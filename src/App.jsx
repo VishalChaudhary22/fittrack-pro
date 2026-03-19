@@ -367,53 +367,155 @@ const DIET_TYPES = {
   vegan: {
     id:'vegan', label:'Vegan', icon:'🌱', color:'#4CAF50',
     description:'100% plant-based — no animal products',
-    proteinSources:['Tofu','Tempeh','Lentils (Dal)','Chickpeas (Chana)','Soy milk','Moong dal','Rajma (Kidney Beans)','Pea protein','Hemp seeds'],
+    proteinSources:['Tofu','Tempeh','Lentils (Dal)','Chickpeas (Chana)','Soy milk','Moong dal','Rajma (Kidney Beans)','Hemp seeds','Quinoa','Amaranth (Rajgira)','Pea protein'],
     meals:[
-      {time:'7:00 AM',label:'Breakfast',icon:'🌅',items:['Overnight oats with soy milk, banana & chia seeds','OR Besan chilla (2) with mint chutney','1 glass of warm water with soaked almonds (6)']},
-      {time:'10:00 AM',label:'Mid-Morning',icon:'🍎',items:['1 apple or pear','Handful roasted chana or makhana','Jeera water or green tea (no milk)']},
-      {time:'1:00 PM',label:'Lunch',icon:'🍱',items:['2 whole wheat rotis','Rajma or chana masala (1 bowl — ~200g)','Stir-fried seasonal vegetables with olive oil','Salad: cucumber, tomato, onion, lemon']},
-      {time:'4:30 PM',label:'Pre-Workout Snack',icon:'⚡',items:['1 banana + 1 tbsp peanut butter','Sattu drink (2 tbsp sattu + lemon + black salt)']},
-      {time:'7:30 PM',label:'Post-Workout Dinner',icon:'🍽️',items:['Brown rice (¾ cup cooked) or 2 rotis','Tofu bhurji or moong dal','Sabzi (palak, methi, or mixed veg)','Coconut water or nimbu pani']},
-      {time:'9:30 PM',label:'Before Bed',icon:'🌙',items:['Haldi doodh (with oat/almond milk)','Mixed seeds: pumpkin + flax + sunflower (1 tbsp each)']},
+      { time:'7:00 AM', label:'Breakfast', icon:'🌅', items:[
+        'Overnight oats with soy milk, banana, chia seeds & 1 tbsp hemp seeds (complete protein)',
+        'OR Quinoa porridge with almond milk, banana & mixed nuts — quinoa has all 9 essential amino acids',
+        'OR Besan chilla (2) with tofu scramble filling & mint chutney',
+        'Soaked almonds (6) + 2 walnuts on the side',
+      ]},
+      { time:'10:00 AM', label:'Mid-Morning', icon:'🍎', items:[
+        '1 apple or pear',
+        'Handful of roasted chana + makhana',
+        'Green tea or jeera water',
+      ]},
+      { time:'1:00 PM', label:'Lunch', icon:'🍱', items:[
+        'Brown rice + rajma or chana masala — rice + legume = complete amino acid profile covering all 9 EAAs',
+        'OR Quinoa khichdi with moong dal (double complete protein combo)',
+        'Stir-fried seasonal sabzi with olive oil',
+        'Salad: cucumber, tomato, onion, lemon + 1 tsp flaxseeds',
+      ]},
+      { time:'4:30 PM', label:'Pre-Workout', icon:'⚡', items:[
+        '1 banana + 1 tbsp peanut butter',
+        'Coconut water or nimbu pani',
+      ]},
+      { time:'7:30 PM', label:'Post-Workout Dinner', icon:'🍽️', items:[
+        'Brown rice (¾ cup) or 2 rotis',
+        'Tofu bhurji (150g tofu — complete protein, PDCAAS 1.0) or soya chunks curry',
+        'Palak, methi or mixed vegetable sabzi',
+        'Nimbu pani or plain water',
+      ]},
+      { time:'9:30 PM', label:'Before Bed', icon:'🌙', items:[
+        'Chamomile or ashwagandha tea',
+        'Mixed seeds: pumpkin + flax + sunflower (1 tbsp each) — rich in amino acids, omega-3 & zinc',
+        'Handful of soaked almonds or walnuts',
+      ]},
     ],
   },
   vegetarian: {
     id:'vegetarian', label:'Vegetarian', icon:'🥛', color:'#5B8DEF',
     description:'Dairy included — no meat, fish or eggs',
-    proteinSources:['Paneer','Curd/Greek Yogurt','Milk','Ghee','Lentils','Rajma','Chana','Soy chunks'],
+    proteinSources:['Paneer','Curd / Greek Yogurt','Milk','Soy chunks (Nutrela)','Lentils','Rajma','Chana','Quinoa','Hemp seeds','Buckwheat (Kuttu)'],
     meals:[
-      {time:'7:00 AM',label:'Breakfast',icon:'🌅',items:['Moong dal cheela (2-3) with curd dip','OR Poha with peanuts & vegetables','1 glass full-fat milk with ashwagandha powder']},
-      {time:'10:00 AM',label:'Mid-Morning',icon:'🍎',items:['Seasonal fruit (papaya/mango/banana)','100g curd with a pinch of jeera powder']},
-      {time:'1:00 PM',label:'Lunch',icon:'🍱',items:['2 rotis with ghee','Paneer bhurji or palak paneer (100g paneer)','Dal (any variety — 1 bowl)','Curd + kachumber salad']},
-      {time:'4:30 PM',label:'Pre-Workout',icon:'⚡',items:['Greek yogurt (100g) with banana & honey','Chai or black coffee (no sugar)']},
-      {time:'7:30 PM',label:'Post-Workout Dinner',icon:'🍽️',items:['Brown rice or 2 rotis','Soya chunks curry or mixed dal','Stir-fried greens','Raita']},
-      {time:'9:30 PM',label:'Before Bed',icon:'🌙',items:['Warm haldi doodh (full-fat milk)','Handful of almonds + walnuts']},
+      { time:'7:00 AM', label:'Breakfast', icon:'🌅', items:[
+        'Moong dal cheela (2-3) with curd dip — moong dal + curd = complete amino acid coverage',
+        'OR Paneer bhurji (80g) with 2 whole wheat toasts — paneer is a complete protein',
+        'OR Quinoa upma with vegetables — all 9 EAAs in one grain',
+        '1 glass full-fat milk',
+      ]},
+      { time:'10:00 AM', label:'Mid-Morning', icon:'🍎', items:[
+        'Seasonal fruit (papaya/mango/banana)',
+        '100g Greek yogurt with 1 tbsp hemp seeds — hemp seeds contain all 9 EAAs',
+      ]},
+      { time:'1:00 PM', label:'Lunch', icon:'🍱', items:[
+        '2 rotis with ghee',
+        'Paneer bhurji or palak paneer (100g paneer) — complete protein',
+        'Dal (any variety) + brown rice — together cover all 9 essential amino acids',
+        'Curd + kachumber salad',
+      ]},
+      { time:'4:30 PM', label:'Pre-Workout', icon:'⚡', items:[
+        'Greek yogurt (100g) with banana & honey',
+        'Black coffee (no sugar)',
+      ]},
+      { time:'7:30 PM', label:'Post-Workout Dinner', icon:'🍽️', items:[
+        'Brown rice or 2 rotis',
+        'Soya chunks curry (complete protein — PDCAAS 1.0) or mixed dal',
+        'Stir-fried greens (palak, broccoli, methi)',
+        'Raita with jeera',
+      ]},
+      { time:'9:30 PM', label:'Before Bed', icon:'🌙', items:[
+        'Warm milk with a pinch of cinnamon',
+        'Handful of almonds + walnuts',
+        '1 tbsp mixed seeds (pumpkin + sunflower) for amino acids & healthy fats',
+      ]},
     ],
   },
   egg: {
     id:'egg', label:'Egg Diet', icon:'🥚', color:'#E8540D',
     description:'Eggs + dairy — no meat or fish',
-    proteinSources:['Eggs (whole + whites)','Paneer','Curd','Milk','Lentils','Chickpeas'],
+    proteinSources:['Eggs (whole + whites)','Paneer','Curd / Greek Yogurt','Milk','Lentils','Chickpeas','Quinoa'],
     meals:[
-      {time:'7:00 AM',label:'Breakfast',icon:'🌅',items:['3 egg whites + 1 whole egg scramble with vegetables','2 whole wheat toasts or 1 roti','1 glass milk']},
-      {time:'10:00 AM',label:'Mid-Morning',icon:'🍎',items:['1 banana or apple','2 boiled eggs (whites only if cutting)','Black coffee or green tea']},
-      {time:'1:00 PM',label:'Lunch',icon:'🍱',items:['2 rotis or brown rice (¾ cup)','Egg curry (2 eggs) or dal','Mixed vegetable sabzi','Curd + salad']},
-      {time:'4:30 PM',label:'Pre-Workout',icon:'⚡',items:['2 boiled eggs + banana','Sattu drink or nimbu pani']},
-      {time:'7:30 PM',label:'Post-Workout Dinner',icon:'🍽️',items:['Egg bhurji (3 eggs) with 2 rotis','OR Masala omelette (3 eggs)','Dal or sabzi as side','Buttermilk']},
-      {time:'9:30 PM',label:'Before Bed',icon:'🌙',items:['Haldi doodh','1-2 hard boiled egg whites if in weight gain phase']},
+      { time:'7:00 AM', label:'Breakfast', icon:'🌅', items:[
+        '3 egg whites + 1 whole egg scramble with vegetables — eggs are the gold standard complete protein (PDCAAS 1.0)',
+        '2 whole wheat toasts or 1 roti',
+        '1 glass milk',
+      ]},
+      { time:'10:00 AM', label:'Mid-Morning', icon:'🍎', items:[
+        '1 banana or apple',
+        '2 boiled eggs — complete protein source, all 9 EAAs in one food',
+        'Black coffee or green tea',
+      ]},
+      { time:'1:00 PM', label:'Lunch', icon:'🍱', items:[
+        '2 rotis or quinoa (¾ cup cooked) — quinoa contains all 9 EAAs unlike regular grains',
+        'Egg curry (2 eggs) or dal + rice combo (complete amino acid profile)',
+        'Mixed vegetable sabzi',
+        'Curd + salad',
+      ]},
+      { time:'4:30 PM', label:'Pre-Workout', icon:'⚡', items:[
+        '2 boiled eggs + banana',
+        'Nimbu pani or black coffee',
+      ]},
+      { time:'7:30 PM', label:'Post-Workout Dinner', icon:'🍽️', items:[
+        'Egg bhurji (3 eggs) with 2 rotis — eggs provide all 9 EAAs for muscle recovery',
+        'OR Masala omelette (3 eggs) with brown rice',
+        'Dal or sabzi on the side',
+        'Buttermilk',
+      ]},
+      { time:'9:30 PM', label:'Before Bed', icon:'🌙', items:[
+        'Warm milk with a pinch of cinnamon',
+        '2 boiled egg whites if in muscle-building phase',
+        '1 tbsp mixed seeds (hemp + pumpkin) for overnight amino acid support',
+      ]},
     ],
   },
   nonveg: {
     id:'nonveg', label:'Non-Veg', icon:'🍗', color:'#E8540D',
     description:'Chicken, fish, eggs + dairy — all sources',
-    proteinSources:['Chicken breast','Fish (Rohu, Katla, Pomfret, Tuna)','Eggs','Paneer','Curd','Mutton (limited)'],
+    proteinSources:['Chicken breast','Fish (Rohu, Katla, Pomfret, Tuna)','Eggs','Paneer','Curd / Greek Yogurt','Mutton (limited)','Quinoa'],
     meals:[
-      {time:'7:00 AM',label:'Breakfast',icon:'🌅',items:['4 egg whites + 1 whole egg (scramble/omelette)','2 whole wheat toasts or 1 roti','1 glass milk + soaked almonds']},
-      {time:'10:00 AM',label:'Mid-Morning',icon:'🍎',items:['1 fruit (banana/apple)','100g curd or Greek yogurt','Handful of mixed nuts']},
-      {time:'1:00 PM',label:'Lunch',icon:'🍱',items:['Brown rice (¾–1 cup cooked) or 2-3 rotis','Chicken curry (150g) or fish curry (150g)','Dal + mixed vegetable sabzi','Salad + curd']},
-      {time:'4:30 PM',label:'Pre-Workout',icon:'⚡',items:['1 banana + 1 tbsp peanut butter','Sattu drink or black coffee','2 boiled eggs (if heavy session)']},
-      {time:'7:30 PM',label:'Post-Workout Dinner',icon:'🍽️',items:['Grilled chicken (200g) or fish (200g)','2 rotis or brown rice (¾ cup)','Stir-fried vegetables with olive oil','Buttermilk or nimbu pani']},
-      {time:'9:30 PM',label:'Before Bed',icon:'🌙',items:['Haldi doodh','Cottage cheese (paneer 50g) or 2 egg whites']},
+      { time:'7:00 AM', label:'Breakfast', icon:'🌅', items:[
+        '4 egg whites + 1 whole egg scramble/omelette — complete protein, PDCAAS 1.0, all 9 EAAs',
+        '2 whole wheat toasts or 1 roti',
+        '1 glass milk + soaked almonds (6)',
+      ]},
+      { time:'10:00 AM', label:'Mid-Morning', icon:'🍎', items:[
+        '1 fruit (banana/apple)',
+        '100g Greek yogurt + 1 tbsp hemp seeds (complete plant protein with all 9 EAAs)',
+        'Handful of mixed nuts',
+      ]},
+      { time:'1:00 PM', label:'Lunch', icon:'🍱', items:[
+        'Brown rice (¾–1 cup) or quinoa — quinoa is a complete grain with all 9 essential amino acids',
+        'Chicken curry (150g) or fish curry (150g) — all animal proteins are complete proteins',
+        'Dal + mixed vegetable sabzi',
+        'Salad + curd',
+      ]},
+      { time:'4:30 PM', label:'Pre-Workout', icon:'⚡', items:[
+        '1 banana + 1 tbsp peanut butter',
+        'Black coffee or nimbu pani',
+        '2 boiled eggs for extra protein on heavy training days',
+      ]},
+      { time:'7:30 PM', label:'Post-Workout Dinner', icon:'🍽️', items:[
+        'Grilled chicken (200g) or fish (200g) — complete protein for muscle repair',
+        '2 rotis or brown rice (¾ cup)',
+        'Stir-fried vegetables with olive oil',
+        'Buttermilk or nimbu pani',
+      ]},
+      { time:'9:30 PM', label:'Before Bed', icon:'🌙', items:[
+        'Warm milk with cinnamon',
+        'Cottage cheese / paneer (50g) or 2 egg whites — slow-digesting casein supports overnight muscle recovery',
+        '1 tbsp mixed seeds for micronutrients & healthy fats',
+      ]},
     ],
   },
 };
@@ -1114,140 +1216,88 @@ const DietPage = ({ user }) => {
         ))}
       </div>
 
-      {/* Protein sources */}
-      <div className="card" style={{ padding:16, marginBottom:16, borderLeft:`3px solid ${dt.color}` }}>
+      {/* Meal Plan — whey injected dynamically per meal */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:14 }}>
+        {dt.meals.map((meal, i) => {
+          // Build dynamic whey items per meal slot
+          const wheyItems = [];
+          const wheyLabel = dietType === 'vegan'
+            ? `${wheyScoops >= 3 && meal.label === 'Mid-Morning' ? '1' : '1'} scoop plant-based protein (pea + rice blend — complete protein) in 250ml water or plant milk`
+            : `1 scoop whey protein (complete protein — all 9 EAAs) in 250ml water or milk`;
+
+          if (meal.label === 'Breakfast') {
+            wheyItems.push('🥤 ' + wheyLabel + ' — take with or after breakfast to hit your morning protein');
+          }
+          if (meal.label === 'Post-Workout Dinner') {
+            wheyItems.push('🥤 1 scoop whey protein within 30 min post-workout — fast-absorbing complete protein for muscle repair');
+          }
+          if (wheyScoops >= 3 && meal.label === 'Mid-Morning') {
+            wheyItems.push('🥤 1 extra scoop whey between meals — needed to reach your ' + prot + 'g protein target');
+          }
+          if (wheyScoops >= 4 && meal.label === 'Before Bed') {
+            wheyItems.push('🥤 1 scoop whey or casein protein before bed — slower digestion supports overnight muscle recovery');
+          }
+
+          const allItems = [...meal.items, ...wheyItems];
+
+          return (
+            <div key={i} className="card" style={{ padding:18 }}>
+              <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
+                <span style={{ fontSize:20 }}>{meal.icon}</span>
+                <div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:'1px' }}>{meal.label}</div>
+                  <div style={{ fontSize:11, color:dt.color, fontWeight:600 }}>{meal.time}</div>
+                </div>
+                {goal==='gain' && <span className="tag tag-g" style={{ marginLeft:'auto', fontSize:9 }}>+Portions</span>}
+                {goal==='loss' && <span className="tag tag-o" style={{ marginLeft:'auto', fontSize:9 }}>-Portions</span>}
+              </div>
+              {allItems.map((item, j) => {
+                const isWhey = item.startsWith('🥤');
+                return (
+                  <div key={j} style={{ display:'flex', gap:7, alignItems:'flex-start', padding:'5px 0', fontSize:12,
+                    color: isWhey ? 'var(--orange)' : '#CCC',
+                    borderBottom: j < allItems.length - 1 ? '1px solid #1E1E1E' : '',
+                    background: isWhey ? 'rgba(232,84,13,.04)' : 'transparent',
+                    borderRadius: isWhey ? 6 : 0, paddingLeft: isWhey ? 8 : 0,
+                  }}>
+                    {!isWhey && <span style={{ color:dt.color, flexShrink:0, marginTop:1 }}>•</span>}
+                    {item}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Calorie note */}
+      <div className="card" style={{ marginTop:14, padding:14, borderLeft:'3px solid var(--orange)' }}>
+        <div style={{ fontSize:11, color:'var(--t2)' }}>
+          📌 <strong>Note:</strong> Scale portions up or down to hit your daily calorie target of <strong style={{ color:'var(--orange)' }}>{cals} kcal</strong>.
+          Calorie calculation uses the Mifflin-St Jeor equation with your body stats.
+          {goal==='loss' && ' For weight loss, a 500 kcal deficit is applied for ~0.5kg/week fat loss.'}
+          {goal==='gain' && ' For muscle gain, 500 kcal above TDEE is added. Combine with progressive overload training.'}
+          {` Your ${wheyScoops} whey scoops cover ${wheyProteinFromSupp}g protein — get the remaining ${foodProteinNeeded}g from whole foods.`}
+          {dietType === 'vegan' && ' Choose a plant-based protein (pea + rice blend) — MuscleBlaze Biozyme Plant or MyProtein Vegan are widely available in India.'}
+          {dietType !== 'vegan' && ' Recommended brands in India: MuscleBlaze, ON Gold Standard, MyProtein, Dymatize, Scitron — available on Amazon & Flipkart.'}
+        </div>
+      </div>
+
+      {/* Protein Sources — moved to end */}
+      <div className="card" style={{ padding:16, marginTop:14, borderLeft:`3px solid ${dt.color}` }}>
         <div style={{ fontSize:12, color:'var(--t3)', fontWeight:700, textTransform:'uppercase', marginBottom:8 }}>Best Protein Sources — {dt.label}</div>
         <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-          {dt.proteinSources.map(s=>(
+          {dt.proteinSources.map(s => (
             <span key={s} style={{ padding:'4px 10px', background:`${dt.color}10`, color:dt.color, border:`1px solid ${dt.color}25`, borderRadius:20, fontSize:12, fontWeight:500 }}>{s}</span>
           ))}
         </div>
       </div>
 
-      {/* ── Whey Protein Card ─────────────────────────────────────────────── */}
-      <div className="card" style={{ padding:20, marginBottom:16, border:'1px solid rgba(232,84,13,.3)', background:'rgba(232,84,13,.04)' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-          <div style={{ width:38, height:38, borderRadius:10, background:'var(--orange)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>🥤</div>
-          <div>
-            <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:'1px', color:'var(--orange)' }}>Whey Protein Supplement</div>
-            <div style={{ fontSize:11, color:'var(--t2)' }}>Recommended to hit your {prot}g daily protein target</div>
-          </div>
-          <span className="tag tag-o" style={{ marginLeft:'auto', fontSize:11, padding:'5px 12px' }}>{wheyScoops} Scoops/day</span>
-        </div>
-
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:10, marginBottom:14 }}>
-          {[
-            { l:'Scoops/Day',    v:wheyScoops,           u:'scoops', c:'var(--orange)' },
-            { l:'Protein/Scoop', v:'~25',                u:'g',      c:'#5B8DEF'       },
-            { l:'From Whey',     v:wheyProteinFromSupp,  u:'g',      c:'#A855F7'       },
-            { l:'From Food',     v:foodProteinNeeded,    u:'g',      c:'#4CAF50'       },
-          ].map(m=>(
-            <div key={m.l} style={{ background:'#111', borderRadius:10, padding:'10px 14px', border:'1px solid var(--border)' }}>
-              <div style={{ fontSize:10, color:'var(--t3)', fontWeight:700, textTransform:'uppercase' }}>{m.l}</div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:24, color:m.c, marginTop:2 }}>{m.v}<span style={{ fontSize:12, color:'var(--t2)', marginLeft:2 }}>{m.u}</span></div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ background:'#111', borderRadius:10, padding:14, border:'1px solid var(--border)' }}>
-          <div style={{ fontSize:11, color:'var(--t3)', fontWeight:700, textTransform:'uppercase', marginBottom:10 }}>When to Take</div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-            {[
-              { time:'Post-Workout',    tip:`1 scoop in 250ml water within 30 min of training`, icon:'⚡' },
-              { time:'Morning',         tip:'1 scoop with breakfast or oats to start protein early', icon:'🌅' },
-              ...(wheyScoops >= 3 ? [{ time:'Mid-Morning',  tip:'1 scoop between breakfast & lunch on training days', icon:'🍎' }] : []),
-              ...(wheyScoops >= 4 ? [{ time:'Pre-Bed',      tip:'1 scoop (prefer casein if available) for overnight recovery', icon:'🌙' }] : []),
-            ].map((t,i)=>(
-              <div key={i} style={{ display:'flex', gap:8, alignItems:'flex-start' }}>
-                <span style={{ fontSize:14, flexShrink:0 }}>{t.icon}</span>
-                <div>
-                  <div style={{ fontSize:11, color:'var(--orange)', fontWeight:700 }}>{t.time}</div>
-                  <div style={{ fontSize:11, color:'var(--t2)', marginTop:2 }}>{t.tip}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(91,141,239,.06)', borderRadius:8, border:'1px solid rgba(91,141,239,.15)', fontSize:11, color:'var(--t2)' }}>
-          💡 <strong style={{ color:'#5B8DEF' }}>Brands available in India:</strong> MuscleBlaze, Optimum Nutrition (ON) Gold Standard, MyProtein, Dymatize, Scitron — all widely available on Amazon/Flipkart. 
-          {dietType === 'vegan' ? ' Choose a plant-based protein (pea + rice blend) like MuscleBlaze Biozyme Plant Protein for a vegan option.' : ' Choose whey isolate if lactose-sensitive, whey concentrate otherwise.'}
-        </div>
-      </div>
-
-      {/* ── Complete Proteins — All 9 Essential Amino Acids ───────────────── */}
-      <div className="card" style={{ padding:20, marginBottom:16 }}>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:18, letterSpacing:'1px', marginBottom:4 }}>Complete Proteins — All 9 Essential Amino Acids</div>
-        <div className="accent-bar" />
-        <div style={{ fontSize:12, color:'var(--t2)', marginBottom:14 }}>
-          Your body cannot make these 9 amino acids — they must come from food daily. 
-          <strong style={{ color:'var(--text)' }}> Histidine · Isoleucine · Leucine · Lysine · Methionine · Phenylalanine · Threonine · Tryptophan · Valine</strong>
-        </div>
-
-        {/* Complete protein foods grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:10, marginBottom:14 }}>
-          {[
-            { food:'Eggs 🥚',         note:'Best bioavailable complete protein — reference food for protein quality (PDCAAS 1.0). 1 whole egg = all 9 EAAs + healthy fats.',  available: true  },
-            { food:'Chicken / Fish 🍗', note:'Lean meats are complete proteins. Rohu, Katla, Pomfret, Tuna are all excellent and widely available across India.',              available: true  },
-            { food:'Milk & Paneer 🥛', note:'Casein + whey naturally present. 100g paneer provides ~18g complete protein. Curd and Greek yogurt also qualify.',               available: true  },
-            { food:'Soy / Tofu 🫘',    note:'Only plant food with a PDCAAS of 1.0 — fully complete. Includes tofu, tempeh, soy milk, soya chunks (nutrela). Widely available in India.', available: true },
-            { food:'Quinoa 🌾',        note:'Complete plant grain — all 9 EAAs including lysine which most grains lack. Available on Amazon/bigbasket. Cook like rice.',       available: true  },
-            { food:'Amaranth (Rajgira) 🌿', note:'Traditional Indian superfood — complete protein at 14g/100g. Used during Navratri fasting. Available as flour, puffed grain or ladoos.', available: true },
-            { food:'Buckwheat (Kuttu) 🥣', note:'Gluten-free, complete protein grain common in North India. Kuttu atta widely available — makes great chillas and rotis.',    available: true  },
-            { food:'Hemp Seeds 🌱',    note:'30% complete protein by weight — all 9 EAAs plus ideal omega 3:6 ratio. Increasingly available in health stores and Amazon India.', available: true },
-            { food:'Dal + Rice combo 🍱', note:'While individually incomplete, dal (lysine-rich) + rice (methionine-rich) together form a complete amino acid profile. Classic Indian khichdi is a perfect complete meal.', available: true },
-          ].filter(f => dietType === 'vegan'
-            ? !['Eggs 🥚','Chicken / Fish 🍗','Milk & Paneer 🥛'].includes(f.food)
-            : dietType === 'vegetarian'
-            ? !['Chicken / Fish 🍗'].includes(f.food)
-            : dietType === 'egg'
-            ? !['Chicken / Fish 🍗'].includes(f.food)
-            : true
-          ).map((f,i)=>(
-            <div key={i} style={{ background:'#111', borderRadius:10, padding:'12px 14px', border:'1px solid var(--border)' }}>
-              <div style={{ fontWeight:700, fontSize:13, marginBottom:5 }}>{f.food}</div>
-              <div style={{ fontSize:11, color:'var(--t2)', lineHeight:1.5 }}>{f.note}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* EAA tip */}
-        <div style={{ padding:'12px 14px', background:'rgba(76,175,80,.06)', borderRadius:10, border:'1px solid rgba(76,175,80,.15)', fontSize:12, color:'var(--t2)' }}>
-          ✅ <strong style={{ color:'#4CAF50' }}>Practical tip:</strong> Aim for at least <strong style={{ color:'var(--text)' }}>2 complete protein sources</strong> per meal. 
-          If eating plant-only meals, combine legumes (dal, chana, rajma) with a grain (rice, roti, quinoa) in the same meal to cover all 9 EAAs. 
-          Whey protein itself is a complete protein and contributes to all 9 EAAs every time you take it.
-        </div>
-      </div>
-
-      {/* Meal Plan */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:14 }}>
-        {dt.meals.map((meal,i)=>(
-          <div key={i} className="card" style={{ padding:18 }}>
-            <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:12 }}>
-              <span style={{ fontSize:20 }}>{meal.icon}</span>
-              <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:'1px' }}>{meal.label}</div>
-                <div style={{ fontSize:11, color:dt.color, fontWeight:600 }}>{meal.time}</div>
-              </div>
-              {goal==='gain'&&<span className="tag tag-g" style={{ marginLeft:'auto', fontSize:9 }}>+Portions</span>}
-              {goal==='loss'&&<span className="tag tag-o" style={{ marginLeft:'auto', fontSize:9 }}>-Portions</span>}
-            </div>
-            {meal.items.map((item,j)=>(
-              <div key={j} style={{ display:'flex', gap:7, alignItems:'flex-start', padding:'5px 0', fontSize:12, color:'#CCC', borderBottom:j<meal.items.length-1?'1px solid #1E1E1E':'' }}>
-                <span style={{ color:dt.color, flexShrink:0, marginTop:1 }}>•</span>{item}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="card" style={{ marginTop:14, padding:14, borderLeft:'3px solid var(--orange)' }}>
-        <div style={{ fontSize:11, color:'var(--t2)' }}>
-          📌 <strong>Note:</strong> Scale portions up or down to hit your daily calorie target of <strong style={{ color:'var(--orange)' }}>{cals} kcal</strong>. 
-          Calorie calculation uses the Mifflin-St Jeor equation with your body stats. 
-          {goal==='loss'&&' For weight loss, a 500 kcal deficit is applied for ~0.5kg/week fat loss.'}
-          {goal==='gain'&&' For muscle gain, 500 kcal above TDEE is added. Combine with progressive overload training.'}
-          {` Your ${wheyScoops} whey scoops contribute ${wheyProteinFromSupp}g protein — get the remaining ${foodProteinNeeded}g from whole foods listed above.`}
-        </div>
+      {/* Practical EAA tip — at the very end */}
+      <div style={{ marginTop:14, padding:'12px 14px', background:'rgba(76,175,80,.06)', borderRadius:10, border:'1px solid rgba(76,175,80,.15)', fontSize:12, color:'var(--t2)' }}>
+        ✅ <strong style={{ color:'#4CAF50' }}>Complete Protein Tip:</strong> Aim for at least <strong style={{ color:'var(--text)' }}>2 complete protein sources</strong> per meal.
+        If eating plant-only meals, combine legumes (dal, chana, rajma) with a grain (rice, roti, quinoa) in the same meal to cover all 9 essential amino acids.
+        Whey protein is itself a complete protein and counts toward all 9 EAAs every time you take it.
       </div>
     </div>
   );

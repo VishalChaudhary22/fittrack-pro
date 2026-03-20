@@ -838,7 +838,7 @@ const DietPage=({user})=>{
         <div style={{width:32,height:32,borderRadius:8,background:'var(--o2)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Activity size={14} color="var(--o)"/></div>
         <div style={{flex:1}}>
           <div style={{fontWeight:600,fontSize:13}}>Whey Protein — {wheyScoops} scoop{wheyScoops>1?'s':''}/day ({wheyProt}g)</div>
-          <div style={{fontSize:11,color:'var(--t2)',marginTop:2}}>{foodProt}g from food + {wheyProt}g from whey = {prot}g target. {dietType==='vegan'?'Use pea+rice blend.':'Brands: MuscleBlaze, ON Gold Standard, MyProtein.'}</div>
+          <div style={{fontSize:11,color:'var(--t2)',marginTop:2}}>{foodProt}g from food + {wheyProt}g from whey = {prot}g target. {diet==='vegan'?'Use pea+rice blend.':'Brands: MuscleBlaze, ON Gold Standard, MyProtein.'}</div>
         </div>
         <span className="tag" style={{fontSize:9}}>{wheyScoops} × 25g</span>
       </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X, Edit2, Trash2, Check, Dumbbell, Repeat, Zap, Target, Trophy, Home, Award, Flame } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, ConfirmDialog } from '../shared/SharedComponents';
+import { PageHeader, ConfirmDialog, Portal } from '../shared/SharedComponents';
 import { gId } from '../../utils/helpers';
 
 export default function SplitsPage() {
@@ -132,14 +132,14 @@ export default function SplitsPage() {
         </div>
       ))}
       {addSp && (
-        <div className="mo"><div className="md" style={{ maxWidth: 400 }}>
+        <Portal><div className="mo"><div className="md" style={{ maxWidth: 400 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 18 }}><div className="bb" style={{ fontSize: 22 }}>New Split</div><button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setAddSp(false)}><X size={14} /></button></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div><label>Name</label><input placeholder="e.g. Bro Split" value={ns.name} onChange={e => setNs(p => ({ ...p, name: e.target.value }))} /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: 10 }}><div><label>Icon</label><select value={ns.icon} onChange={e => setNs(p => ({ ...p, icon: e.target.value }))} style={{ fontSize: 12 }}>{Object.keys(ICON_MAP).map(k => <option key={k} value={k}>{k}</option>)}</select></div><div><label>Description</label><input placeholder="5 days/week..." value={ns.description} onChange={e => setNs(p => ({ ...p, description: e.target.value }))} /></div></div>
             <button className="btn-p" style={{ width: '100%', padding: '12px' }} onClick={addSpFn}>Create Split</button>
           </div>
-        </div></div>
+        </div></div></Portal>
       )}
       <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>

@@ -1,7 +1,10 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { clamp, O } from '../../utils/helpers';
 
+// ─── PORTAL (renders children at document.body to avoid transform stacking) ──
+export const Portal = ({ children }) => createPortal(children, document.body);
 // ─── STAT CARD ────────────────────────────────────────────────────────────────
 export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge }) => (
   <div className="card" style={{ padding: '20px 18px', position: 'relative', overflow: 'hidden', cursor: onClick ? 'pointer' : 'default', userSelect: 'none' }}
@@ -108,19 +111,21 @@ export const ToastContainer = ({ toasts, removeToast }) => (
 export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', danger = false }) => {
   if (!open) return null;
   return (
-    <div className="mo">
-      <div className="md" style={{ maxWidth: 380, textAlign: 'center' }}>
-        <div className="bb" style={{ fontSize: 22, marginBottom: 8 }}>{title}</div>
-        <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>Cancel</button>
-          <button className={danger ? 'btn-p' : 'btn-p'} style={{
-            flex: 1, padding: '12px',
-            background: danger ? '#FF3B30' : 'var(--og)',
-          }} onClick={onConfirm}>{confirmLabel}</button>
+    <Portal>
+      <div className="mo">
+        <div className="md" style={{ maxWidth: 380, textAlign: 'center' }}>
+          <div className="bb" style={{ fontSize: 22, marginBottom: 8 }}>{title}</div>
+          <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>Cancel</button>
+            <button className={danger ? 'btn-p' : 'btn-p'} style={{
+              flex: 1, padding: '12px',
+              background: danger ? '#FF3B30' : 'var(--og)',
+            }} onClick={onConfirm}>{confirmLabel}</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

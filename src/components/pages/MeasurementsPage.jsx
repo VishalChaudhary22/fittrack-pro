@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Ruler, X, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState } from '../shared/SharedComponents';
+import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../data/constants';
 import { gId, tod, fmt } from '../../utils/helpers';
 
@@ -102,6 +102,7 @@ export default function MeasurementsPage() {
 
       {/* Add Modal */}
       {showAdd && (
+        <Portal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 420 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -120,6 +121,7 @@ export default function MeasurementsPage() {
             <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveMeasurement}>Save Measurements</button>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Scale, BarChart2, Ruler, Flame, Trophy, Target, ChevronDown, ChevronRight, Check, X, Zap, Repeat, Dumbbell, Home, Award } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { StatCard, PageHeader, ScrollPicker, SkeletonCard } from '../shared/SharedComponents';
+import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal } from '../shared/SharedComponents';
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems } from '../../utils/helpers';
 import { useState as useStateR, useEffect } from 'react';
@@ -216,6 +216,7 @@ export default function DashboardPage() {
 
       {/* Log Weight Modal */}
       {showLog && (
+        <Portal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -230,10 +231,12 @@ export default function DashboardPage() {
             <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveLog}>Save Log</button>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Set Goal Modal */}
       {showGoal && (
+        <Portal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 400 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -260,6 +263,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

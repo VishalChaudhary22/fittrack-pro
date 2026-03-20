@@ -94,7 +94,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 /* ─── MODALS ────────────────────────────────────────────────────── */
 .mo{
   position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;
-  justify-content:center;z-index:2000;padding:16px;backdrop-filter:blur(16px) saturate(120%)
+  justify-content:center;z-index:2000;padding:16px;backdrop-filter:blur(16px) saturate(120%);
+  overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)
 }
 .md{
   background:var(--c1);border:1px solid var(--bd);border-radius:28px;padding:28px;
@@ -190,8 +191,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .g2{grid-template-columns:1fr!important}
   .g3{grid-template-columns:1fr!important}
   .g4{grid-template-columns:1fr 1fr!important}
-  .md{padding:22px!important;border-radius:22px!important;max-height:92vh!important}
+  .mo{align-items:flex-end;padding:0;padding-bottom:0}
+  .md{padding:22px 18px calc(18px + env(safe-area-inset-bottom,8px))!important;border-radius:22px 22px 0 0!important;max-height:92vh!important;max-width:100%!important;margin:0!important}
   .pt{font-size:26px!important}
+  .picker-wrap{height:180px}
+  .picker-fade-top{height:66px}
+  .picker-fade-bot{height:66px}
+  .picker-sel{top:66px}
 }
 @media(min-width:769px){.bn{display:none!important}}
 @media(max-width:500px){.ex-r{grid-template-columns:28px 1fr 1fr 70px;gap:5px}}

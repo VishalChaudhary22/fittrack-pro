@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Trophy, Timer, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState } from '../shared/SharedComponents';
+import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
 import { gId, tod, fmt } from '../../utils/helpers';
 
 // ─── REST TIMER ───────────────────────────────────────────────────────────────
@@ -38,20 +38,24 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
   const secs = left % 60;
 
   return (
-    <div style={{ position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)', zIndex: 1500, background: 'var(--c1)', border: '1px solid var(--o)', borderRadius: 16, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 8px 32px rgba(232,84,13,.3)', minWidth: 240 }}>
-      <div style={{ position: 'relative', width: 48, height: 48 }}>
-        <svg width={48} height={48} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={24} cy={24} r={20} fill="none" stroke="var(--c3)" strokeWidth={4} />
-          <circle cx={24} cy={24} r={20} fill="none" stroke="var(--o)" strokeWidth={4} strokeDasharray={125.6} strokeDashoffset={125.6 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
-        </svg>
-        <Timer size={16} color="var(--o)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+    <Portal>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(8px)' }}>
+      <div style={{ background: 'var(--c1)', border: '1px solid var(--o)', borderRadius: 24, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, boxShadow: '0 12px 48px rgba(232,84,13,.25)', minWidth: 260 }}>
+        <div style={{ position: 'relative', width: 56, height: 56 }}>
+          <svg width={56} height={56} style={{ transform: 'rotate(-90deg)' }}>
+            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--c3)" strokeWidth={4} />
+            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--o)" strokeWidth={4} strokeDasharray={150.8} strokeDashoffset={150.8 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
+          </svg>
+          <Timer size={18} color="var(--o)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
+          <div className="bb" style={{ fontSize: 32, color: 'var(--o)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
+        </div>
+        <button onClick={onCancel} style={{ background: 'none', border: '1px solid var(--bd)', borderRadius: 10, padding: '8px', cursor: 'pointer', color: 'var(--t3)', marginLeft: 'auto' }}><X size={16} /></button>
       </div>
-      <div>
-        <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
-        <div className="bb" style={{ fontSize: 28, color: 'var(--o)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
-      </div>
-      <button onClick={onCancel} style={{ background: 'none', border: '1px solid var(--bd)', borderRadius: 8, padding: '6px', cursor: 'pointer', color: 'var(--t3)', marginLeft: 'auto' }}><X size={14} /></button>
     </div>
+    </Portal>
   );
 };
 

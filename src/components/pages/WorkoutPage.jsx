@@ -1,0 +1,181 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Trophy, Timer, X } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { PageHeader, EmptyState } from '../shared/SharedComponents';
+import { gId, tod, fmt } from '../../utils/helpers';
+
+// ─── REST TIMER ───────────────────────────────────────────────────────────────
+const RestTimer = ({ seconds, onDone, onCancel }) => {
+  const [left, setLeft] = useState(seconds);
+  const intRef = useRef(null);
+
+  useEffect(() => {
+    intRef.current = setInterval(() => {
+      setLeft(p => {
+        if (p <= 1) {
+          clearInterval(intRef.current);
+          // Beep
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.connect(g); g.connect(ctx.destination);
+            osc.frequency.value = 880; g.gain.value = 0.3;
+            osc.start(); osc.stop(ctx.currentTime + 0.2);
+            setTimeout(() => { const o2 = ctx.createOscillator(); const g2 = ctx.createGain(); o2.connect(g2); g2.connect(ctx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(ctx.currentTime + 0.3); }, 250);
+          } catch (e) { /* no audio */ }
+          onDone();
+          return 0;
+        }
+        return p - 1;
+      });
+    }, 1000);
+    return () => clearInterval(intRef.current);
+  }, [seconds, onDone]);
+
+  const pct = ((seconds - left) / seconds) * 100;
+  const mins = Math.floor(left / 60);
+  const secs = left % 60;
+
+  return (
+    <div style={{ position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)', zIndex: 1500, background: 'var(--c1)', border: '1px solid var(--o)', borderRadius: 16, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 8px 32px rgba(232,84,13,.3)', minWidth: 240 }}>
+      <div style={{ position: 'relative', width: 48, height: 48 }}>
+        <svg width={48} height={48} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={24} cy={24} r={20} fill="none" stroke="var(--c3)" strokeWidth={4} />
+          <circle cx={24} cy={24} r={20} fill="none" stroke="var(--o)" strokeWidth={4} strokeDasharray={125.6} strokeDashoffset={125.6 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
+        </svg>
+        <Timer size={16} color="var(--o)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+      </div>
+      <div>
+        <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
+        <div className="bb" style={{ fontSize: 28, color: 'var(--o)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
+      </div>
+      <button onClick={onCancel} style={{ background: 'none', border: '1px solid var(--bd)', borderRadius: 8, padding: '6px', cursor: 'pointer', color: 'var(--t3)', marginLeft: 'auto' }}><X size={14} /></button>
+    </div>
+  );
+};
+
+export default function WorkoutPage() {
+  const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
+  const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
+  const [session, setSession] = useState(null);
+  const [done, setDone] = useState(false);
+  const [timer, setTimer] = useState(null); // { active, seconds }
+  const [restSeconds, setRestSeconds] = useState(90);
+  const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
+
+  const start = day => {
+    const exs = day.exercises.map(ex => {
+      const prev = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      const pe = prev?.exercises?.find(e => e.name === ex.name);
+      return {
+        ...ex, sv: ex.variants ? ex.variants[0] : null,
+        sets: Array.from({ length: ex.sets }, (_, i) => {
+          const ps = pe?.sets?.[i];
+          return { reps: ps?.reps || ex.repsRange?.split('-')[0] || 8, weight: ps?.weight || 0, done: false };
+        }),
+      };
+    });
+    setSession({ day, exs, notes: '' }); setDone(false);
+  };
+
+  const upd = (ei, si, f, v) => setSession(p => {
+    const e = [...p.exs]; const s = [...e[ei].sets];
+    s[si] = { ...s[si], [f]: f === 'done' ? v : parseFloat(v) || 0 };
+    e[ei] = { ...e[ei], sets: s };
+    // Auto-start timer when marking set done
+    if (f === 'done' && v) setTimer({ active: true });
+    return { ...p, exs: e };
+  });
+
+  const addS = ei => setSession(p => { const e = [...p.exs]; const ls = e[ei].sets[e[ei].sets.length - 1]; e[ei] = { ...e[ei], sets: [...e[ei].sets, { ...ls, done: false }] }; return { ...p, exs: e }; });
+  const rmS = (ei, si) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sets: e[ei].sets.filter((_, i) => i !== si) }; return { ...p, exs: e }; });
+  const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
+
+  const finish = () => {
+    const log = {
+      id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
+      exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: s.reps, weight: s.weight })) })).filter(ex => ex.sets.length > 0),
+    };
+    setWorkoutLogs(p => [...p, log]); setDone(true); setTimer(null);
+    addToast('Workout saved!', 'success');
+  };
+
+  if (done) return (
+    <div className="pg-in" style={{ textAlign: 'center', padding: '80px 20px' }}>
+      <Trophy size={52} color="var(--o)" style={{ marginBottom: 14 }} />
+      <div className="bb" style={{ fontSize: 36, color: 'var(--o)' }}>WORKOUT COMPLETE!</div>
+      <div style={{ color: 'var(--t2)', marginTop: 8, marginBottom: 28 }}>Session saved. Recovery starts now.</div>
+      <button className="btn-p" style={{ padding: '13px 28px', fontSize: 16 }} onClick={() => { setSession(null); setDone(false); }}>Log Another</button>
+    </div>
+  );
+
+  if (session) return (
+    <div className="pg-in">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <button className="btn-g" onClick={() => { setSession(null); setTimer(null); }} style={{ fontSize: 13 }}>← Back</button>
+        <div style={{ flex: 1 }}>
+          <div className="bb" style={{ fontSize: 22 }}>{session.day.name}</div>
+          <div style={{ fontSize: 12, color: 'var(--t2)' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Timer size={14} color="var(--t3)" />
+          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '4px 8px', background: 'var(--c3)', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t2)' }}>
+            {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
+          </select>
+        </div>
+      </div>
+      {session.exs.map((ex, ei) => (
+        <div key={ex.id} className="card" style={{ marginBottom: 10, padding: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+            <div>
+              <div className="bb" style={{ fontSize: 16 }}>{ex.sv || ex.name}</div>
+              {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 5, fontSize: 12, padding: '4px 10px', width: 'auto' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
+              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Target: {ex.repsRange}</span>}</div>
+            </div>
+            <button className="btn-g" style={{ fontSize: 11, padding: '5px 9px' }} onClick={() => addS(ei)}>+ Set</button>
+          </div>
+          <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700 }}>{h}</div>)}</div>
+          {ex.sets.map((s, si) => (
+            <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1 }}>
+              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700 }}>{si + 1}</div>
+              <input type="number" value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <input type="number" step=".5" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <div style={{ display: 'flex', gap: 3 }}>
+                <button onClick={() => upd(ei, si, 'done', !s.done)} style={{ flex: 1, background: s.done ? 'var(--o2)' : 'var(--c3)', border: `1px solid ${s.done ? 'var(--o)' : 'var(--bd)'}`, borderRadius: 8, color: s.done ? 'var(--o)' : 'var(--t3)', cursor: 'pointer', padding: '7px 0', fontSize: 14, transition: 'all .15s' }}>{s.done ? '✓' : '○'}</button>
+                {ex.sets.length > 1 && <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t3)', cursor: 'pointer', padding: '7px 5px', fontSize: 10 }}>✕</button>}
+              </div>
+            </div>
+          ))}
+          {ex.notes && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 5, fontStyle: 'italic' }}>{ex.notes}</div>}
+        </div>
+      ))}
+      <div className="card" style={{ marginBottom: 10, padding: 14 }}><label>Session Notes</label><textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+      <button className="btn-p" style={{ width: '100%', padding: '14px', fontSize: 16, borderRadius: 12 }} onClick={finish}>Finish Workout</button>
+
+      {timer?.active && <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />}
+    </div>
+  );
+
+  return (
+    <div className="pg-in">
+      <PageHeader title="Workout Tracker" sub={activeSplit ? activeSplit.name : 'Select a split first'} />
+      {!activeSplit ? <EmptyState Icon={Trophy} title="No Split Selected" message="Go to Splits to select a workout program first" /> :
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 10 }}>
+          {wDays.map(day => {
+            const last = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            return (
+              <div key={day.id} className="card" style={{ padding: 16, cursor: 'pointer', transition: 'transform .2s,border-color .2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--o)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--bd)'; }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 9, color: 'var(--t3)' }}>Last: {fmt(last.date)}</span>}</div>
+                <div className="bb" style={{ fontSize: 16, marginBottom: 8 }}>{day.name}</div>
+                {day.exercises.slice(0, 4).map(ex => <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--t2)', padding: '3px 0', borderBottom: '1px solid var(--bd)' }}><span>{ex.name}</span><span style={{ color: 'var(--o)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
+                {day.exercises.length > 4 && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 4 }}>+{day.exercises.length - 4} more</div>}
+                <button className="btn-p" style={{ width: '100%', marginTop: 12, padding: '10px' }} onClick={() => start(day)}>Start Session →</button>
+              </div>
+            );
+          })}
+        </div>
+      }
+    </div>
+  );
+}

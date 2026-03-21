@@ -1,14 +1,21 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Scale, BarChart2, Ruler, Flame, Trophy, Target, ChevronDown, ChevronRight, Check, X, Zap, Repeat, Dumbbell, Home, Award } from 'lucide-react';
+import { Scale, BarChart2, Ruler, Flame, Trophy, Target, ChevronDown, ChevronRight, Check, X, Zap, Repeat, Dumbbell, Home, Award, Activity, Shield } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal } from '../shared/SharedComponents';
+import { MiniBodyMap } from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems } from '../../utils/helpers';
+import { calcAllMuscleXP, getWeeklyMuscles, getOverallRank, MUSCLE_GROUPS } from '../../data/muscleData';
 import { useState as useStateR, useEffect } from 'react';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak } = useApp();
+  const weeklyMuscles = useMemo(() => getWeeklyMuscles(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
+  const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
+  const overallRank = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
   const [showLog, setShowLog] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
   const [logWeight, setLogWeight] = useState(user.weight);
@@ -211,6 +218,34 @@ export default function DashboardPage() {
                 <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={12} color="var(--o)" /></div>
               </div>
             ))}
+        </div>
+      </div>
+
+      {/* Muscle Activity Widget */}
+      <div className="card" style={{ padding: 18, cursor: 'pointer', marginTop: 12 }} onClick={() => navigate('/muscle-map')}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Activity size={13} color="var(--o)" /> Muscle Activity
+          </div>
+          <ChevronRight size={14} color="var(--t3)" />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <MiniBodyMap weeklyMuscles={weeklyMuscles} />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <Shield size={14} color={overallRank.color} />
+              <span className="bb" style={{ fontSize: 18, color: overallRank.color }}>{overallRank.name}</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--t2)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
+            <div style={{ fontSize: 10, color: 'var(--t3)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              {weeklyMuscles.slice(0, 6).map(m => (
+                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--o2)', color: 'var(--o)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
+              ))}
+              {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--t3)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
+            </div>
+          </div>
         </div>
       </div>
 

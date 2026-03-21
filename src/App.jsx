@@ -13,6 +13,7 @@ import ProfilePage from './components/pages/ProfilePage';
 import WorkoutHistoryPage from './components/pages/WorkoutHistoryPage';
 import WeightLogPage from './components/pages/WeightLogPage';
 import MeasurementsPage from './components/pages/MeasurementsPage';
+import MuscleMapPage from './components/pages/MuscleMapPage';
 
 function AppInner() {
   const { user, toasts, removeToast } = useApp();
@@ -34,6 +35,7 @@ function AppInner() {
           <Route path="/history" element={<WorkoutHistoryPage />} />
           <Route path="/weight-log" element={<WeightLogPage />} />
           <Route path="/measurements" element={<MeasurementsPage />} />
+          <Route path="/muscle-map" element={<MuscleMapPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

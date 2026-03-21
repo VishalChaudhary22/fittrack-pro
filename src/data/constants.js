@@ -1,4 +1,4 @@
-import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler, Activity } from 'lucide-react';
 
 // ─── ACTIVITY LEVELS ──────────────────────────────────────────────────────────
 export const ACTIVITY = {
@@ -16,6 +16,7 @@ export const NAV = [
   { id: 'workout', label: 'Tracker', Icon: Target, path: '/workout' },
   { id: 'diet', label: 'Diet', Icon: Salad, path: '/diet' },
   { id: 'progress', label: 'Progress', Icon: TrendingUp, path: '/progress' },
+  { id: 'musclemap', label: 'Muscle Map', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
   { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
 ];
@@ -33,6 +34,7 @@ export const NAV_MOBILE_MORE = [
   { id: 'history', label: 'History', Icon: Clock, path: '/history' },
   { id: 'weightlog', label: 'Weight Log', Icon: Scale, path: '/weight-log' },
   { id: 'measurements', label: 'Measurements', Icon: Ruler, path: '/measurements' },
+  { id: 'musclemap', label: 'Muscle Map', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
   { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
 ];

@@ -65,7 +65,7 @@ export const getRank = (xp) => {
   // Calculate progress to next tier
   const idx = RANK_TIERS.indexOf(rank);
   const next = RANK_TIERS[idx + 1];
-  const progress = next ? (xp - rank.minXP) / (next.minXP - rank.minXP) : 1;
+  const progress = next ? xp / next.minXP : 1;
   return { ...rank, progress: Math.min(progress, 1), nextXP: next?.minXP || rank.minXP };
 };
 

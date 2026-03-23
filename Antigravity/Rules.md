@@ -61,15 +61,18 @@ src/
 - `.btn-g` — Secondary ghost button. Grey bg, subtle border. Use for cancel/secondary actions.
 - `.btn-d` — Danger/outline button. Orange border, orange text, transparent bg. Use for delete/destructive.
 
-### Form Elements
+### Form Elements & Inputs
 - Always use bare `<input>`, `<select>`, `<textarea>` — global CSS styles them automatically.
 - Always add `<label>` above inputs. Labels are auto-styled (uppercase, 10px, letter-spacing).
+- **Input State Handling:** When dealing with number inputs (like reps or weight), allow them to be blank (`''`) by default rather than coercing immediate empty states to `0`. Use `parseFloat(v) || 0` only at the time of calculation or saving.
+- **Checkboxes/Toggles:** For "Done" states (e.g. workout sets, supplement logs), use square checkboxes instead of round toggles. (Pattern: `s.done ? var(--o) : var(--c3)` with a white SVG checkmark).
 
 ### Tags & Badges
 - `.tag` — Orange pill badge. Use for status indicators, active states, labels.
 - `.tag-d` — Grey pill badge. Use for disabled/inactive states.
 
-### Utility
+### Utility & Layout Practices
+- **Card Readability:** Always ensure primary stat values inside cards are pure white (`var(--tx)`) and not faded `var(--t2)`. Labels should be bright enough to read (minimum `11px`, `var(--t2)`).
 - `.sep` — 1px horizontal divider. Use inside cards between sections.
 - `.row-sep` — Bottom border on list rows. Apply to list item `div`s.
 - `.pbar` + `.pbar-fill` — Progress bar. Set `width` on `.pbar-fill` as percentage.

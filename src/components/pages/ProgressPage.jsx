@@ -60,16 +60,16 @@ export default function ProgressPage() {
 
       {/* Weekly / Monthly Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }} className="g2">
-        <div className="card stripe" style={{ padding: '14px 16px' }}>
+        <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>This Week</div>
           <div style={{ display: 'flex', gap: 16 }}>
             <div><div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>{weeklySummary.sessions}</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>sessions</div></div>
             <div><div className="bb" style={{ fontSize: 28, color: 'var(--tx)' }}>{Math.round(weeklySummary.volume / 1000)}k</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>kg volume</div></div>
           </div>
-          {weeklySummary.volChange !== 0 && <div style={{ marginTop: 6, fontSize: 11, color: weeklySummary.volChange > 0 ? '#6BCB77' : '#FF6B6B', fontWeight: 600 }}>{weeklySummary.volChange > 0 ? '▲' : '▼'} {Math.abs(weeklySummary.volChange)}% vs last week</div>}
+          {weeklySummary.volChange !== 0 && <div style={{ marginTop: 6, fontSize: 11, color: weeklySummary.volChange > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>{weeklySummary.volChange > 0 ? '▲' : '▼'} {Math.abs(weeklySummary.volChange)}% vs last week</div>}
           {weeklySummary.sessions !== weeklySummary.lastSessions && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 2 }}>Last week: {weeklySummary.lastSessions} sessions</div>}
         </div>
-        <div className="card stripe" style={{ padding: '14px 16px' }}>
+        <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>This Month</div>
           <div style={{ display: 'flex', gap: 16 }}>
             <div><div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>{monthlySummary.sessions}</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>sessions</div></div>

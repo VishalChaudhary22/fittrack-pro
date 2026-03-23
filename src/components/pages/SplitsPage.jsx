@@ -63,7 +63,7 @@ export default function SplitsPage() {
           <div style={{ padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1, cursor: 'pointer' }} onClick={() => setExp(exp === split.id ? null : split.id)}>
               {(() => { const I = getIcon(split.icon); return <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><I size={17} color="var(--o)" /></div>; })()}
-              <div><div className="bb" style={{ fontSize: 17, color: 'var(--o)', letterSpacing: '1px' }}>{split.name}</div><div style={{ fontSize: 12, color: 'var(--t2)' }}>{split.description}</div></div>
+              <div><div className="bb" style={{ fontSize: 17, color: user.activeSplitId === split.id ? 'var(--o)' : 'var(--tx)', letterSpacing: '1px' }}>{split.name}</div><div style={{ fontSize: 12, color: 'var(--t2)' }}>{split.description}</div></div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {split.comingSoon ? <span className="tag tag-d">Soon</span> : user.activeSplitId === split.id ? <span className="tag"><Check size={10} /> Active</span> : <button className="btn-p" style={{ padding: '7px 14px', fontSize: 13 }} onClick={() => pick(split.id)}>Select →</button>}
@@ -79,7 +79,7 @@ export default function SplitsPage() {
                 <div key={day.id} style={{ background: 'var(--bg)', borderRadius: 10, marginBottom: 7 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', cursor: 'pointer' }} onClick={() => setExpDay(expDay === day.id ? null : day.id)}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span className="tag" style={{ fontSize: 9 }}>{day.type}</span>
+                      <span className="tag-d" style={{ fontSize: 9 }}>{day.type}</span>
                       <span style={{ fontWeight: 600, fontSize: 13 }}>{day.name}</span>
                       <span style={{ fontSize: 11, color: 'var(--t3)' }}>{day.exercises.length} ex</span>
                     </div>
@@ -98,7 +98,7 @@ export default function SplitsPage() {
                             </div>
                           ) : (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div><span style={{ fontWeight: 500, fontSize: 13 }}>{ex.name}</span>{ex.variants && <span style={{ fontSize: 10, color: 'var(--t3)', marginLeft: 5 }}>(options)</span>}<span style={{ fontSize: 12, color: 'var(--t2)', marginLeft: 8 }}>{ex.sets}×{ex.repsRange}</span>{ex.muscle && <span style={{ fontSize: 10, color: 'var(--o)', marginLeft: 8 }}>{ex.muscle}</span>}</div>
+                              <div><span style={{ fontWeight: 500, fontSize: 13 }}>{ex.name}</span>{ex.variants && <span style={{ fontSize: 10, color: 'var(--t3)', marginLeft: 5 }}>(options)</span>}<span style={{ fontSize: 12, color: 'var(--t2)', marginLeft: 8 }}>{ex.sets}×{ex.repsRange}</span>{ex.muscle && <span style={{ fontSize: 10, color: 'var(--t2)', marginLeft: 8 }}>{ex.muscle}</span>}</div>
                               {isAdmin && <div style={{ display: 'flex', gap: 5 }}><button className="btn-g" style={{ padding: '2px 7px', fontSize: 10 }} onClick={() => setEditEx(editEx === ex.id ? null : ex.id)}>{editEx === ex.id ? '✓' : <Edit2 size={10} />}</button><button className="btn-d" style={{ padding: '2px 7px' }} onClick={() => delEx(split.id, day.id, ex.id)}><Trash2 size={10} /></button></div>}
                             </div>
                           )}

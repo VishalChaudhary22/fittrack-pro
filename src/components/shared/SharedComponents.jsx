@@ -23,7 +23,7 @@ export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge 
       {value}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--t2)', marginLeft: 4, fontFamily: "'DM Sans'" }}>{unit}</span>
     </div>
     {sub && <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 5 }}>{sub}</div>}
-    {trend !== undefined && <div style={{ fontSize: 11, marginTop: 5, color: trend > 0 ? '#FF6B6B' : '#51CF66', fontWeight: 600 }}>{trend > 0 ? '▲' : '▼'} {Math.abs(trend).toFixed(1)} kg since last log</div>}
+    {trend !== undefined && <div style={{ fontSize: 11, marginTop: 5, color: trend > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{trend > 0 ? '▲' : '▼'} {Math.abs(trend).toFixed(1)} kg since last log</div>}
   </div>
 );
 
@@ -118,9 +118,8 @@ export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confi
           <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>Cancel</button>
-            <button className={danger ? 'btn-p' : 'btn-p'} style={{
-              flex: 1, padding: '12px',
-              background: danger ? '#FF3B30' : 'var(--og)',
+            <button className={danger ? 'btn-danger' : 'btn-p'} style={{
+              flex: 1, padding: '12px'
             }} onClick={onConfirm}>{confirmLabel}</button>
           </div>
         </div>

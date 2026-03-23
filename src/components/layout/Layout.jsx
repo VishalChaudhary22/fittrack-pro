@@ -15,7 +15,7 @@ export const Sidebar = () => {
   const isActive = (path) => path === '/' ? currentPath === '/' : currentPath.startsWith(path);
 
   return (
-    <div className="ds" style={{ width: sb ? 220 : 54, background: '#0C0C0E', borderRight: '1px solid rgba(255,255,255,.04)', display: 'flex', flexDirection: 'column', transition: 'width .22s cubic-bezier(.4,0,.2,1)', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', boxShadow: '4px 0 24px rgba(0,0,0,.3)' }}>
+    <div className="ds" style={{ width: sb ? 220 : 54, background: 'var(--c1)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', transition: 'width .22s cubic-bezier(.4,0,.2,1)', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
       <div style={{ padding: '16px 12px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
         <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--og)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Dumbbell size={15} color="#fff" /></div>
         {sb && <div className="bb" style={{ fontSize: 16, letterSpacing: '2px', color: 'var(--o)', whiteSpace: 'nowrap' }}>FITTRACK PRO</div>}

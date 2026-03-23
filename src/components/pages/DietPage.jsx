@@ -48,7 +48,7 @@ export default function DietPage() {
       <PageHeader title="Diet Guide" sub={`Personalised for ${user.name.split(' ')[0]} · ${user.weightGoal ? `Goal: ${user.weightGoal}kg` : 'No goal set'}`} />
 
       {/* Stats bar */}
-      <div className="card stripe" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="card" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700 }}>BODY STATS</div>
         {[{ l: 'Weight', v: `${user.weight}kg` }, { l: 'Height', v: `${user.height}cm` }, { l: 'BMI', v: bmi }, { l: 'TDEE', v: `${tdee}kcal` }, { l: 'Activity', v: ACTIVITY[user.activityLevel || 'moderate']?.label.split('(')[0].trim() }].map(s => (
           <div key={s.l} style={{ padding: '5px 11px', background: 'var(--c3)', borderRadius: 8, border: '1px solid var(--bd)' }}>
@@ -59,7 +59,7 @@ export default function DietPage() {
       </div>
 
       {/* Calorie Tracker Card */}
-      <div className="card stripe" style={{ padding: '16px 18px', marginBottom: 14 }}>
+      <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={{ fontWeight: 700, fontSize: 14 }}>Today's Intake</div>
           <button className="btn-g" style={{ fontSize: 11, padding: '5px 10px' }} onClick={() => setShowCalLog(!showCalLog)}>{showCalLog ? 'Hide' : 'Log Meal'}</button>
@@ -70,10 +70,10 @@ export default function DietPage() {
               <span>{todayTotal} kcal consumed</span><span>{goalKcal} kcal target</span>
             </div>
             <div className="pbar" style={{ height: 8 }}>
-              <div className="pbar-fill" style={{ width: `${calPct}%`, background: todayTotal > goalKcal ? '#FF6B6B' : 'var(--og)' }} />
+              <div className="pbar-fill" style={{ width: `${calPct}%`, background: todayTotal > goalKcal ? 'var(--danger)' : 'var(--og)' }} />
             </div>
           </div>
-          <div className="bb" style={{ fontSize: 24, color: todayTotal > goalKcal ? '#FF6B6B' : 'var(--o)' }}>{calPct}%</div>
+          <div className="bb" style={{ fontSize: 24, color: todayTotal > goalKcal ? 'var(--danger)' : 'var(--o)' }}>{calPct}%</div>
         </div>
         {todayCals.length > 0 && (
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: showCalLog ? 10 : 0 }}>
@@ -174,7 +174,7 @@ export default function DietPage() {
       </div>
 
       {/* Footer */}
-      <div className="card stripe" style={{ marginTop: 12, padding: '12px 16px' }}>
+      <div className="card" style={{ marginTop: 12, padding: '12px 16px' }}>
         <div style={{ fontSize: 11, color: 'var(--t2)' }}>Scale portions to hit <strong style={{ color: 'var(--o)' }}>{goalKcal} kcal/day</strong>.{goal === 'loss' && ` ${dailyDelta} kcal deficit for safe fat loss.`}{goal === 'gain' && ` ${dailyDelta} kcal surplus for lean muscle gain.`}{` Whey: ${wheyScoops} scoops (${wheyProt}g) + ${foodProt}g from food.`}{diet === 'vegan' && ' Plant protein (pea+rice) covers all 9 EAAs.'}</div>
       </div>
       <div className="card" style={{ padding: '12px 16px', marginTop: 8, borderLeft: '3px solid var(--o)', borderRadius: '0 14px 14px 0' }}>

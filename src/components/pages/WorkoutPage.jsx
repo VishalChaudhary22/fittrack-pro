@@ -135,7 +135,7 @@ export default function WorkoutPage() {
             <div>
               <div className="bb" style={{ fontSize: 16 }}>{ex.sv || ex.name}</div>
               {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 5, fontSize: 12, padding: '4px 10px', width: 'auto' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
-              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Target: {ex.repsRange}</span>}</div>
+              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag-d" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Target: {ex.repsRange}</span>}</div>
             </div>
             <button className="btn-g" style={{ fontSize: 11, padding: '5px 9px' }} onClick={() => addS(ei)}>+ Set</button>
           </div>
@@ -181,9 +181,9 @@ export default function WorkoutPage() {
             const last = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             return (
               <div key={day.id} className="card" style={{ padding: 16, cursor: 'pointer', transition: 'transform .2s,border-color .2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--o)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--bd)'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 9, color: 'var(--t3)' }}>Last: {fmt(last.date)}</span>}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag-d" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Last: {fmt(last.date)}</span>}</div>
                 <div className="bb" style={{ fontSize: 16, marginBottom: 8 }}>{day.name}</div>
-                {day.exercises.slice(0, 4).map(ex => <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--t2)', padding: '3px 0', borderBottom: '1px solid var(--bd)' }}><span>{ex.name}</span><span style={{ color: 'var(--o)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
+                {day.exercises.slice(0, 4).map(ex => <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--t2)', padding: '3px 0', borderBottom: '1px solid var(--bd)' }}><span>{ex.name}</span><span style={{ color: 'var(--t2)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
                 {day.exercises.length > 4 && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 4 }}>+{day.exercises.length - 4} more</div>}
                 <button className="btn-p" style={{ width: '100%', marginTop: 12, padding: '10px' }} onClick={() => start(day)}>Start Session →</button>
               </div>

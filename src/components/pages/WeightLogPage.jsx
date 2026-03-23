@@ -70,7 +70,7 @@ export default function WeightLogPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--o)' }}>{log.weight}</span>
                       <span style={{ fontSize: 11, color: 'var(--t3)' }}>kg</span>
-                      {diff && <span style={{ fontSize: 10, color: parseFloat(diff) > 0 ? '#FF6B6B' : '#6BCB77', fontWeight: 600 }}>{parseFloat(diff) > 0 ? '+' : ''}{diff}</span>}
+                      {diff && <span style={{ fontSize: 10, color: parseFloat(diff) > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{parseFloat(diff) > 0 ? '+' : ''}{diff}</span>}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--t3)' }}>{log.notes || '—'}</div>
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>

@@ -54,10 +54,10 @@ const MuscleCard = ({ muscle, xp }) => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
           <div style={{ fontSize: 10, color: 'var(--t3)' }}>
-            {Math.round(xp).toLocaleString()} XP
+            {Math.round(xp).toLocaleString()} / {Math.round(rank.nextXP).toLocaleString()} XP
           </div>
           <div style={{ fontSize: 10, color: 'var(--t3)' }}>
-            {rank.progress < 1 ? `${Math.round(rank.nextXP).toLocaleString()} XP` : 'MAX'}
+            {rank.progress < 1 ? `→ ${RANK_TIERS[RANK_TIERS.findIndex(t => t.name === rank.name) + 1]?.name}` : 'MAX'}
           </div>
         </div>
       </div>

@@ -238,7 +238,7 @@ export default function DashboardPage() {
             <div style={{ fontSize: 10, color: 'var(--t3)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
               {weeklyMuscles.slice(0, 6).map(m => (
-                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--o2)', color: 'var(--o)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
+                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--c3)', color: 'var(--t2)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
               ))}
               {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--t3)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
             </div>

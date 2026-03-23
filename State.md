@@ -61,11 +61,12 @@ Themes are managed using the `data-theme` attribute (e.g., `<html data-theme="da
 |-------|------------|------------------|------|-----------------|
 | **Dark** | Deep Black (`#050506`) | Off-blacks (`#111113`, `#161619`) | Off-white (`#EAEAF0`) | Soft ambient glow shadows (`rgba(232,84,13,.04)`) |
 | **Light** | Light Gray (`#F2F2F5`) | Pure Whites (`#FFFFFF`, `#F7F7F9`) | Dark Gray (`#1A1A1E`) | Crisp, lightweight drop shadows (`rgba(0,0,0,.06)`) |
+| **Semantic** | Adaptive Semantic | `var(--success)`, `var(--danger)`, `var(--error)` | Adaptive | Positive trends (`#51CF66`), warnings (`#FF6B6B`), and destructive actions (`#FF3B30`) |
 
 ### Orange Accent (Signature)
 - **Base Color**: `#E8540D` (`--o`)
 - **Gradient**: `linear-gradient(135deg, #E8540D, #FF6B35)` (`--og`)
-- **Usage**: Used prominently across Primary Buttons (`.btn-p`), Navigation Action States (`.ni.act`), Tags (`.tag`), dynamic Progress Bars (`.pbar-fill`), and interactive elements to provide a striking, energetic contrast.
+- **Usage**: Used prominently across Primary Buttons (`.btn-p`), Navigation Action States (`.ni.act`), Tags (`.tag`), dynamic Progress Bars (`.pbar-fill`), and interactive elements to provide a striking, energetic contrast. Recent UI polish reduced overly aggressive orange usage in informational tags and lists to improve visual hierarchy and readability.
 
 ### UI Characteristics
 - Smooth `0.25s` cubic-bezier transition states on buttons, cards, and interactives.
@@ -83,9 +84,11 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
    - Users must authenticate through the `AuthModal.jsx` before accessing the app.
 2. **Dashboard Overview**  
    - `DashboardPage.jsx`: The primary landing interface displaying summarized health data, metrics, or recent activities.
+   - **Recent Updates:** BMI status labels feature improved readability, and the Weight Change trend indicator strictly compares the latest logged weight against the immediately previous entry. Muscle mini-tags updated to subtle grey to reduce visual clutter.
 3. **Workout & Split Management**  
-   - `SplitsPage.jsx`: Organize routines by muscle groups or scheduling protocols.
+   - `SplitsPage.jsx`: Organize routines by muscle groups or scheduling protocols. Now accessible directly from the primary mobile bottom navigation.
    - `WorkoutPage.jsx`: The active session tracker.
+   - **Recent Updates:** The tracker UI features a prominent "Rest Timer" control, blank-by-default input fields for reps/weight (preventing zero-coercion issues), and a modern, square checkbox design for set completion. Reduced orange overload on day tags, split names, and set indicators.
    - `WorkoutHistoryPage.jsx`: Comprehensive log of past workout sessions.
 4. **Nutrition & Diet**  
    - `DietPage.jsx`: Interface for meal tracking and macro logging.
@@ -94,7 +97,8 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
    - `MeasurementsPage.jsx`: To track body dimensions.
    - `ProgressPage.jsx`: A data visualization page (using `recharts`) showcasing performance and body changes over time.
 6. **Detailed Anatomical Visualization**  
-   - `MuscleMapPage.jsx`: A dedicated visual map (likely SVG or complex structure) highlighting muscle groups and areas of focus.
+   - `MuscleMapPage.jsx`: A dedicated visual map highlighting muscle groups and areas of focus.
+   - **Recent Updates:** XP bars now properly reflect absolute progress relative to tier targets (e.g., "567/1000 XP") for improved clarity.
 7. **User Personalization**  
    - `ProfilePage.jsx`: Manage personal information, settings, and potentially theme toggling.
    - `ContactPage.jsx`: Provide feedback or reach support.

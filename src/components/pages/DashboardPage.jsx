@@ -34,12 +34,9 @@ export default function DashboardPage() {
 
   const trend = useMemo(() => {
     if (allUserLogs.length < 2) return undefined;
-    const now = new Date(); const weekAgo = new Date(now.getTime() - 7 * 86400000);
-    const recent = allUserLogs.filter(l => new Date(l.date) >= weekAgo);
-    const older = allUserLogs.filter(l => new Date(l.date) < weekAgo);
-    if (!recent.length || !older.length) return undefined;
-    const avg = arr => arr.reduce((s, l) => s + l.weight, 0) / arr.length;
-    return +(avg(recent) - avg(older)).toFixed(1);
+    const latest = allUserLogs[allUserLogs.length - 1].weight;
+    const previous = allUserLogs[allUserLogs.length - 2].weight;
+    return +(latest - previous).toFixed(1);
   }, [allUserLogs]);
 
   const activeSplit = splits.find(s => s.id === user.activeSplitId);
@@ -184,8 +181,8 @@ export default function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%', marginTop: 4 }}>
             {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => (
               <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: bmiCat.label.startsWith(s.l) ? 'var(--o2)' : 'var(--c2)', border: `1px solid ${bmiCat.label.startsWith(s.l) ? 'rgba(232,84,13,.35)' : 'var(--bd)'}` }}>
-                <div style={{ fontSize: 9, color: bmiCat.label.startsWith(s.l) ? 'var(--o)' : 'var(--t3)', fontWeight: 700 }}>{s.l}</div>
-                <div style={{ fontSize: 8, color: 'var(--t3)' }}>{s.r}</div>
+                <div style={{ fontSize: 10, color: bmiCat.label.startsWith(s.l) ? 'var(--o)' : 'var(--t2)', fontWeight: 700 }}>{s.l}</div>
+                <div style={{ fontSize: 9, color: 'var(--t3)' }}>{s.r}</div>
               </div>
             ))}
           </div>

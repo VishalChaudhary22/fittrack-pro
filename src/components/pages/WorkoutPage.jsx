@@ -74,9 +74,8 @@ export default function WorkoutPage() {
       const pe = prev?.exercises?.find(e => e.name === ex.name);
       return {
         ...ex, sv: ex.variants ? ex.variants[0] : null,
-        sets: Array.from({ length: ex.sets }, (_, i) => {
-          const ps = pe?.sets?.[i];
-          return { reps: ps?.reps || ex.repsRange?.split('-')[0] || 8, weight: ps?.weight || 0, done: false };
+        sets: Array.from({ length: pe?.sets?.length || 3 }, () => {
+          return { reps: '', weight: '', done: false, targetRep: ex.repsRange || '8-12' };
         }),
       };
     });
@@ -123,8 +122,9 @@ export default function WorkoutPage() {
           <div style={{ fontSize: 12, color: 'var(--t2)' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Timer size={14} color="var(--t3)" />
-          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '4px 8px', background: 'var(--c3)', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t2)' }}>
+          <span style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600, textTransform: 'uppercase' }}>Rest:</span>
+          <Timer size={20} color="var(--t3)" />
+          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 13, padding: '4px 8px', background: 'var(--c3)', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t2)' }}>
             {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
           </select>
         </div>
@@ -142,12 +142,23 @@ export default function WorkoutPage() {
           <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700 }}>{h}</div>)}</div>
           {ex.sets.map((s, si) => (
             <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1 }}>
-              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700 }}>{si + 1}</div>
-              <input type="number" value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <input type="number" step=".5" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <div style={{ display: 'flex', gap: 3 }}>
-                <button onClick={() => upd(ei, si, 'done', !s.done)} style={{ flex: 1, background: s.done ? 'var(--o2)' : 'var(--c3)', border: `1px solid ${s.done ? 'var(--o)' : 'var(--bd)'}`, borderRadius: 8, color: s.done ? 'var(--o)' : 'var(--t3)', cursor: 'pointer', padding: '7px 0', fontSize: 14, transition: 'all .15s' }}>{s.done ? '✓' : '○'}</button>
-                {ex.sets.length > 1 && <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t3)', cursor: 'pointer', padding: '7px 5px', fontSize: 10 }}>✕</button>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700, width: 22 }}>{si + 1}</div>
+              <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
+                  width: 22, height: 22, flexShrink: 0, padding: 0,
+                  background: s.done ? 'var(--o)' : 'var(--c3)',
+                  border: `1px solid ${s.done ? 'var(--o)' : 'var(--bd)'}`,
+                  borderRadius: 6, color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all .15s'
+                }}>
+                  {s.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+              </button>
+              </div>
+              <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <input type="number" step=".5" placeholder="kg" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {ex.sets.length > 1 && <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: 'none', color: 'var(--t3)', cursor: 'pointer', padding: '7px 5px', fontSize: 14 }}>✕</button>}
               </div>
             </div>
           ))}

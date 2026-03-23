@@ -18,7 +18,7 @@ export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge 
       {badge && <span className="tag" style={{ fontSize: 9 }}>{badge}</span>}
       {onClick && !badge && <ChevronRight size={14} color="var(--t3)" />}
     </div>
-    <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 5 }}>{label}</div>
+    <div style={{ fontSize: 11, color: 'var(--t2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 5 }}>{label}</div>
     <div className="bb" style={{ fontSize: 34, color: 'var(--tx)', lineHeight: 1 }}>
       {value}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--t2)', marginLeft: 4, fontFamily: "'DM Sans'" }}>{unit}</span>
     </div>

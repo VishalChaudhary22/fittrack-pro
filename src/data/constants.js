@@ -24,13 +24,13 @@ export const NAV = [
 // ─── EXTRA NAV (hidden in "More" on mobile) ──────────────────────────────────
 export const NAV_MOBILE_MAIN = [
   { id: 'dashboard', label: 'Home', Icon: LayoutDashboard, path: '/' },
+  { id: 'splits', label: 'Splits', Icon: Dumbbell, path: '/splits' },
   { id: 'workout', label: 'Tracker', Icon: Target, path: '/workout' },
   { id: 'diet', label: 'Diet', Icon: Salad, path: '/diet' },
   { id: 'progress', label: 'Progress', Icon: TrendingUp, path: '/progress' },
 ];
 
 export const NAV_MOBILE_MORE = [
-  { id: 'splits', label: 'Splits', Icon: Dumbbell, path: '/splits' },
   { id: 'history', label: 'History', Icon: Clock, path: '/history' },
   { id: 'weightlog', label: 'Weight Log', Icon: Scale, path: '/weight-log' },
   { id: 'measurements', label: 'Measurements', Icon: Ruler, path: '/measurements' },

@@ -74,7 +74,7 @@ export default function WorkoutPage() {
       const pe = prev?.exercises?.find(e => e.name === ex.name);
       return {
         ...ex, sv: ex.variants ? ex.variants[0] : null,
-        sets: Array.from({ length: pe?.sets?.length || 3 }, () => {
+        sets: Array.from({ length: ex.sets || 3 }, () => {
           return { reps: '', weight: '', done: false, targetRep: ex.repsRange || '8-12' };
         }),
       };
@@ -84,7 +84,7 @@ export default function WorkoutPage() {
 
   const upd = (ei, si, f, v) => setSession(p => {
     const e = [...p.exs]; const s = [...e[ei].sets];
-    s[si] = { ...s[si], [f]: f === 'done' ? v : parseFloat(v) || 0 };
+    s[si] = { ...s[si], [f]: f === 'done' ? v : v };
     e[ei] = { ...e[ei], sets: s };
     // Auto-start timer when marking set done
     if (f === 'done' && v) setTimer({ active: true });
@@ -98,7 +98,7 @@ export default function WorkoutPage() {
   const finish = () => {
     const log = {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
-      exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: s.reps, weight: s.weight })) })).filter(ex => ex.sets.length > 0),
+      exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 })) })).filter(ex => ex.sets.length > 0),
     };
     setWorkoutLogs(p => [...p, log]); setDone(true); setTimer(null);
     addToast('Workout saved!', 'success');

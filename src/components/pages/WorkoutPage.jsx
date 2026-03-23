@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
 import { gId, tod, fmt } from '../../utils/helpers';
+import BodyMapSVG from '../shared/BodyMapSVG';
+import { calcAllMuscleXP } from '../../data/muscleData';
 
 // ─── REST TIMER ───────────────────────────────────────────────────────────────
 const RestTimer = ({ seconds, onDone, onCancel }) => {
@@ -61,9 +64,10 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
 
 export default function WorkoutPage() {
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
+  const nav = useNavigate();
   const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
   const [session, setSession] = useState(null);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(null);
   const [timer, setTimer] = useState(null); // { active, seconds }
   const [restSeconds, setRestSeconds] = useState(90);
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
@@ -79,7 +83,7 @@ export default function WorkoutPage() {
         }),
       };
     });
-    setSession({ day, exs, notes: '' }); setDone(false);
+    setSession({ day, exs, notes: '' }); setDone(null);
   };
 
   const upd = (ei, si, f, v) => setSession(p => {
@@ -100,18 +104,45 @@ export default function WorkoutPage() {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
       exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 })) })).filter(ex => ex.sets.length > 0),
     };
-    setWorkoutLogs(p => [...p, log]); setDone(true); setTimer(null);
+    setWorkoutLogs(p => [...p, log]); setDone(log); setTimer(null);
     addToast('Workout saved!', 'success');
   };
 
-  if (done) return (
-    <div className="pg-in" style={{ textAlign: 'center', padding: '80px 20px' }}>
-      <Trophy size={52} color="var(--o)" style={{ marginBottom: 14 }} />
-      <div className="bb" style={{ fontSize: 36, color: 'var(--o)' }}>WORKOUT COMPLETE!</div>
-      <div style={{ color: 'var(--t2)', marginTop: 8, marginBottom: 28 }}>Session saved. Recovery starts now.</div>
-      <button className="btn-p" style={{ padding: '13px 28px', fontSize: 16 }} onClick={() => { setSession(null); setDone(false); }}>Log Another</button>
-    </div>
-  );
+  if (done) {
+    // Treat the single session as an array of logs to compute exactly what this session yielded
+    const sessionXP = calcAllMuscleXP([done], splits, user);
+    const totalXP = Object.values(sessionXP).reduce((a, b) => a + b, 0);
+    const totalSets = done.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+    const totalVol = done.exercises.reduce((acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + s.reps * s.weight, 0), 0);
+
+    return (
+      <div className="pg-in" style={{ padding: '20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <Trophy size={42} color="var(--o)" style={{ marginBottom: 10 }} />
+          <div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>WORKOUT COMPLETE!</div>
+          <div style={{ color: 'var(--t2)', fontSize: 13, marginTop: 4 }}>Great job crushing your session today.</div>
+        </div>
+
+        <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: 'center', background: 'var(--c1)', borderRadius: 16, border: `1px solid var(--o2)` }}>
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginBottom: 20 }}>
+            <div><div className="bb" style={{ fontSize: 24, color: 'var(--o)' }}>+{totalXP.toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>XP Gained</div></div>
+            <div style={{ width: 1, background: 'var(--bd)' }}></div>
+            <div><div className="bb" style={{ fontSize: 24, color: 'var(--tx)' }}>{totalSets}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>Sets</div></div>
+            <div style={{ width: 1, background: 'var(--bd)' }}></div>
+            <div><div className="bb" style={{ fontSize: 24, color: 'var(--tx)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
+          </div>
+          <div style={{ maxWidth: 160, margin: '0 auto' }}>
+            <BodyMapSVG muscleXP={sessionXP} gender={user?.gender} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn-p" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => { setSession(null); setDone(null); }}>Log Another</button>
+          <button className="btn-g" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => nav('/muscle-map')}>View Map →</button>
+        </div>
+      </div>
+    );
+  }
 
   if (session) return (
     <div className="pg-in">

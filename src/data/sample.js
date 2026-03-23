@@ -13,8 +13,7 @@ export const genSample = () => {
   const wl = [];
   const bw = [60, 62.5, 65, 67.5, 70, 72.5, 75, 77.5, 80, 82.5];
   for (let w = 0; w < 10; w++) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - (70 - w * 7));
+    const d = new Date(now.getFullYear(), now.getMonth(), Math.max(1, Math.floor(now.getDate() * (w + 1) / 10)));
     wl.push({
       id: gId(), userId: 'vishal', splitId: 'ppl', dayId: 'ppl-pa', dayName: 'Push Day A', date: d.toISOString().split('T')[0],
       exercises: [

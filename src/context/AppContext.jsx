@@ -18,6 +18,11 @@ export function AppProvider({ children }) {
   const [workoutLogs, setWorkoutLogs] = useLocalStorage('fittrack_workoutLogs', SAMPLE.wl);
   const [measurements, setMeasurements] = useLocalStorage('fittrack_measurements', []);
   const [caloriesLog, setCaloriesLog] = useLocalStorage('fittrack_caloriesLog', []);
+  const [monthlyRankHistory, setMonthlyRankHistory] = useLocalStorage('fittrack_monthlyRankHistory', [
+    { id: '2026-02', label: 'Feb 2026', xp: 175000 },
+    { id: '2026-01', label: 'Jan 2026', xp: 130000 },
+    { id: '2025-12', label: 'Dec 2025', xp: 98000 },
+  ]);
 
   const { theme, toggleTheme, initTheme } = useTheme();
   const { toasts, addToast, removeToast } = useToast();
@@ -94,6 +99,7 @@ export function AppProvider({ children }) {
     // Measurements & Calories
     measurements, setMeasurements,
     caloriesLog, setCaloriesLog,
+    monthlyRankHistory, setMonthlyRankHistory,
     // Theme
     theme, toggleTheme,
     // Toast

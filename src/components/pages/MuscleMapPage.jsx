@@ -67,7 +67,7 @@ const MuscleCard = ({ muscle, xp }) => {
 
 // ─── MUSCLE MAP PAGE ─────────────────────────────────────────────────────────
 export default function MuscleMapPage() {
-  const { workoutLogs, splits, user } = useApp();
+  const { workoutLogs, splits, user, monthlyRankHistory } = useApp();
   const [filter, setFilter] = useState('all');
 
   const muscleXP = useMemo(
@@ -99,7 +99,7 @@ export default function MuscleMapPage() {
         background: 'linear-gradient(135deg, var(--c1) 0%, rgba(232,84,13,.06) 100%)',
         border: `1px solid ${overall.color}20`,
       }}>
-        <BodyMapSVG muscleXP={muscleXP} />
+        <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
 
         {/* Rank Display */}
         <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
@@ -118,6 +118,32 @@ export default function MuscleMapPage() {
           </div>
         </div>
       </div>
+
+      {/* Previous Months History */}
+      {monthlyRankHistory && monthlyRankHistory.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px', padding: '0 2px' }}>Past Performance</div>
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6 }}>
+            {monthlyRankHistory.map(hist => {
+              const r = getOverallRank({ fake: hist.xp }); // Hack: pass muscleXP object that totals hist.xp to getOverallRank
+              return (
+                <div key={hist.id} className="card" style={{ padding: '12px 14px', minWidth: 156, flexShrink: 0, border: `1px solid ${r.color}20`, background: 'var(--bg)' }}>
+                  <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600, marginBottom: 8 }}>{hist.label}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trophy size={16} color={r.color} />
+                    </div>
+                    <div>
+                      <div className="bb" style={{ fontSize: 14, color: r.color }}>{r.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--t2)' }}>{Math.round(hist.xp).toLocaleString()} XP</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Rank Legend */}
       <div className="card" style={{ padding: '12px 14px', marginBottom: 14, overflow: 'hidden' }}>

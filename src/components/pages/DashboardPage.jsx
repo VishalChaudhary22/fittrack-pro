@@ -228,7 +228,7 @@ export default function DashboardPage() {
           <ChevronRight size={14} color="var(--t3)" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <MiniBodyMap weeklyMuscles={weeklyMuscles} />
+          <MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
               <Shield size={14} color={overallRank.color} />

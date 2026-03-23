@@ -15,22 +15,22 @@ import { useMemo, useEffect, useRef } from 'react';
 
 const MUSCLE_IMAGES = {
   // Front view muscles
-  shoulders:  { view: 'front', file: '/muscles/front-shoulders.png' },
-  chest:      { view: 'front', file: '/muscles/front-chest.png' },
-  abs:        { view: 'front', file: '/muscles/front-abs.png' },
-  biceps:     { view: 'front', file: '/muscles/front-biceps.png' },
-  forearms:   { view: 'front', file: '/muscles/front-forearms.png' },
-  quads:      { view: 'front', file: '/muscles/front-quads.png' },
-  calves:     { view: 'front', file: '/muscles/front-calves.png' },
+  shoulders:  { view: 'front', file: 'front-shoulders.png' },
+  chest:      { view: 'front', file: 'front-chest.png' },
+  abs:        { view: 'front', file: 'front-abs.png' },
+  biceps:     { view: 'front', file: 'front-biceps.png' },
+  forearms:   { view: 'front', file: 'front-forearms.png' },
+  quads:      { view: 'front', file: 'front-quads.png' },
+  calves:     { view: 'front', file: 'front-calves.png' },
   // Back view muscles
-  traps:      { view: 'back',  file: '/muscles/back-traps.png' },
-  back:       { view: 'back',  file: '/muscles/back-back.png' },
-  triceps:    { view: 'back',  file: '/muscles/back-triceps.png' },
-  glutes:     { view: 'back',  file: '/muscles/back-glutes.png' },
-  hamstrings: { view: 'back',  file: '/muscles/back-hamstrings.png' },
+  traps:      { view: 'back',  file: 'back-traps.png' },
+  back:       { view: 'back',  file: 'back-back.png' },
+  triceps:    { view: 'back',  file: 'back-triceps.png' },
+  glutes:     { view: 'back',  file: 'back-glutes.png' },
+  hamstrings: { view: 'back',  file: 'back-hamstrings.png' },
 };
 
-const BACK_SHOULDER_IMG = '/muscles/back-shoulders.png';
+const BACK_SHOULDER_IMG = 'back-shoulders.png';
 
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
 const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
@@ -137,7 +137,9 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
 };
 
 // ─── EXPORTED MAIN COMPONENT ─────────────────────────────────────────────────
-export default function BodyMapSVG({ muscleXP = {}, mini = false }) {
+export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male' }) {
+  const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
+
   // Determine which muscles have XP (are active/trained)
   const activeMuscles = useMemo(
     () => Object.entries(muscleXP).filter(([, xp]) => xp > 0).map(([k]) => k),
@@ -152,24 +154,25 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false }) {
     activeMuscles.forEach(muscle => {
       const info = MUSCLE_IMAGES[muscle];
       if (info) {
-        if (info.view === 'front') front.push(info.file);
-        if (info.view === 'back') back.push(info.file);
+        if (info.view === 'front') front.push(getAssetUrl(info.file));
+        if (info.view === 'back') back.push(getAssetUrl(info.file));
       }
       
       // Special case: shoulders wrap to both front and back views
       if (muscle === 'shoulders') {
-        if (!back.includes(BACK_SHOULDER_IMG)) back.push(BACK_SHOULDER_IMG);
+        const backShoulderAsset = getAssetUrl(BACK_SHOULDER_IMG);
+        if (!back.includes(backShoulderAsset)) back.push(backShoulderAsset);
       }
     });
     
     return { frontLayers: front, backLayers: back };
-  }, [activeMuscles]);
+  }, [activeMuscles, gender]);
 
   if (mini) {
     return (
       <div style={{ width: 55, height: 'auto', flexShrink: 0 }}>
         <CanvasBodyMap 
-          baseSrc="/muscles/front-base.png" 
+          baseSrc={getAssetUrl('front-base.png')} 
           layerSrcs={frontLayers} 
           borderRadius={6}
         />
@@ -181,14 +184,14 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false }) {
     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'flex-start' }}>
       <div style={{ flex: '0 0 auto', width: '42%', maxWidth: 180 }}>
         <CanvasBodyMap 
-          baseSrc="/muscles/front-base.png" 
+          baseSrc={getAssetUrl('front-base.png')} 
           layerSrcs={frontLayers} 
           label="Front" 
         />
       </div>
       <div style={{ flex: '0 0 auto', width: '42%', maxWidth: 180 }}>
         <CanvasBodyMap 
-          baseSrc="/muscles/back-base.png" 
+          baseSrc={getAssetUrl('back-base.png')} 
           layerSrcs={backLayers} 
           label="Back" 
         />
@@ -198,18 +201,20 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false }) {
 }
 
 // ─── MINI VERSION FOR DASHBOARD ──────────────────────────────────────────────
-export const MiniBodyMap = ({ weeklyMuscles = [] }) => {
+export const MiniBodyMap = ({ weeklyMuscles = [], gender = 'male' }) => {
+  const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
+
   const frontLayers = useMemo(() => {
     return weeklyMuscles
       .map(m => MUSCLE_IMAGES[m])
       .filter(info => info && info.view === 'front')
-      .map(info => info.file);
-  }, [weeklyMuscles]);
+      .map(info => getAssetUrl(info.file));
+  }, [weeklyMuscles, gender]);
 
   return (
     <div style={{ width: 50, height: 'auto', flexShrink: 0 }}>
       <CanvasBodyMap 
-        baseSrc="/muscles/front-base.png" 
+        baseSrc={getAssetUrl('front-base.png')} 
         layerSrcs={frontLayers} 
         borderRadius={6}
       />

@@ -1,4 +1,4 @@
-+import { useState } from 'react';
+import { useState } from 'react';
 import { Dumbbell, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ACTIVITY } from '../../data/constants';

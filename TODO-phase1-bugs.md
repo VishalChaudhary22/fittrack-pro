@@ -362,6 +362,78 @@ This is fragile — the class name logic is also wrong (both branches return `'b
 
 ---
 
+---
+
+### 1.12 Done Button Column Alignment — Workout Tracker
+
+**Problem:** The done button (checkbox) has been moved to the left side of the exercise row, placing it under the "SET" column header instead of under the "DONE" column header where it belongs.
+
+**Root cause:** The `.ex-r` grid (`src/index.css` line 168) defines 4 columns:
+```css
+.ex-r { grid-template-columns: 34px 1fr 1fr 80px; }
+/* Column 1: SET | Column 2: REPS | Column 3: KG | Column 4: DONE */
+```
+
+The header row (`WorkoutPage.jsx` line 142) correctly renders `['SET', 'REPS', 'KG', 'DONE']` — "DONE" sits in column 4. However, item 1.5's checkbox implementation placed the done button in column 1 (the SET position), breaking the visual alignment.
+
+**Current broken layout:**
+```
+[DONE✓] [REPS  ] [KG    ] [✕    ]
+ SET      REPS     KG       DONE    ← headers don't match columns
+```
+
+**Expected layout:**
+```
+[ 1   ] [REPS  ] [KG    ] [✓  ✕]
+ SET      REPS     KG       DONE    ← headers align correctly
+```
+
+**Fix in `WorkoutPage.jsx` (lines 144–151):**
+
+The set number must stay in column 1, both inputs in columns 2–3, and the done button + remove button together in column 4. The done button wrapper `div` is already in column 4 — the checkbox just needs to render inside it, not be extracted out to column 1.
+
+```jsx
+// Current broken structure — done button pulled to column 1:
+<div key={si} className="ex-r" ...>
+  <button onClick={() => upd(ei, si, 'done', !s.done)} ...> ← this is in column 1 (SET)
+  <div style={{ fontSize: 12, ... }}>{si + 1}</div>          ← this gets pushed to column 2
+  <input type="number" value={s.reps} ... />                 ← column 3
+  <input type="number" step=".5" value={s.weight} ... />    ← column 4
+  ...
+</div>
+
+// Correct structure — set number in col 1, done button in col 4:
+<div key={si} className="ex-r" ...>
+  <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700 }}>{si + 1}</div>
+  <input type="number" value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+  <input type="number" step=".5" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+  <div style={{ display: 'flex', gap: 3 }}>
+    <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
+      flex: 1,
+      width: 32, height: 32, borderRadius: 6,
+      background: s.done ? 'var(--o)' : 'transparent',
+      border: `2px solid ${s.done ? 'var(--o)' : 'var(--bd2)'}`,
+      color: s.done ? '#fff' : 'var(--t3)',
+      cursor: 'pointer', fontSize: 14,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      transition: 'all .15s'
+    }}>{s.done ? '✓' : ''}</button>
+    {ex.sets.length > 1 && (
+      <button onClick={() => rmS(ei, si)} style={{
+        background: 'transparent', border: '1px solid var(--bd)',
+        borderRadius: 8, color: 'var(--t3)', cursor: 'pointer',
+        padding: '7px 5px', fontSize: 10
+      }}>✕</button>
+    )}
+  </div>
+</div>
+```
+
+**Files to modify:**
+- `src/components/pages/WorkoutPage.jsx` — lines 144–152, restore set number to column 1 and done button to column 4
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -377,3 +449,4 @@ This is fragile — the class name logic is also wrong (both branches return `'b
 | 9     | 1.9 Sidebar Light Mode Fix | ✅ Done | 🟢 Small | High |
 | 10    | 1.10 Orange Overload Reduction | ✅ Done | 🟡 Medium | High |
 | 11    | 1.11 ConfirmDialog Danger Button | ✅ Done | 🟢 Small | Medium |
+| 12    | 1.12 Done Button Column Alignment | ✅ Done | 🟢 Small | High |

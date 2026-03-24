@@ -33,7 +33,7 @@ const MUSCLE_IMAGES = {
 const BACK_SHOULDER_IMG = 'back-shoulders.png';
 
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
-const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
+const CanvasBodyMap = ({ baseSrc, layerSrcs, secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -44,12 +44,10 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
 
     const loadImg = (src) => new Promise((resolve, reject) => {
       const img = new Image();
-      // Ensure cross-origin is set for local dev / prod
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
       img.onerror = () => {
         console.warn(`Failed to load image: ${src}`);
-        // Return a dummy small transparent image instead of crashing
         const dummy = new Image();
         dummy.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         dummy.onload = () => resolve(dummy);
@@ -57,62 +55,67 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
       img.src = src;
     });
 
-    // Load base and all active layers
     Promise.all([
       loadImg(baseSrc),
-      ...layerSrcs.map(loadImg)
-    ]).then(([baseImg, ...layerImgs]) => {
+      ...layerSrcs.map(loadImg),
+      ...secondaryLayerSrcs.map(loadImg)
+    ]).then(([baseImg, ...allLayerImgs]) => {
       if (!active) return;
       
-      // Set canvas size to match the original image resolution
       canvas.width = baseImg.width || 800;
       canvas.height = baseImg.height || 800;
       
-      // Draw base image
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(baseImg, 0, 0);
       
-      if (layerImgs.length === 0) return; // No active muscles to draw
+      if (allLayerImgs.length === 0) return;
+
+      const primaryImgs = allLayerImgs.slice(0, layerSrcs.length);
+      const secondaryImgs = allLayerImgs.slice(layerSrcs.length);
 
       const baseData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       
-      // Offscreen canvas for processing layers
       const offCanvas = document.createElement('canvas');
       offCanvas.width = canvas.width;
       offCanvas.height = canvas.height;
       const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
 
-      layerImgs.forEach(img => {
+      const processLayer = (img, isSecondary) => {
         offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
         offCtx.drawImage(img, 0, 0);
         const layerData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
         
-        // Composite only the coral/red pixels
-        // Base Teal: R~107, G~155, B~173
-        // Coral Highlight: R~232, G~84, B~13
         for (let i = 0; i < layerData.data.length; i += 4) {
           const r = layerData.data[i];
           const g = layerData.data[i+1];
           const b = layerData.data[i+2];
           const a = layerData.data[i+3];
           
-          // Check if pixel is prominently red (red channel is high and greater than green and blue)
-          // Also added a slight anti-aliasing edge detection by catching lighter reds
           if (r > 130 && r > g + 20 && r > b + 20 && a > 0) {
-            baseData.data[i] = r;
-            baseData.data[i+1] = g;
-            baseData.data[i+2] = b;
-            baseData.data[i+3] = a;
+            if (isSecondary) {
+              const alpha = 0.4;
+              baseData.data[i]   = Math.round(r * alpha + baseData.data[i] * (1 - alpha));
+              baseData.data[i+1] = Math.round(g * alpha + baseData.data[i+1] * (1 - alpha));
+              baseData.data[i+2] = Math.round(b * alpha + baseData.data[i+2] * (1 - alpha));
+            } else {
+              baseData.data[i] = r;
+              baseData.data[i+1] = g;
+              baseData.data[i+2] = b;
+              baseData.data[i+3] = a;
+            }
           }
         }
-      });
+      };
+
+      // Draw secondary layers first, then primary on top
+      secondaryImgs.forEach(img => processLayer(img, true));
+      primaryImgs.forEach(img => processLayer(img, false));
       
-      // Put updated data back to the visible canvas
       ctx.putImageData(baseData, 0, 0);
     }).catch(err => console.error("Canvas compositing error:", err));
 
     return () => { active = false; };
-  }, [baseSrc, layerSrcs]);
+  }, [baseSrc, layerSrcs, secondaryLayerSrcs]);
 
   return (
     <div style={{ textAlign: 'center', width: '100%' }}>
@@ -137,36 +140,39 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
 };
 
 // ─── EXPORTED MAIN COMPONENT ─────────────────────────────────────────────────
-export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male' }) {
+export default function BodyMapSVG({ muscleXP = {}, primaryMuscles = null, secondaryMuscles = null, mini = false, gender = 'male' }) {
   const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
 
-  // Determine which muscles have XP (are active/trained)
-  const activeMuscles = useMemo(
-    () => Object.entries(muscleXP).filter(([, xp]) => xp > 0).map(([k]) => k),
-    [muscleXP]
-  );
+  const { pMuscles, sMuscles } = useMemo(() => {
+    if (primaryMuscles || secondaryMuscles) {
+      return { pMuscles: primaryMuscles || [], sMuscles: secondaryMuscles || [] };
+    }
+    // Fallback: use all active from muscleXP as primary if specific lists aren't provided
+    return { 
+      pMuscles: Object.entries(muscleXP).filter(([, xp]) => xp > 0).map(([k]) => k),
+      sMuscles: []
+    };
+  }, [muscleXP, primaryMuscles, secondaryMuscles]);
 
-  // Group active layers by view
-  const { frontLayers, backLayers } = useMemo(() => {
+  const mapToLayers = (muscles) => {
     const front = [];
     const back = [];
-    
-    activeMuscles.forEach(muscle => {
+    muscles.forEach(muscle => {
       const info = MUSCLE_IMAGES[muscle];
       if (info) {
         if (info.view === 'front') front.push(getAssetUrl(info.file));
         if (info.view === 'back') back.push(getAssetUrl(info.file));
       }
-      
-      // Special case: shoulders wrap to both front and back views
       if (muscle === 'shoulders') {
-        const backShoulderAsset = getAssetUrl(BACK_SHOULDER_IMG);
-        if (!back.includes(backShoulderAsset)) back.push(backShoulderAsset);
+        const bg = getAssetUrl(BACK_SHOULDER_IMG);
+        if (!back.includes(bg)) back.push(bg);
       }
     });
-    
-    return { frontLayers: front, backLayers: back };
-  }, [activeMuscles, gender]);
+    return { front, back };
+  };
+
+  const { frontLayers, backLayers } = useMemo(() => mapToLayers(pMuscles), [pMuscles, gender]);
+  const { frontLayers: frontSecondary, backLayers: backSecondary } = useMemo(() => mapToLayers(sMuscles), [sMuscles, gender]);
 
   if (mini) {
     return (
@@ -174,6 +180,7 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male
         <CanvasBodyMap 
           baseSrc={getAssetUrl('front-base.png')} 
           layerSrcs={frontLayers} 
+          secondaryLayerSrcs={frontSecondary}
           borderRadius={6}
         />
       </div>
@@ -186,6 +193,7 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male
         <CanvasBodyMap 
           baseSrc={getAssetUrl('front-base.png')} 
           layerSrcs={frontLayers} 
+          secondaryLayerSrcs={frontSecondary}
           label="Front" 
         />
       </div>
@@ -193,6 +201,7 @@ export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male
         <CanvasBodyMap 
           baseSrc={getAssetUrl('back-base.png')} 
           layerSrcs={backLayers} 
+          secondaryLayerSrcs={backSecondary}
           label="Back" 
         />
       </div>

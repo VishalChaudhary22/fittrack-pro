@@ -38,6 +38,30 @@ const MAP = {
 
 export const getMusclesForExercise = (muscleField) => MAP[muscleField] || [];
 
+// ─── MUSCLE ID FALLBACK PARSER ───────────────────────────────────────────────
+const DISPLAY_TO_ID = {
+  'chest': 'chest', 'pecs': 'chest',
+  'back': 'back', 'lats': 'back', 'lat': 'back',
+  'shoulders': 'shoulders', 'delts': 'shoulders',
+  'biceps': 'biceps', 'bi': 'biceps',
+  'triceps': 'triceps', 'tri': 'triceps',
+  'legs': 'quads', 'quads': 'quads', 'quadriceps': 'quads',
+  'hamstrings': 'hamstrings', 'hams': 'hamstrings',
+  'glutes': 'glutes', 'glute': 'glutes', 'butt': 'glutes',
+  'calves': 'calves', 'calf': 'calves',
+  'abs': 'abs', 'core': 'abs',
+  'traps': 'traps', 'trapezius': 'traps',
+  'forearms': 'forearms',
+  'lower back': 'back', 'lowerback': 'back',
+  'obliques': 'abs',
+};
+
+export const muscleIdFromDisplayName = (displayName) => {
+  if (!displayName) return { primary: null, secondary: [] };
+  const parts = displayName.split('/').map(s => DISPLAY_TO_ID[s.trim().toLowerCase()]);
+  return { primary: parts[0] || null, secondary: parts.slice(1).filter(Boolean) };
+};
+
 // ─── RANK TIERS ──────────────────────────────────────────────────────────────
 const TIER_STYLES = [
   { name: 'Untrained',  color: '#555',     bg: 'rgba(85,85,85,.15)' },
@@ -91,12 +115,18 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
     sessionsPerMuscle[m.key] = 0;
   });
 
-  // Build exercise name → muscle field lookup from splits
+  // Build exercise name → muscle lookups from splits
+  const exPrimaryMap = {};
+  const exSecondaryMap = {};
   const exMuscleMap = {};
   splits.forEach(split => {
     split.days?.forEach(day => {
       day.exercises?.forEach(ex => {
-        if (ex.name && ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+        if (ex.name) {
+          if (ex.primaryMuscle) exPrimaryMap[ex.name] = ex.primaryMuscle;
+          if (ex.secondaryMuscles) exSecondaryMap[ex.name] = ex.secondaryMuscles;
+          if (ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+        }
       });
     });
   });
@@ -117,10 +147,26 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
     const trainedInSession = new Set();
     
     log.exercises?.forEach(ex => {
-      const muscleField = exMuscleMap[ex.name];
-      if (!muscleField) return;
-      const muscles = getMusclesForExercise(muscleField);
-      if (muscles.length === 0) return;
+      let primary = exPrimaryMap[ex.name];
+      let secondary = exSecondaryMap[ex.name] || [];
+      const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
+      
+      if (!primary && fallbackMuscle) {
+        const fallback = muscleIdFromDisplayName(fallbackMuscle);
+        if (fallback.primary) {
+          primary = fallback.primary;
+          secondary = fallback.secondary;
+        } else {
+          // Fallback to the old MAP array
+          const mapped = getMusclesForExercise(fallbackMuscle);
+          if (mapped.length > 0) {
+            primary = mapped[0];
+            secondary = mapped.slice(1);
+          }
+        }
+      }
+
+      if (!primary && secondary.length === 0) return;
 
       let exXP = 0;
       let completedSets = 0;
@@ -141,11 +187,17 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
       const qualityBonus = (completedSets >= 3 && (avgWeight >= 20 || avgWeight === 0)) ? 1.15 : 1.0;
       exXP = exXP * qualityBonus;
 
-      // Distribute XP across targeted muscles (primary gets more)
-      const perMuscle = Math.round(exXP / muscles.length);
-      muscles.forEach(m => { 
-        xp[m] = (xp[m] || 0) + perMuscle; 
-        trainedInSession.add(m);
+      // Distribute XP: Primary gets 100%, Secondary gets 30% each
+      if (primary && xp[primary] !== undefined) {
+        xp[primary] += exXP;
+        trainedInSession.add(primary);
+      }
+      
+      secondary.forEach(m => {
+        if (xp[m] !== undefined) {
+          xp[m] += exXP * 0.3;
+          trainedInSession.add(m);
+        }
       });
     });
 
@@ -171,8 +223,23 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
     activeSplit.days.forEach(day => {
       const dayMuscles = new Set();
       day.exercises?.forEach(ex => {
-        const mf = exMuscleMap[ex.name] || ex.muscle;
-        getMusclesForExercise(mf).forEach(m => dayMuscles.add(m));
+        let primary = ex.primaryMuscle;
+        let secondary = ex.secondaryMuscles || [];
+        if (!primary) {
+          const fallbackMuscle = ex.muscle;
+          if (fallbackMuscle) {
+            const fallback = muscleIdFromDisplayName(fallbackMuscle);
+            if (fallback.primary) {
+              primary = fallback.primary;
+              secondary = fallback.secondary;
+            } else {
+              const mapped = getMusclesForExercise(fallbackMuscle);
+              if (mapped.length > 0) { primary = mapped[0]; secondary = mapped.slice(1); }
+            }
+          }
+        }
+        if (primary) dayMuscles.add(primary);
+        secondary.forEach(m => dayMuscles.add(m));
       });
       dayMuscles.forEach(m => {
         if (expectedSessionsPerMuscle[m] !== undefined) {
@@ -207,11 +274,17 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
 
   const trained = new Set();
 
+  const exPrimaryMap = {};
+  const exSecondaryMap = {};
   const exMuscleMap = {};
   splits.forEach(split => {
     split.days?.forEach(day => {
       day.exercises?.forEach(ex => {
-        if (ex.name && ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+        if (ex.name) {
+          if (ex.primaryMuscle) exPrimaryMap[ex.name] = ex.primaryMuscle;
+          if (ex.secondaryMuscles) exSecondaryMap[ex.name] = ex.secondaryMuscles;
+          if (ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+        }
       });
     });
   });
@@ -223,9 +296,23 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
 
   userLogs.forEach(log => {
     log.exercises?.forEach(ex => {
-      const muscleField = exMuscleMap[ex.name];
-      if (!muscleField) return;
-      getMusclesForExercise(muscleField).forEach(m => trained.add(m));
+      let primary = exPrimaryMap[ex.name];
+      let secondary = exSecondaryMap[ex.name] || [];
+      const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
+
+      if (!primary && fallbackMuscle) {
+        const fallback = muscleIdFromDisplayName(fallbackMuscle);
+        if (fallback.primary) {
+          primary = fallback.primary;
+          secondary = fallback.secondary;
+        } else {
+          const mapped = getMusclesForExercise(fallbackMuscle);
+          if (mapped.length > 0) { primary = mapped[0]; secondary = mapped.slice(1); }
+        }
+      }
+
+      if (primary) trained.add(primary);
+      secondary.forEach(m => trained.add(m));
     });
   });
 

@@ -115,6 +115,19 @@ export default function WorkoutPage() {
     const totalSets = done.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
     const totalVol = done.exercises.reduce((acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + s.reps * s.weight, 0), 0);
 
+    const sessionPrimaryMuscles = [...new Set(
+      done.exercises.map(doneEx => {
+        const exItem = session.exs.find(e => (e.sv || e.name) === doneEx.name);
+        return exItem?.primaryMuscle || exItem?.muscle?.toLowerCase();
+      }).filter(Boolean)
+    )];
+    const sessionSecondaryMuscles = [...new Set(
+      done.exercises.flatMap(doneEx => {
+        const exItem = session.exs.find(e => (e.sv || e.name) === doneEx.name);
+        return exItem?.secondaryMuscles || [];
+      })
+    )].filter(m => !sessionPrimaryMuscles.includes(m));
+
     return (
       <div className="pg-in" style={{ padding: '20px' }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -132,7 +145,7 @@ export default function WorkoutPage() {
             <div><div className="bb" style={{ fontSize: 24, color: 'var(--tx)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
           </div>
           <div style={{ maxWidth: 160, margin: '0 auto' }}>
-            <BodyMapSVG muscleXP={sessionXP} gender={user?.gender} />
+            <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
           </div>
         </div>
 
@@ -173,23 +186,29 @@ export default function WorkoutPage() {
           <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700 }}>{h}</div>)}</div>
           {ex.sets.map((s, si) => (
             <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700, width: 22 }}>{si + 1}</div>
-              <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
-                  width: 22, height: 22, flexShrink: 0, padding: 0,
-                  background: s.done ? 'var(--o)' : 'var(--c3)',
-                  border: `1px solid ${s.done ? 'var(--o)' : 'var(--bd)'}`,
-                  borderRadius: 6, color: '#fff', cursor: 'pointer',
+              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700 }}>{si + 1}</div>
+              <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <input type="number" step=".5" placeholder="kg" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
+              <div style={{ display: 'flex', gap: 3 }}>
+                <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
+                  flex: 1,
+                  height: 32, borderRadius: 6,
+                  background: s.done ? 'var(--o)' : 'transparent',
+                  border: `2px solid ${s.done ? 'var(--o)' : 'var(--bd2)'}`,
+                  color: s.done ? '#fff' : 'var(--t3)',
+                  cursor: 'pointer', fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all .15s'
                 }}>
-                  {s.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-              </button>
-              </div>
-              <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <input type="number" step=".5" placeholder="kg" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {ex.sets.length > 1 && <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: 'none', color: 'var(--t3)', cursor: 'pointer', padding: '7px 5px', fontSize: 14 }}>✕</button>}
+                  {s.done ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> : ''}
+                </button>
+                {ex.sets.length > 1 && (
+                  <button onClick={() => rmS(ei, si)} style={{
+                    background: 'transparent', border: '1px solid var(--bd)',
+                    borderRadius: 8, color: 'var(--t3)', cursor: 'pointer',
+                    padding: '7px 5px', fontSize: 10
+                  }}>✕</button>
+                )}
               </div>
             </div>
           ))}

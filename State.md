@@ -88,7 +88,7 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 3. **Workout & Split Management**  
    - `SplitsPage.jsx`: Organize routines by muscle groups or scheduling protocols. Now accessible directly from the primary mobile bottom navigation.
    - `WorkoutPage.jsx`: The active session tracker.
-   - **Recent Updates:** The tracker UI features a prominent "Rest Timer" control and a new rich **Post-Workout Summary** screen that dynamically highlights worked muscles on the `BodyMapSVG` and calculates Session XP, Sets, and Volume.
+   - **Recent Updates:** The tracker UI features a prominent "Rest Timer" control, blank-by-default input fields for reps/weight, corrected checkbox column alignments (`DONE` markers), and a new rich **Post-Workout Summary** screen that dynamically highlights worked muscles on the `BodyMapSVG` and calculates Session XP, Sets, and Volume.
    - `WorkoutHistoryPage.jsx`: Comprehensive log of past workout sessions.
 4. **Nutrition & Diet**  
    - `DietPage.jsx`: Interface for meal tracking and macro logging.
@@ -98,7 +98,7 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
    - `ProgressPage.jsx`: A data visualization page (using `recharts`) showcasing performance and body changes over time.
 6. **Detailed Anatomical Visualization**  
    - `MuscleMapPage.jsx` & `BodyMapSVG.jsx`: A dedicated visual map highlighting muscle groups and areas of focus based on accumulated XP.
-   - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` has been upgraded to dynamically render **Female Anatomy Maps** if `user.gender` is 'female'.
+   - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` has been upgraded to dynamically render **Female Anatomy Maps** if `user.gender` is 'female', and visually distinguish **Primary vs Secondary Muscle Engagement** with biomechanically-accurate dimming transparency on the canvas highlights.
 7. **User Personalization**  
    - `ProfilePage.jsx`: Manage personal information, settings, and potentially theme toggling.
    - `ContactPage.jsx`: Provide feedback or reach support.

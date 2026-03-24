@@ -25,10 +25,13 @@ The project follows a component-based directory structure, organized by feature 
 fittrack-pro/
 ├── README.md
 ├── State.md (This file)
+├── vercel.json              # Vercel SPA routing rewrite rules
 ├── index.html
 ├── package.json
 ├── vite.config.js
 ├── eslint.config.js
+├── TODO-male-anatomy.md     # Male muscle asset reference & verification
+├── TODO-female-anatomy.md   # Female muscle asset implementation plan
 └── src/
     ├── App.jsx                # Main application component with routing
     ├── main.jsx               # Entry point
@@ -105,8 +108,12 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
    - `MeasurementsPage.jsx`: To track body dimensions.
    - `ProgressPage.jsx`: A data visualization page (using `recharts`) showcasing performance and body changes over time.
 6. **Detailed Anatomical Visualization**  
-   - `MuscleMapPage.jsx` & `BodyMapSVG.jsx`: A dedicated visual map highlighting muscle groups and areas of focus based on accumulated XP.
-   - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` has been upgraded to dynamically render **Female Anatomy Maps** if `user.gender` is 'female', and visually distinguish **Primary vs Secondary Muscle Engagement** with biomechanically-accurate dimming transparency on the canvas highlights.
+    - `MuscleMapPage.jsx` & `BodyMapSVG.jsx`: A dedicated visual map highlighting muscle groups and areas of focus based on accumulated XP.
+    - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` renders on an HTML5 Canvas using a pixel-compositing technique that extracts coral-red highlights over a teal-blue base, showing **Primary vs Secondary Muscle Engagement** with biomechanically-accurate alpha blending.
+    - **Anatomy Status:**
+      - 🟢 **Male** — 17 PNGs committed, rendering in production. See `TODO-male-anatomy.md`.
+      - 🟡 **Female** — Code routing complete (`gender='female'` prop wired up). 16 female PNGs not yet created — shows graceful fallback for female users. See `TODO-female-anatomy.md`.
+      - 🟢 **Fallback** — Canvas renders a styled placeholder if any image fails to load, preventing invisible collapse.
 7. **User Personalization**  
    - `ProfilePage.jsx`: Manage personal information, settings, and potentially theme toggling.
    - `ContactPage.jsx`: Provide feedback or reach support.
@@ -122,6 +129,16 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 
 - **Biomechanical XP Accuracy**: Exercises now track `primary` (100% XP) and `secondary` (30% XP) muscle engagement with corresponding visual dimming on the body map.
 - **Progress Ladder 2.0**: Shifted to a **Monthly Reset** logic with overall and per-muscle ranking, including consistency bonuses and past-performance tracking.
-- **Anatomical Diversity**: Full support for both male and female anatomical visualization based on user profiles.
+- **Male Anatomy**: 17 PNGs fully implemented and live in production.
 - **Design Standardization**: Overhauled typography, color contrast, and action buttons to ensure premium dark/light mode consistency.
 - **Rest Timer System**: High-visibility timer with custom tones integrated directly into the tracker workflow.
+- **Canvas Fallback**: Graceful placeholder prevents invisible canvas collapse on image load failures.
+
+---
+
+## 🔲 Pending Tasks
+
+| Task | Description | Reference |
+|------|-------------|----------|
+| Female Anatomy PNGs | Source/generate 16 female PNG assets and commit to `public/muscles/female/` | `TODO-female-anatomy.md` |
+| `back-calves` / `back-forearms` | Optionally add to `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` | Minor code change |

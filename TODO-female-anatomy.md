@@ -1,0 +1,180 @@
+# FitTrack Pro — Female Anatomy Implementation
+
+> **Created:** 2026-03-24 · Scope: Asset creation only. Zero code changes required.
+
+---
+
+## 🎯 Goal
+
+Add female anatomical illustrations to `public/muscles/female/` so that female users (those with `user.gender === 'female'`) see a biologically accurate body map instead of the "Image unavailable" fallback.
+
+The code routing is **already complete** — `BodyMapSVG.jsx` constructs female paths using:
+```js
+const getAssetUrl = (file) => gender === 'female'
+  ? `/muscles/female/female-${file}`
+  : `/muscles/${file}`;
+```
+
+**No code changes are needed.** This task is entirely about creating and committing the PNG assets.
+
+---
+
+## 🔍 Male Anatomy Reference
+
+Study the 17 existing male PNGs in `public/muscles/` before generating female versions. All images follow these rules:
+
+| Property | Value |
+|----------|-------|
+| **Style** | Getty / pop_jop — realistic anatomical illustration |
+| **Base body color** | Teal-blue / cyan (all muscles untrained) |
+| **Highlight color** | Coral-red / orange-red (only the target muscle) |
+| **Background** | Transparent PNG |
+| **Dimensions** | ~400 × 800 px (portrait, 1:2 aspect ratio) |
+| **Format** | PNG, transparent background |
+
+### Mechanism (how canvas rendering works)
+The canvas renderer filters for pixels where `R > 130 && R > G + 20 && R > B + 20` (i.e., red-dominant pixels). Only these pixels are composited onto the base image. This means:
+- **Base PNGs** must show the full body in teal-blue with all muscles visible.
+- **Highlight PNGs** must show the full body in teal-blue **PLUS** the highlighted muscle in coral-red. Only that one muscle should be red-dominant.
+
+---
+
+## 📁 Required Files — 16 Total
+
+All files go in **`public/muscles/female/`** and must follow the **`female-`** prefix naming convention.
+
+### Base Images (2 files)
+| Filename | Description |
+|----------|-------------|
+| `female-front-base.png` | Full female body, front view, all muscles in teal-blue, no highlights |
+| `female-back-base.png` | Full female body, back view, all muscles in teal-blue, no highlights |
+
+### Front View Highlights (7 files)
+| Filename | Muscle | Anatomical Notes |
+|----------|--------|-----------------|
+| `female-front-shoulders.png` | Deltoids | Anterior and medial deltoid heads |
+| `female-front-chest.png` | Pectoralis Major | Female chest — must show pec outline under breast tissue |
+| `female-front-abs.png` | Rectus Abdominis | Six-pack groups + linea alba |
+| `female-front-biceps.png` | Biceps Brachii | Both arms, anterior upper arm |
+| `female-front-forearms.png` | Forearm Flexors | Both arms, anterior forearms |
+| `female-front-quads.png` | Quadriceps | Both legs, anterior thighs (4 heads: rectus femoris, vastus lateralis, medialis, intermedius) |
+| `female-front-calves.png` | Gastrocnemius / Soleus | Both legs, anterior-visible portion of calves |
+
+### Back View Highlights (7 files)
+| Filename | Muscle | Anatomical Notes |
+|----------|--------|-----------------|
+| `female-back-shoulders.png` | Posterior Deltoid | Rear deltoid head, both shoulders |
+| `female-back-traps.png` | Trapezius | Upper/mid traps, extending from neck to mid-back |
+| `female-back-back.png` | Latissimus Dorsi | Lats — wide sweep from armpits to lower back |
+| `female-back-triceps.png` | Triceps Brachii | Both arms, posterior upper arm (3 heads) |
+| `female-back-glutes.png` | Gluteus Maximus | Both glutes — anatomically prominent in female figure |
+| `female-back-hamstrings.png` | Biceps Femoris / Semitendinosus | Both legs, posterior thigh group |
+| `female-back-back.png` | — | *(same as lats above — already listed)* |
+
+> **Note:** The back calves (`back-calves.png`) and back forearms (`back-forearms.png`) exist in the male set but are not referenced in `MUSCLE_IMAGES` in the current code. You may skip these for the female set or add them for future use.
+
+---
+
+## 🖼️ Generation Approach
+
+### Option A — AI Image Generation (Recommended)
+Use an image generation tool (e.g., Gemini imagen, DALL-E, Midjourney) to produce the PNGs.
+
+**Recommended prompt template for base image:**
+```
+Full-body female anatomical illustration, front view.
+Style: medical fitness app illustration, Getty anatomical art style.
+Colors: all muscles shown in vibrant teal-blue (#00B4D8 to #0077B6 gradient range), 
+no green or yellow. Medium skin tone, athletic build. 
+Transparent background. Portrait orientation (1:2 ratio). 
+No clothing. Stylized, not hyper-realistic. Clean edges, flat anatomy layers.
+```
+
+**Recommended prompt template for muscle highlight (example for glutes):**
+```
+Full-body female anatomical illustration, back view.
+All muscles in teal-blue. Gluteus maximus only highlighted in coral-red (#E8540D to #FF6B35).
+No other muscles in red. Style: medical fitness app, Getty anatomical art.
+Transparent background. Portrait orientation (1:2 ratio). Stylized anatomy.
+```
+
+### Option B — Graphic Designer / Asset Library
+- License female anatomy SVGs from Adobe Stock, Shutterstock, or similar
+- Convert to the required color convention (teal base + coral highlight) using Illustrator/Figma
+- Export as transparent PNGs at ~400×800px
+
+### Option C — Trace/Adapt Male Images
+- Use the male images as a template in Figma or Photoshop
+- Modify the silhouette to female proportions (broader hips, narrower shoulders, different chest)
+- Keep the same teal/coral color scheme
+
+---
+
+## ✅ Implementation Checklist
+
+### Asset Creation
+> **NOTE:** AI Image generation quota exhausted after 6 images. The remaining 10 files are currently using copies of the base image as placeholders.
+
+- [x] Generate / source `female-front-base.png`
+- [x] Generate / source `female-back-base.png`
+- [x] Generate / source `female-front-shoulders.png`
+- [x] Generate / source `female-front-chest.png`
+- [x] Generate / source `female-front-abs.png`
+- [x] Generate / source `female-front-biceps.png`
+- [ ] Generate / source `female-front-forearms.png` (using placeholder)
+- [ ] Generate / source `female-front-quads.png` (using placeholder)
+- [ ] Generate / source `female-front-calves.png` (using placeholder)
+- [ ] Generate / source `female-back-shoulders.png` (using placeholder)
+- [ ] Generate / source `female-back-traps.png` (using placeholder)
+- [ ] Generate / source `female-back-back.png` (using placeholder)
+- [ ] Generate / source `female-back-triceps.png` (using placeholder)
+- [ ] Generate / source `female-back-glutes.png` (using placeholder)
+- [ ] Generate / source `female-back-hamstrings.png` (using placeholder)
+
+### Quality Check (per image)
+- [ ] Transparent background (no white/grey fill)
+- [ ] Correct orientation (front or back)
+- [ ] Teal-blue base with correct muscle highlighted in coral-red (for highlight PNGs)
+- [ ] Base PNGs have NO red-dominant pixels at all
+- [ ] Canvas pixel test: highlight PNGs have red channel clearly dominant over G and B in the target muscle area
+- [ ] Roughly 1:2 aspect ratio portrait
+
+### Deployment
+- [ ] Place all 16 files in `public/muscles/female/`
+- [ ] `git add public/muscles/female/` and commit
+- [ ] Push to `main` → Vercel auto-deploys
+- [ ] Verify on Vercel: log in as female user, navigate to `/muscle-map` — body map should render the female illustration
+
+---
+
+## 🔍 Verification Steps
+
+1. **Local test:**
+   - Open app with `npm run dev`
+   - Create or edit a test user with `gender: 'female'`
+   - Navigate to `/muscle-map`
+   - Both FRONT and BACK canvases should render the female body illustration in teal-blue
+
+2. **XP highlight test:**
+   - Log a workout that trains chest and glutes
+   - Navigate to `/muscle-map`
+   - Chest should highlight on the front canvas, glutes on the back canvas — both in coral-red
+
+3. **Fallback regression test:**
+   - Temporarily rename one female PNG (e.g., `female-front-base.bak`)
+   - Reload — should show "Image unavailable" placeholder, not a blank/invisible canvas
+   - Restore the file
+
+4. **Male regression test:**
+   - Switch user gender back to `male`
+   - Body map should continue to render male illustrations with no regressions
+
+---
+
+## 📌 Notes for the Image Generator
+
+- The canvas filtering threshold is: `R > 130 && R > G + 20 && R > B + 20`
+- For coral-red highlight to be detected: use colors like `#E8540D`, `#FF6B35`, `#D94F00`
+- For teal-blue base to NOT be detected as highlight: use `#00B4D8`, `#0096C7`, `#0077B6`
+- **Do NOT use orange, pink, or magenta for the base** — these may have high red channel values and accidentally trigger the highlight filter
+- All highlight PNGs must include the complete silhouette (not just the highlighted muscle in isolation) so the canvas renders correctly

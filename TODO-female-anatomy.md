@@ -140,10 +140,10 @@ Transparent background. Portrait orientation (1:2 ratio). Stylized anatomy.
 - [ ] Roughly 1:2 aspect ratio portrait
 
 ### Deployment
-- [ ] Place all 16 files in `public/muscles/female/`
-- [ ] `git add public/muscles/female/` and commit
-- [ ] Push to `main` → Vercel auto-deploys
-- [ ] Verify on Vercel: log in as female user, navigate to `/muscle-map` — body map should render the female illustration
+- [x] Place all 16 files in `public/muscles/female/`
+- [x] `git add public/muscles/female/` and commit
+- [x] Push to `main` → Vercel auto-deploys
+- [x] Verify on Vercel: log in as female user, navigate to `/muscle-map` — body map should render the female illustration
 
 ---
 
@@ -178,3 +178,104 @@ Transparent background. Portrait orientation (1:2 ratio). Stylized anatomy.
 - For teal-blue base to NOT be detected as highlight: use `#00B4D8`, `#0096C7`, `#0077B6`
 - **Do NOT use orange, pink, or magenta for the base** — these may have high red channel values and accidentally trigger the highlight filter
 - All highlight PNGs must include the complete silhouette (not just the highlighted muscle in isolation) so the canvas renders correctly
+
+---
+
+## 🐛 Known Bug: Background Visible in Generated Images
+
+> **Reported:** 2026-03-24 · Status: ⏳ Plan ready, fix pending
+
+### What the user sees
+The female anatomy canvases show a **grey/white checkered pattern** behind the illustration and **muscle name text labels** drawn on the image, both of which should not be visible.
+
+![Screenshot reference](screenshot of user-reported issue)
+
+### Root causes
+
+#### Issue 1 — Checkered background baked into the PNG pixels
+The AI image generator rendered the "transparent background" instruction by adding a grey/white checkerboard pattern as literal solid pixels in the PNG, rather than actual PNG alpha transparency. When the canvas draws this image with `ctx.drawImage()`, those grey/white pixels appear on screen.
+
+**Evidence:** The checkerboard squares are visible inside the canvas bounds, obscuring the muscle illustration.
+
+#### Issue 2 — Text labels drawn into the image
+The AI generator included muscle anatomy labels (e.g., "Pectoralis Major", "Biceps Brachii") as part of the illustration. These should not appear in the app UI.
+
+**Evidence:** Visible label text on the front-view illustration in the screenshot.
+
+---
+
+### Fix Plan — Two Tracks
+
+#### Track A: Code-level background stripping in `CanvasBodyMap` (Quick Fix)
+
+Add a canvas post-processing step in `BodyMapSVG.jsx` that strips out grey/white and light-colored pixels from the **base image** before compositing, treating them as transparent background.
+
+**How it works:**
+After loading and drawing `baseImg` onto the canvas, scan the pixel data and zero out the alpha channel for any pixel that looks like a background checkerboard (near-white or light grey with low saturation).
+
+**Detection threshold for background pixels:**
+```js
+// A pixel is considered background if it is light and desaturated
+const r = data[i], g = data[i+1], b = data[i+2];
+const isBackground = r > 200 && g > 200 && b > 200 && Math.abs(r - g) < 20 && Math.abs(g - b) < 20;
+if (isBackground) data[i+3] = 0; // make transparent
+```
+
+**Files to modify:**
+- `src/components/shared/BodyMapSVG.jsx` — add `stripBackground()` helper called immediately after `ctx.drawImage(baseImg, 0, 0)` in the `useEffect`
+
+**Pros:** Fast, no new assets needed, fixes display immediately.
+
+**Cons:** Might accidentally clip some light-teal edge pixels on the anatomy illustration. Needs tuning.
+
+**Implementation steps:**
+- [x] Add `stripBackground(ctx, canvas)` function in `BodyMapSVG.jsx`
+- [x] Call it after drawing `baseImg` on the canvas, before muscle compositing
+- [x] Call it on overlay layers in the offscreen canvas too
+- [ ] Test locally — ensure teal-blue anatomy body is preserved and grey checkerboard is gone
+- [ ] Confirm red muscle highlights still composite correctly after background strip
+
+---
+
+#### Track B: Re-generate clean assets (Permanent Fix, when quota resets)
+
+Re-generate all 16 female PNGs with improved prompts that explicitly prevent background patterns and text labels.
+
+**Improved prompt for base images:**
+```
+Full-body female anatomical muscular illustration, front view.
+Medical fitness app illustration style. Clean vector art.
+ALL muscles shown in vibrant teal-blue (#00B4D8).
+PURE TRANSPARENT BACKGROUND — no checkerboard, no grid, no background fill of any kind.
+NO text labels, NO annotations, NO muscle names or callouts.
+No clothing. Athletic female build. Portrait orientation (roughly 1:2 aspect ratio).
+Center the figure with generous margin on all sides.
+```
+
+**Improved prompt for muscle highlights (example — glutes):**
+```
+Full-body female anatomical muscular illustration, back view.
+Medical fitness app illustration style. Clean vector art.
+ALL muscles in teal-blue (#00B4D8), EXCEPT gluteus maximus which is highlighted in solid coral-red (#E8540D).
+PURE TRANSPARENT BACKGROUND — no checkerboard, no grid, no white fill.
+NO text labels, NO annotations, NO muscle names of any kind.
+No clothing. Athletic female build. Portrait orientation.
+```
+
+**Asset quality checklist before committing:**
+- [ ] Open PNG in any image editor (Photoshop, Pixelmator, Preview) — background must show as transparent (checkerboard in editor = correct actual transparency)
+- [ ] No text visible on the image at any zoom level
+- [ ] Body occupies 60–80% of the image height
+- [ ] Blue channel dominant across the body silhouette
+- [ ] Target muscle has clearly red-dominant pixels (`R > 130`, `R > G + 20`, `R > B + 20`)
+
+---
+
+### Recommended Action Order
+
+| Step | Track | Priority |
+|------|-------|----------|
+| 1 | **A** — Add `stripBackground()` to `BodyMapSVG.jsx` | 🔴 Do immediately — fixes the issue now |
+| 2 | **B** — Re-generate all 16 assets with improved prompts | 🟡 Do when image quota resets (2026-03-31) |
+| 3 | When new assets arrive, remove the `stripBackground()` workaround | 🟢 Cleanup after B is done |
+

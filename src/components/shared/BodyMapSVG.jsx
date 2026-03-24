@@ -32,6 +32,24 @@ const MUSCLE_IMAGES = {
 
 const BACK_SHOULDER_IMG = 'back-shoulders.png';
 
+// ─── BACKGROUND STRIP (fixes AI-generated PNGs with baked-in checkerboard) ──
+const stripBackground = (ctx, w, h) => {
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    // Strip near-white / light-grey checkerboard pixels (desaturated & bright)
+    if (r > 180 && g > 180 && b > 180 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30) {
+      d[i+3] = 0;
+    }
+    // Strip near-black text / label pixels (dark & desaturated)
+    if (r < 60 && g < 60 && b < 60) {
+      d[i+3] = 0;
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+};
+
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
 const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
   const canvasRef = useRef(null);
@@ -80,7 +98,14 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(baseImg, 0, 0);
       
-      if (allLayerImgs.length === 0) return;
+      // Strip baked-in checkered background & text labels from AI-generated female PNGs
+      const isFemale = baseSrc.includes('/female/');
+      if (isFemale) stripBackground(ctx, canvas.width, canvas.height);
+      
+      if (allLayerImgs.length === 0) {
+        setLoading(false);
+        return;
+      }
 
       const primaryImgs = allLayerImgs.slice(0, layerSrcs.length);
       const secondaryImgs = allLayerImgs.slice(layerSrcs.length);
@@ -95,6 +120,7 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
       const processLayer = (img, isSecondary) => {
         offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
         offCtx.drawImage(img, 0, 0);
+        if (isFemale) stripBackground(offCtx, offCanvas.width, offCanvas.height);
         const layerData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
         
         for (let i = 0; i < layerData.data.length; i += 4) {

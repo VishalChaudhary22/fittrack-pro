@@ -434,6 +434,30 @@ The set number must stay in column 1, both inputs in columns 2–3, and the done
 
 ---
 
+### 1.13 Vercel Client-Side Routing (404 on Reload) — ✅ Done
+
+**Problem:** When reloading the application on a deployed Vercel URL (e.g., `/splits`), Vercel throws a "404: Not found" error. This happens because Vercel looks for a physical file at that path instead of falling back to the React app's `index.html` for client-side routing.
+
+**Fix:**
+Create a `vercel.json` configuration file in the project root with a rewrite rule that catches all routes and directs them to `index.html`.
+
+**Content for `vercel.json`:**
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+**Files to modify/create:**
+- `vercel.json` (New file)
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -450,3 +474,4 @@ The set number must stay in column 1, both inputs in columns 2–3, and the done
 | 10    | 1.10 Orange Overload Reduction | ✅ Done | 🟡 Medium | High |
 | 11    | 1.11 ConfirmDialog Danger Button | ✅ Done | 🟢 Small | Medium |
 | 12    | 1.12 Done Button Column Alignment | ✅ Done | 🟢 Small | High |
+| 13    | 1.13 Vercel Client-Side Routing Fix | ✅ Done | 🟢 Small | 🔴 Critical |

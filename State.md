@@ -63,6 +63,12 @@ Themes are managed using the `data-theme` attribute (e.g., `<html data-theme="da
 | **Light** | Light Gray (`#F2F2F5`) | Pure Whites (`#FFFFFF`, `#F7F7F9`) | Dark Gray (`#1A1A1E`) | Crisp, lightweight drop shadows (`rgba(0,0,0,.06)`) |
 | **Semantic** | Adaptive Semantic | `var(--success)`, `var(--danger)`, `var(--error)` | Adaptive | Positive trends (`#51CF66`), warnings (`#FF6B6B`), and destructive actions (`#FF3B30`) |
 
+### Standardized Actions
+- **Primary Action**: `.btn-p` (Orange gradient, used for confirms/starts).
+- **Secondary Action**: `.btn-g` (Grey, used for back/cancel).
+- **Danger Action**: `.btn-danger` (Red gradient, used for destructive confirms).
+- **Categorical Tags**: `.tag-d` (Subtle grey for muscle groups/day types to reduce visual clutter).
+
 ### Orange Accent (Signature)
 - **Base Color**: `#E8540D` (`--o`)
 - **Gradient**: `linear-gradient(135deg, #E8540D, #FF6B35)` (`--og`)
@@ -73,6 +79,8 @@ Themes are managed using the `data-theme` attribute (e.g., `<html data-theme="da
 - Deep, highly defined box-shadows on cards and Modals (`--shadow`, `--shadow-lg`) providing physical layering.
 - Polished Modal (`.mo`, `.md`) components utilizing background blurs (`backdrop-filter`).
 - Built-in visual skeleton loading states and toast notifications integrated into CSS animations (`@keyframes`).
+- **Standardized Form Markers**: Square checkboxes (`var(--o)`) replace simple text/icons for better interaction clarity in trackers.
+- **Enhanced Data Density**: Blank-by-default inputs with placeholders prevent data coercion and improve logging intent.
 
 ---
 
@@ -105,3 +113,15 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 8. **App Structure & Responsiveness**  
    - Uses `Sidebar` for desktop and `BottomNav` for a dynamic app-like experience on mobile.
    - Context-managed global Toast System (`ToastContainer`) for immediate user feedback.
+9. **Deployment & Environment**
+    - Corrected client-side routing logic for **Vercel Deployment** via `vercel.json` rewrites, ensuring no 404 errors on page reloads.
+
+---
+
+## 🏆 Recent Major Enhancements (Phases 1 & 2)
+
+- **Biomechanical XP Accuracy**: Exercises now track `primary` (100% XP) and `secondary` (30% XP) muscle engagement with corresponding visual dimming on the body map.
+- **Progress Ladder 2.0**: Shifted to a **Monthly Reset** logic with overall and per-muscle ranking, including consistency bonuses and past-performance tracking.
+- **Anatomical Diversity**: Full support for both male and female anatomical visualization based on user profiles.
+- **Design Standardization**: Overhauled typography, color contrast, and action buttons to ensure premium dark/light mode consistency.
+- **Rest Timer System**: High-visibility timer with custom tones integrated directly into the tracker workflow.

@@ -33,7 +33,7 @@ const MUSCLE_IMAGES = {
 const BACK_SHOULDER_IMG = 'back-shoulders.png';
 
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
-const CanvasBodyMap = ({ baseSrc, layerSrcs, secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
+const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export default function BodyMapSVG({ muscleXP = {}, primaryMuscles = null, secon
         if (!back.includes(bg)) back.push(bg);
       }
     });
-    return { front, back };
+    return { frontLayers: front, backLayers: back };
   };
 
   const { frontLayers, backLayers } = useMemo(() => mapToLayers(pMuscles), [pMuscles, gender]);

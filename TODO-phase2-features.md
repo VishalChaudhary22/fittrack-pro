@@ -608,6 +608,358 @@ return { primary: parts[0] || null, secondary: parts.slice(1).filter(Boolean) };
 
 ---
 
+### 2.5 Body Map — Blank Canvas Fix + Gender Prop Implementation
+
+> **Added:** 2026-03-24 — Body map completely invisible in production. Confirmed via screenshot.
+
+---
+
+#### Problem Statement
+
+The Muscle Rankings page shows "FRONT" and "BACK" labels but completely black/invisible canvas areas where the body illustrations should appear. The XP data and rank cards are unaffected. This is a **production bug** affecting every user.
+
+---
+
+#### Root Cause — Full Chain of Failure
+
+**Step 1 — PNG images return 404 in production**
+
+The base and highlight PNGs in `public/muscles/` are either missing from the deployed build or not committed to the repository. Vite serves `public/` as static assets — if the files aren't there, every image request returns 404.
+
+**Step 2 — `onerror` silently swallows the failure**
+
+`BodyMapSVG.jsx` lines 50–56:
+```js
+img.onerror = () => {
+  console.warn(`Failed to load image: ${src}`);
+  const dummy = new Image();
+  dummy.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  dummy.onload = () => resolve(dummy);
+};
+```
+No visible error state is set. The failed image is replaced with a **1×1 transparent GIF** and the Promise resolves normally.
+
+**Step 3 — 1×1 dummy collapses the canvas**
+
+```js
+canvas.width = baseImg.width || 800;   // dummy.width = 1, not 0 → sets to 1px
+canvas.height = baseImg.height || 800; // dummy.height = 1 → sets to 1px
+```
+The `|| 800` fallback never fires because the dummy GIF actually has a width/height of 1, not 0. Canvas becomes 1×1 pixels.
+
+**Step 4 — CSS stretches the 1px canvas invisibly**
+
+```css
+canvas { width: 100%; height: auto; }
+```
+A 1×1 canvas stretched to container width renders as a ~1px transparent hairline. Against the dark card background this is completely invisible — exactly what the screenshot shows.
+
+**Additional Issue — Gender Prop Never Implemented in Code**
+
+Despite State.md marking 2.1 as ✅ Done, the actual `BodyMapSVG.jsx` source code:
+- Has no `gender` prop in the component signature
+- Always hardcodes `/muscles/front-base.png` and `/muscles/back-base.png`
+- Has no `FEMALE_MUSCLE_IMAGES` constant or conditional path logic
+- `MiniBodyMap` also has no gender awareness
+
+The female anatomy implementation described in State.md does not exist in the codebase. It needs to be built.
+
+---
+
+#### Fix Plan
+
+**Fix A — Deployment: Verify PNG files exist in `public/muscles/`**
+
+Confirm the following files are committed to the repository and present in the deployed build. These are the required male anatomy PNGs:
+
+```
+public/muscles/
+├── front-base.png
+├── back-base.png
+├── front-shoulders.png
+├── front-chest.png
+├── front-abs.png
+├── front-biceps.png
+├── front-forearms.png
+├── front-quads.png
+├── front-calves.png
+├── back-traps.png
+├── back-back.png
+├── back-triceps.png
+├── back-glutes.png
+├── back-hamstrings.png
+└── back-shoulders.png
+```
+
+And the female anatomy PNGs (needed for Fix C):
+```
+public/muscles/female/
+├── front-base.png
+├── back-base.png
+├── front-shoulders.png
+├── front-chest.png
+├── front-abs.png
+├── front-biceps.png
+├── front-forearms.png
+├── front-quads.png
+├── front-calves.png
+├── back-traps.png
+├── back-back.png
+├── back-triceps.png
+├── back-glutes.png
+├── back-hamstrings.png
+└── back-shoulders.png
+```
+
+**Fix B — Replace silent dummy with visible error + loading state**
+
+Update `CanvasBodyMap` in `BodyMapSVG.jsx` to track loading/error state and render a meaningful fallback when images fail:
+
+```jsx
+const CanvasBodyMap = ({ baseSrc, layerSrcs, label, borderRadius = 8 }) => {
+  const canvasRef = useRef(null);
+  const [loadError, setLoadError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    setLoadError(false);
+    // ... existing load logic
+    Promise.all([loadImg(baseSrc), ...layerSrcs.map(loadImg)])
+      .then(([baseImg, ...layerImgs]) => {
+        if (!active) return;
+        // If base image is the dummy (1×1), treat as error
+        if (baseImg.width <= 1 || baseImg.height <= 1) {
+          setLoadError(true);
+          setLoading(false);
+          return;
+        }
+        // ... rest of canvas drawing
+        setLoading(false);
+      })
+      .catch(() => { setLoadError(true); setLoading(false); });
+  }, [baseSrc, layerSrcs]);
+
+  if (loadError) return (
+    <div style={{
+      width: '100%', aspectRatio: '1/2', borderRadius,
+      background: 'var(--c3)', border: '1px dashed var(--bd2)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 6,
+    }}>
+      {label && <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{label}</div>}
+      <div style={{ fontSize: 10, color: 'var(--t3)' }}>Image unavailable</div>
+    </div>
+  );
+
+  // ... rest of render with canvas
+};
+```
+
+This prevents the invisible canvas problem regardless of whether Fix A is applied — if images are missing, user sees a clear placeholder instead of nothing.
+
+**Fix C — Implement `gender` prop and female image paths**
+
+Add `gender` prop to `BodyMapSVG` and define female image constants:
+
+```js
+// Add to BodyMapSVG.jsx alongside MUSCLE_IMAGES
+const FEMALE_MUSCLE_IMAGES = {
+  shoulders:  { view: 'front', file: '/muscles/female/front-shoulders.png' },
+  chest:      { view: 'front', file: '/muscles/female/front-chest.png' },
+  abs:        { view: 'front', file: '/muscles/female/front-abs.png' },
+  biceps:     { view: 'front', file: '/muscles/female/front-biceps.png' },
+  forearms:   { view: 'front', file: '/muscles/female/front-forearms.png' },
+  quads:      { view: 'front', file: '/muscles/female/front-quads.png' },
+  calves:     { view: 'front', file: '/muscles/female/front-calves.png' },
+  traps:      { view: 'back',  file: '/muscles/female/back-traps.png' },
+  back:       { view: 'back',  file: '/muscles/female/back-back.png' },
+  triceps:    { view: 'back',  file: '/muscles/female/back-triceps.png' },
+  glutes:     { view: 'back',  file: '/muscles/female/back-glutes.png' },
+  hamstrings: { view: 'back',  file: '/muscles/female/back-hamstrings.png' },
+};
+const FEMALE_BACK_SHOULDER_IMG = '/muscles/female/back-shoulders.png';
+```
+
+Update the component signature and path selection:
+```js
+// BodyMapSVG component
+export default function BodyMapSVG({ muscleXP = {}, mini = false, gender = 'male' }) {
+  const isFemale = gender === 'female';
+  const muscleImages = isFemale ? FEMALE_MUSCLE_IMAGES : MUSCLE_IMAGES;
+  const backShoulderImg = isFemale ? FEMALE_BACK_SHOULDER_IMG : BACK_SHOULDER_IMG;
+  const frontBase = isFemale ? '/muscles/female/front-base.png' : '/muscles/front-base.png';
+  const backBase  = isFemale ? '/muscles/female/back-base.png'  : '/muscles/back-base.png';
+
+  // Use muscleImages and backShoulderImg in layer resolution logic
+  // Use frontBase / backBase in CanvasBodyMap baseSrc props
+}
+```
+
+Update `MiniBodyMap` similarly:
+```js
+export const MiniBodyMap = ({ weeklyMuscles = [], gender = 'male' }) => {
+  const isFemale = gender === 'female';
+  const muscleImages = isFemale ? FEMALE_MUSCLE_IMAGES : MUSCLE_IMAGES;
+  const frontBase = isFemale ? '/muscles/female/front-base.png' : '/muscles/front-base.png';
+  // ...
+};
+```
+
+**Fix D — Pass `gender` from context in calling components**
+
+```jsx
+// MuscleMapPage.jsx
+const { user, workoutLogs, splits } = useApp();
+// ...
+<BodyMapSVG muscleXP={muscleXP} gender={user?.gender || 'male'} />
+
+// DashboardPage.jsx
+<MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender || 'male'} />
+```
+
+---
+
+#### Priority Order Within This Fix
+
+1. **Fix B first** (error state) — immediate user-visible improvement, no assets needed
+2. **Fix A next** (verify/add PNG files to repo) — makes the actual images appear
+3. **Fix C + D together** (gender prop) — completes the female anatomy feature properly
+
+---
+
+#### Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/components/shared/BodyMapSVG.jsx` | Add `useState` for loading/error, visible error fallback, `gender` prop, `FEMALE_MUSCLE_IMAGES` constant, conditional path logic in both `BodyMapSVG` and `MiniBodyMap` |
+| `src/components/pages/MuscleMapPage.jsx` | Pass `gender={user?.gender \|\| 'male'}` to `BodyMapSVG` |
+| `src/components/pages/DashboardPage.jsx` | Pass `gender={user?.gender \|\| 'male'}` to `MiniBodyMap` |
+| `public/muscles/` | Verify all 15 male PNGs are present and committed |
+| `public/muscles/female/` | Add all 15 female PNGs (same naming convention as male) |
+
+---
+
+### 2.5 Research Notes — Gap Analysis (2026-03-24)
+
+> Codebase audit performed against the Task 2.5 spec. **7 gaps identified**.
+
+---
+
+#### Gap 1 — Fix C & D are already implemented ✅ (Spec is wrong)
+
+The spec claims BodyMapSVG has "no `gender` prop" and "always hardcodes `/muscles/front-base.png`." This is **factually incorrect** in the current codebase.
+
+**Actual code (`BodyMapSVG.jsx` L143–144):**
+```js
+export default function BodyMapSVG({ muscleXP = {}, primaryMuscles = null, secondaryMuscles = null, mini = false, gender = 'male' }) {
+  const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
+```
+
+**Actual callers — all 3 already pass `gender`:**
+- `MuscleMapPage.jsx` L102: `<BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />`
+- `DashboardPage.jsx` L231: `<MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />`
+- `WorkoutPage.jsx` L148: `<BodyMapSVG ... gender={user?.gender} />`
+
+**Action:** Remove Fix C and Fix D from the implementation plan entirely. No code changes needed.
+
+---
+
+#### Gap 2 — Female path convention mismatch
+
+The spec proposes files named `female/front-base.png` but the code constructs the URL as `/muscles/female/female-front-base.png` (via `` `/muscles/female/female-${file}` ``).
+
+**Decision needed:** Either:
+- **(A)** Rename the PNGs to `female-front-base.png`, `female-back-base.png`, etc. to match the code. ← **Recommended (no code change)**
+- **(B)** Change the code from `female-${file}` to just `${file}`. ← Requires code change.
+
+**Action:** Document this mismatch. When female PNGs are sourced, name them to match the existing code convention (`female-front-base.png`).
+
+---
+
+#### Gap 3 — `public/muscles/female/` directory is empty
+
+The directory does not exist at all on the filesystem. No female anatomy PNGs have been created or sourced.
+
+**Impact:** The gender toggle works in code but will trigger the 1×1 dummy fallback for any female user, producing the same blank canvas bug.
+
+**Action:** This is a known limitation. The error state fallback (Fix B) will handle this gracefully by showing "Image unavailable" instead of a blank canvas. Female PNGs remain a **separate asset-sourcing task**.
+
+---
+
+#### Gap 4 — Male PNGs ARE git-tracked (Spec root cause partially wrong)
+
+The spec's "Step 1" says PNGs "are either missing from the deployed build or not committed to the repository."
+
+**Verified:** All 17 male PNGs are committed to `origin/main`:
+```
+public/muscles/back-back.png     public/muscles/front-abs.png
+public/muscles/back-base.png     public/muscles/front-base.png
+public/muscles/back-calves.png   public/muscles/front-biceps.png
+...etc (17 total, all tracked, git status clean)
+```
+
+**Updated root cause:** If the body map is blank in production, the issue is NOT missing files from the repo. Possible real causes:
+1. Vercel build cache serving a stale version without the `public/muscles/` directory.
+2. The canvas is working but the images are rendering at sub-pixel size due to CSS or container constraints.
+3. A CORS issue on the deployed domain preventing canvas `getImageData()` from functioning (canvas gets "tainted" and silently fails).
+
+**Action:** Fix B (error state) still addresses this regardless of root cause. Additionally, add CORS verification to the testing plan.
+
+---
+
+#### Gap 5 — Fix B code is missing `useState` import
+
+The spec's Fix B snippet uses `useState` for `loadError` and `loading` state, but `BodyMapSVG.jsx` currently only imports:
+```js
+import { useMemo, useEffect, useRef } from 'react';
+```
+
+**Action:** When implementing Fix B, add `useState` to the import statement.
+
+---
+
+#### Gap 6 — Fix B code snippet is stale vs Task 2.4
+
+The spec's Fix B code block shows `CanvasBodyMap` with only `layerSrcs` but Task 2.4 added the `secondaryLayerSrcs` prop. The error-state and loading-state logic must account for both arrays.
+
+**Corrected signature for Fix B:**
+```jsx
+const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
+  const [loadError, setLoadError] = useState(false);
+  // ... rest of Fix B logic, but Promise.all must include secondaryLayerSrcs
+```
+
+**Action:** Update Fix B implementation to preserve `secondaryLayerSrcs` in the `Promise.all` chain and error handling.
+
+---
+
+#### Gap 7 — No verification plan
+
+The spec has no section describing how to verify the fix works.
+
+**Proposed verification:**
+1. **Local dev:** Run `npm run dev`, navigate to `/muscle-map`. Canvas should render with all muscle highlights. Open Console — no errors.
+2. **Simulated failure:** Temporarily rename `front-base.png` → `front-base.bak`. Reload. Should see "Image unavailable" placeholder instead of blank canvas.
+3. **Female fallback:** Set `user.gender` to `'female'` in the app. Should show "Image unavailable" gracefully (since female PNGs don't exist yet).
+4. **Production deploy:** Push to Vercel. Verify `/muscle-map` renders correctly on the deployed URL. Check Network tab for 200 status on all PNG requests.
+5. **CORS check:** On the deployed site, open Console. Confirm no `SecurityError` or "tainted canvas" warnings.
+
+---
+
+#### Revised Implementation Plan (after gap analysis)
+
+| Fix | Description | Status | Still Needed? |
+|-----|-------------|--------|:-------------:|
+| Fix A | Verify PNGs exist in repo | ✅ Verified — all 17 tracked on `main` | ❌ No |
+| Fix B | Error/loading state for `CanvasBodyMap` | Needs implementation | ✅ Yes |
+| Fix C | Gender prop + female image constants | ✅ Already implemented | ❌ No |
+| Fix D | Pass `gender` from context in callers | ✅ Already implemented | ❌ No |
+
+**Only Fix B remains to be implemented.** The scope is significantly smaller than the original spec suggested.
+
+---
+
 ## ⚠️ Known Dependency
 
 - **2.3 must be done before 2.2** — the Post-Workout Summary's XP delta calculation depends on whichever XP formula is active. Implement the monthly reset first, then build the summary screen on top of it.
@@ -624,3 +976,4 @@ return { primary: parts[0] || null, secondary: parts.slice(1).filter(Boolean) };
 | 2     | 2.2 Post-Workout Summary | 🟡 Medium | High | ✅ Done |
 | 3     | 2.1 Female Anatomy | 🔴 Large | Medium | ✅ Done |
 | 4     | 2.4 XP Distribution Fix | 🟡 Medium | 🔴 Critical | ✅ Done |
+| 5     | 2.5 Body Map Blank Canvas + Gender Fix | 🟢 Small | 🔴 Critical | ✅ Done |

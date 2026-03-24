@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CANVAS-BASED MUSCLE MAP — Getty/pop_jop style
@@ -35,9 +35,14 @@ const BACK_SHOULDER_IMG = 'back-shoulders.png';
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
 const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
   const canvasRef = useRef(null);
+  const [loadError, setLoadError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setLoadError(false);
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -61,6 +66,13 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
       ...secondaryLayerSrcs.map(loadImg)
     ]).then(([baseImg, ...allLayerImgs]) => {
       if (!active) return;
+      
+      // If base image is the 1x1 dummy, treat as an error
+      if (baseImg.width <= 1 || baseImg.height <= 1) {
+        setLoadError(true);
+        setLoading(false);
+        return;
+      }
       
       canvas.width = baseImg.width || 800;
       canvas.height = baseImg.height || 800;
@@ -112,10 +124,27 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
       primaryImgs.forEach(img => processLayer(img, false));
       
       ctx.putImageData(baseData, 0, 0);
-    }).catch(err => console.error("Canvas compositing error:", err));
+      setLoading(false);
+    }).catch(err => {
+      console.error("Canvas compositing error:", err);
+      setLoadError(true);
+      setLoading(false);
+    });
 
     return () => { active = false; };
   }, [baseSrc, layerSrcs, secondaryLayerSrcs]);
+
+  if (loadError) return (
+    <div style={{
+      width: '100%', aspectRatio: '1/2', borderRadius,
+      background: 'var(--c3)', border: '1px dashed var(--bd2)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 6,
+    }}>
+      {label && <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{label}</div>}
+      <div style={{ fontSize: 10, color: 'var(--t3)' }}>Image unavailable</div>
+    </div>
+  );
 
   return (
     <div style={{ textAlign: 'center', width: '100%' }}>

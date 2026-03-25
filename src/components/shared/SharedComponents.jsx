@@ -33,8 +33,8 @@ export const ThemeTogglePill = () => {
   const { theme, toggleTheme } = useApp();
   const isDark = theme === 'dark';
 
-  const w = 108;
-  const h = 36;
+  const w = 96;
+  const h = 32;
   const pad = 3;
   const knobSize = h - pad * 2;
   const travel = w - knobSize - pad * 2;
@@ -69,11 +69,11 @@ export const ThemeTogglePill = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: isDark ? 'flex-end' : 'flex-start',
-        padding: `0 ${isDark ? 12 : 14}px`,
+        padding: `0 ${isDark ? 9 : 11}px`,
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontSize: 9,
+          fontSize: 8,
           fontWeight: 800,
           color: isDark ? '#FFF' : '#000',
           letterSpacing: '0.5px'

@@ -706,6 +706,20 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 
 ---
 
+## 1.19 Day / Night Toggle Resizing (Additional 10% scale-down)
+
+**Problem:** The Day/Night theme toggle pill is still slightly larger than preferred.
+**Fix:** Shrink the entire toggle component down by another 10% from its current size.
+
+**Implementation Plan:**
+Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shared/SharedComponents.jsx`:
+- Track width: 108px → 96px
+- Track height: 36px → 32px
+- Inner padding: 3px → 2px or 3px (keeping it balanced)
+- Font size: 9px → 8px.
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -728,3 +742,4 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 | 16    | 1.16 Theme Toggle Header Integration | ✅ Done | 🟢 Small | High |
 | 17    | 1.17 Day / Night Toggle Redesign | ✅ Done | 🟡 Medium | High |
 | 18    | 1.18 Day / Night Toggle Resizing | ✅ Done | 🟢 Small | Medium |
+| 19    | 1.19 Day / Night Toggle Resizing II | ✅ Done | 🟢 Small | Medium |

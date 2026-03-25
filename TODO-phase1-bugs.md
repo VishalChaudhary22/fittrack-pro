@@ -692,6 +692,20 @@ Clicking the pill slides the white knob from one side to the other, cross-fading
 
 ---
 
+## 1.18 Day / Night Toggle Resizing (10% scale-down)
+
+**Problem:** The Day/Night theme toggle pill implemented in 1.17 is currently a bit too bulky inside the `PageHeader`.
+**Fix:** Shrink the entire toggle component (track, knob, and text) by exactly 10%.
+
+**Implementation Plan:**
+Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shared/SharedComponents.jsx`:
+- Track width: 120px → 108px
+- Track height: 40px → 36px
+- Inner padding: 4px → 3px (this proportionally resizes the knob to 30px)
+- Font size: 10px → 9px.
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -713,3 +727,4 @@ Clicking the pill slides the white knob from one side to the other, cross-fading
 | 15    | 1.15 Muscle Map XP Text Readability | ✅ Done | 🟢 Small | High |
 | 16    | 1.16 Theme Toggle Header Integration | ✅ Done | 🟢 Small | High |
 | 17    | 1.17 Day / Night Toggle Redesign | ✅ Done | 🟡 Medium | High |
+| 18    | 1.18 Day / Night Toggle Resizing | ✅ Done | 🟢 Small | Medium |

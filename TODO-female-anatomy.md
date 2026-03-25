@@ -232,8 +232,8 @@ if (isBackground) data[i+3] = 0; // make transparent
 - [x] Add `stripBackground(ctx, canvas)` function in `BodyMapSVG.jsx`
 - [x] Call it after drawing `baseImg` on the canvas, before muscle compositing
 - [x] Call it on overlay layers in the offscreen canvas too
-- [ ] Test locally — ensure teal-blue anatomy body is preserved and grey checkerboard is gone
-- [ ] Confirm red muscle highlights still composite correctly after background strip
+- [x] Test locally — ensure teal-blue anatomy body is preserved and grey checkerboard is gone
+- [x] Confirm red muscle highlights still composite correctly after background strip
 
 ---
 
@@ -275,7 +275,7 @@ No clothing. Athletic female build. Portrait orientation.
 
 | Step | Track | Priority |
 |------|-------|----------|
-| 1 | **A** — Add `stripBackground()` to `BodyMapSVG.jsx` | 🔴 Do immediately — fixes the issue now |
+| 1 | **A** — Add `stripBackground()` to `BodyMapSVG.jsx` | ✅ Done |
 | 2 | **B** — Re-generate all 16 assets with improved prompts | 🟡 Do when image quota resets (2026-03-31) |
 | 3 | When new assets arrive, remove the `stripBackground()` workaround | 🟢 Cleanup after B is done |
 

@@ -52,13 +52,19 @@ const MuscleCard = ({ muscle, xp }) => {
             transition: 'width .6s cubic-bezier(.4,0,.2,1)',
           }} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>
-            {Math.round(xp).toLocaleString()} / {Math.round(rank.nextXP).toLocaleString()} XP
-          </div>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>
-            {rank.progress < 1 ? `→ ${RANK_TIERS[RANK_TIERS.findIndex(t => t.name === rank.name) + 1]?.name}` : 'MAX'}
-          </div>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          fontSize: 11, fontWeight: 600, color: 'var(--t2)',
+          marginTop: 4
+        }}>
+          <span style={{ color: rank.color }}>
+            {Math.round(xp).toLocaleString()} XP
+          </span>
+          <span>
+            {rank.progress < 1
+              ? `Next: ${Math.round(rank.nextXP).toLocaleString()} XP`
+              : <span style={{ color: rank.color }}>✓ MAX TIER</span>}
+          </span>
         </div>
       </div>
     </div>
@@ -114,7 +120,7 @@ export default function MuscleMapPage() {
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Overall Rank</div>
             <div className="bb" style={{ fontSize: 28, color: overall.color, letterSpacing: '1px' }}>{overall.name}</div>
-            <div style={{ fontSize: 11, color: 'var(--t2)' }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
+            <div style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 600 }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
           </div>
         </div>
       </div>

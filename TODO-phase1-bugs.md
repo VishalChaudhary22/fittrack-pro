@@ -458,6 +458,196 @@ Create a `vercel.json` configuration file in the project root with a rewrite rul
 
 ---
 
+### 1.14 Light Mode Toggle — Per-Page Quick Access
+
+**Problem:** The theme toggle is currently buried in two hard-to-reach locations:
+- Desktop: at the very bottom of the collapsible sidebar (easy to miss when sidebar is narrow)
+- Mobile: inside the Profile page only — requires a full navigation away from the current page
+
+Indian users frequently switch between light and dark based on ambient lighting (outdoors vs. gym vs. office). Requiring navigation to Profile to change the theme is a friction point.
+
+**Design — Fixed Top-Right Button:**
+
+Add a small, always-visible `Sun`/`Moon` icon button fixed to the top-right corner of the viewport. It should:
+- Be `position: fixed`, `top: 12px`, `right: 16px`, `z-index: 500`
+- Render a `Sun` icon (20px) when in dark mode (click → switch to light)
+- Render a `Moon` icon (20px) when in light mode (click → switch to dark)
+- Use a pill-shaped background: `background: var(--c2)`, `border: 1px solid var(--bd)`, `border-radius: 20px`, `padding: 6px 10px`
+- Smooth transition: `transition: all .2s` with slight scale on hover
+- On desktop (sidebar visible), offset right to not overlap with page content: already fine at `right: 16px` since the sidebar is on the left
+- On mobile, sit comfortably above the bottom nav
+
+**Why not in PageHeader:** `PageHeader` is used on every page but is not sticky — it scrolls away. A `position: fixed` approach ensures the toggle is always accessible without scrolling back up.
+
+**Implementation:**
+
+Add a single `ThemeToggle` component to `Layout.jsx` and render it as a sibling to `<Sidebar>` and `<BottomNav>` so it mounts once for the whole app, regardless of current page:
+
+```jsx
+// Layout.jsx — add ThemeToggle component
+const ThemeToggle = () => {
+  const { theme, toggleTheme } = useApp();
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      style={{
+        position: 'fixed', top: 12, right: 16, zIndex: 500,
+        background: 'var(--c2)', border: '1px solid var(--bd)',
+        borderRadius: 20, padding: '6px 10px',
+        display: 'flex', alignItems: 'center', gap: 5,
+        cursor: 'pointer', transition: 'all .2s',
+        boxShadow: 'var(--shadow)',
+        color: 'var(--t2)',
+      }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
+      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+    >
+      {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+      <span style={{ fontSize: 11, fontWeight: 600 }}>
+        {theme === 'dark' ? 'Light' : 'Dark'}
+      </span>
+    </button>
+  );
+};
+```
+
+Render it in the main `Layout` export (or `App.jsx`) at the top level so it overlays all pages.
+
+**Relationship to existing toggles:**
+- Keep the sidebar toggle (desktop) — power users who know it's there will keep using it
+- Remove the redundant one from the Profile page sidebar column to avoid duplication — or keep it for discoverability; it's not harmful
+
+**Files to modify:**
+- `src/components/layout/Layout.jsx` — add `ThemeToggle` component and render it globally
+- `src/index.css` — no CSS changes needed (uses existing variables)
+
+**⚠️ Gaps identified (must resolve before implementing):**
+
+1. **Wrong file for ThemeToggle placement:** Task says to add `ThemeToggle` to `Layout.jsx` and render as a sibling to `<Sidebar>` and `<BottomNav>`. But `Layout.jsx` only _exports_ `Sidebar` and `BottomNav` as separate named components — they are actually rendered as siblings inside `App.jsx` (`AppInner`, lines 25 and 42). The `ThemeToggle` must either be:
+   - (a) Defined in `Layout.jsx` and **imported + rendered in `App.jsx`** alongside `<Sidebar>` and `<BottomNav>`, OR
+   - (b) Defined directly inside `App.jsx`'s `AppInner` component.
+   → **Recommended: option (a)** — define in `Layout.jsx`, render in `App.jsx`. Update the "Files to modify" list to include `App.jsx`.
+
+2. **Ambiguous Profile page toggle decision:** The task says "Remove the redundant one from the Profile page sidebar column to avoid duplication — or keep it for discoverability; it's not harmful" but doesn't commit to either option. `ProfilePage.jsx` (line 69) has a full-width `btn-g` styled theme toggle. **Decision needed:** keep it (harmless redundancy) or remove it (cleaner UI). Recommendation: keep it — Profile is a natural place users look for settings.
+
+3. **Missing mobile-specific positioning:** On mobile (≤768px), the sidebar is hidden (`.ds{display:none!important}`) and the bottom nav (`.bn`) appears at `position: fixed; bottom: 0; z-index: 100`. The task says the toggle should "sit comfortably above the bottom nav" on mobile but provides no mobile-specific CSS (e.g., adjusting `bottom` instead of `top` positioning, or smaller padding). The fixed `top: 12px, right: 16px` position should work on mobile too (it's at top-right, not near the bottom nav), so the "above bottom nav" note is misleading — clarify that it's fine at top-right on mobile.
+
+4. **Icon size inconsistency (minor):** Sidebar toggle uses `Sun`/`Moon` at `size={16}`, ProfilePage uses `size={13}`, proposed ThemeToggle uses `size={14}`. Not a blocker, but worth being intentional about sizing — the `14px` icon + `11px` text in the proposal is a good size for a floating pill.
+
+5. **No `@media` adjustments specified:** The task says no CSS changes needed, which is correct since it uses inline styles. However, on very small screens (<375px), the fixed button at `right: 16px` could feel cramped. Consider adding a note that this should be tested on small viewports.
+
+---
+
+### 1.15 Muscle Map — XP Text Readability
+
+**Problem:** Inside each `MuscleCard` on the Muscle Map page, the XP figures (`"2,400 XP"` on the left, `"6,500 XP"` on the right) are rendered at `fontSize: 10` with `color: var(--t3)` — the faintest gray in the palette. On mobile screens and in dark mode, these labels are nearly illegible against the card background.
+
+This is especially frustrating because XP is one of the most motivating numbers on the page — users want to read exactly how close they are to the next tier.
+
+**Current code (`MuscleMapPage.jsx`, `MuscleCard` component, lines ~55–61):**
+```jsx
+<div style={{ fontSize: 10, color: 'var(--t3)' }}>
+  {Math.round(xp).toLocaleString()} XP
+</div>
+<div style={{ fontSize: 10, color: 'var(--t3)' }}>
+  {rank.progress < 1 ? `${Math.round(rank.nextXP).toLocaleString()} XP` : 'MAX'}
+</div>
+```
+
+**Fix — three-part improvement:**
+
+**Part A — Increase font size and contrast:**
+```jsx
+// Left label: current XP
+<div style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>
+  {Math.round(xp).toLocaleString()} XP
+</div>
+
+// Right label: next tier threshold or MAX
+<div style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>
+  {rank.progress < 1
+    ? `→ ${Math.round(rank.nextXP).toLocaleString()} XP`
+    : <span style={{ color: rank.color, fontWeight: 700 }}>MAX</span>}
+</div>
+```
+
+**Part B — Add a contextual "X / Y XP" format below the bar:**
+Instead of showing XP on the left and next-tier XP on the right (which requires mental math to understand progress), show them as a ratio in one place:
+```jsx
+// Replace the two separate labels with a single centered label:
+<div style={{
+  display: 'flex', justifyContent: 'space-between',
+  fontSize: 11, fontWeight: 600, color: 'var(--t2)',
+  marginTop: 4
+}}>
+  <span style={{ color: rank.color }}>
+    {Math.round(xp).toLocaleString()} XP
+  </span>
+  <span>
+    {rank.progress < 1
+      ? `Next: ${Math.round(rank.nextXP).toLocaleString()} XP`
+      : <span style={{ color: rank.color }}>✓ MAX TIER</span>}
+  </span>
+</div>
+```
+
+**Part C — Color the current XP in the rank's own color:**
+The current XP number carries emotional weight (it's the user's achievement). Coloring it in the rank tier color (bronze, silver, gold, etc.) creates a strong visual association:
+- Bronze tier user sees their XP number in bronze color
+- Gold tier user sees it in gold
+- This makes the number feel earned rather than just informational
+
+**Also fix the overall rank XP on the main card** (`MuscleMapPage.jsx` line ~93):
+```jsx
+// Current: fontSize: 11, color: 'var(--t2)'
+// Fix: fontSize: 13, fontWeight: 600, color: 'var(--t2)'
+<div style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 600 }}>
+  {Math.round(overall.totalXP).toLocaleString()} Total XP
+</div>
+```
+
+**Files to modify:**
+- `src/components/pages/MuscleMapPage.jsx` — `MuscleCard` component XP label section (lines ~55–61), overall rank XP line (~93)
+
+**⚠️ Gaps identified (must resolve before implementing):**
+
+1. **Stale "Current code" reference:** The task quotes the current MuscleCard code as:
+   ```jsx
+   <div style={{ fontSize: 10, color: 'var(--t3)' }}>
+     {Math.round(xp).toLocaleString()} XP
+   </div>
+   <div style={{ fontSize: 10, color: 'var(--t3)' }}>
+     {rank.progress < 1 ? `${Math.round(rank.nextXP).toLocaleString()} XP` : 'MAX'}
+   </div>
+   ```
+   But the **actual code** (lines 55–62) is:
+   ```jsx
+   <div style={{ fontSize: 10, color: 'var(--t3)' }}>
+     {Math.round(xp).toLocaleString()} / {Math.round(rank.nextXP).toLocaleString()} XP
+   </div>
+   <div style={{ fontSize: 10, color: 'var(--t3)' }}>
+     {rank.progress < 1 ? `→ ${RANK_TIERS[RANK_TIERS.findIndex(t => t.name === rank.name) + 1]?.name}` : 'MAX'}
+   </div>
+   ```
+   The left label shows `xp / nextXP XP` (ratio format), and the right label shows the **next rank name** (e.g., "→ Silver"), not the next XP value. The fix must be written against the actual code.
+
+2. **Part A vs Part B are contradictory:** Part A says keep two separate left/right labels with improved styling. Part B says "Replace the two separate labels with a single centered label" but then still uses `justifyContent: 'space-between'` (two-sided, not centered). These are mutually exclusive approaches. **Decision needed:** apply only Part B (which supersedes Part A) and ignore Part A entirely.
+
+3. **Part C is already embedded in Part B:** Part C describes "Color the current XP in the rank's own color" as a separate step, but Part B's code snippet already includes `<span style={{ color: rank.color }}>` on the left XP value. Part C is therefore redundant as a separate section — it's already implemented in Part B's code. Remove Part C or mark it as "included in Part B".
+
+4. **Overall rank XP line number is wrong:** The task references "line ~93" for the overall rank XP, but the actual code is at **line 117** of `MuscleMapPage.jsx`:
+   ```jsx
+   <div style={{ fontSize: 11, color: 'var(--t2)' }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
+   ```
+   The proposed fix (fontSize: 13, fontWeight: 600) is correct; only the line reference needs updating.
+
+5. **Right-side label content change not acknowledged:** The current right label shows the next **rank name** (e.g., "→ Silver"), which is useful context. The proposed fix replaces this with `Next: X,XXX XP` — losing the rank name information. Consider combining both: `→ Silver (6,500 XP)` or keeping the rank name and just fixing the styling.
+
+6. **MAX tier `rank.nextXP` safety:** When `rank.progress >= 1` (MAX tier), the code guards with `rank.progress < 1` before accessing `rank.nextXP`. This is correct, but worth verifying that `getRank()` returns a sensible `nextXP` value at max tier (or that it's never accessed). The `RANK_TIERS` array index lookup `[findIndex + 1]` could return `undefined` if at the last tier — the `?.name` optional chaining handles this, but the proposed code using `rank.nextXP` directly should also be safe.
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -475,3 +665,5 @@ Create a `vercel.json` configuration file in the project root with a rewrite rul
 | 11    | 1.11 ConfirmDialog Danger Button | ✅ Done | 🟢 Small | Medium |
 | 12    | 1.12 Done Button Column Alignment | ✅ Done | 🟢 Small | High |
 | 13    | 1.13 Vercel Client-Side Routing Fix | ✅ Done | 🟢 Small | 🔴 Critical |
+| 14    | 1.14 Light Mode Toggle Quick Access | ✅ Done | 🟢 Small | High |
+| 15    | 1.15 Muscle Map XP Text Readability | ✅ Done | 🟢 Small | High |

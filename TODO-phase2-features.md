@@ -960,6 +960,181 @@ The spec has no section describing how to verify the fix works.
 
 ---
 
+### 2.6 Diet Page — Protein, Carbs & Fat Intake Bars
+
+**Problem:** The "Today's Intake" card on `DietPage.jsx` shows only a single calorie progress bar. Users can see they've consumed 1,200 of 2,100 kcal, but have no way to visualise their macro breakdown. Indian fitness users — especially those following structured diet plans — are increasingly macro-aware and want to see P/C/F split at a glance.
+
+**Context — Current data model:**
+The `caloriesLog` entries store `{ id, userId, date, meal, calories }`. There is currently **no per-entry macro data**. Two implementation paths are available:
+
+**Path A — Estimated macros (no data model change, immediate):**
+Derive today's macro consumption from the target ratios already computed on the page:
+```js
+// DietPage.jsx already computes these from user goals:
+// prot (g), carbs (g), fat (g), goalKcal (kcal)
+// todayTotal = calories consumed so far
+
+const consumedRatio = todayTotal / goalKcal;
+const estimatedProtein = Math.round(prot * consumedRatio);   // g
+const estimatedCarbs   = Math.round(carbs * consumedRatio);  // g
+const estimatedFat     = Math.round(fat * consumedRatio);    // g
+```
+Show each as a small bar with label. Note these are estimates; add a small "(est.)" indicator.
+
+**Path B — Per-entry macro logging (schema change, more accurate):**
+Extend `caloriesLog` entries to optionally include `{ protein, carbs, fat }` fields. Update the "Log Meal" form to include three optional number inputs for macros. Aggregate them like calories. This is the correct long-term approach but requires UI changes to the logging form too.
+
+**Recommended approach:** Implement Path A now as a non-breaking improvement. Plan Path B as a follow-up (see Phase 3 backlog). Add a note inside the card explaining the values are estimates until macro tracking is added.
+
+**Design — Three horizontal mini-bars below the kcal bar:**
+
+```jsx
+{/* Below the existing kcal bar in the Today's Intake card */}
+<div style={{ marginTop: 12 }}>
+  <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700,
+    textTransform: 'uppercase', marginBottom: 6 }}>
+    Estimated Macros (based on intake ratio)
+  </div>
+  {[
+    { label: 'Protein', consumed: estimatedProtein, target: prot,   unit: 'g', color: '#4ECDC4' },
+    { label: 'Carbs',   consumed: estimatedCarbs,   target: carbs,  unit: 'g', color: '#FFE66D' },
+    { label: 'Fat',     consumed: estimatedFat,     target: fat,    unit: 'g', color: '#FF6B6B' },
+  ].map(macro => (
+    <div key={macro.label} style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between',
+        fontSize: 11, color: 'var(--t2)', marginBottom: 3 }}>
+        <span style={{ fontWeight: 600 }}>{macro.label}</span>
+        <span style={{ color: 'var(--t3)' }}>
+          {macro.consumed}g / {macro.target}g
+        </span>
+      </div>
+      <div className="pbar" style={{ height: 5 }}>
+        <div className="pbar-fill" style={{
+          width: `${Math.min(100, Math.round(macro.consumed / macro.target * 100))}%`,
+          background: macro.color,
+        }} />
+      </div>
+    </div>
+  ))}
+  <div style={{ fontSize: 9, color: 'var(--t3)', marginTop: 4, fontStyle: 'italic' }}>
+    * Estimated from calorie intake ratio. Log macros per meal for accurate tracking (coming soon).
+  </div>
+</div>
+```
+
+**Color choices for macro bars** (distinct from orange to avoid confusion with kcal bar):
+- Protein → Teal `#4ECDC4` (muscle, strength — widely used convention in Indian apps like HealthifyMe)
+- Carbs → Soft Yellow `#FFE66D` (energy, fuel)
+- Fat → Soft Red `#FF6B6B` (matches `--danger` already in the palette)
+
+**When Path B is implemented later:**
+- Extend the "Log Meal" form to add `protein`, `carbs`, `fat` number fields (all optional, default 0)
+- Replace estimated values with actual sums from `caloriesLog`
+- Remove the "(est.)" disclaimer
+- Update `AppContext.jsx` `caloriesLog` schema documentation
+
+**Files to modify:**
+- `src/components/pages/DietPage.jsx` — add macro computation and three bars inside "Today's Intake" card, below the existing kcal bar (around line 73–78)
+
+**Files to modify later (Path B):**
+- `src/components/pages/DietPage.jsx` — update Log Meal form to accept macro inputs
+- `src/context/AppContext.jsx` — document extended `caloriesLog` schema
+
+---
+
+### 2.7 Floating "Finish Workout" FAB
+
+**Problem:** During a long workout session with many exercises, the "Finish Workout" button sits at the very bottom of the page (`WorkoutPage.jsx`). On mobile, users must scroll past every exercise and every set to reach it. This friction discourages timely session completion and can cause accidental session abandonment.
+
+Indian gym-goers typically train 6–8 exercises with 3–4 sets each. On a phone screen that's a lot of scrolling. A floating action button (FAB) in the corner solves this immediately.
+
+**Design:**
+
+A small floating button fixed to the `bottom-right` during an active session. It should:
+- Be `position: fixed`, `bottom: 80px` (above the mobile bottom nav), `right: 16px`, `z-index: 400`
+- On desktop: `bottom: 24px`, `right: 24px` (no bottom nav to avoid)
+- Label: `"✓ Finish"` with a `Check` icon (14px)
+- Style: orange gradient (`var(--og)`), `border-radius: 20px`, compact padding `'10px 16px'`, small font `13px`, bold
+- Box shadow: `0 4px 20px rgba(232,84,13,.35)` — prominent glow to draw attention
+- Subtle pulse animation on first render to draw the user's eye once, then settle
+
+**Smart visibility — disappears when the real button is in view:**
+Use `IntersectionObserver` to watch the real "Finish Workout" `<button>` at the bottom. When the real button enters the viewport (user scrolled to the bottom), hide the FAB. When it exits (user scrolls up), show the FAB again.
+
+```jsx
+// WorkoutPage.jsx — inside the session render branch
+const finishBtnRef = useRef(null);
+const [showFAB, setShowFAB] = useState(true);
+
+useEffect(() => {
+  if (!finishBtnRef.current) return;
+  const observer = new IntersectionObserver(
+    ([entry]) => setShowFAB(!entry.isIntersecting),
+    { threshold: 0.5 }
+  );
+  observer.observe(finishBtnRef.current);
+  return () => observer.disconnect();
+}, [session]); // re-attach when session changes
+
+// Attach ref to the existing finish button:
+<button ref={finishBtnRef} className="btn-p" style={{ width: '100%', ... }} onClick={finish}>
+  Finish Workout
+</button>
+
+// FAB — rendered conditionally:
+{showFAB && (
+  <button
+    className="btn-p"
+    onClick={finish}
+    style={{
+      position: 'fixed',
+      bottom: 80,   // above mobile bottom nav
+      right: 16,
+      zIndex: 400,
+      padding: '10px 16px',
+      fontSize: 13,
+      borderRadius: 20,
+      display: 'flex', alignItems: 'center', gap: 6,
+      boxShadow: '0 4px 20px rgba(232,84,13,.4)',
+      animation: 'fabIn .3s cubic-bezier(.4,0,.2,1)',
+    }}
+    aria-label="Finish workout session"
+  >
+    <Check size={14} /> Finish
+  </button>
+)}
+```
+
+**CSS animation for FAB entry** (add to `index.css`):
+```css
+@keyframes fabIn {
+  from { opacity: 0; transform: scale(.85) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+```
+
+**Responsive positioning:**
+- Mobile (≤768px): `bottom: 80px` to clear the bottom nav bar
+- Desktop (>768px): `bottom: 24px` — no bottom nav, standard FAB position
+
+Use a CSS media query or inline conditional:
+```jsx
+// Detect via CSS class on the window — or use a hook
+const isMobile = window.innerWidth <= 768;
+bottom: isMobile ? 80 : 24,
+```
+
+**Edge cases:**
+- FAB should only render when `session !== null && !done` — it's invisible on the day-selection screen and after completion
+- Clicking the FAB calls the same `finish()` function as the regular button — no duplicate logic
+- The FAB does NOT replace the regular button — both coexist; the FAB just floats for accessibility
+
+**Files to modify:**
+- `src/components/pages/WorkoutPage.jsx` — add `finishBtnRef`, `showFAB` state, `IntersectionObserver` effect, FAB JSX, ref on the existing finish button
+- `src/index.css` — add `@keyframes fabIn` animation
+
+---
+
 ## ⚠️ Known Dependency
 
 - **2.3 must be done before 2.2** — the Post-Workout Summary's XP delta calculation depends on whichever XP formula is active. Implement the monthly reset first, then build the summary screen on top of it.
@@ -977,3 +1152,5 @@ The spec has no section describing how to verify the fix works.
 | 3     | 2.1 Female Anatomy | 🔴 Large | Medium | ✅ Done |
 | 4     | 2.4 XP Distribution Fix | 🟡 Medium | 🔴 Critical | ✅ Done |
 | 5     | 2.5 Body Map Blank Canvas + Gender Fix | 🟢 Small | 🔴 Critical | ✅ Done |
+| 6     | 2.6 Diet Page Macro Intake Bars | 🟢 Small | High | ⏳ Pending |
+| 7     | 2.7 Floating Finish Workout FAB | 🟢 Small | High | ⏳ Pending |

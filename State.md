@@ -132,7 +132,7 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 - **Male Anatomy**: 17 PNGs fully implemented and live in production.
 - **Design Standardization**: Overhauled typography, color contrast, and action buttons to ensure premium dark/light mode consistency.
 - **Rest Timer System**: High-visibility timer with custom tones integrated directly into the tracker workflow.
-- **Canvas Fallback**: Graceful placeholder prevents invisible canvas collapse on image load failures.
+- **Canvas Fallback & Post-Processing**: Graceful placeholder prevents invisible canvas collapse on image load failures. Additionally, a dynamic `stripBackground()` canvas filter runs at render time to clean up baked-in artifacts (checkered patterns and text labels) from AI-generated female anatomy PNGs.
 
 ---
 

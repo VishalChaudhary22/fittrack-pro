@@ -109,30 +109,3 @@ export const BottomNav = () => {
   );
 };
 
-// ─── THEME TOGGLE (GLOBAL) ──────────────────────────────────────────────────
-export const ThemeToggle = () => {
-  const { theme, toggleTheme } = useApp();
-  return (
-    <button
-      onClick={toggleTheme}
-      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      style={{
-        position: 'fixed', top: 12, right: 16, zIndex: 500,
-        background: 'var(--c2)', border: '1px solid var(--bd)',
-        borderRadius: 20, padding: '6px 10px',
-        display: 'flex', alignItems: 'center', gap: 5,
-        cursor: 'pointer', transition: 'all .2s',
-        boxShadow: 'var(--shadow)',
-        color: 'var(--t2)',
-      }}
-      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
-      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-    >
-      {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-      <span style={{ fontSize: 11, fontWeight: 600 }}>
-        {theme === 'dark' ? 'Light' : 'Dark'}
-      </span>
-    </button>
-  );
-};
-

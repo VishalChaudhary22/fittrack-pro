@@ -27,6 +27,109 @@ export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge 
   </div>
 );
 
+// ─── THEME TOGGLE PILL (DAY/NIGHT) ──────────────────────────────────────────
+export const ThemeTogglePill = () => {
+  const { theme, toggleTheme } = useApp();
+  const isDark = theme === 'dark';
+
+  const w = 120;
+  const h = 40;
+  const pad = 4;
+  const knobSize = h - pad * 2;
+  const travel = w - knobSize - pad * 2;
+
+  return (
+    <div
+      onClick={toggleTheme}
+      role="switch"
+      aria-checked={!isDark}
+      aria-label="Toggle theme"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }}}
+      style={{
+        width: w,
+        height: h,
+        borderRadius: h / 2,
+        background: isDark ? '#111' : '#EFEFEF',
+        boxShadow: isDark ? 'inset 0 1px 3px rgba(0,0,0,0.5)' : 'inset 0 1px 3px rgba(0,0,0,0.1)',
+        position: 'relative',
+        cursor: 'pointer',
+        userSelect: 'none',
+        transition: 'background 0.4s ease',
+        display: 'flex',
+        alignItems: 'center',
+        flexShrink: 0
+      }}
+    >
+      {/* Text Container */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: isDark ? 'flex-end' : 'flex-start',
+        padding: `0 ${isDark ? 14 : 16}px`,
+        pointerEvents: 'none'
+      }}>
+        <span style={{
+          fontSize: 10,
+          fontWeight: 800,
+          color: isDark ? '#FFF' : '#000',
+          letterSpacing: '0.5px'
+        }}>
+          {isDark ? 'NIGHT MODE' : 'DAY MODE'}
+        </span>
+      </div>
+
+      {/* Sliding Knob */}
+      <div style={{
+        position: 'absolute',
+        top: pad,
+        left: pad,
+        width: knobSize,
+        height: knobSize,
+        borderRadius: '50%',
+        background: '#FFF',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        transform: `translateX(${isDark ? 0 : travel}px)`,
+        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ position: 'relative', width: 16, height: 16 }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            opacity: isDark ? 0 : 1, transition: 'opacity 0.3s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#000' }}>
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <div style={{
+            position: 'absolute', inset: 0,
+            opacity: isDark ? 1 : 0, transition: 'opacity 0.3s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#000' }}>
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── PAGE HEADER ──────────────────────────────────────────────────────────────
 export const PageHeader = ({ title, sub, action }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
@@ -35,7 +138,10 @@ export const PageHeader = ({ title, sub, action }) => (
       <div className="abar" style={{ marginTop: 6 }} />
       {sub && <div style={{ fontSize: 13, color: 'var(--t2)', marginTop: -4 }}>{sub}</div>}
     </div>
-    {action}
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <ThemeTogglePill />
+      {action}
+    </div>
   </div>
 );
 

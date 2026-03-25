@@ -648,6 +648,50 @@ The current XP number carries emotional weight (it's the user's achievement). Co
 
 ---
 
+### 1.16 Theme Toggle Header Integration
+
+**Problem:** The `<ThemeToggle>` positioned `fixed` at the top right overlaps with page actions on the Dashboard and Splits pages.
+
+**Fix:**
+Keep the exact styling of the original Theme Toggle (the pill with the Sun/Moon icon and "Light"/"Dark" text), but remove its fixed positioning.
+Move it directly into the `<PageHeader>` component next to any existing `action` buttons, so it flows naturally and doesn't overlap text.
+
+**Files to modify:**
+- `src/components/layout/Layout.jsx`: Remove `ThemeToggle` export.
+- `src/App.jsx`: Remove `<ThemeToggle />` global render.
+- `src/components/shared/SharedComponents.jsx`: Add the `ThemeToggle` component logic here without fixed positioning rules. Integrate it into `PageHeader` in a flex container next to the `action` prop.
+
+---
+
+## 1.17 Day / Night Mode Toggle Redesign
+
+**Problem:** The current theme toggle button is a simple floating dark pill. The user wants a customized "Day Mode" / "Night Mode" pill toggle based on a new reference design, while keeping its current floating position.
+
+**Design Specifics:**
+The new toggle is a horizontal pill container functioning as a slider.
+- **Day Mode (Light):**
+  - Pill Background: Light gray (`#EFEFEF` or similar)
+  - Text: "DAY MODE" on the left side (black, bold text).
+  - Knob: A white circular knob positioned on the right side.
+  - Icon: A black Sun icon centered inside the white knob.
+- **Night Mode (Dark):**
+  - Pill Background: Solid black (`#000000` or similar dark color).
+  - Text: "NIGHT MODE" on the right side (white, bold text).
+  - Knob: A white circular knob positioned on the left side.
+  - Icon: A black Moon/Stars icon centered inside the white knob.
+
+**Animation & Behavior:**
+Clicking the pill slides the white knob from one side to the other, cross-fading the icons and the background container color, while the text swaps between "DAY MODE" and "NIGHT MODE".
+
+**Implementation Plan:**
+1. Keep the exact position and fixed styling of the current global `<ThemeToggle>` component in `App.jsx`.
+2. Rewrite the internal JSX of the `<ThemeToggle>` component in `src/App.jsx` (or extract it to `SharedComponents.jsx` if preferred).
+3. Use a flex container with relative positioning for the track. Set fixed dimensions (e.g., ~130px width, 44px height).
+4. Implement the sliding knob using `transform: translateX(...)` based on the `theme` state.
+5. Use Lucide icons (`Sun` and `Moon`) inside the knob, dynamically swapping them out based on state.
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -667,3 +711,5 @@ The current XP number carries emotional weight (it's the user's achievement). Co
 | 13    | 1.13 Vercel Client-Side Routing Fix | ✅ Done | 🟢 Small | 🔴 Critical |
 | 14    | 1.14 Light Mode Toggle Quick Access | ✅ Done | 🟢 Small | High |
 | 15    | 1.15 Muscle Map XP Text Readability | ✅ Done | 🟢 Small | High |
+| 16    | 1.16 Theme Toggle Header Integration | ✅ Done | 🟢 Small | High |
+| 17    | 1.17 Day / Night Toggle Redesign | ✅ Done | 🟡 Medium | High |

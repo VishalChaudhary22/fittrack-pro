@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
-import { Sidebar, BottomNav, ThemeToggle } from './components/layout/Layout';
+import { Sidebar, BottomNav } from './components/layout/Layout';
 import { ToastContainer } from './components/shared/SharedComponents';
 import AuthModal from './components/pages/AuthModal';
 import DashboardPage from './components/pages/DashboardPage';
@@ -40,7 +40,6 @@ function AppInner() {
         </Routes>
       </main>
       <BottomNav />
-      <ThemeToggle />
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );

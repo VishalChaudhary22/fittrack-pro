@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { LogOut, Sun, Moon, Download, Upload } from 'lucide-react';
+import { LogOut, Download, Upload } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, ConfirmDialog } from '../shared/SharedComponents';
+import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
 import { fmt } from '../../utils/helpers';
@@ -66,9 +66,13 @@ export default function ProfilePage() {
           <div className="sep" />
 
           {/* Theme toggle */}
-          <button className="btn-g" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }} onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />} {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 10px', background: 'var(--c2)', borderRadius: 12, border: '1px solid var(--bd)', marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Theme</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Switch display mode</div>
+            </div>
+            <ThemeTogglePill />
+          </div>
 
           {/* Export/Import */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>

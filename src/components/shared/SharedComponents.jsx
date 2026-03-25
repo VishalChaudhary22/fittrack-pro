@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { clamp, O } from '../../utils/helpers';
+import { useApp } from '../../context/AppContext';
 
 // ─── PORTAL (renders children at document.body to avoid transform stacking) ──
 export const Portal = ({ children }) => createPortal(children, document.body);

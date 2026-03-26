@@ -197,7 +197,7 @@ export const ScrollPicker = ({ value, onChange, items, unit = '', fmtVal = v => 
 
 // ─── TOAST CONTAINER ──────────────────────────────────────────────────────────
 export const ToastContainer = ({ toasts, removeToast }) => (
-  <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+  <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 'var(--z-toast)', display: 'flex', flexDirection: 'column', gap: 10 }}>
     {toasts.map(t => (
       <div key={t.id} className={t.exiting ? 'toast-exit' : 'toast-enter'} style={{
         background: t.type === 'error' ? 'rgba(255,59,48,.92)' : t.type === 'info' ? 'rgba(26,26,30,.92)' : 'rgba(232,84,13,.92)',
@@ -236,8 +236,8 @@ export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confi
 };
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
-export const Skeleton = ({ width = '100%', height = 20, borderRadius = 8, style = {} }) => (
-  <div className="skeleton-pulse" style={{ width, height, borderRadius, background: 'var(--c3)', ...style }} />
+export const Skeleton = ({ width = '100%', height = 20, aspectRatio, borderRadius = 8, style = {} }) => (
+  <div className="skeleton-pulse" style={{ width, height, aspectRatio, borderRadius, background: 'var(--c3)', ...style }} />
 );
 
 export const SkeletonCard = () => (

@@ -42,7 +42,7 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
 
   return (
     <Portal>
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(8px)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(8px)' }}>
       <div style={{ background: 'var(--c1)', border: '1px solid var(--o)', borderRadius: 24, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, boxShadow: '0 12px 48px rgba(232,84,13,.25)', minWidth: 260 }}>
         <div style={{ position: 'relative', width: 56, height: 56 }}>
           <svg width={56} height={56} style={{ transform: 'rotate(-90deg)' }}>

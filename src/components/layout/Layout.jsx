@@ -90,11 +90,11 @@ export const BottomNav = () => {
 
       {/* More sheet */}
       {showMore && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowMore(false)}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 'calc(var(--z-nav) - 1)' }} onClick={() => setShowMore(false)}>
           <div style={{
             position: 'fixed', bottom: 'calc(52px + env(safe-area-inset-bottom))', left: 8, right: 8,
             background: 'var(--c1)', border: '1px solid var(--bd)', borderRadius: 16, padding: '8px',
-            boxShadow: '0 -8px 32px rgba(0,0,0,.5)', zIndex: 100,
+            boxShadow: '0 -8px 32px rgba(0,0,0,.5)', zIndex: 'var(--z-nav)',
           }} onClick={e => e.stopPropagation()}>
             {NAV_MOBILE_MORE.map(({ id, label, Icon, path }) => (
               <div key={id} className={`ni ${isActive(path) ? 'act' : ''}`}

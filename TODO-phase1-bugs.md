@@ -720,6 +720,34 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 
 ---
 
+## 1.20 Missing Keyboard Focus States (A11y)
+
+**Problem:** Buttons and interactive elements lack `:focus-visible` styles, making keyboard navigation difficult. (Source: UI/UX Pro Max `focus-states`)
+**Fix:** Add a global `:focus-visible` utility class to `index.css` for buttons and links.
+
+---
+
+## 1.21 Mobile Tap Delay
+
+**Problem:** Native mobile browsers introduce a ~300ms delay on tapping elements. (Source: UI/UX Pro Max `tap-delay`)
+**Fix:** Add `touch-action: manipulation` globally to buttons, links, inputs, and interactive cards to make the app feel instantly responsive.
+
+---
+
+## 1.22 Hardcoded Z-Index Values
+
+**Problem:** Z-indexes are hardcoded randomly across the app (e.g., `.mo` is 2000, `.bn` is 100). (Source: UI/UX Pro Max `z-index-management`)
+**Fix:** Define a strict stack order using CSS variables in `:root` and replace hardcoded values.
+
+---
+
+## 1.23 Loading Skeleton Aspect Ratios (CLS)
+
+**Problem:** Loading skeletons may cause layout shifts (CLS) if their dimensions don't strictly match the content that replaces them. (Source: UI/UX Pro Max `image-dimension`)
+**Fix:** Ensure any loading placeholders, such as the one planned for the Muscle Map canvas, strictly use the `aspect-ratio` property.
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -743,3 +771,7 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 | 17    | 1.17 Day / Night Toggle Redesign | ✅ Done | 🟡 Medium | High |
 | 18    | 1.18 Day / Night Toggle Resizing | ✅ Done | 🟢 Small | Medium |
 | 19    | 1.19 Day / Night Toggle Resizing II | ✅ Done | 🟢 Small | Medium |
+| 20    | 1.20 Missing Keyboard Focus States | ✅ Done | 🟢 Small | High |
+| 21    | 1.21 Mobile Tap Delay Resolution | ✅ Done | 🟢 Small | High |
+| 22    | 1.22 Z-Index Tokenization | ✅ Done | 🟢 Small | Medium |
+| 23    | 1.23 Skeleton Aspect Ratios (CLS) | ✅ Done | 🟢 Small | Medium |

@@ -112,7 +112,7 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
     - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` renders on an HTML5 Canvas using a pixel-compositing technique that extracts coral-red highlights over a teal-blue base, showing **Primary vs Secondary Muscle Engagement** with biomechanically-accurate alpha blending.
     - **Anatomy Status:**
       - 🟢 **Male** — 17 PNGs committed, rendering in production. See `TODO-male-anatomy.md`.
-      - 🟢 **Female** — 16 female PNGs committed to `public/muscles/female/` (6 custom illustrations, 10 placeholders). Rendering live in production without canvas collapse. See `TODO-female-anatomy.md`.
+      - 🟢 **Female** — 15 clean custom PNGs committed to `public/muscles/female/` (2 bases, 6 back highlights, 7 front highlights), replacing all defective placeholders. Rendering live in production. See `Female-Anatomy-Build-2-0.md`.
       - 🟢 **Fallback** — Canvas renders a styled placeholder if any image fails to load, preventing invisible collapse.
 7. **User Personalization**  
    - `ProfilePage.jsx`: Manage personal information, settings, and potentially theme toggling.
@@ -140,5 +140,5 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 
 | Task | Description | Reference |
 |------|-------------|----------|
-| Generate Remaining Female Assets | Replace the 10 placeholder female asset PNGs with actual muscle highlight illustrations | `TODO-female-anatomy.md` |
+| Remove `stripBackground()` workaround | Remove the near-black pixel stripping from `BodyMapSVG.jsx` now that all assets are clean with solid `#000000` backgrounds | `Female-Anatomy-Build-2-0.md` |
 | `back-calves` / `back-forearms` | Optionally add to `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` | Minor code change |

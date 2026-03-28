@@ -140,5 +140,5 @@ The application incorporates a rich set of pages aimed at a comprehensive fitnes
 
 | Task | Description | Reference |
 |------|-------------|----------|
-| Remove `stripBackground()` workaround | Remove the near-black pixel stripping from `BodyMapSVG.jsx` now that all assets are clean with solid `#000000` backgrounds | `Female-Anatomy-Build-2-0.md` |
+| `stripBackground()` finalized | The function was simplified to ONLY strip solid black backgrounds to transparent (Option A). White checkerboard stripping was removed. | `Female-Anatomy-Build-2-0.md` |
 | `back-calves` / `back-forearms` | Optionally add to `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` | Minor code change |

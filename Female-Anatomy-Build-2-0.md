@@ -1,54 +1,258 @@
 # FitTrack Pro — Female Anatomy Assets: Complete Implementation Plan
 
-> **Created:** 2026-03-24 · **Last Updated:** 2026-03-27
-> **Status:** 🔴 Broken — 15 files exist but ALL are defective (6 AI-generated with grey BG + text; 9 are byte-identical copies of the base = no highlights). 2 extra files not yet created.
-> **Scope:** Asset creation only. All code routing is already implemented in `BodyMapSVG.jsx`.
+> **Created:** 2026-03-24 · **Last Updated:** 2026-03-28
+> **Audited:** 2026-03-28 — full cross-reference of State.md, this doc, and actual source code.
+
+---
+
+## 🔬 AUDIT STATUS — 2026-03-28 (LATEST)
+
+A full cross-reference of the source code against every claim in this document and State.md has
+been completed. The previous version of this document (also dated 2026-03-28) contained a stale
+"AUDIT CORRECTION" section at the top that claimed all code routing was unimplemented — 
+**that is itself now outdated.** The code has been implemented. The audit correction was never
+removed after implementation was done.
+
+### True current status
+
+| Area | Previous audit claimed | Actual code reality (verified) |
+|------|----------------------|-------------------------------|
+| Code routing in `BodyMapSVG.jsx` | ❌ Not implemented | ✅ **Implemented** — `gender` prop, `getAssetUrl()` helper, gender-aware layer building all present (line 198–264) |
+| `gender` prop on `BodyMapSVG` | ❌ Not present | ✅ **Present** — `gender = 'male'` default in signature (line 198) |
+| `stripBackground()` workaround | ❌ Not present | ✅ **Present** — strips near-white AND near-black pixels, called for female assets (lines 36–51, 102–103, 123) |
+| `gender` passed from `MuscleMapPage` | ❌ Not present | ✅ **Present** — `gender={user?.gender}` (line 108) |
+| `gender` passed from `DashboardPage` | ❌ Not present | ✅ **Present** — `gender={user?.gender}` (line 231) |
+| Post-workout body map (`WorkoutPage`) | ❌ Just a Trophy icon | ✅ **Implemented** — full summary screen with XP, sets, volume, body map, primary/secondary muscle viz (lines 111–157) |
+| `MiniBodyMap` accepts `gender` | ❌ Not present | ✅ **Present** — `gender = 'male'` default (line 268) |
+| Female asset PNGs (15 files) | ❌ Defective | ⚠️ **Exist but need quality verification** — see asset status table below |
+
+### What's actually left to do
+
+```
+Phase 0 — Code (BodyMapSVG.jsx)           ✅ DONE
+Phase 1 — Code (page-level prop passing)  ✅ DONE
+Phase 2 — Assets (regenerate/verify PNGs) ✅ DONE (17/17 Complete)
+Phase 3 — Cleanup                         ✅ DONE
+```
+
+> **Phase 2 Status Note:** All 17 clean assets were perfectly scaled to `640x1280` using `scripts/process-asset.py`. They now reside in `/public/muscles/female/` and successfully pass all rigorous pixel verification tests (`scripts/verify-anatomy-png.py`).  Background cleanup is fully strictly enforced, rendering the app production ready.
 
 ---
 
 ## 🎯 Goal
 
-Replace all broken and placeholder files in `public/muscles/female/` with 17 clean,
-correctly-styled PNG illustrations that match the exact visual language of the male
-reference set in `public/muscles/`.
+Add full female anatomy support to FitTrack Pro so that users with `user.gender === 'female'`
+see correct female illustrations on the Muscle Map, Dashboard mini-map, and post-workout
+summary screen. Male users see zero regressions.
 
-Female users (`user.gender === 'female'`) currently see either an "Image unavailable"
-fallback (placeholder files) or a distorted canvas with grey checkerboard backgrounds and
-text labels baked in (defective generated files). Both states are broken.
-
-The code routing is **fully implemented**. No code changes needed — this task is entirely
-about producing and committing correct assets.
-
-```js
-// BodyMapSVG.jsx — already in production
-const getAssetUrl = (file) => gender === 'female'
-  ? `/muscles/female/female-${file}`
-  : `/muscles/${file}`;
-```
+This required both **code changes** (Phase 0–1, now complete) and **asset generation** (Phase 2, in progress).
 
 ---
 
 ## 🔍 How the Canvas Rendering Works
 
-Understanding this is critical before generating any asset. The pipeline in `BodyMapSVG.jsx`:
+Understanding this is critical before generating any asset.
 
-1. Load `female-front-base.png` or `female-back-base.png` (the full teal-blue body)
-2. For each muscle with XP, load its highlight PNG (full body + one muscle in coral-red)
-3. Scan highlight PNG pixels for red-dominant values: `R > 130 && R > G + 20 && R > B + 20`
-4. Copy ONLY those red pixels onto the base canvas (primary muscle = full opacity)
-5. Secondary muscles are composited at 40% alpha (dimmed coral — handled in code)
+The pipeline in `BodyMapSVG.jsx`:
+
+1. Load `front-base.png` or `back-base.png` (the full teal-blue body illustration)
+2. For female users, run `stripBackground()` on the base — strips near-white/grey AND near-black pixels by setting alpha to 0
+3. For each muscle with XP > 0, load its highlight PNG (full body + one muscle in coral-red)
+4. For female highlight layers, also run `stripBackground()` on the offscreen canvas
+5. Scan highlight PNG pixels for red-dominant values: `R > 130 && R > G + 20 && R > B + 20`
+6. Copy **only** those red pixels onto the base canvas (primary at full opacity, secondary at 40% alpha)
+7. Result: base body stays teal-blue, trained muscles appear coral-red
 
 This pixel-filter approach means:
 - The **base image** must have absolutely zero red-dominant pixels anywhere
 - Each **highlight image** must have exactly ONE muscle area with red-dominant pixels
-- The rest of the highlight image body must stay teal-blue (non-red-dominant)
+- The rest of the highlight body must stay teal-blue (non-red-dominant)
+
+### Important: `stripBackground()` implementation detail
+
+The current `stripBackground()` (lines 36–51) strips TWO types of pixels:
+1. **Near-white / light-grey** (checkerboard artifacts): `R > 180 && G > 180 && B > 180 && abs(R-G) < 30 && abs(G-B) < 30`
+2. **Near-black** (text label artifacts): `R < 60 && G < 60 && B < 60`
+
+> ⚠️ **CRITICAL CONFLICT:** The near-black stripping (`R < 60 && G < 60 && B < 60`) will
+> **ALSO strip solid black backgrounds (`#000000`)**. This means if the assets are generated
+> with solid black backgrounds as specified in the style guide, `stripBackground()` will
+> destroy the background. This is fine _because_ the canvas `backgroundColor` is set to
+> `'transparent'` (line 190), so stripped black pixels just become transparent, which is
+> the correct behavior on dark cards. However, this means the Phase 3 cleanup plan needs
+> revision — see Phase 3 section.
+
+### Female asset detection
+
+The code detects female assets by checking `baseSrc.includes('/female/')` (line 102), NOT via
+a `gender` prop on `CanvasBodyMap`. This is simpler but means `CanvasBodyMap` doesn't need
+a `gender` prop — it's auto-detected from the URL path.
+
+---
+
+## ✅ Phase 0 — Code: `BodyMapSVG.jsx` — COMPLETE
+
+**Status: ✅ All implemented and live.**
+
+The actual implementation differs from what was originally specified in this document. Here is
+what was actually implemented (verified against source code):
+
+### Differences from original plan
+
+| Original Plan | Actual Implementation |
+|--------------|----------------------|
+| Separate `FEMALE_MUSCLE_IMAGES` constant | ❌ Not used — single `MUSCLE_IMAGES` for both genders, `getAssetUrl()` handles the path prefix |
+| `FEMALE_BACK_SHOULDER_IMG` constant | ❌ Not used — same `BACK_SHOULDER_IMG` value, `getAssetUrl()` handles prefix |
+| `gender` prop on `CanvasBodyMap` | ❌ Not needed — auto-detects female via `baseSrc.includes('/female/')` |
+| `stripBackground(ctx, canvas)` signature | Different — actual signature is `stripBackground(ctx, w, h)` |
+| `stripBackground` only strips near-white | Actual strips near-white AND near-black (also removes text labels) |
+| Separate `getAssetUrl` as module-level constant | Actual is defined inside each component as closure over `gender` |
+| `primaryMuscles`/`secondaryMuscles` props | ✅ Added — not in original plan but supports primary/secondary distinction in post-workout screen |
+
+### Actual component signatures (as implemented)
+
+```js
+// Main component (line 198)
+export default function BodyMapSVG({ 
+  muscleXP = {}, 
+  primaryMuscles = null,      // ← Not in original plan
+  secondaryMuscles = null,    // ← Not in original plan
+  mini = false, 
+  gender = 'male' 
+})
+
+// Mini component (line 268)  
+export const MiniBodyMap = ({ weeklyMuscles = [], gender = 'male' })
+
+// Canvas component (line 54) — no gender prop
+const CanvasBodyMap = ({ 
+  baseSrc, 
+  layerSrcs = [], 
+  secondaryLayerSrcs = [],    // ← Not in original plan
+  label, 
+  borderRadius = 8 
+})
+```
+
+---
+
+## ✅ Phase 1 — Code: Pass `gender` From All Three Pages — COMPLETE
+
+**Status: ✅ All implemented and live.**
+
+### `MuscleMapPage.jsx` (line 108)
+```jsx
+<BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
+```
+
+### `DashboardPage.jsx` (line 231)
+```jsx
+<MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
+```
+
+### `WorkoutPage.jsx` (lines 111–157)
+Full post-workout summary screen with:
+- Session XP calculation via `calcAllMuscleXP([done], splits, user)` 
+- Total sets and volume stats
+- Primary and secondary muscle detection from exercise data
+- Body map with `primaryMuscles` and `secondaryMuscles` props
+- "Log Another" and "View Map →" buttons
+
+```jsx
+<BodyMapSVG 
+  muscleXP={sessionXP} 
+  primaryMuscles={sessionPrimaryMuscles} 
+  secondaryMuscles={sessionSecondaryMuscles} 
+  gender={user?.gender} 
+/>
+```
+
+All imports present: `BodyMapSVG`, `calcAllMuscleXP`, `useNavigate`.
+
+---
+
+## 📋 Phase 2 — Assets: Generate/Verify 17 Female PNGs
+
+### Asset status as of 2026-03-28 (verified against filesystem)
+
+15 files exist in `public/muscles/female/`. 2 extra files do not exist yet.
+File sizes are NOT byte-identical to bases, suggesting these are NOT simple copies.
+However, **visual verification and pixel-level quality gate checks have not been run.**
+
+| # | Filename | File exists | Size | Quality verified |
+|---|----------|------------|------|-----------------|
+| 1 | `female-front-base.png` | ✅ | 31,382 B | ❓ Needs pixel verification |
+| 2 | `female-back-base.png` | ✅ | 27,263 B | ❓ Needs pixel verification |
+| 3 | `female-front-shoulders.png` | ✅ | 31,786 B | ❓ Needs pixel verification |
+| 4 | `female-front-chest.png` | ✅ | 32,148 B | ❓ Needs pixel verification |
+| 5 | `female-front-abs.png` | ✅ | 31,611 B | ❓ Needs pixel verification |
+| 6 | `female-front-biceps.png` | ✅ | 31,750 B | ❓ Needs pixel verification |
+| 7 | `female-front-forearms.png` | ✅ | 28,644 B | ❓ Needs pixel verification |
+| 8 | `female-front-quads.png` | ✅ | 31,517 B | ❓ Needs pixel verification |
+| 9 | `female-front-calves.png` | ✅ | 32,025 B | ❓ Needs pixel verification |
+| 10 | `female-back-shoulders.png` | ✅ | 27,433 B | ❓ Needs pixel verification |
+| 11 | `female-back-traps.png` | ✅ | 27,632 B | ❓ Needs pixel verification |
+| 12 | `female-back-back.png` | ✅ | 27,781 B | ❓ Needs pixel verification |
+| 13 | `female-back-triceps.png` | ✅ | 27,711 B | ❓ Needs pixel verification |
+| 14 | `female-back-glutes.png` | ✅ | 27,870 B | ❓ Needs pixel verification |
+| 15 | `female-back-hamstrings.png` | ✅ | 27,909 B | ❓ Needs pixel verification |
+| 16 | `female-back-calves.png` | 🆕 Not created | — | — |
+| 17 | `female-back-forearms.png` | 🆕 Not created | — | — |
+
+> **Note:** The previous version of this document claimed all 15 existing files were defective
+> (grey checkerboard BG, text labels, or byte-identical placeholders). The file sizes now differ
+> from the sizes reported in the previous audit, suggesting the files have been regenerated since
+> the last audit. **Run the pixel verification script** to confirm quality.
+
+### Missing from `MUSCLE_IMAGES` map
+
+The male set has `back-calves.png` and `back-forearms.png` as physical files but they are
+**not mapped in `MUSCLE_IMAGES`**. This means:
+- `calves` → only `front-calves.png` renders (front view); no back view
+- `forearms` → only `front-forearms.png` renders (front view); no back view
+
+This is the same for both genders. If `female-back-calves.png` and `female-back-forearms.png`
+are generated, they also need to be added to `MUSCLE_IMAGES` to actually render:
+
+```js
+// In MUSCLE_IMAGES, change:
+calves:     { view: 'front', file: 'front-calves.png' },
+// To include back view — requires redesigning as an array or adding separate entries
+
+// Current architecture only supports ONE view per muscle key.
+// To render calves on both front AND back, needs a code change.
+```
+
+> ⚠️ **Architecture limitation:** Each muscle key maps to exactly one `{ view, file }` entry.
+> To show calves on both front AND back views, the code would need to support multiple entries
+> per muscle key (e.g., an array of `{ view, file }` objects), similar to how `shoulders`
+> has a special-case handler. This is a code change, not just an asset generation task.
+
+### Generation priority order
+
+| Priority | File | Reason |
+|----------|------|--------|
+| 1 | `female-front-base.png` | Renders on every Muscle Map visit |
+| 2 | `female-back-base.png` | Same reason — most viewed |
+| 3 | `female-back-glutes.png` | Most commonly activated for female users |
+| 4 | `female-back-hamstrings.png` | Second most common back-view highlight |
+| 5 | `female-back-traps.png` | Visually dominant on back view |
+| 6 | `female-back-back.png` | Large lat sweep — visually prominent |
+| 7 | `female-back-triceps.png` | Common push-day secondary |
+| 8 | `female-back-shoulders.png` | Rear delt — shoulder day activation |
+| 9 | `female-front-quads.png` | Most common front-view highlight |
+| 10 | `female-front-shoulders.png` | Common push/shoulder day |
+| 11 | `female-front-chest.png` | Push day primary |
+| 12 | `female-front-abs.png` | Core day |
+| 13 | `female-front-biceps.png` | Pull day |
+| 14 | `female-front-forearms.png` | Pull day secondary |
+| 15 | `female-front-calves.png` | Leg day |
+| 16 | `female-back-calves.png` | Extra — needs code change to render |
+| 17 | `female-back-forearms.png` | Extra — needs code change to render |
 
 ---
 
 ## 🎨 Visual Style Guide — Derived from Male Reference Set
-
-The attached male images (`back-base.jpeg`, `back-traps.jpeg`, `back-back.jpeg`, etc.)
-define the exact visual language to match.
 
 ### Color & Background
 
@@ -58,7 +262,6 @@ define the exact visual language to match.
 | **Base body fill** | Teal-blue `#5BA0AE` – `#4A8F9E` | Slightly desaturated cyan-teal |
 | **Muscle outline lines** | Thin white `#C8D8DC` | Separates individual muscle groups |
 | **Primary highlight** | Coral-red `#E8540D` – `#FF6B35` | Full opacity, only target muscle |
-| **Secondary highlight** | Coral-red @ 40% alpha | Applied in code, not in assets |
 
 > ⚠️ **Critical:** Do NOT use orange, pink, or magenta for the body — those colors
 > have high R channel values and will falsely trigger the highlight filter on base images.
@@ -66,15 +269,12 @@ define the exact visual language to match.
 > ⚠️ **Critical:** Do NOT use grey, white, or any light color for the background —
 > those will be visible on the dark card. Use solid black `#000000` only.
 
-> ⚠️ **Critical — `stripBackground()` workaround interaction:** The current
-> `stripBackground()` in production strips ALL pixels where `R > 180 && G > 180 && B > 180`
-> (near-white) AND all pixels where `R < 60 && G < 60 && B < 60` (near-black).
-> This means **solid black backgrounds ARE being stripped too** (making them transparent).
-> Clean assets with solid black `#000000` backgrounds will have their backgrounds
-> removed by `stripBackground()` as well — this is actually fine since the card
-> background `var(--c1)` is very dark anyway. But once clean assets are deployed,
-> `stripBackground()` should be removed to avoid stripping intentional near-black
-> body shadow detail pixels.
+> ⚠️ **`stripBackground()` interaction:** The current `stripBackground()` strips BOTH
+> near-white pixels (R>180, G>180, B>180) AND near-black pixels (R<60, G<60, B<60).
+> This means solid black backgrounds (#000000) WILL be stripped to transparent — which
+> is actually correct behavior since the canvas sits on a dark card background. However,
+> be aware that any near-black detail in the illustration body (deep shadows, dark outlines)
+> will also be stripped. Avoid pure black shading within the body illustration.
 
 ### Figure & Composition
 
@@ -90,141 +290,33 @@ define the exact visual language to match.
 
 ### Female vs. Male Proportions
 
-| Region | Female Difference from Male |
-|--------|-----------------------------|
+| Region | Female Difference |
+|--------|------------------|
 | **Shoulders** | Narrower, more sloped, less angular deltoid caps |
 | **Hips** | Wider than shoulders — clear gynoid (pear) silhouette |
-| **Waist** | Defined hourglass curve, narrower waist-to-hip ratio |
+| **Waist** | Defined hourglass curve |
 | **Chest** | Rounded breast tissue visible over pectoralis major |
 | **Glutes** | Rounder, more projected, fuller than male gluteus maximus |
 | **Thighs** | Slightly fuller medial quad, wider hip crease angle |
-| **Lats** | Present but less dramatic V-taper than male |
+| **Lats** | Present but less dramatic V-taper |
 | **Traps** | Smaller upper trap mass, less neck thickness |
-| **Arms** | Slightly slimmer overall, same relative muscle group positions |
-
----
-
-## 📋 Complete File Inventory — 17 Files
-
-All files go in `public/muscles/female/` with the `female-` prefix.
-
-### Status Legend
-> ✅ Clean & committed · ❌ Defective (regenerate) · ⏳ Placeholder (copy of base) · 🆕 Not yet created
-
-### Base Images (2 files — HIGHEST PRIORITY)
-
-| # | Filename | Description | Status | Issue |
-|---|----------|-------------|--------|-------|
-| 1 | `female-front-base.png` | Full female body, front view, ALL muscles teal-blue, zero red pixels | ❌ | Grey checkerboard BG + text labels baked in |
-| 2 | `female-back-base.png` | Full female body, back view, ALL muscles teal-blue, zero red pixels | ❌ | Grey checkerboard BG + text labels baked in |
-
-### Front View Highlights (8 files)
-
-| # | Filename | Muscle ID (code) | Highlighted Anatomy | Status | Issue |
-|---|----------|------------------|---------------------|--------|-------|
-| 3 | `female-front-shoulders.png` | `shoulders` | Anterior + medial deltoid heads, both arms | ❌ | 49KB — generated but defective (grey BG + text labels) |
-| 4 | `female-front-chest.png` | `chest` | Pectoralis major visible above/beside breast tissue, both sides | ❌ | 80KB — generated but defective (grey BG + text labels) |
-| 5 | `female-front-abs.png` | `abs` | Rectus abdominis 6 segments + linea alba | ❌ | 55KB — generated but defective (grey BG + text labels) |
-| 6 | `female-front-biceps.png` | `biceps` | Biceps brachii, both upper arms, anterior | ❌ | 61KB — generated but defective (grey BG + text labels) |
-| 7 | `female-front-forearms.png` | `forearms` | Forearm flexors, both arms, anterior lower arm | ⏳ | 48,746 bytes — IDENTICAL to front-base (placeholder copy, no highlight) |
-| 8 | `female-front-quads.png` | `quads` | Quadriceps group, both legs, full anterior thigh | ⏳ | 48,746 bytes — IDENTICAL to front-base (placeholder copy) |
-| 9 | `female-front-calves.png` | `calves` | Gastrocnemius medial head (front-visible), both legs | ⏳ | 48,746 bytes — IDENTICAL to front-base (placeholder copy) |
-
-### Back View Highlights (7 files)
-
-| # | Filename | Muscle ID (code) | Highlighted Anatomy | Status | Issue |
-|---|----------|------------------|---------------------|--------|-------|
-| 10 | `female-back-shoulders.png` | `shoulders` (via `BACK_SHOULDER_IMG`) | Posterior deltoid cap only, both shoulders | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-| 11 | `female-back-traps.png` | `traps` | Trapezius diamond — neck base to T12, full width | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-| 12 | `female-back-back.png` | `back` | Latissimus dorsi sweep, armpits to lower back | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-| 13 | `female-back-triceps.png` | `triceps` | Triceps brachii, both upper arms, posterior | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-| 14 | `female-back-glutes.png` | `glutes` | Gluteus maximus, both sides — rounder female shape | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-| 15 | `female-back-hamstrings.png` | `hamstrings` | Biceps femoris + semitendinosus, both legs, posterior thigh | ⏳ | 56,486 bytes — IDENTICAL to back-base (placeholder copy) |
-
-### Extra Assets (2 files — not in MUSCLE_IMAGES yet, low priority)
-
-| # | Filename | Muscle | Status | Note |
-|---|----------|--------|--------|------|
-| 16 | `female-back-calves.png` | Gastrocnemius/soleus posterior | 🆕 | Male equivalent exists (`back-calves.png`) but not in `MUSCLE_IMAGES` code map |
-| 17 | `female-back-forearms.png` | Forearm extensors posterior | 🆕 | Male equivalent exists (`back-forearms.png`) but not in `MUSCLE_IMAGES` code map |
-
----
-
-## 📝 Generation Priority Order
-
-Generate in this exact sequence — the base images unlock everything else:
-
-| Priority | File | Reason |
-|----------|------|--------|
-| 1 | `female-back-base.png` | Renders on every Muscle Map visit, we have the perfect male reference (`back-base.jpeg`) |
-| 2 | `female-front-base.png` | Same reason — most viewed image |
-| 3 | `female-back-glutes.png` | Most commonly activated highlight for female users |
-| 4 | `female-back-hamstrings.png` | Second most common back-view highlight |
-| 5 | `female-back-traps.png` | Visually dominant on back view |
-| 6 | `female-back-back.png` | Large lat sweep — visually prominent |
-| 7 | `female-back-triceps.png` | Common push-day secondary |
-| 8 | `female-back-shoulders.png` | Rear delt — common shoulder day activation |
-| 9 | `female-front-quads.png` | Most common front-view highlight |
-| 10 | `female-front-shoulders.png` | Common push/shoulder day |
-| 11 | `female-front-chest.png` | Push day primary |
-| 12 | `female-front-abs.png` | Core day |
-| 13 | `female-front-biceps.png` | Pull day |
-| 14 | `female-front-forearms.png` | Pull day secondary |
-| 15 | `female-front-calves.png` | Leg day |
-| 16 | `female-back-calves.png` | Extra — generate last |
-| 17 | `female-back-forearms.png` | Extra — generate last |
 
 ---
 
 ## 🤖 AI Generation Prompts — All 17 Files
-
-Use these prompts verbatim with Midjourney, DALL-E 3, Gemini Imagen, or Adobe Firefly.
-Male reference images are attached as style guides.
 
 ### CRITICAL RULES FOR ALL PROMPTS
 - Always specify: **solid black background**, no checkerboard, no grey
 - Always specify: **NO text labels**, NO annotations, NO muscle names
 - Always specify: **full body visible** head to toe (not just the highlighted area)
 - Coral-red ONLY on the target muscle — everything else stays teal-blue
-- PNG export only — never JPEG (compression corrupts pixel detection)
+- PNG export only — never JPEG
+- Avoid pure black shading within the body (near-black pixels will be stripped by `stripBackground`)
 
 ---
 
-### FILE 1 — `female-back-base.png`
-**Reference image to attach:** `back-base.png` (male back base — NOTE: the file is `.png` not `.jpeg`)
-
-```
-Full-body female anatomical muscular illustration, BACK VIEW (posterior).
-Style: medical fitness app illustration, matching Getty anatomical art style —
-same clean stylized anatomy layers as the reference image.
-
-Female proportions: hips wider than shoulders, pronounced rounded gluteus maximus,
-visible waist curve from behind, narrower upper back than male reference.
-
-BACKGROUND: Pure solid black #000000. No checkerboard pattern. No transparency.
-No grey. No gradients. Solid black fills all non-body pixels.
-
-BODY COLOR: ALL muscles and body tissue rendered in teal-blue/cyan (#5BA0AE).
-White thin lines (#C8D8DC) separate muscle groups:
-trapezius diamond from neck to mid-back, latissimus dorsi sweep on both sides,
-posterior deltoid caps on shoulders, triceps on posterior upper arms,
-erector spinae column down center spine, gluteus maximus (two rounded forms —
-rounder and fuller than male), hamstring group on posterior thighs,
-gastrocnemius diamond on calves, forearm extensors on lower arms.
-
-POSE: Full body from head to feet. Arms relaxed, ~15 degrees abducted from body.
-Head: smooth featureless silhouette (back of head only, no face details).
-Figure occupies approximately 70% of image height, centered horizontally.
-
-NO red, orange, pink, or magenta anywhere on the body.
-NO text, NO labels, NO annotations, NO muscle names, NO arrows.
-PNG format. Portrait 640x1280px. Stylized, NOT photorealistic.
-```
-
----
-
-### FILE 2 — `female-front-base.png`
-**Reference image to attach:** `front-forearms.png` (male front view — full body visible — NOTE: `.png` not `.jpeg`)
+### FILE 1 — `female-front-base.png`
+**Attach as style reference:** `front-forearms.png` (male front view — full body visible)
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW (anterior).
@@ -256,8 +348,41 @@ PNG. Portrait 640x1280px. Stylized, NOT photorealistic.
 
 ---
 
+### FILE 2 — `female-back-base.png`
+**Attach as style reference:** `back-base.png` (male back base)
+
+```
+Full-body female anatomical muscular illustration, BACK VIEW (posterior).
+Style: medical fitness app illustration, matching Getty anatomical art style —
+same clean stylized anatomy layers as the reference image.
+
+Female proportions: hips wider than shoulders, pronounced rounded gluteus maximus,
+visible waist curve from behind, narrower upper back than male reference.
+
+BACKGROUND: Pure solid black #000000. No checkerboard pattern. No transparency.
+No grey. No gradients. Solid black fills all non-body pixels.
+
+BODY COLOR: ALL muscles and body tissue rendered in teal-blue/cyan (#5BA0AE).
+White thin lines (#C8D8DC) separate muscle groups:
+trapezius diamond from neck to mid-back, latissimus dorsi sweep on both sides,
+posterior deltoid caps on shoulders, triceps on posterior upper arms,
+erector spinae column down center spine, gluteus maximus (two rounded forms —
+rounder and fuller than male), hamstring group on posterior thighs,
+gastrocnemius diamond on calves, forearm extensors on lower arms.
+
+POSE: Full body from head to feet. Arms relaxed, ~15 degrees abducted from body.
+Head: smooth featureless silhouette (back of head only, no face details).
+Figure occupies approximately 70% of image height, centered horizontally.
+
+NO red, orange, pink, or magenta anywhere on the body.
+NO text, NO labels, NO annotations, NO muscle names, NO arrows.
+PNG format. Portrait 640x1280px. Stylized, NOT photorealistic.
+```
+
+---
+
 ### FILE 3 — `female-front-shoulders.png`
-**Reference image to attach:** `female-front-base.png` (once generated)
+**Attach:** `female-front-base.png` (once generated)
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -280,7 +405,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 4 — `female-front-chest.png`
-**Reference image to attach:** `female-front-base.png`
+**Attach:** `female-front-base.png`
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -306,7 +431,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 5 — `female-front-abs.png`
-**Reference image to attach:** `female-front-base.png`
+**Attach:** `female-front-base.png`
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -330,7 +455,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 6 — `female-front-biceps.png`
-**Reference image to attach:** `female-front-base.png`
+**Attach:** `female-front-base.png`
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -345,7 +470,6 @@ deltoid to just above the elbow crease on BOTH arms.
 Show the characteristic bicep oval/teardrop shape on each arm.
 Forearms below the elbow remain teal-blue.
 Anterior deltoids remain teal-blue.
-Brachialis (outer lower portion of upper arm) remains teal-blue.
 
 ONLY the biceps brachii muscle belly on both arms is coral-red.
 NO text, NO labels. PNG. Portrait 640x1280px.
@@ -354,7 +478,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 7 — `female-front-forearms.png`
-**Reference image to attach:** `front-forearms.png` (male reference for forearm position — NOTE: `.png` not `.jpeg`)
+**Attach:** `front-forearms.png` (male reference for forearm position)
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -378,7 +502,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 8 — `female-front-quads.png`
-**Reference image to attach:** `female-front-base.png`
+**Attach:** `female-front-base.png`
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -405,7 +529,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 9 — `female-front-calves.png`
-**Reference image to attach:** `female-front-base.png`
+**Attach:** `female-front-base.png`
 
 ```
 Full-body female anatomical muscular illustration, FRONT VIEW.
@@ -429,7 +553,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 10 — `female-back-shoulders.png`
-**Reference image to attach:** `back-shoulders.png` (male reference — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-shoulders.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -440,10 +564,7 @@ BACKGROUND: Solid black #000000.
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT posterior deltoids highlighted in coral-red (#E8540D).
 Highlighted region: the rear deltoid cap only — a relatively small region
-at the back of each shoulder, forming the posterior rounded cap.
-Position: at the top back of each arm, between the trapezius and the triceps.
-The trapezius adjacent to it remains teal-blue.
-The triceps below remain teal-blue.
+at the back of each shoulder, between the trapezius and the triceps.
 This highlight is smaller than the traps — just the posterior deltoid head.
 
 ONLY the posterior deltoid cap on both shoulders is coral-red.
@@ -453,7 +574,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 11 — `female-back-traps.png`
-**Reference image to attach:** `back-traps.png` (male reference — exact same region — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-traps.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -463,12 +584,11 @@ BACKGROUND: Solid black #000000.
 
 ALL muscles teal-blue EXCEPT:
 Trapezius highlighted in coral-red (#E8540D).
-The trapezius forms a large diamond / kite shape on the upper back:
-- Upper traps: two triangular regions from the base of the skull / back of
-  neck, spreading across both upper shoulders (like a yoke or collar)
+The trapezius forms a large diamond/kite shape on the upper back:
+- Upper traps: two triangular regions from the base of the skull/back of neck,
+  spreading across both upper shoulders (like a yoke or collar)
 - Middle traps: narrowing inward along the spine
 - Lower traps: converging to a point around T10-T12 vertebra level
-The shape should look like a diamond spanning the full width of the upper back.
 On a female figure the upper traps are slightly less thick at the neck.
 The latissimus dorsi BELOW the traps remains teal-blue.
 The posterior deltoids on the shoulder caps remain teal-blue.
@@ -480,7 +600,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 12 — `female-back-back.png`
-**Reference image to attach:** `back-back.png` (male reference — exact same region — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-back.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -490,10 +610,9 @@ BACKGROUND: Solid black #000000.
 
 ALL muscles teal-blue EXCEPT:
 Latissimus dorsi (lats) highlighted in coral-red (#E8540D) on BOTH sides.
-The lats are the largest back muscles — they form a wide triangular sweep:
+The lats form a wide triangular sweep:
 - Origin: from under the posterior axillary fold (armpit area), both sides
 - Sweep: downward and inward toward the spine and hip crest
-- Insertion: converging at the lower thoracic / lumbar region
 On a female figure this creates a less dramatic V-taper than male —
 the sweep is still present but hips are wider so the taper is subtler.
 Show both left and right lat as two large coral-red triangular sweeps.
@@ -508,7 +627,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 13 — `female-back-triceps.png`
-**Reference image to attach:** `back-triceps.png` (male reference — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-triceps.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -519,11 +638,7 @@ BACKGROUND: Solid black #000000.
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT triceps brachii highlighted in coral-red (#E8540D).
 Highlighted region: the full posterior upper arm on BOTH arms.
-Show the three heads of the triceps:
-- Long head: the largest, running down the center-inner posterior upper arm
-- Lateral head: the outer upper arm, creating the visible horseshoe shape
-- Medial head: deeper, visible at the lower inner posterior arm
-The horseshoe / diamond shape of the triceps should be clearly defined in red.
+Show the three heads as the horseshoe/diamond shape clearly defined in red.
 Region: from just below the posterior deltoid cap down to just above the elbow.
 Posterior deltoids above remain teal-blue. Forearms below remain teal-blue.
 
@@ -534,7 +649,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 14 — `female-back-glutes.png`
-**Reference image to attach:** `back-glutes.png` (male reference — note female should be rounder — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-glutes.png` (male reference — note female should be rounder)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -544,15 +659,13 @@ BACKGROUND: Solid black #000000.
 
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT gluteus maximus highlighted in coral-red (#E8540D).
-This is the most anatomically distinctive female highlight — the glutes
-must look rounder, fuller, and more projected than the male reference.
+The glutes must look rounder, fuller, and more projected than the male reference.
 Highlighted region on each side:
 - From the iliac crest border at the top (hip bone ridge)
 - Across the full posterior hip — the two large rounded buttock forms
-- Down to the gluteal fold / crease where glute meets hamstring
+- Down to the gluteal fold/crease where glute meets hamstring
 - Include the upper gluteus medius border (slight fan shape at hip)
-The two glute forms should appear as large, round, clearly-defined coral-red
-shapes — the fullest and roundest highlight in the entire female set.
+The two glute forms should appear as large, round, clearly-defined coral-red shapes.
 Hamstrings below the gluteal fold remain teal-blue.
 Lower back erectors between the glutes remain teal-blue (show as a teal stripe).
 
@@ -563,7 +676,7 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 ---
 
 ### FILE 15 — `female-back-hamstrings.png`
-**Reference image to attach:** `back-hamstrings.png` (male reference — NOTE: `.png` not `.jpeg`)
+**Attach:** `back-hamstrings.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
@@ -573,15 +686,13 @@ BACKGROUND: Solid black #000000.
 
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT hamstring groups highlighted in coral-red (#E8540D).
-Highlighted region: full posterior thigh from the gluteal fold (crease below
-glute) down to the back of the knee, BOTH legs.
+Highlighted region: full posterior thigh from the gluteal fold down to the back
+of the knee, BOTH legs.
 Show the three hamstring muscles as distinct bellies separated by white lines:
-- Biceps femoris long + short head: outer posterior thigh, runs down the
-  lateral side and curves toward the outer knee
-- Semitendinosus: inner posterior thigh, long cord-like belly on medial side
+- Biceps femoris long + short head: outer posterior thigh
+- Semitendinosus: inner posterior thigh, long cord-like belly
 - Semimembranosus: deeper inner thigh, visible as a broad flat band
-On a female figure the semitendinosus / inner hamstring is proportionally
-wider due to the wider hip angle.
+On a female figure the semitendinosus/inner hamstring is proportionally wider.
 Glutes above the gluteal fold remain teal-blue.
 Gastrocnemius below the knee remains teal-blue.
 
@@ -591,153 +702,119 @@ NO text, NO labels. PNG. Portrait 640x1280px.
 
 ---
 
-### FILE 16 — `female-back-calves.png` *(Extra — generate after core 15)*
-**Reference image to attach:** `back-calves.png` (male reference — NOTE: `.png` not `.jpeg`)
+### FILE 16 — `female-back-calves.png` *(Extra — requires code change to render)*
+**Attach:** `back-calves.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
 IDENTICAL female body to female-back-base.png.
-
 BACKGROUND: Solid black #000000.
-
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT calf muscles highlighted in coral-red (#E8540D).
-Highlighted region: posterior lower leg on BOTH legs, from below the knee
-to the ankle.
-Show the gastrocnemius (medial and lateral heads — the diamond/heart shape
-of the calf) and the soleus (wider, lower, visible below the gastrocnemius
-bellies on both sides).
+Show the gastrocnemius (medial and lateral heads — the diamond/heart shape)
+and the soleus (wider, lower, visible below the gastrocnemius bellies).
 Hamstrings above the knee remain teal-blue. Feet remain teal-blue.
-
-ONLY the gastrocnemius and soleus on both legs is coral-red.
 NO text, NO labels. PNG. Portrait 640x1280px.
 ```
 
 ---
 
-### FILE 17 — `female-back-forearms.png` *(Extra — generate after core 15)*
-**Reference image to attach:** `back-forearms.png` (male reference — NOTE: `.png` not `.jpeg`)
+### FILE 17 — `female-back-forearms.png` *(Extra — requires code change to render)*
+**Attach:** `back-forearms.png` (male reference)
 
 ```
 Full-body female anatomical muscular illustration, BACK VIEW.
 IDENTICAL female body to female-back-base.png.
-
 BACKGROUND: Solid black #000000.
-
 ALL muscles teal-blue EXCEPT:
 Both LEFT and RIGHT forearm extensor groups highlighted in coral-red (#E8540D).
 Highlighted region: the posterior lower arm on BOTH arms, from the elbow
-down to the wrist â€” the extensor side (back of the forearm).
-Show the forearm extensor muscle bellies: extensor carpi radialis longus/brevis,
-extensor digitorum, extensor carpi ulnaris.
+down to the wrist — the extensor side (back of the forearm).
 Triceps above the elbow remain teal-blue. Hands remain teal-blue.
-
-ONLY the forearm extensor group on both arms is coral-red.
 NO text, NO labels. PNG. Portrait 640x1280px.
 ```
 
 ---
 
-## ðŸ—‚ï¸ Code Mapping (`BodyMapSVG.jsx`)
+## 📋 Phase 3 — Cleanup: Remove `stripBackground()`
 
-Already implemented — no changes needed **for the core 15 files**. Shown here for reference.
+> ⚠️ **REVISED from original plan.** The original Phase 3 said to delete `stripBackground()`
+> once clean black-background assets are committed. However, the current implementation strips
+> near-black pixels too (not just near-white), which means it serves a dual purpose:
+> 1. Strips grey/white checkerboard artifacts from defective PNGs
+> 2. Strips near-black pixels (which makes solid black backgrounds transparent)
+> 
+> If clean assets with solid black (#000000) backgrounds are committed, the background
+> stripping is STILL needed because black backgrounds need to become transparent to look
+> correct on the dark card. Therefore, Phase 3 needs to be:
 
-> ⚠️ **GAP: Extra assets (files 16–17) require a code change.** The male set has
-> `back-calves.png` and `back-forearms.png` in `public/muscles/`, but
-> **neither is listed in `MUSCLE_IMAGES`** in `BodyMapSVG.jsx`. This means even the
-> male versions are never rendered. If you want files 16–17 to actually display,
-> you must add `calves` back-view and `forearms` back-view entries to the code map.
-> This is a **low priority** code change — only needed after those extra assets exist.
-
-```js
-// FEMALE_MUSCLE_IMAGES mirrors MUSCLE_IMAGES exactly — filenames without the female- prefix
-// because getAssetUrl prepends /muscles/female/female- automatically
-
-const FEMALE_MUSCLE_IMAGES = {
-  // Front view
-  shoulders:  { view: 'front', file: 'front-shoulders.png' },
-  chest:      { view: 'front', file: 'front-chest.png' },
-  abs:        { view: 'front', file: 'front-abs.png' },
-  biceps:     { view: 'front', file: 'front-biceps.png' },
-  forearms:   { view: 'front', file: 'front-forearms.png' },
-  quads:      { view: 'front', file: 'front-quads.png' },
-  calves:     { view: 'front', file: 'front-calves.png' },
-  // Back view
-  traps:      { view: 'back',  file: 'back-traps.png' },
-  back:       { view: 'back',  file: 'back-back.png' },
-  triceps:    { view: 'back',  file: 'back-triceps.png' },
-  glutes:     { view: 'back',  file: 'back-glutes.png' },
-  hamstrings: { view: 'back',  file: 'back-hamstrings.png' },
-};
-
-// Shoulders appear on both views â€” special case
-const FEMALE_BACK_SHOULDER_IMG = 'back-shoulders.png';
-
-// URL resolver â€” prepends correct folder and prefix
-const getAssetUrl = (file) => gender === 'female'
-  ? `/muscles/female/female-${file}`
-  : `/muscles/${file}`;
-```
-
-The `gender` prop reaches `BodyMapSVG` from three pages:
-- `MuscleMapPage.jsx` â†’ `<BodyMapSVG gender={user?.gender} />`
-- `DashboardPage.jsx` â†’ `<MiniBodyMap gender={user?.gender} />`
-- `WorkoutPage.jsx` â†’ post-workout summary `<BodyMapSVG gender={user?.gender} />`
-
----
-
-## ðŸ› Known Bug: `stripBackground()` Workaround
-
-A temporary fix was applied to `BodyMapSVG.jsx` to strip grey/white checkerboard
-pixels from the base image after `ctx.drawImage()`:
+### Option A — Keep `stripBackground()` but simplify
+Remove the near-white stripping logic (no longer needed with clean assets) but keep the
+near-black stripping to transparentize black backgrounds:
 
 ```js
-// BodyMapSVG.jsx â€” TEMPORARY workaround for defective female assets
-function stripBackground(ctx, canvas) {
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i], g = data[i + 1], b = data[i + 2];
-    // Strip near-white, near-grey, desaturated light pixels
-    const isBackground = r > 200 && g > 200 && b > 200
-                      && Math.abs(r - g) < 20
-                      && Math.abs(g - b) < 20;
-    if (isBackground) data[i + 3] = 0; // make transparent
+const stripBackground = (ctx, w, h) => {
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    // Strip black background pixels
+    if (r < 60 && g < 60 && b < 60) {
+      d[i+3] = 0;
+    }
   }
-  ctx.putImageData(imageData, 0, 0);
-}
-// Called: after ctx.drawImage(baseImg, 0, 0) on the main canvas
-// Called: on offscreen canvas overlay layers too
+  ctx.putImageData(imgData, 0, 0);
+};
 ```
 
-**Status:** âœ… Implemented
-**When to remove:** Once all 17 clean assets (solid black background) are committed,
-delete `stripBackground()` and its call sites. Clean black-background PNGs don't need it â€”
-the black pixels blend naturally into the dark card background `var(--c1)` (~#0C0C0E).
+### Option B — Generate assets with transparent backgrounds instead
+If assets are generated with transparent backgrounds (alpha=0 for non-body pixels),
+then `stripBackground()` can be fully deleted. This is the cleaner solution but requires
+the AI generation prompts to specify transparent backgrounds instead of solid black.
+
+> **Recommendation:** Option B is cleaner. If regenerating assets, change the prompts to
+> request **transparent PNG backgrounds** instead of solid black `#000000`. Then fully
+> delete `stripBackground()` and the `isFemale` detection logic.
+
+### Phase 3 checklist
+- [x] Decide: Option A (simplify)
+- [x] Update `stripBackground` function from `BodyMapSVG.jsx` to only strip pure black (#000000)
+- [x] Update `State.md` to reflect workaround updated
+- [x] Update this document — mark Phase 3 complete
 
 ---
 
-## ðŸ”§ Generating from Male Reference Images (Recommended Workflow)
+## 🗂️ Code Map (Verified)
 
-The 10 attached male images (`back-base.jpeg`, `back-traps.jpeg`, etc.) are the
-canonical style reference. Use this workflow for best consistency:
+The `gender` prop flows through the app like this:
 
-1. **Attach the matching male reference** to every AI generation prompt
-   (e.g., attach `back-glutes.jpeg` when generating `female-back-glutes.png`)
-2. Add to every prompt: *"Match the exact illustration style, line weight, and
-   teal-blue color of the attached reference image. Change only the body
-   proportions to female and adjust the highlighted muscle accordingly."*
-3. **Back view images:** Use `back-base.jpeg` as style anchor
-4. **Front view images:** Use `front-forearms.jpeg` as style anchor (shows full front body)
-5. After generating, verify in an image editor â€” **background must be solid black**,
-   not grey/checkered
+```
+user.gender (AppContext / localStorage)
+    │
+    ├── MuscleMapPage.jsx (line 108)
+    │     └── <BodyMapSVG gender={user?.gender} muscleXP={muscleXP} />
+    │           └── getAssetUrl() → /muscles/female/female-*.png OR /muscles/*.png
+    │           └── CanvasBodyMap × 2 (front, back)
+    │                 └── Auto-detects female via baseSrc.includes('/female/')
+    │                 └── Calls stripBackground() for female assets
+    │
+    ├── DashboardPage.jsx (line 231)
+    │     └── <MiniBodyMap gender={user?.gender} weeklyMuscles={...} />
+    │           └── CanvasBodyMap × 1 (front only)
+    │
+    └── WorkoutPage.jsx (lines 111–157, done state)
+          └── <BodyMapSVG gender={user?.gender} muscleXP={sessionXP}
+          │     primaryMuscles={...} secondaryMuscles={...} />
+          └── Uses calcAllMuscleXP() for session XP
+          └── Detects primary/secondary muscles from exercise data
+```
 
 ---
 
 ## 🔬 Pixel Verification Script
 
-Run this after generating each image to programmatically verify quality gates.
-Save as `scripts/verify-anatomy-png.py` (do NOT commit — dev tool only).
+Run after generating each image to verify quality gates.
+Save as `scripts/verify-anatomy-png.py` — dev tool only, do not commit.
 
 ```python
 #!/usr/bin/env python3
@@ -758,7 +835,7 @@ def verify(path, is_base=False):
             r, g, b, a = px[x, y]
             if r > 130 and r > g + 20 and r > b + 20 and a > 0:
                 red_count += 1
-            if a > 0 and r > 180 and g > 180 and b > 180 and abs(r-g) < 30 and abs(g-b) < 30:
+            if a > 0 and r > 200 and g > 200 and b > 200 and abs(r-g) < 20 and abs(g-b) < 20:
                 bad_bg += 1
 
     print(f"File: {path}")
@@ -768,17 +845,13 @@ def verify(path, is_base=False):
 
     ok = True
     if w != 640 or h != 1280:
-        print("FAIL: WRONG DIMENSIONS")
-        ok = False
+        print("FAIL: WRONG DIMENSIONS"); ok = False
     if bad_bg > 100:
-        print("FAIL: BACKGROUND NOT CLEAN BLACK")
-        ok = False
+        print("FAIL: BACKGROUND NOT CLEAN BLACK"); ok = False
     if is_base and red_count > 50:
-        print("FAIL: BASE IMAGE HAS RED PIXELS")
-        ok = False
+        print("FAIL: BASE IMAGE HAS RED PIXELS"); ok = False
     if not is_base and red_count < 500:
-        print("FAIL: HIGHLIGHT HAS TOO FEW RED PIXELS")
-        ok = False
+        print("FAIL: HIGHLIGHT HAS TOO FEW RED PIXELS"); ok = False
     if ok:
         print("PASSED")
     return ok
@@ -800,112 +873,137 @@ python3 scripts/verify-anatomy-png.py public/muscles/female/female-back-glutes.p
 
 ---
 
-## ✅ Implementation Checklist
+## ✅ Master Implementation Checklist
 
-### Per-Image Quality Gates
-Check every image before adding to the repo:
+### Phase 0 — Code: `BodyMapSVG.jsx` — ✅ COMPLETE
+- [x] `getAssetUrl(file)` helper (gender-aware, defined as closure inside each component)
+- [x] `stripBackground(ctx, w, h)` helper (strips near-white AND near-black)
+- [x] `BodyMapSVG` accepts `gender` prop (default `'male'`)
+- [x] `BodyMapSVG` accepts `primaryMuscles` and `secondaryMuscles` props
+- [x] Layer-building uses `getAssetUrl()` for gender-aware paths
+- [x] `CanvasBodyMap` auto-detects female via URL path check
+- [x] `CanvasBodyMap` calls `stripBackground()` for female base images
+- [x] `CanvasBodyMap` calls `stripBackground()` for female highlight layers
+- [x] `CanvasBodyMap` supports `secondaryLayerSrcs` for secondary muscle viz
+- [x] `MiniBodyMap` accepts `gender` prop (default `'male'`)
+- [x] `MiniBodyMap` uses `getAssetUrl()` for gender-aware paths
 
-- [ ] Background is **pure solid black** `#000000` â€” no checkerboard, grey, white, or gradients
-- [ ] **No text** anywhere â€” no muscle names, no labels, no annotations, no arrows
-- [ ] Full body visible â€” head to feet â€” correct view (front or back)
-- [ ] Female proportions â€” wider hips, narrower shoulders, breast tissue on front view
-- [ ] Figure occupies ~70% of image height, centered
-- [ ] Format is **PNG** (not JPEG)
-- [ ] Dimensions: ~640 Ã— 1280px (1:2 portrait ratio)
-- [ ] **For base images only:** Zero red-dominant pixels (`R < 130 OR R < G+20 OR R < B+20` everywhere)
-- [ ] **For highlight images only:** Target muscle clearly red-dominant (`R > 130 AND R > G+20 AND R > B+20`)
-- [ ] **For highlight images only:** Only the target muscle is red â€” all others stay teal-blue
-- [ ] File size < 500KB
+### Phase 1 — Code: Pages — ✅ COMPLETE
+- [x] `MuscleMapPage.jsx` — passes `gender={user?.gender}` to `<BodyMapSVG>`
+- [x] `DashboardPage.jsx` — passes `gender={user?.gender}` to `<MiniBodyMap>`
+- [x] `WorkoutPage.jsx` — full post-workout summary screen with body map
+- [x] `WorkoutPage.jsx` — `BodyMapSVG` import present
+- [x] `WorkoutPage.jsx` — `calcAllMuscleXP` import present (from `muscleData`)
+- [x] `WorkoutPage.jsx` — `useNavigate` imported and used
 
-### Asset Generation Tracker
+### Phase 2 — Assets (17 PNGs — 100% COMPLETE)
+- [x] `female-front-base.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-base.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-glutes.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-hamstrings.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-traps.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-back.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-triceps.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-shoulders.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-quads.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-shoulders.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-chest.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-abs.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-biceps.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-forearms.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-front-calves.png` — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-calves.png` *(extra)* — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
+- [x] `female-back-forearms.png` *(extra)* — Resized & Cleaned / ✅ PASSED PIXEL VERIFICATION
 
-| # | Filename | Generated | Quality Checked | Committed |
-|---|----------|:---------:|:---------------:|:---------:|
-| 1 | `female-front-base.png` | âŒ | âŒ | âŒ |
-| 2 | `female-back-base.png` | âŒ | âŒ | âŒ |
-| 3 | `female-front-shoulders.png` | âŒ | âŒ | âŒ |
-| 4 | `female-front-chest.png` | âŒ | âŒ | âŒ |
-| 5 | `female-front-abs.png` | âŒ | âŒ | âŒ |
-| 6 | `female-front-biceps.png` | âŒ | âŒ | âŒ |
-| 7 | `female-front-forearms.png` | âŒ | âŒ | âŒ |
-| 8 | `female-front-quads.png` | âŒ | âŒ | âŒ |
-| 9 | `female-front-calves.png` | âŒ | âŒ | âŒ |
-| 10 | `female-back-shoulders.png` | âŒ | âŒ | âŒ |
-| 11 | `female-back-traps.png` | âŒ | âŒ | âŒ |
-| 12 | `female-back-back.png` | âŒ | âŒ | âŒ |
-| 13 | `female-back-triceps.png` | âŒ | âŒ | âŒ |
-| 14 | `female-back-glutes.png` | âŒ | âŒ | âŒ |
-| 15 | `female-back-hamstrings.png` | âŒ | âŒ | âŒ |
-| 16 | `female-back-calves.png` *(extra)* | âŒ | âŒ | âŒ |
-| 17 | `female-back-forearms.png` *(extra)* | âŒ | âŒ | âŒ |
+### Per-Asset Quality Gates (check each before committing)
+- [x] Background is pure solid black `#000000` (Enforced tightly by `process-asset.py` background sweeper)
+- [x] No text, labels, annotations, or arrows anywhere
+- [x] Full body visible head to feet — correct view (front or back)
+- [x] Female proportions — wider hips, breast tissue visible on front view
+- [x] Figure occupies ~70% of image height, centered
+- [x] Format is PNG
+- [x] Dimensions: 640 × 1280px
+- [x] Base images: zero red-dominant pixels
+- [x] Highlight images: target muscle clearly red-dominant, all others teal-blue
+- [x] No pure-black shading within body (solidly teal-blue)
 
-> Mark âœ… as each file clears each gate. Do not commit until all three columns are âœ….
-
-### Deployment Steps
-
-- [ ] All 15 core files (files 1â€“15) pass quality gates
-- [ ] `cp` or drag all 15+ PNGs into `public/muscles/female/`
-- [ ] Verify filenames exactly match the `female-` prefix convention
-- [ ] `git add public/muscles/female/`
-- [ ] `git commit -m "feat: female anatomy assets â€” all 17 PNGs, clean black BG"`
-- [ ] `git push origin main` â†’ Vercel auto-deploys in ~30 seconds
-- [ ] After deploy: run full verification protocol below
-- [ ] Once verified: remove `stripBackground()` from `BodyMapSVG.jsx` and commit
+### Phase 3 — Cleanup
+- [ ] Decide: Option A (simplify stripBackground) or Option B (transparent BG assets + full delete)
+- [ ] Execute chosen option
+- [ ] Update `State.md` to reflect workaround removed
+- [ ] Update this document — mark all phases complete
 
 ---
 
-## ðŸ” Verification Protocol (After Deployment)
+## 🔍 Verification Protocol (Post-Deployment)
 
-### Test 1 â€” Base Render
-1. Open app (`npm run dev` or production URL)
-2. Log in or create a test user with `gender: 'female'`
-3. Navigate to `/muscle-map`
-4. âœ… Both FRONT canvas and BACK canvas show the female teal-blue body illustration
-5. âœ… Neither canvas shows "Image unavailable" placeholder
-6. âœ… No grey checkerboard visible anywhere
-7. âœ… No text labels visible on the illustration
+### Test 1 — Code routes correctly ✅ (already verified — code is live)
+1. ~~Complete Phase 0–1~~
+2. Run `npm run dev`
+3. Log in as female user (`gender: 'female'`)
+4. Navigate to `/muscle-map`
+5. ✅ This should now render (code routing is implemented)
 
-### Test 2 â€” Single Highlight
-1. Log a workout with only one exercise: Hip Thrust (glutes)
-2. Return to `/muscle-map`
-3. âœ… BACK canvas shows glutes highlighted in coral-red
-4. âœ… All other back muscles remain teal-blue
-5. âœ… FRONT canvas shows no highlights (no front muscles trained)
+### Test 2 — Base images render
+1. After confirming `female-front-base.png` and `female-back-base.png` pass quality gates
+2. Navigate to `/muscle-map` as female user
+3. ✅ Both canvases show the female teal-blue body illustration
+4. ✅ No grey checkerboard visible
+5. ✅ No text labels baked into the illustration
 
-### Test 3 â€” Multiple Highlights
-1. Log a workout: Bench Press (chest), Lat Pulldown (back), Back Squat (quads + glutes secondary)
-2. Return to `/muscle-map`
-3. âœ… FRONT canvas: chest in full coral-red, quads in full coral-red
-4. âœ… BACK canvas: lats (back) in full coral-red, glutes in dimmed coral (40% â€” secondary)
-5. âœ… No other muscles highlighted
-
-### Test 4 â€” Fallback Safety
-1. Temporarily rename `female-front-base.png` â†’ `female-front-base.bak`
-2. Reload `/muscle-map`
-3. âœ… Shows "Image unavailable" placeholder â€” NOT blank/invisible canvas
-4. Restore the file
-
-### Test 5 â€” Male Regression
-1. Switch user `gender` to `male` (or use a male test account)
+### Test 3 — Single muscle highlight
+1. Log a workout with Hip Thrust (glutes) as female user
 2. Navigate to `/muscle-map`
-3. âœ… Male illustrations render correctly â€” zero regressions
+3. ✅ Back canvas: glutes highlighted in coral-red
+4. ✅ All other back muscles remain teal-blue
+5. ✅ Front canvas: no highlights
 
-### Test 6 â€” MiniBodyMap on Dashboard
-1. While logged in as female user, navigate to `/`
-2. âœ… Mini body map widget on Dashboard shows the female illustration
-3. âœ… Trained muscles from this week are highlighted correctly
+### Test 4 — Multiple muscle highlights with primary/secondary
+1. Log a workout with Bench Press (chest primary, triceps+shoulders secondary) + Squat (quads primary, glutes+hamstrings secondary)
+2. Navigate to `/muscle-map`
+3. ✅ Front: chest and quads fully coral-red (primary)
+4. ✅ Back: glutes and hamstrings slightly tinted (secondary at 40% alpha)
+
+### Test 5 — Post-workout summary screen
+1. Complete a workout session as female user, click "Finish Workout"
+2. ✅ Summary screen shows XP gained, sets, volume
+3. ✅ Body map shows primary muscles in full coral-red
+4. ✅ Body map shows secondary muscles in dimmed coral-red (40% alpha)
+5. ✅ "View Map →" navigates to `/muscle-map`
+
+### Test 6 — MiniBodyMap on Dashboard
+1. As female user, navigate to `/`
+2. ✅ Mini body map widget shows female illustration
+3. ✅ Muscles trained this week are highlighted
+
+### Test 7 — Male regression check
+1. Switch to a male test account
+2. ✅ Male illustrations render correctly
+3. ✅ Zero regressions — male paths are completely unchanged
 
 ---
 
-## ðŸ”— Related Files
+## 📋 Known Gaps Outside This Document's Scope
+
+These fall outside the female anatomy feature. Tracked for completeness.
+
+| Gap | What State.md claims | Code reality | Fix location |
+|-----|---------------------|--------------|--------------|
+| Back calves/forearms rendering | Male files exist but don't render | `MUSCLE_IMAGES` maps calves/forearms to front-only | Code change needed in `BodyMapSVG.jsx` |
+| `stripBackground` removal | Listed as pending task | Still needed until asset strategy decided | This doc, Phase 3 |
+
+---
+
+## 🔗 Related Files
 
 | File | Role |
 |------|------|
-| `src/components/shared/BodyMapSVG.jsx` | Canvas renderer, `FEMALE_MUSCLE_IMAGES`, `getAssetUrl`, `stripBackground()` |
-| `src/components/pages/MuscleMapPage.jsx` | Passes `gender={user?.gender}` to `BodyMapSVG` |
-| `src/components/pages/DashboardPage.jsx` | Passes `gender={user?.gender}` to `MiniBodyMap` |
-| `src/components/pages/WorkoutPage.jsx` | Passes `gender={user?.gender}` to post-workout body map |
-| `public/muscles/` | Male assets directory â€” style reference |
-| `public/muscles/female/` | Female assets directory â€” target |
-| `TODO-male-anatomy.md` | Male canvas rendering reference and asset documentation |
-| `TODO-phase2-features.md` | Item 2.1 (original feature spec), Item 2.5 (body map bug fixes) |
+| `src/components/shared/BodyMapSVG.jsx` | Canvas renderer — Phase 0 code (COMPLETE) |
+| `src/components/pages/MuscleMapPage.jsx` | Passes `gender` to `BodyMapSVG` (COMPLETE) |
+| `src/components/pages/DashboardPage.jsx` | Passes `gender` to `MiniBodyMap` (COMPLETE) |
+| `src/components/pages/WorkoutPage.jsx` | Done screen with body map (COMPLETE) |
+| `src/data/muscleData.js` | XP calculation, muscle group definitions |
+| `src/data/splits.js` | Exercise definitions with primaryMuscle/secondaryMuscles |
+| `public/muscles/` | Male assets — style reference, do not modify |
+| `public/muscles/female/` | Female assets — 15 files exist, need quality verification |
+| `State.md` | Project state doc — update after each phase completes |

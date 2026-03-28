@@ -38,11 +38,7 @@ const stripBackground = (ctx, w, h) => {
   const d = imgData.data;
   for (let i = 0; i < d.length; i += 4) {
     const r = d[i], g = d[i+1], b = d[i+2];
-    // Strip near-white / light-grey checkerboard pixels (desaturated & bright)
-    if (r > 180 && g > 180 && b > 180 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30) {
-      d[i+3] = 0;
-    }
-    // Strip near-black text / label pixels (dark & desaturated)
+    // Strip solid black background pixels to make them transparent
     if (r < 60 && g < 60 && b < 60) {
       d[i+3] = 0;
     }

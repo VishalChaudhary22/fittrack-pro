@@ -32,6 +32,10 @@ const MUSCLE_IMAGES = {
 
 const BACK_SHOULDER_IMG = 'back-shoulders.png';
 
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const RENDER_W = 640;
+const RENDER_H = 1280;
+
 // ─── BACKGROUND STRIP (fixes AI-generated PNGs with baked-in checkerboard) ──
 const stripBackground = (ctx, w, h) => {
   const imgData = ctx.getImageData(0, 0, w, h);
@@ -44,6 +48,17 @@ const stripBackground = (ctx, w, h) => {
     }
   }
   ctx.putImageData(imgData, 0, 0);
+};
+
+// ─── BUILD BODY MASK (prevents highlight leaking outside base silhouette) ────
+const buildBodyMask = (imageData) => {
+  const d = imageData.data;
+  const mask = new Uint8Array(d.length / 4);
+  for (let i = 0; i < d.length; i += 4) {
+    // A pixel is "body" if it's opaque and not near-black (background)
+    mask[i / 4] = (d[i+3] > 128 && (d[i] > 50 || d[i+1] > 50 || d[i+2] > 50)) ? 1 : 0;
+  }
+  return mask;
 };
 
 // ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
@@ -88,15 +103,30 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
         return;
       }
       
-      canvas.width = baseImg.width || 800;
-      canvas.height = baseImg.height || 800;
+      // Normalize all canvases to a fixed render size (640x1280)
+      // Male assets are 640x640 — draw centered vertically
+      // Female assets are 640x1280 — draw at native size
+      canvas.width = RENDER_W;
+      canvas.height = RENDER_H;
+      
+      const isFemale = baseSrc.includes('/female/');
+      
+      // Compute vertical offset to center shorter (male 640x640) images
+      const drawImg = (targetCtx, img) => {
+        const yOffset = Math.round((RENDER_H - img.height) / 2);
+        targetCtx.drawImage(img, 0, yOffset);
+      };
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(baseImg, 0, 0);
+      drawImg(ctx, baseImg);
       
       // Strip baked-in checkered background & text labels from AI-generated female PNGs
-      const isFemale = baseSrc.includes('/female/');
       if (isFemale) stripBackground(ctx, canvas.width, canvas.height);
+      
+      // Build a body silhouette mask from the base — only pixels inside
+      // this mask will accept highlight colors (prevents leaking)
+      const baseData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const bodyMask = buildBodyMask(baseData);
       
       if (allLayerImgs.length === 0) {
         setLoading(false);
@@ -105,8 +135,6 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
 
       const primaryImgs = allLayerImgs.slice(0, layerSrcs.length);
       const secondaryImgs = allLayerImgs.slice(layerSrcs.length);
-
-      const baseData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       
       const offCanvas = document.createElement('canvas');
       offCanvas.width = canvas.width;
@@ -115,11 +143,15 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
 
       const processLayer = (img, isSecondary) => {
         offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
-        offCtx.drawImage(img, 0, 0);
+        drawImg(offCtx, img);
         if (isFemale) stripBackground(offCtx, offCanvas.width, offCanvas.height);
         const layerData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
         
         for (let i = 0; i < layerData.data.length; i += 4) {
+          const px = i / 4;
+          // Skip pixels outside the base body silhouette
+          if (!bodyMask[px]) continue;
+          
           const r = layerData.data[i];
           const g = layerData.data[i+1];
           const b = layerData.data[i+2];

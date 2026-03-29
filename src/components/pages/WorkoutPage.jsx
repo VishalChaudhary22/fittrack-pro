@@ -233,26 +233,28 @@ export default function WorkoutPage() {
 
       {timer?.active && <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />}
 
-      {showFAB && (
-        <button
-          className="btn-p"
-          onClick={finish}
-          style={{
-            position: 'fixed',
-            bottom: window.innerWidth <= 768 ? 80 : 24,
-            right: 16,
-            zIndex: 400,
-            padding: '10px 16px',
-            fontSize: 13,
-            borderRadius: 20,
-            display: 'flex', alignItems: 'center', gap: 6,
-            boxShadow: '0 4px 20px rgba(232,84,13,.4)',
-            animation: 'fabIn .3s cubic-bezier(.4,0,.2,1)',
-          }}
-          aria-label="Finish workout session"
-        >
-          <Check size={14} /> Finish
-        </button>
+      {showFAB && session && (
+        <Portal>
+          <button
+            className="btn-p"
+            onClick={finish}
+            style={{
+              position: 'fixed',
+              bottom: window.innerWidth <= 768 ? 80 : 24,
+              right: 16,
+              zIndex: 9999,
+              padding: '12px 20px',
+              fontSize: 14,
+              borderRadius: 24,
+              display: 'flex', alignItems: 'center', gap: 6,
+              boxShadow: '0 4px 24px rgba(232,84,13,.5)',
+              animation: 'fabIn .3s cubic-bezier(.4,0,.2,1)',
+            }}
+            aria-label="Finish workout session"
+          >
+            <Check size={15} /> Finish
+          </button>
+        </Portal>
       )}
     </div>
   );

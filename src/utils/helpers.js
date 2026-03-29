@@ -30,8 +30,8 @@ export const cmToFtIn = (cm) => {
   const inches = Math.round(totalIn % 12);
   return `${ft}'${inches}"`;
 };
-export const displayWeight = (kg, units) => units === 'imperial' ? `${kgToLbs(kg)} lbs` : `${kg} kg`;
-export const displayHeight = (cm, units) => units === 'imperial' ? cmToFtIn(cm) : `${cm} cm`;
+export const displayWeight = (kg, unitWeight) => unitWeight === 'lbs' ? `${kgToLbs(kg)} lbs` : `${kg} kg`;
+export const displayHeight = (cm, unitHeight) => unitHeight === 'ft' ? cmToFtIn(cm) : `${cm} cm`;
 export const mkWtItemsImperial = (lo = 66, hi = 440, step = 0.5) => {
   const a = [];
   for (let v = lo; v <= hi; v = parseFloat((v + step).toFixed(1))) a.push(v);

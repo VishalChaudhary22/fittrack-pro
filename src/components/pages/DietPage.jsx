@@ -9,8 +9,10 @@ import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 
 export default function DietPage() {
   const { user, caloriesLog, setCaloriesLog, addToast } = useApp();
-  const units = user.units || 'metric';
-  const isImp = units === 'imperial';
+  const unitWeight = user.unitWeight || 'kg';
+  const isImpWeight = unitWeight === 'lbs';
+  const unitHeight = user.unitHeight || 'cm';
+  const isImpHeight = unitHeight === 'ft';
   const [diet, setDiet] = useState('nonveg');
   const [calInput, setCalInput] = useState({ meal: '', calories: '' });
   const [showCalLog, setShowCalLog] = useState(false);
@@ -56,12 +58,12 @@ export default function DietPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Diet Guide" sub={`Personalised for ${user.name.split(' ')[0]} · ${user.weightGoal ? `Goal: ${isImp ? kgToLbs(user.weightGoal) + 'lbs' : user.weightGoal + 'kg'}` : 'No goal set'}`} />
+      <PageHeader title="Diet Guide" sub={`Personalised for ${user.name.split(' ')[0]} · ${user.weightGoal ? `Goal: ${isImpWeight ? kgToLbs(user.weightGoal) + 'lbs' : user.weightGoal + 'kg'}` : 'No goal set'}`} />
 
       {/* Stats bar */}
       <div className="card" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700 }}>BODY STATS</div>
-        {[{ l: 'Weight', v: isImp ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg` }, { l: 'Height', v: isImp ? cmToFtIn(user.height) : `${user.height}cm` }, { l: 'BMI', v: bmi }, { l: 'TDEE', v: `${tdee}kcal` }, { l: 'Activity', v: ACTIVITY[user.activityLevel || 'moderate']?.label.split('(')[0].trim() }].map(s => (
+        {[{ l: 'Weight', v: isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg` }, { l: 'Height', v: isImpHeight ? cmToFtIn(user.height) : `${user.height}cm` }, { l: 'BMI', v: bmi }, { l: 'TDEE', v: `${tdee}kcal` }, { l: 'Activity', v: ACTIVITY[user.activityLevel || 'moderate']?.label.split('(')[0].trim() }].map(s => (
           <div key={s.l} style={{ padding: '5px 11px', background: 'var(--c3)', borderRadius: 8, border: '1px solid var(--bd)' }}>
             <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>{s.l}</div>
             <div style={{ fontSize: 13, fontWeight: 600, marginTop: 1 }}>{s.v}</div>
@@ -158,7 +160,7 @@ export default function DietPage() {
         ))}
       </div>
       <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: -6, marginBottom: 14, padding: '0 2px' }}>
-        ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal' : 'current'} weight ({isImp ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
+        ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal' : 'current'} weight ({isImpWeight ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
       </div>
 
       {/* Whey inline */}

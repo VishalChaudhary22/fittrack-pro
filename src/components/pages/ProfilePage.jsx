@@ -9,10 +9,13 @@ import { exportData, importData } from '../../utils/storage';
 
 export default function ProfilePage() {
   const { user, setUsers, logout, theme, toggleTheme, addToast } = useApp();
-  const units = user.units || 'metric';
-  const toggleUnits = () => {
-    const next = units === 'metric' ? 'imperial' : 'metric';
-    setUsers(p => p.map(u => u.id === user.id ? { ...u, units: next } : u));
+  const unitWeight = user.unitWeight || 'kg';
+  const unitHeight = user.unitHeight || 'cm';
+  const toggleUnitWeight = () => {
+    setUsers(p => p.map(u => u.id === user.id ? { ...u, unitWeight: unitWeight === 'kg' ? 'lbs' : 'kg' } : u));
+  };
+  const toggleUnitHeight = () => {
+    setUsers(p => p.map(u => u.id === user.id ? { ...u, unitHeight: unitHeight === 'cm' ? 'ft' : 'cm' } : u));
   };
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
@@ -70,15 +73,27 @@ export default function ProfilePage() {
           </div>
           <div className="sep" />
 
-          {/* Units toggle */}
+          {/* Weight Unit toggle */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 10px', background: 'var(--c2)', borderRadius: 12, border: '1px solid var(--bd)', marginBottom: 8 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Units</div>
-              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Weight & height display</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Weight Unit</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Log and display weight</div>
             </div>
             <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--bd)' }}>
-              <button onClick={toggleUnits} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: units === 'metric' ? 'var(--o)' : 'var(--c3)', color: units === 'metric' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>KG / CM</button>
-              <button onClick={toggleUnits} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: units === 'imperial' ? 'var(--o)' : 'var(--c3)', color: units === 'imperial' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>LBS / FT</button>
+              <button onClick={toggleUnitWeight} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitWeight === 'kg' ? 'var(--o)' : 'var(--c3)', color: unitWeight === 'kg' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>KG</button>
+              <button onClick={toggleUnitWeight} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitWeight === 'lbs' ? 'var(--o)' : 'var(--c3)', color: unitWeight === 'lbs' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>LBS</button>
+            </div>
+          </div>
+
+          {/* Height Unit toggle */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 10px', background: 'var(--c2)', borderRadius: 12, border: '1px solid var(--bd)', marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Height Unit</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Profile height display</div>
+            </div>
+            <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--bd)' }}>
+              <button onClick={toggleUnitHeight} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'cm' ? 'var(--o)' : 'var(--c3)', color: unitHeight === 'cm' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>CM</button>
+              <button onClick={toggleUnitHeight} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'ft' ? 'var(--o)' : 'var(--c3)', color: unitHeight === 'ft' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>FT/IN</button>
             </div>
           </div>
 
@@ -105,11 +120,11 @@ export default function ProfilePage() {
             <button className="btn-g" style={{ fontSize: 12 }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : '✏️ Edit'}</button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: units === 'imperial' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: units === 'imperial' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: units === 'imperial' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }].map(fld => {
+            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: unitWeight === 'lbs' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }].map(fld => {
               const dispVal = (k, v) => {
                 if (!v && v !== 0) return 'Not set';
-                if (units === 'imperial' && (k === 'weight' || k === 'weightGoal')) return kgToLbs(v);
-                if (units === 'imperial' && k === 'height') return cmToFtIn(v);
+                if (unitWeight === 'lbs' && (k === 'weight' || k === 'weightGoal')) return kgToLbs(v);
+                if (unitHeight === 'ft' && k === 'height') return cmToFtIn(v);
                 return String(v);
               };
               return (

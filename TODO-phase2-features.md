@@ -960,7 +960,7 @@ The spec has no section describing how to verify the fix works.
 
 ---
 
-### 2.6 Diet Page — Protein, Carbs & Fat Intake Bars
+### 2.6 Diet Page — Protein, Carbs & Fat Intake Bars ✅ Done
 
 **Problem:** The "Today's Intake" card on `DietPage.jsx` shows only a single calorie progress bar. Users can see they've consumed 1,200 of 2,100 kcal, but have no way to visualise their macro breakdown. Indian fitness users — especially those following structured diet plans — are increasingly macro-aware and want to see P/C/F split at a glance.
 
@@ -1042,7 +1042,7 @@ Extend `caloriesLog` entries to optionally include `{ protein, carbs, fat }` fie
 
 ---
 
-### 2.7 Floating "Finish Workout" FAB
+### 2.7 Floating "Finish Workout" FAB ✅ Done
 
 **Problem:** During a long workout session with many exercises, the "Finish Workout" button sits at the very bottom of the page (`WorkoutPage.jsx`). On mobile, users must scroll past every exercise and every set to reach it. This friction discourages timely session completion and can cause accidental session abandonment.
 
@@ -1135,6 +1135,173 @@ bottom: isMobile ? 80 : 24,
 
 ---
 
+---
+
+### 2.8 — Unit Toggle: kg ↔ lbs & cm ↔ ft/in on Profile Page
+
+**Problem:** FitTrack Pro currently shows all weight and height values in metric only (kg and cm). A significant portion of the Indian fitness community — particularly those who follow international fitness influencers, YouTube content, or have lived/trained abroad — think in lbs for weight and ft/in for height. HealthifyMe, for example, supports both. Forcing metric-only creates friction and reduces the precision of self-reported data.
+
+**Research backing:** Indian fitness apps that support both units see better data entry accuracy — users round to the nearest 5kg (e.g., "85kg") but will enter more precise data in lbs (e.g., "187 lbs"). Height in feet is ubiquitous in India — almost no one says "I'm 175cm"; they say "I'm 5'9"."
+
+**Scope:**
+- Add a `units` preference to the user profile: `'metric'` (default, kg + cm) or `'imperial'` (lbs + ft/in).
+- Store in `AppContext` / user object: `{ ...user, units: 'metric' }`.
+- Add a toggle on `ProfilePage.jsx` — a simple two-button pill toggle: `[KG / CM] [LBS / FT]`.
+- Display weight values in the selected unit everywhere: Dashboard stat cards, Weight Log entries, Goal card, Diet page stats bar.
+- Display height in ft/in format when imperial is selected.
+- Conversion constants: `1 kg = 2.20462 lbs`, `1 cm = 0.0328084 ft` (display as `5'9"` format).
+- **Storage is always in metric (kg, cm)** — units is a display preference only. Never store lbs or ft in localStorage. All calculations (BMI, BMR, TDEE, deficit) continue to use the raw kg/cm values.
+- `ScrollPicker` for weight logging on Dashboard should also adapt to show lbs increments (0.5 lb steps) when imperial is selected, but save converted-to-kg value.
+
+**Conversion helpers to add in `src/utils/helpers.js`:**
+```js
+export const kgToLbs = (kg) => +(kg * 2.20462).toFixed(1);
+export const lbsToKg = (lbs) => +(lbs / 2.20462).toFixed(1);
+export const cmToFtIn = (cm) => {
+  const totalIn = cm / 2.54;
+  const ft = Math.floor(totalIn / 12);
+  const inches = Math.round(totalIn % 12);
+  return `${ft}'${inches}"`;
+};
+export const displayWeight = (kg, units) => units === 'imperial' ? `${kgToLbs(kg)} lbs` : `${kg} kg`;
+export const displayHeight = (cm, units) => units === 'imperial' ? cmToFtIn(cm) : `${cm} cm`;
+```
+
+**Files to modify:**
+- `src/utils/helpers.js` — add `kgToLbs`, `lbsToKg`, `cmToFtIn`, `displayWeight`, `displayHeight`
+- `src/context/AppContext.jsx` — add `units` to user default object
+- `src/components/pages/ProfilePage.jsx` — add unit toggle pill UI, update display fields
+- `src/components/pages/DashboardPage.jsx` — use `displayWeight`/`displayHeight` for stat cards
+- `src/components/pages/WeightLogPage.jsx` — display lbs when imperial
+- `src/components/pages/DietPage.jsx` — stats bar weight/height display
+- `src/data/sample.js` — no change (sample data stays metric)
+
+---
+
+### 2.9 — Protein Recalculation: Use Goal Weight for Loss, Higher Multiplier Validated by Research
+
+**Problem:** The current protein formula in `DietPage.jsx` uses `user.weight` (current body weight) with a fixed multiplier per goal:
+```js
+const prot = goal === 'loss' ? Math.round(user.weight * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8);
+```
+
+This is partially correct — the multiplier DOES change when the goal changes. However, two issues exist:
+
+**Issue A — Goal weight vs current weight for loss:**
+The research consensus (NASM, StrengthLog, Examine.com) is that for weight loss in overweight/obese individuals, protein should be calculated from **goal body weight**, not current body weight. Reason: if someone is 95kg targeting 75kg, calculating `95 × 2.2 = 209g` is excessive — `75 × 2.2 = 165g` is the evidence-based target. The current implementation overcalculates protein for cutting users, which inflates their calorie target and makes the diet harder to follow.
+
+**Issue B — Reactivity concern:** When a user changes their weight goal on the Dashboard and returns to the Diet page, the goal-derived multiplier changes but the *visual change in the protein number* is subtle (2.2 → 2.0 → 1.8 on the same base weight). Users don't realize protein has updated. A clear "Goal changed → protein recalculated" callout would help.
+
+**Corrected protein formula (evidence-based):**
+```js
+// Use goal weight for loss (if goal weight is set), current weight for gain/maintain
+const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight)
+  ? user.weightGoal   // calculate protein from goal weight during cut
+  : user.weight;      // use current weight for gain and maintain
+
+const prot = goal === 'loss'
+  ? Math.round(baseWeightForProtein * 2.2)   // 2.2g/kg of GOAL weight during cut
+  : goal === 'gain'
+    ? Math.round(user.weight * 2.0)           // 2.0g/kg of current weight during bulk
+    : Math.round(user.weight * 1.8);          // 1.8g/kg of current weight for maintenance
+```
+
+**Science rationale (add as tooltip/footnote on DietPage):**
+- **Loss:** 2.2g/kg of goal weight — higher multiplier preserves lean mass during deficit (NASM/Examine.com consensus: 1.6–2.4g/kg, use goal weight for obese individuals)
+- **Gain:** 2.0g/kg of current weight — supports hypertrophy without excessive surplus (1.6–2.2g/kg; trained individuals at higher end)
+- **Maintain:** 1.8g/kg of current weight — above the 0.8g/kg RDA, suitable for active individuals
+
+**UX fix — make the recalculation visible:**
+When the goal changes (loss → gain → maintenance), add a small callout below the macro grid:
+```jsx
+<div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 8 }}>
+  ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal ? 'goal' : 'current'} weight ({baseWeightForProtein}kg) × {goal === 'loss' ? '2.2' : goal === 'gain' ? '2.0' : '1.8'}g/kg
+</div>
+```
+
+**Files to modify:**
+- `src/components/pages/DietPage.jsx` — update protein formula (lines ~25–30), add protein basis callout
+
+---
+
+### 2.10 — Iron League Rankings Page: Leaderboard, Percentile Benchmarks & Rank History
+
+**Problem:** The current Muscle Map page (soon renamed to "Iron League") shows per-muscle XP cards and an overall rank, but has no dedicated **rankings** view. Users want to know:
+- How do they rank **overall** on the monthly ladder?
+- How do they rank **per muscle group** (e.g., "My chest is Silver II — how far from Gold?")?
+- How do they compare to fitness **benchmarks** (even if no real leaderboard exists yet)?
+- What was their **best rank ever**, and are they improving month over month?
+
+Since FitTrack Pro has no backend, a true global leaderboard requires either mock/percentile benchmark data or a future Supabase integration. This item specifies the UI and the data architecture for both.
+
+**Feature scope:**
+
+**A — "League Standings" Tab on Iron League Page:**
+Add a second tab on `MuscleMapPage.jsx` alongside the existing muscle cards:
+- **Tab 1:** `My Muscles` (existing ranked muscle cards)
+- **Tab 2:** `League Standings` (new — rankings view)
+
+**B — League Standings View contains 3 sections:**
+
+**Section 1 — Overall Monthly Rank Card (prominent hero):**
+- Big display of current overall rank (e.g., `GOLD I`) with rank color
+- XP progress bar toward the next overall rank tier
+- Monthly XP earned vs target for next tier
+- Days remaining in current month
+- Current month's `weeklyConsistency` % (e.g., "Training 5 of 7 days this week")
+
+**Section 2 — Per-Muscle League Table:**
+Replace the flat filter tabs + card list with a ranked **league table** format:
+```
+MUSCLE         RANK      XP        vs LAST MONTH
+──────────────────────────────────────────────
+Back           Gold II   9,240     ▲ +2,100
+Chest          Silver III 4,890    ▲ +890
+Quads          Silver I   2,200    ▼ -310
+Shoulders      Bronze III 1,050    — (new)
+...
+```
+- Sort by XP descending (strongest first)
+- Color-code rank by tier
+- Show month-over-month delta (requires `calcMuscleXPForMonth` helper — already spec'd in UX-08-muscle-map.md item 8.3)
+- Weakest muscle highlighted with a red "FOCUS THIS MONTH" badge
+
+**Section 3 — Percentile Benchmarks (hardcoded reference table, no backend needed):**
+Show where the user stands against benchmark profiles. Hardcode 5 benchmark profiles representing typical Indian gym-goers:
+```js
+// src/data/rankBenchmarks.js
+export const MONTHLY_BENCHMARKS = [
+  { label: 'Beginner (3 months)', totalXP: 8000, chest: 800, back: 900, ... },
+  { label: 'Intermediate (1 year)', totalXP: 35000, chest: 3500, back: 4000, ... },
+  { label: 'Advanced (3+ years)', totalXP: 80000, chest: 8000, back: 10000, ... },
+  { label: 'Competitive (5+ years)', totalXP: 150000, chest: 15000, back: 18000, ... },
+  { label: 'Elite (athlete)', totalXP: 250000, chest: 25000, back: 30000, ... },
+];
+```
+Display as: `"Your overall XP (47,200) places you in the Intermediate–Advanced range."` with a visual bar showing position.
+
+**Section 4 — Monthly Rank History Timeline:**
+- Horizontal scrollable timeline: `Jan | Feb | Mar | Apr ...`
+- Each month shows the rank badge earned (Bronze, Silver, Gold etc.)
+- Best month highlighted in orange
+- "Personal Best" badge on the highest-ever rank month
+- This leverages the existing `monthlyRankHistory` in `AppContext.jsx` (added in 2.3)
+
+**C — Route and Nav:**
+- No new route needed — tabs live within `/muscle-map`
+- Add tab state: `const [activeTab, setActiveTab] = useState('muscles' | 'league')`
+
+**D — New data file:**
+- `src/data/rankBenchmarks.js` — benchmark profiles for percentile comparison
+
+**Files to modify:**
+- `src/components/pages/MuscleMapPage.jsx` — add tabs, League Standings view
+- `src/data/rankBenchmarks.js` — **[NEW]** benchmark profiles
+- `src/data/muscleData.js` — ensure `calcMuscleXPForMonth` helper exists (ref: UX-08-muscle-map.md 8.3)
+- `src/context/AppContext.jsx` — verify `monthlyRankHistory` is being stored
+
+---
+
 ## ⚠️ Known Dependency
 
 - **2.3 must be done before 2.2** — the Post-Workout Summary's XP delta calculation depends on whichever XP formula is active. Implement the monthly reset first, then build the summary screen on top of it.
@@ -1152,5 +1319,8 @@ bottom: isMobile ? 80 : 24,
 | 3     | 2.1 Female Anatomy | 🔴 Large | Medium | ✅ Done |
 | 4     | 2.4 XP Distribution Fix | 🟡 Medium | 🔴 Critical | ✅ Done |
 | 5     | 2.5 Body Map Blank Canvas + Gender Fix | 🟢 Small | 🔴 Critical | ✅ Done |
-| 6     | 2.6 Diet Page Macro Intake Bars | 🟢 Small | High | ⏳ Pending |
-| 7     | 2.7 Floating Finish Workout FAB | 🟢 Small | High | ⏳ Pending |
+| 6     | 2.6 Diet Page Macro Intake Bars | 🟢 Small | High | ✅ Done |
+| 7     | 2.7 Floating Finish Workout FAB | 🟢 Small | High | ✅ Done |
+| 8     | 2.8 Unit Toggle kg↔lbs, cm↔ft/in | 🟡 Medium | High | ✅ Done |
+| 9     | 2.9 Protein Recalculation from Goal Weight | 🟢 Small | High | ✅ Done |
+| 10    | 2.10 Iron League Rankings Page | 🔴 Large | High | ✅ Done |

@@ -4,11 +4,16 @@ import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
-import { fmt } from '../../utils/helpers';
+import { fmt, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { exportData, importData } from '../../utils/storage';
 
 export default function ProfilePage() {
   const { user, setUsers, logout, theme, toggleTheme, addToast } = useApp();
+  const units = user.units || 'metric';
+  const toggleUnits = () => {
+    const next = units === 'metric' ? 'imperial' : 'metric';
+    setUsers(p => p.map(u => u.id === user.id ? { ...u, units: next } : u));
+  };
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -65,6 +70,18 @@ export default function ProfilePage() {
           </div>
           <div className="sep" />
 
+          {/* Units toggle */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 10px', background: 'var(--c2)', borderRadius: 12, border: '1px solid var(--bd)', marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>Units</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Weight & height display</div>
+            </div>
+            <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--bd)' }}>
+              <button onClick={toggleUnits} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: units === 'metric' ? 'var(--o)' : 'var(--c3)', color: units === 'metric' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>KG / CM</button>
+              <button onClick={toggleUnits} style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: units === 'imperial' ? 'var(--o)' : 'var(--c3)', color: units === 'imperial' ? '#fff' : 'var(--t3)', transition: 'all .2s' }}>LBS / FT</button>
+            </div>
+          </div>
+
           {/* Theme toggle */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 10px', background: 'var(--c2)', borderRadius: 12, border: '1px solid var(--bd)', marginBottom: 8 }}>
             <div>
@@ -88,9 +105,17 @@ export default function ProfilePage() {
             <button className="btn-g" style={{ fontSize: 12 }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : '✏️ Edit'}</button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: 'Weight (kg)', k: 'weight', t: 'number' }, { l: 'Height (cm)', k: 'height', t: 'number' }, { l: 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }].map(fld => (
-              <div key={fld.k}><label>{fld.l}</label>{ed ? <input type={fld.t} value={f[fld.k] || ''} onChange={sf(fld.k)} /> : <div style={{ padding: '10px 13px', background: 'var(--c3)', borderRadius: 10, fontSize: 14, border: '1px solid var(--bd)', color: fld.k === 'weightGoal' && !user[fld.k] ? 'var(--t3)' : 'var(--tx)' }}>{user[fld.k] ? String(user[fld.k]) : 'Not set'}</div>}</div>
-            ))}
+            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: units === 'imperial' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: units === 'imperial' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: units === 'imperial' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }].map(fld => {
+              const dispVal = (k, v) => {
+                if (!v && v !== 0) return 'Not set';
+                if (units === 'imperial' && (k === 'weight' || k === 'weightGoal')) return kgToLbs(v);
+                if (units === 'imperial' && k === 'height') return cmToFtIn(v);
+                return String(v);
+              };
+              return (
+              <div key={fld.k}><label>{fld.l}</label>{ed ? <input type={fld.t} value={f[fld.k] || ''} onChange={sf(fld.k)} /> : <div style={{ padding: '10px 13px', background: 'var(--c3)', borderRadius: 10, fontSize: 14, border: '1px solid var(--bd)', color: fld.k === 'weightGoal' && !user[fld.k] ? 'var(--t3)' : 'var(--tx)' }}>{dispVal(fld.k, user[fld.k])}</div>}</div>
+              );
+            })}
             <div><label>Gender</label>{ed ? <select value={f.gender} onChange={sf('gender')}><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select> : <div style={{ padding: '10px 13px', background: 'var(--c3)', borderRadius: 10, fontSize: 14, border: '1px solid var(--bd)' }}>{user.gender}</div>}</div>
             <div><label>Activity Level</label>{ed ? <select value={f.activityLevel} onChange={sf('activityLevel')}>{Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select> : <div style={{ padding: '10px 13px', background: 'var(--c3)', borderRadius: 10, fontSize: 13, border: '1px solid var(--bd)', color: 'var(--t2)' }}>{ACTIVITY[user.activityLevel || 'moderate']?.label}</div>}</div>
           </div>

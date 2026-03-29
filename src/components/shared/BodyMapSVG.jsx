@@ -31,6 +31,8 @@ const MUSCLE_IMAGES = {
 };
 
 const BACK_SHOULDER_IMG = 'back-shoulders.png';
+const BACK_CALVES_IMG = 'back-calves.png';
+const BACK_FOREARMS_IMG = 'back-forearms.png';
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const RENDER_W = 640;
@@ -248,6 +250,14 @@ export default function BodyMapSVG({ muscleXP = {}, primaryMuscles = null, secon
       }
       if (muscle === 'shoulders') {
         const bg = getAssetUrl(BACK_SHOULDER_IMG);
+        if (!back.includes(bg)) back.push(bg);
+      }
+      if (muscle === 'calves') {
+        const bg = getAssetUrl(BACK_CALVES_IMG);
+        if (!back.includes(bg)) back.push(bg);
+      }
+      if (muscle === 'forearms') {
+        const bg = getAssetUrl(BACK_FOREARMS_IMG);
         if (!back.includes(bg)) back.push(bg);
       }
     });

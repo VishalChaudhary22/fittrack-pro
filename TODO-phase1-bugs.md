@@ -748,6 +748,79 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 
 ---
 
+### 1.24 — Calves Not Highlighted on Back View Body Map 🔴
+
+**Problem:** When a calf exercise (e.g., Standing Calf Raises, Seated Calf Raises) is logged, the `calves` muscle group maps only to the **front view** canvas in `BodyMapSVG.jsx`. Calves are primarily visible from the **back** — the gastrocnemius (the dominant calf muscle) is a posterior muscle. The result is that logging a calf session shows calves highlighted on the front canvas but leaves the back canvas unchanged, which looks incorrect to users and defeats the purpose of the anatomical visualization.
+
+**Root cause in `BodyMapSVG.jsx` — `MUSCLE_IMAGES` map:**
+```js
+// CURRENT — calves mapped to front view only
+const MUSCLE_IMAGES = {
+  calves: { view: 'front', file: '/muscles/front-calves.png' },
+  // ...
+};
+```
+The male back calf asset (`/muscles/back-calves.png`) exists in `public/muscles/` and the female equivalent (`/muscles/female/female-back-calves.png`) exists too — they just aren't wired up.
+
+**Fix — add back view calves entry:**
+```js
+// UPDATED — calves appear on BOTH front and back canvases
+const MUSCLE_IMAGES = {
+  calves: { view: 'front', file: '/muscles/front-calves.png' },
+  // ...
+};
+
+// Add a BACK_CALVES_IMG constant (same pattern as BACK_SHOULDER_IMG):
+const BACK_CALVES_IMG = '/muscles/back-calves.png';
+const FEMALE_BACK_CALVES_IMG = 'back-calves.png'; // prefixed by getAssetUrl
+
+// In the activeMuscles.forEach() loop inside the frontLayers/backLayers useMemo:
+if (muscle === 'calves') {
+  if (!back.includes(BACK_CALVES_IMG)) back.push(getAssetUrl(BACK_CALVES_IMG));
+}
+```
+
+Similarly update `getWeeklyMuscles` if used. Also apply to the `MiniBodyMap` component.
+
+**Also add `forearms` back view** while at it — `back-forearms.png` exists for both male and female and is currently unused. Pattern is identical.
+
+**Files to modify:**
+- `src/components/shared/BodyMapSVG.jsx` — `MUSCLE_IMAGES` map and the `frontLayers/backLayers` derivation logic
+
+---
+
+### 1.25 — Rename "Muscle Map" Page to "Iron League" (or Culturally Resonant Alternative) 🟢
+
+**Problem:** "Muscle Map" is a purely descriptive, functional name that undersells the gamified XP/ranking system behind it. The page has tiers (Bronze → Legend), monthly resets, consistency bonuses, and a full rank ladder — it's a **league system**, not just a map. The name should communicate excitement, competition, and progression.
+
+**Research:** Indian fitness audiences on apps like FitTrack respond strongly to aspirational, competitive naming. The page is essentially a gamified ranking arena for your body — your muscles have tiers, you climb ranks, you earn XP monthly.
+
+**Name options (with rationale):**
+
+| Option | Vibe | Indian Resonance |
+|--------|------|-----------------|
+| **Iron League** | Competitive, gaming-forward, motivating | High — "iron" is universally fitness-coded |
+| **The Arena** | Combat, battle, proving yourself | High — arena culture is well understood |
+| **Akhara** | Traditional Indian wrestling ground — you train, you rank | 🏆 Highest — deeply cultural, unique differentiator |
+| **Body Vault** | Secure, premium, your stats locked in | Medium |
+| **Muscle Arena** | Descriptive + competitive hybrid | Medium |
+| **The Forge** | Transformation, refinement, crafting yourself | Medium |
+
+**Recommended name: "Iron League"** — universally understood, gym culture coded, gaming-resonant, fits the XP/tier system perfectly. Secondary recommendation for a more distinctly Indian identity: **"Akhara"** (the traditional Indian wrestling ground where strength is tested and ranked — perfect metaphor for a muscle ranking system).
+
+**What changes:**
+- Page title in `MuscleMapPage.jsx` `<PageHeader>` — `"Muscle Rankings"` → `"Iron League"`
+- `PageHeader` sub-text → `"Your monthly strength league — climb the ranks"`
+- Nav label in `src/data/constants.js` — `label: 'Muscle Map'` → `label: 'Iron League'`
+- Bottom nav label in `NAV_MOBILE_MORE` — same update
+- Any in-app references to "Muscle Map" in `DashboardPage.jsx` (the "Muscle Activity" card's `navigate('/muscle-map')` call stays the same — only labels change, not the route path)
+
+**Files to modify:**
+- `src/components/pages/MuscleMapPage.jsx` — `PageHeader` title and sub
+- `src/data/constants.js` — nav label for `musclemap` entry in `NAV` and `NAV_MOBILE_MORE`
+
+---
+
 ## 🗓️ Phase 1 Implementation Order
 
 | Order | Item | Status | Effort | Impact |
@@ -775,3 +848,5 @@ Update the hardcoded dimensions inside `ThemeTogglePill` in `src/components/shar
 | 21    | 1.21 Mobile Tap Delay Resolution | ✅ Done | 🟢 Small | High |
 | 22    | 1.22 Z-Index Tokenization | ✅ Done | 🟢 Small | Medium |
 | 23    | 1.23 Skeleton Aspect Ratios (CLS) | ✅ Done | 🟢 Small | Medium |
+| 24    | 1.24 Calves Back View Body Map Bug | ✅ Done | 🟢 Small | High |
+| 25    | 1.25 Rename Muscle Map → Iron League | ✅ Done | 🟢 Small | High |

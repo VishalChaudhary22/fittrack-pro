@@ -2,10 +2,12 @@ import { useState, useMemo } from 'react';
 import { Scale, Edit2, Trash2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
-import { fmt, gId, tod } from '../../utils/helpers';
+import { fmt, gId, tod, kgToLbs } from '../../utils/helpers';
 
 export default function WeightLogPage() {
   const { user, healthLogs, setHealthLogs, addToast } = useApp();
+  const units = user.units || 'metric';
+  const isImp = units === 'imperial';
   const [editId, setEditId] = useState(null);
   const [editVal, setEditVal] = useState({ weight: '', notes: '' });
   const [confirm, setConfirm] = useState(null);
@@ -68,9 +70,9 @@ export default function WeightLogPage() {
                 ) : (
                   <>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--o)' }}>{log.weight}</span>
-                      <span style={{ fontSize: 11, color: 'var(--t3)' }}>kg</span>
-                      {diff && <span style={{ fontSize: 10, color: parseFloat(diff) > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{parseFloat(diff) > 0 ? '+' : ''}{diff}</span>}
+                      <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--o)' }}>{isImp ? kgToLbs(log.weight) : log.weight}</span>
+                      <span style={{ fontSize: 11, color: 'var(--t3)' }}>{isImp ? 'lbs' : 'kg'}</span>
+                      {diff && <span style={{ fontSize: 10, color: parseFloat(diff) > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{parseFloat(diff) > 0 ? '+' : ''}{isImp ? (parseFloat(diff) * 2.20462).toFixed(1) : diff}</span>}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--t3)' }}>{log.notes || '—'}</div>
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>

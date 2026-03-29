@@ -30,5 +30,5 @@ export const INIT_USERS = [{
   age: 32, gender: 'male', weight: 83.5, height: 175, weightGoal: 78, weightGoalStart: 85,
   goalWeeks: 20, goalSetDate: '2024-11-01', activityLevel: 'active', workoutDays: 6,
   isAdmin: true, activeSplitId: 'ppl', joinDate: '2024-01-15',
-  avatar: 'VC',
+  avatar: 'VC', units: 'metric',
 }];

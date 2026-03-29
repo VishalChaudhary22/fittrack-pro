@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X } from 'lucide-react';
+import { Trophy, Timer, X, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
 import { gId, tod, fmt } from '../../utils/helpers';
@@ -71,6 +71,19 @@ export default function WorkoutPage() {
   const [timer, setTimer] = useState(null); // { active, seconds }
   const [restSeconds, setRestSeconds] = useState(90);
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
+
+  const finishBtnRef = useRef(null);
+  const [showFAB, setShowFAB] = useState(true);
+
+  useEffect(() => {
+    if (!finishBtnRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFAB(!entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(finishBtnRef.current);
+    return () => observer.disconnect();
+  }, [session]);
 
   const start = day => {
     const exs = day.exercises.map(ex => {
@@ -216,9 +229,31 @@ export default function WorkoutPage() {
         </div>
       ))}
       <div className="card" style={{ marginBottom: 10, padding: 14 }}><label>Session Notes</label><textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical' }} /></div>
-      <button className="btn-p" style={{ width: '100%', padding: '14px', fontSize: 16, borderRadius: 12 }} onClick={finish}>Finish Workout</button>
+      <button ref={finishBtnRef} className="btn-p" style={{ width: '100%', padding: '14px', fontSize: 16, borderRadius: 12 }} onClick={finish}>Finish Workout</button>
 
       {timer?.active && <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />}
+
+      {showFAB && (
+        <button
+          className="btn-p"
+          onClick={finish}
+          style={{
+            position: 'fixed',
+            bottom: window.innerWidth <= 768 ? 80 : 24,
+            right: 16,
+            zIndex: 400,
+            padding: '10px 16px',
+            fontSize: 13,
+            borderRadius: 20,
+            display: 'flex', alignItems: 'center', gap: 6,
+            boxShadow: '0 4px 20px rgba(232,84,13,.4)',
+            animation: 'fabIn .3s cubic-bezier(.4,0,.2,1)',
+          }}
+          aria-label="Finish workout session"
+        >
+          <Check size={14} /> Finish
+        </button>
+      )}
     </div>
   );
 

@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react';
-import { Shield, Trophy, ChevronRight } from 'lucide-react';
+import { Shield, Trophy, ChevronRight, TrendingUp, TrendingDown, Minus, AlertTriangle, Award, Calendar, Zap } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import {
   MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank
 } from '../../data/muscleData';
+import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
 
 // ─── RANK BADGE ──────────────────────────────────────────────────────────────
 const RankBadge = ({ rank, size = 'md' }) => {
-  const sz = size === 'sm' ? { fs: 8, px: 6, py: 2, icon: 10 } : { fs: 10, px: 10, py: 4, icon: 12 };
+  const sz = size === 'sm' ? { fs: 8, px: 6, py: 2, icon: 10 } : size === 'lg' ? { fs: 12, px: 12, py: 5, icon: 14 } : { fs: 10, px: 10, py: 4, icon: 12 };
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -75,6 +76,7 @@ const MuscleCard = ({ muscle, xp }) => {
 export default function MuscleMapPage() {
   const { workoutLogs, splits, user, monthlyRankHistory } = useApp();
   const [filter, setFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('muscles');
 
   const muscleXP = useMemo(
     () => calcAllMuscleXP(workoutLogs, splits, user?.id),
@@ -95,104 +97,368 @@ export default function MuscleMapPage() {
     { key: 'core', label: 'Core' },
   ];
 
+  // ─── LEAGUE DATA ─────────────────────────────────────────────────────────
+  const daysInMonth = useMemo(() => {
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return lastDay - now.getDate();
+  }, []);
+
+  const thisWeekDays = useMemo(() => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const uniqueDates = new Set(
+      workoutLogs
+        .filter(l => (l.userId === user?.id || l.userId === 'vishal') && new Date(l.date) >= startOfWeek)
+        .map(l => l.date)
+    );
+    return uniqueDates.size;
+  }, [workoutLogs, user?.id]);
+
+  const sortedMuscles = useMemo(() =>
+    [...MUSCLE_GROUPS].sort((a, b) => (muscleXP[b.key] || 0) - (muscleXP[a.key] || 0)),
+    [muscleXP]
+  );
+
+  const weakestMuscle = sortedMuscles[sortedMuscles.length - 1];
+
+  const benchmark = useMemo(() => getBenchmarkBracket(overall.totalXP), [overall.totalXP]);
+
+  const benchmarkPct = useMemo(() => {
+    const maxXP = MONTHLY_BENCHMARKS[MONTHLY_BENCHMARKS.length - 1].totalXP;
+    return Math.min(100, Math.round((overall.totalXP / maxXP) * 100));
+  }, [overall.totalXP]);
+
+  // Find best month from history
+  const bestMonth = useMemo(() => {
+    if (!monthlyRankHistory || monthlyRankHistory.length === 0) return null;
+    return monthlyRankHistory.reduce((best, cur) => cur.xp > best.xp ? cur : best, monthlyRankHistory[0]);
+  }, [monthlyRankHistory]);
+
+  // ─── TAB PILLS ─────────────────────────────────────────────────────────
+  const tabs = [
+    { key: 'muscles', label: 'My Muscles' },
+    { key: 'league', label: 'League Standings' },
+  ];
+
   return (
     <div className="pg-in">
-      <PageHeader title="Muscle Rankings" sub="Track your muscle development progress" />
+      <PageHeader title="Iron League" sub="Your monthly strength league — climb the ranks" />
 
-      {/* Overall Rank Card */}
-      <div className="card" style={{
-        padding: '24px 20px', marginBottom: 14, textAlign: 'center',
-        background: 'linear-gradient(135deg, var(--c1) 0%, rgba(232,84,13,.06) 100%)',
-        border: `1px solid ${overall.color}20`,
-      }}>
-        <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
-
-        {/* Rank Display */}
-        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 14,
-            background: overall.bg,
-            border: `2px solid ${overall.color}40`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+      {/* Tab Switcher */}
+      <div style={{ display: 'flex', gap: 0, marginBottom: 14, background: 'var(--c2)', borderRadius: 14, padding: 3, border: '1px solid var(--bd)' }}>
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+            flex: 1, padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700, transition: 'all .2s',
+            background: activeTab === t.key ? 'var(--og)' : 'transparent',
+            color: activeTab === t.key ? '#fff' : 'var(--t2)',
+            boxShadow: activeTab === t.key ? '0 2px 12px rgba(232,84,13,.3)' : 'none',
           }}>
-            <Trophy size={24} color={overall.color} />
-          </div>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Overall Rank</div>
-            <div className="bb" style={{ fontSize: 28, color: overall.color, letterSpacing: '1px' }}>{overall.name}</div>
-            <div style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 600 }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Previous Months History */}
-      {monthlyRankHistory && monthlyRankHistory.length > 0 && (
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px', padding: '0 2px' }}>Past Performance</div>
-          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6 }}>
-            {monthlyRankHistory.map(hist => {
-              const r = getOverallRank({ fake: hist.xp }); // Hack: pass muscleXP object that totals hist.xp to getOverallRank
-              return (
-                <div key={hist.id} className="card" style={{ padding: '12px 14px', minWidth: 156, flexShrink: 0, border: `1px solid ${r.color}20`, background: 'var(--bg)' }}>
-                  <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600, marginBottom: 8 }}>{hist.label}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Trophy size={16} color={r.color} />
-                    </div>
-                    <div>
-                      <div className="bb" style={{ fontSize: 14, color: r.color }}>{r.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--t2)' }}>{Math.round(hist.xp).toLocaleString()} XP</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Rank Legend */}
-      <div className="card" style={{ padding: '12px 14px', marginBottom: 14, overflow: 'hidden' }}>
-        <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px' }}>Rank Tiers</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {RANK_TIERS.filter((_, i) => i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12 || i === 13).map(tier => (
-            <div key={tier.name} style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: 9, color: tier.color, fontWeight: 600,
-              padding: '3px 8px', borderRadius: 6,
-              background: typeof tier.bg === 'string' && tier.bg.startsWith('linear') ? tier.bg : tier.bg,
-            }}>
-              <Shield size={10} /> {tier.name}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', paddingBottom: 2 }}>
-        {filters.map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)} style={{
-            padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
-            fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
-            background: filter === f.key ? 'var(--o2)' : 'var(--c1)',
-            color: filter === f.key ? 'var(--o)' : 'var(--t2)',
-            border: `1px solid ${filter === f.key ? 'rgba(232,84,13,.2)' : 'var(--bd)'}`,
-            transition: 'all .15s',
-          }}>
-            {f.label}
+            {t.label}
           </button>
         ))}
       </div>
 
-      {/* Muscle Cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filtered
-          .sort((a, b) => (muscleXP[b.key] || 0) - (muscleXP[a.key] || 0))
-          .map(muscle => (
-            <MuscleCard key={muscle.key} muscle={muscle} xp={muscleXP[muscle.key] || 0} />
-          ))
-        }
-      </div>
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* TAB 1: MY MUSCLES (existing view) */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'muscles' && (<>
+        {/* Overall Rank Card */}
+        <div className="card" style={{
+          padding: '24px 20px', marginBottom: 14, textAlign: 'center',
+          background: 'linear-gradient(135deg, var(--c1) 0%, rgba(232,84,13,.06) 100%)',
+          border: `1px solid ${overall.color}20`,
+        }}>
+          <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
+
+          {/* Rank Display */}
+          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 14,
+              background: overall.bg,
+              border: `2px solid ${overall.color}40`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Trophy size={24} color={overall.color} />
+            </div>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Overall Rank</div>
+              <div className="bb" style={{ fontSize: 28, color: overall.color, letterSpacing: '1px' }}>{overall.name}</div>
+              <div style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 600 }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Rank Legend */}
+        <div className="card" style={{ padding: '12px 14px', marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px' }}>Rank Tiers</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {RANK_TIERS.filter((_, i) => i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12 || i === 13).map(tier => (
+              <div key={tier.name} style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                fontSize: 9, color: tier.color, fontWeight: 600,
+                padding: '3px 8px', borderRadius: 6,
+                background: typeof tier.bg === 'string' && tier.bg.startsWith('linear') ? tier.bg : tier.bg,
+              }}>
+                <Shield size={10} /> {tier.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14, overflowX: 'auto', paddingBottom: 2 }}>
+          {filters.map(f => (
+            <button key={f.key} onClick={() => setFilter(f.key)} style={{
+              padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
+              fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
+              background: filter === f.key ? 'var(--o2)' : 'var(--c1)',
+              color: filter === f.key ? 'var(--o)' : 'var(--t2)',
+              border: `1px solid ${filter === f.key ? 'rgba(232,84,13,.2)' : 'var(--bd)'}`,
+              transition: 'all .15s',
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Muscle Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered
+            .sort((a, b) => (muscleXP[b.key] || 0) - (muscleXP[a.key] || 0))
+            .map(muscle => (
+              <MuscleCard key={muscle.key} muscle={muscle} xp={muscleXP[muscle.key] || 0} />
+            ))
+          }
+        </div>
+      </>)}
+
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* TAB 2: LEAGUE STANDINGS */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'league' && (<>
+
+        {/* SECTION 1 — Overall Monthly Rank Hero */}
+        <div className="card" style={{
+          padding: '24px 20px', marginBottom: 14, textAlign: 'center',
+          background: `linear-gradient(135deg, var(--c1) 0%, ${overall.color}10 100%)`,
+          border: `1px solid ${overall.color}25`,
+        }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 18,
+            background: overall.bg,
+            border: `2px solid ${overall.color}40`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 12px',
+          }}>
+            <Trophy size={30} color={overall.color} />
+          </div>
+          <div className="bb" style={{ fontSize: 36, color: overall.color, letterSpacing: '2px' }}>{overall.name}</div>
+          <div style={{ fontSize: 14, color: 'var(--t2)', fontWeight: 600, marginTop: 4 }}>
+            {Math.round(overall.totalXP).toLocaleString()} Monthly XP
+          </div>
+
+          {/* Progress to next tier */}
+          {overall.progress < 1 && (
+            <div style={{ marginTop: 16, maxWidth: 300, margin: '16px auto 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t3)', marginBottom: 4 }}>
+                <span>{overall.name}</span>
+                <span>{Math.round(overall.nextXP).toLocaleString()} XP</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 4, background: 'var(--c3)', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 4,
+                  background: `linear-gradient(90deg, ${overall.color}80, ${overall.color})`,
+                  width: `${overall.progress * 100}%`,
+                  transition: 'width .6s cubic-bezier(.4,0,.2,1)',
+                }} />
+              </div>
+              <div style={{ fontSize: 11, color: overall.color, fontWeight: 700, marginTop: 4 }}>
+                {Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to next rank
+              </div>
+            </div>
+          )}
+
+          {/* Meta stats */}
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
+              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Days Left</div>
+              <div className="bb" style={{ fontSize: 20, color: 'var(--o)' }}>{daysInMonth}</div>
+            </div>
+            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
+              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>This Week</div>
+              <div className="bb" style={{ fontSize: 20, color: thisWeekDays >= 4 ? 'var(--success)' : 'var(--o)' }}>{thisWeekDays}/7 <span style={{ fontSize: 11, fontFamily: "'DM Sans'", color: 'var(--t2)' }}>days</span></div>
+            </div>
+            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
+              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Muscles</div>
+              <div className="bb" style={{ fontSize: 20, color: 'var(--tx)' }}>{Object.values(muscleXP).filter(v => v > 0).length}/{MUSCLE_GROUPS.length}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 2 — Per-Muscle League Table */}
+        <div className="card" style={{ marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--bd)', background: 'var(--c2)' }}>
+            <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Shield size={12} color="var(--o)" /> Per-Muscle League Table
+            </div>
+          </div>
+          {/* Header */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 80px 60px', gap: 8, padding: '8px 16px', borderBottom: '1px solid var(--bd)', background: 'var(--c2)' }}>
+            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Muscle</div>
+            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rank</div>
+            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>XP</div>
+            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Status</div>
+          </div>
+          {sortedMuscles.map((muscle, i) => {
+            const xp = muscleXP[muscle.key] || 0;
+            const rank = getRank(xp);
+            const isWeakest = muscle.key === weakestMuscle?.key && xp < (muscleXP[sortedMuscles[0]?.key] || 0) * 0.3;
+            return (
+              <div key={muscle.key} className="row-sep" style={{
+                display: 'grid', gridTemplateColumns: '1fr 90px 80px 60px', gap: 8,
+                padding: '10px 16px', alignItems: 'center',
+                background: isWeakest ? 'rgba(255,107,107,.06)' : 'transparent',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, width: 16 }}>#{i + 1}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{muscle.label}</div>
+                </div>
+                <RankBadge rank={rank} size="sm" />
+                <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: rank.color }}>
+                  {Math.round(xp).toLocaleString()}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  {isWeakest ? (
+                    <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--danger)', textTransform: 'uppercase', background: 'rgba(255,107,107,.12)', padding: '2px 5px', borderRadius: 4 }}>Focus</span>
+                  ) : xp > 0 ? (
+                    <TrendingUp size={12} color="var(--success)" />
+                  ) : (
+                    <Minus size={12} color="var(--t3)" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* SECTION 3 — Percentile Benchmarks */}
+        <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <TrendingUp size={12} color="var(--o)" /> Where You Stand
+          </div>
+
+          {/* Benchmark bar */}
+          <div style={{ position: 'relative', marginBottom: 16 }}>
+            <div style={{ height: 10, borderRadius: 5, background: 'var(--c3)', overflow: 'hidden', position: 'relative' }}>
+              <div style={{
+                height: '100%', borderRadius: 5,
+                background: 'linear-gradient(90deg, #CD7F32, #C0C0C0, #FFD700, #40E0D0, #FF69B4)',
+                width: `${benchmarkPct}%`,
+                transition: 'width .8s cubic-bezier(.4,0,.2,1)',
+              }} />
+            </div>
+            {/* Benchmark markers */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+              {MONTHLY_BENCHMARKS.map(b => {
+                const pct = (b.totalXP / MONTHLY_BENCHMARKS[MONTHLY_BENCHMARKS.length - 1].totalXP) * 100;
+                return (
+                  <div key={b.label} style={{
+                    fontSize: 8, color: 'var(--t3)', fontWeight: 600, textAlign: 'center',
+                    position: 'absolute', left: `${pct}%`, transform: 'translateX(-50%)', top: 20,
+                  }}>
+                    <div style={{ width: 1, height: 6, background: 'var(--bd2)', margin: '0 auto 2px' }} />
+                    {b.label}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Text summary */}
+          <div style={{ marginTop: 36, padding: '10px 12px', background: 'var(--o3)', borderRadius: 10, border: '1px solid rgba(232,84,13,.15)' }}>
+            <div style={{ fontSize: 12, color: 'var(--t2)' }}>
+              Your overall XP (<strong style={{ color: 'var(--o)' }}>{Math.round(overall.totalXP).toLocaleString()}</strong>)
+              {benchmark.lower && benchmark.upper
+                ? <> places you in the <strong style={{ color: 'var(--o)' }}>{benchmark.lower.label}–{benchmark.upper.label}</strong> range.</>
+                : benchmark.lower
+                  ? <> puts you beyond <strong style={{ color: 'var(--o)' }}>{benchmark.lower.label}</strong> level. Incredible!</>
+                  : <> is at the <strong style={{ color: 'var(--o)' }}>{benchmark.upper?.label || 'Beginner'}</strong> level. Keep training!</>
+              }
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 4 — Monthly Rank History Timeline */}
+        {monthlyRankHistory && monthlyRankHistory.length > 0 && (
+          <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}>
+            <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Calendar size={12} color="var(--o)" /> Rank History
+            </div>
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6 }}>
+              {/* Current month (live) */}
+              <div className="card" style={{
+                padding: '12px 14px', minWidth: 140, flexShrink: 0,
+                border: `2px solid ${overall.color}40`,
+                background: `linear-gradient(135deg, var(--c1), ${overall.color}08)`,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, color: 'var(--o)', fontWeight: 700 }}>
+                    {new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                  </div>
+                  <span style={{ fontSize: 7, fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', background: 'rgba(81,207,102,.12)', padding: '2px 5px', borderRadius: 4 }}>Live</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: overall.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Trophy size={16} color={overall.color} />
+                  </div>
+                  <div>
+                    <div className="bb" style={{ fontSize: 14, color: overall.color }}>{overall.name}</div>
+                    <div style={{ fontSize: 10, color: 'var(--t2)' }}>{Math.round(overall.totalXP).toLocaleString()} XP</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Past months */}
+              {monthlyRankHistory.map(hist => {
+                const r = getOverallRank({ fake: hist.xp });
+                const isBest = bestMonth && hist.id === bestMonth.id;
+                return (
+                  <div key={hist.id} className="card" style={{
+                    padding: '12px 14px', minWidth: 140, flexShrink: 0,
+                    border: `1px solid ${isBest ? 'var(--o)' : r.color + '20'}`,
+                    background: isBest ? 'var(--o3)' : 'var(--bg)',
+                    position: 'relative',
+                  }}>
+                    {isBest && (
+                      <div style={{
+                        position: 'absolute', top: -1, right: 10,
+                        fontSize: 7, fontWeight: 700, color: '#fff', textTransform: 'uppercase',
+                        background: 'var(--og)', padding: '2px 6px', borderRadius: '0 0 4px 4px',
+                      }}>
+                        <Award size={8} /> Best
+                      </div>
+                    )}
+                    <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600, marginBottom: 8 }}>{hist.label}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trophy size={16} color={r.color} />
+                      </div>
+                      <div>
+                        <div className="bb" style={{ fontSize: 14, color: r.color }}>{r.name}</div>
+                        <div style={{ fontSize: 10, color: 'var(--t2)' }}>{Math.round(hist.xp).toLocaleString()} XP</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </>)}
     </div>
   );
 }

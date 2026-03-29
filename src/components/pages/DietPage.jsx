@@ -5,10 +5,12 @@ import { PageHeader } from '../shared/SharedComponents';
 import { DIET_TYPES } from '../../data/diets';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, calcBMR, calcTDEE, goalFromWeight, calcDeficit } from '../../utils/calculations';
-import { gId, tod } from '../../utils/helpers';
+import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 
 export default function DietPage() {
   const { user, caloriesLog, setCaloriesLog, addToast } = useApp();
+  const units = user.units || 'metric';
+  const isImp = units === 'imperial';
   const [diet, setDiet] = useState('nonveg');
   const [calInput, setCalInput] = useState({ meal: '', calories: '' });
   const [showCalLog, setShowCalLog] = useState(false);
@@ -21,7 +23,11 @@ export default function DietPage() {
   const goal = deficitInfo.goal;
   const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
   const goalKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
-  const prot = goal === 'loss' ? Math.round(user.weight * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8);
+  const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight)
+    ? user.weightGoal
+    : user.weight;
+  const protMultiplier = goal === 'loss' ? 2.2 : goal === 'gain' ? 2.0 : 1.8;
+  const prot = goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8);
   const carbs = Math.round((goalKcal * (goal === 'loss' ? .38 : .44)) / 4);
   const fat = Math.round((goalKcal * .26) / 9);
   const wheyScoops = prot >= 180 ? Math.min(Math.ceil((prot - 100) / 25), 4) : 2;
@@ -36,6 +42,11 @@ export default function DietPage() {
   const todayTotal = todayCals.reduce((s, l) => s + l.calories, 0);
   const calPct = Math.min(Math.round((todayTotal / goalKcal) * 100), 100);
 
+  const consumedRatio = todayTotal / goalKcal;
+  const estimatedProtein = Math.round(prot * consumedRatio);
+  const estimatedCarbs   = Math.round(carbs * consumedRatio);
+  const estimatedFat     = Math.round(fat * consumedRatio);
+
   const logCalories = () => {
     if (!calInput.meal || !calInput.calories) return;
     setCaloriesLog(p => [...p, { id: gId(), userId: user.id, date: todayStr, meal: calInput.meal, calories: parseInt(calInput.calories) }]);
@@ -45,12 +56,12 @@ export default function DietPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Diet Guide" sub={`Personalised for ${user.name.split(' ')[0]} · ${user.weightGoal ? `Goal: ${user.weightGoal}kg` : 'No goal set'}`} />
+      <PageHeader title="Diet Guide" sub={`Personalised for ${user.name.split(' ')[0]} · ${user.weightGoal ? `Goal: ${isImp ? kgToLbs(user.weightGoal) + 'lbs' : user.weightGoal + 'kg'}` : 'No goal set'}`} />
 
       {/* Stats bar */}
       <div className="card" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700 }}>BODY STATS</div>
-        {[{ l: 'Weight', v: `${user.weight}kg` }, { l: 'Height', v: `${user.height}cm` }, { l: 'BMI', v: bmi }, { l: 'TDEE', v: `${tdee}kcal` }, { l: 'Activity', v: ACTIVITY[user.activityLevel || 'moderate']?.label.split('(')[0].trim() }].map(s => (
+        {[{ l: 'Weight', v: isImp ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg` }, { l: 'Height', v: isImp ? cmToFtIn(user.height) : `${user.height}cm` }, { l: 'BMI', v: bmi }, { l: 'TDEE', v: `${tdee}kcal` }, { l: 'Activity', v: ACTIVITY[user.activityLevel || 'moderate']?.label.split('(')[0].trim() }].map(s => (
           <div key={s.l} style={{ padding: '5px 11px', background: 'var(--c3)', borderRadius: 8, border: '1px solid var(--bd)' }}>
             <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>{s.l}</div>
             <div style={{ fontSize: 13, fontWeight: 600, marginTop: 1 }}>{s.v}</div>
@@ -75,6 +86,36 @@ export default function DietPage() {
           </div>
           <div className="bb" style={{ fontSize: 24, color: todayTotal > goalKcal ? 'var(--danger)' : 'var(--o)' }}>{calPct}%</div>
         </div>
+        
+        <div style={{ marginTop: 12, marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
+            Estimated Macros (based on intake ratio)
+          </div>
+          {[
+            { label: 'Protein', consumed: estimatedProtein, target: prot,   unit: 'g', color: '#4ECDC4' },
+            { label: 'Carbs',   consumed: estimatedCarbs,   target: carbs,  unit: 'g', color: '#FFE66D' },
+            { label: 'Fat',     consumed: estimatedFat,     target: fat,    unit: 'g', color: '#FF6B6B' },
+          ].map(macro => (
+            <div key={macro.label} style={{ marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--t2)', marginBottom: 3 }}>
+                <span style={{ fontWeight: 600 }}>{macro.label}</span>
+                <span style={{ color: 'var(--t3)' }}>
+                  {macro.consumed}g / {macro.target}g
+                </span>
+              </div>
+              <div className="pbar" style={{ height: 5 }}>
+                <div className="pbar-fill" style={{
+                  width: `${Math.min(100, Math.round((macro.consumed / macro.target) * 100)) || 0}%`,
+                  background: macro.color,
+                }} />
+              </div>
+            </div>
+          ))}
+          <div style={{ fontSize: 9, color: 'var(--t3)', marginTop: 4, fontStyle: 'italic' }}>
+            * Estimated from calorie intake ratio. Log macros per meal for accurate tracking (coming soon).
+          </div>
+        </div>
+
         {todayCals.length > 0 && (
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: showCalLog ? 10 : 0 }}>
             {todayCals.map(l => (
@@ -115,6 +156,9 @@ export default function DietPage() {
             <div className="bb" style={{ fontSize: 22, color: 'var(--o)', letterSpacing: '1px' }}>{m.v}<span style={{ fontSize: 11, color: 'var(--t2)', fontFamily: "'DM Sans'" }}>{m.u}</span></div>
           </div>
         ))}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: -6, marginBottom: 14, padding: '0 2px' }}>
+        ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal' : 'current'} weight ({isImp ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
       </div>
 
       {/* Whey inline */}

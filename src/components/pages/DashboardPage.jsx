@@ -6,13 +6,15 @@ import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal } from '../shared/SharedComponents';
 import { MiniBodyMap } from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
-import { gId, tod, fmt, clamp, mkWtItems, mkIntItems } from '../../utils/helpers';
+import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, displayWeight, displayHeight, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP, getWeeklyMuscles, getOverallRank, MUSCLE_GROUPS } from '../../data/muscleData';
 import { useState as useStateR, useEffect } from 'react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak } = useApp();
+  const units = user.units || 'metric';
+  const isImp = units === 'imperial';
   const weeklyMuscles = useMemo(() => getWeeklyMuscles(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   const overallRank = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
@@ -59,7 +61,8 @@ export default function DashboardPage() {
     return Math.max(0, Math.round(diff));
   }, [user]);
 
-  const kgLeft = user.weightGoal ? Math.abs(latestWeight - user.weightGoal).toFixed(1) : null;
+  const kgLeftRaw = user.weightGoal ? Math.abs(latestWeight - user.weightGoal).toFixed(1) : null;
+  const kgLeft = isImp && kgLeftRaw ? kgToLbs(parseFloat(kgLeftRaw)) : kgLeftRaw;
   const isLoss = user.weightGoal && latestWeight > user.weightGoal;
 
   const saveLog = () => {
@@ -67,7 +70,7 @@ export default function DashboardPage() {
     if (!w || isNaN(w)) return;
     setHealthLogs(p => [...p, { id: gId(), userId: user.id, date: tod(), weight: w, notes: logNote }]);
     setLogNote(''); setShowLog(false);
-    addToast(`Weight logged: ${w} kg`, 'success');
+    addToast(`Weight logged: ${isImp ? kgToLbs(w) + ' lbs' : w + ' kg'}`, 'success');
   };
 
   const saveGoal = () => {
@@ -76,7 +79,7 @@ export default function DashboardPage() {
     addToast('Weight goal updated!', 'success');
   };
 
-  const wtItems = mkWtItems(30, 200, 0.5);
+  const wtItems = isImp ? mkWtItemsImperial(66, 440, 1) : mkWtItems(30, 200, 0.5);
   const wkItems = mkIntItems(1, 52);
 
   if (!loaded) return (
@@ -95,9 +98,9 @@ export default function DashboardPage() {
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))', gap: 10, marginBottom: 14 }}>
-        <StatCard label="Current Weight" value={latestWeight} unit="kg" Icon={Scale} trend={trend} />
+        <StatCard label="Current Weight" value={isImp ? kgToLbs(latestWeight) : latestWeight} unit={isImp ? 'lbs' : 'kg'} Icon={Scale} trend={trend ? (isImp ? +(trend * 2.20462).toFixed(1) : trend) : undefined} />
         <StatCard label="BMI" value={bmi || '—'} unit="" Icon={BarChart2} sub={bmiCat.label} />
-        <StatCard label="Height" value={user.height} unit="cm" Icon={Ruler} />
+        <StatCard label="Height" value={displayHeight(user.height, units).replace(/ cm$/, '')} unit={isImp ? '' : 'cm'} Icon={Ruler} />
         <StatCard label="Sessions / Week" value={thisWk} unit="" Icon={Flame} sub="this week" />
         <StatCard label="All Time" value={userWo.length} unit="" Icon={Trophy} sub="sessions" />
       </div>
@@ -134,7 +137,7 @@ export default function DashboardPage() {
         </div>
         {user.weightGoal ? (<>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
-            {[{ l: 'Target', v: `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} kg ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
+            {[{ l: 'Target', v: isImp ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImp ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
               <div key={s.l} style={{ background: 'var(--c2)', borderRadius: 10, padding: '10px 12px', border: '1px solid var(--bd)' }}>
                 <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
                 <div style={{ fontFamily: "'Bebas Neue'", fontSize: 20, color: 'var(--o)', letterSpacing: '1px' }}>{s.v}</div>
@@ -147,7 +150,7 @@ export default function DashboardPage() {
           </div>
           <div className="pbar"><div className="pbar-fill" style={{ width: `${goalPct}%` }} /></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t3)', marginTop: 5 }}>
-            <span>{user.weightGoalStart} kg (start)</span><span>{user.weightGoal} kg (goal)</span>
+            <span>{isImp ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImp ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
           </div>
         </>) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--c2)', borderRadius: 10, border: '1px dashed var(--bd2)' }}>
@@ -256,8 +259,8 @@ export default function DashboardPage() {
               <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowLog(false)}><X size={14} /></button>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label>Select Weight (kg)</label>
-              <ScrollPicker value={logWeight} onChange={setLogWeight} items={wtItems} unit="kg" fmtVal={v => v.toFixed(1)} />
+              <label>Select Weight ({isImp ? 'lbs' : 'kg'})</label>
+              <ScrollPicker value={isImp ? kgToLbs(logWeight) : logWeight} onChange={v => setLogWeight(isImp ? lbsToKg(v) : v)} items={wtItems} unit={isImp ? 'lbs' : 'kg'} fmtVal={v => v.toFixed(1)} />
             </div>
             <div style={{ marginBottom: 16 }}><label>Notes (optional)</label><input placeholder="Post-morning, post-workout..." value={logNote} onChange={e => setLogNote(e.target.value)} /></div>
             <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveLog}>Save Log</button>
@@ -275,9 +278,9 @@ export default function DashboardPage() {
               <div className="bb" style={{ fontSize: 22 }}>Set Weight Goal</div>
               <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowGoal(false)}><X size={14} /></button>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--o)' }}>{latestWeight} kg</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
+            <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--o)' }}>{isImp ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-              <div><label>Target Weight (kg)</label><ScrollPicker value={goalTarget} onChange={setGoalTarget} items={wtItems} unit="kg" fmtVal={v => v.toFixed(1)} /></div>
+              <div><label>Target Weight ({isImp ? 'lbs' : 'kg'})</label><ScrollPicker value={isImp ? kgToLbs(goalTarget) : goalTarget} onChange={v => setGoalTarget(isImp ? lbsToKg(v) : v)} items={wtItems} unit={isImp ? 'lbs' : 'kg'} fmtVal={v => v.toFixed(1)} /></div>
               <div><label>Timeline (weeks)</label><ScrollPicker value={goalWeeks} onChange={setGoalWeeks} items={wkItems} unit="wks" /></div>
             </div>
             {goalTarget && goalWeeks && (

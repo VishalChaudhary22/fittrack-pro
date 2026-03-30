@@ -95,7 +95,7 @@ export default function DashboardPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title={`Hey, ${user.name.split(' ')[0]}`} sub={new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+      <PageHeader title={<>WELCOME BACK,<br/><span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span></>} sub={new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         action={<button className="btn-p" style={{ padding: '10px 18px', fontSize: 13 }} onClick={() => setShowLog(true)}>+ Log Weight</button>} />
 
       {/* Stats grid */}
@@ -165,8 +165,8 @@ export default function DashboardPage() {
 
       {/* Chart + BMI */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 12, marginBottom: 12 }} className="g2">
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Weight Trend</div>
+        <div className="card glass-card" style={{ padding: 18 }}>
+          <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 12 }}>Weight Trend</div>
           <ResponsiveContainer width="100%" height={170}>
             <AreaChart data={chartData}>
               <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
@@ -179,11 +179,20 @@ export default function DashboardPage() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>BMI Status</div>
-          <div className="display-lg" style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', color: 'var(--primary)', lineHeight: 0.9, marginLeft: '-0.2rem' }}>{bmi || '—'}</div>
-          <span className="tag" style={{ fontSize: 11 }}>{bmiCat.label}</span>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%', marginTop: 4 }}>
+        <div className="card glass-card" style={{ padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, overflow: 'hidden', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15 }}><Activity size={28} color="var(--on-surface)" /></div>
+          <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 16 }}>Metabolic Index</div>
+          
+          <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, marginTop: 8 }}>
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+            <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span className="headline-lg" style={{ color: 'var(--on-surface)', fontSize: '2.5rem' }}>{bmi || '—'}</span>
+              <span className="label-md" style={{ color: 'var(--primary-container)', fontSize: '10px', marginTop: 4 }}>{bmiCat.label}</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%', marginTop: 8 }}>
             {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => (
               <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: bmiCat.label.startsWith(s.l) ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', border: `none` }}>
                 <div style={{ fontSize: 10, color: bmiCat.label.startsWith(s.l) ? 'var(--primary)' : 'var(--on-surface-variant)', fontWeight: 700 }}>{s.l}</div>
@@ -196,17 +205,34 @@ export default function DashboardPage() {
 
       {/* Active Split + Recent */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 12 }} className="g2">
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Active Split</div>
+        <div className="card glass-card group" style={{ position: 'relative', overflow: 'hidden', minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 18 }}>
           {activeSplit ? <>
-            <div className="headline-md" style={{ color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>{(() => { const I = { Repeat, Zap, Target, Dumbbell, Trophy, Home, Award }[activeSplit.icon] || Flame; return <I size={18} />; })()}{activeSplit.name} <PulseIndicator color="var(--primary)" /></div>
-            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{activeSplit.description}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {activeSplit.schedule.map((d, i) => (
-                <div key={i} style={{ padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600, background: d === 'Rest' ? 'var(--surface-container-lowest)' : 'var(--surface-container-highest)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--primary)' }}>D{i + 1}: {d}</div>
-              ))}
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5YpbGNIoffyZlhuSOD4j3ahpYBQQfFB1zqtCjL7_BUk6tA9p0a2lG1HEdiThIXTYVvnA-b2UjzmbZYd6rat_MwXd9ODZuWMaRe032I3mzdPojqaOMzCMuRODYzlRH9HlY4iTumjwp8hBdSRz10dmucVjk_M38BsbuYmWp1pWbWzth6YNIBRy9LJp_cEya6moQ0MDMrpczz829a-mzevNqgxlRdofFwnDBCoEoiIqa-dekVLFyHK3u02-qrQe5iqKtus-ZsA1--JiE" alt="Split Imagery" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, filter: 'grayscale(100%)', mixBlendMode: 'overlay', zIndex: 0 }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background) 15%, transparent 100%)', zIndex: 0 }}></div>
+            
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <PulseIndicator color="var(--primary-container)" />
+                <span className="label-md" style={{ color: 'var(--primary-container)', opacity: 1, letterSpacing: '0.1em' }}>Target Split</span>
+              </div>
+              
+              <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase' }}>
+                {activeSplit.name}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{activeSplit.description}</div>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {activeSplit.schedule.map((d, i) => (
+                  <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.05)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>D{i + 1}: {d}</div>
+                ))}
+              </div>
             </div>
-          </> : <div style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>No split active</div>}
+          </> : <>
+            <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+               <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 12 }}>Active Split</div>
+               <div style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>No split active — set one up to track routine!</div>
+            </div>
+          </>}
         </div>
         <div className="card" style={{ padding: 18 }}>
           <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Recent Sessions</div>

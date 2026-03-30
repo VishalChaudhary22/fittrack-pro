@@ -36,6 +36,8 @@
   --on-surface-variant: #E3BFB3;
   --on-surface-dim: #6E6E76;
 
+  --tertiary-container: #e76c37;
+
   --outline-variant: rgba(90, 65, 56, 0.15);
 
   --shadow-ambient: 0 20px 40px rgba(0,0,0,0.4);
@@ -181,6 +183,22 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .card>*{position:relative;z-index:1}
 .card-p{background:var(--surface-container);border:none;border-radius:20px;overflow:hidden;box-shadow:none;}
 
+/* ─── STITCH PATTERNS (Phase 6) ─────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: none;
+}
+.ember-glow {
+  box-shadow: 0 0 20px rgba(248, 95, 27, 0.2);
+}
+.text-gradient-primary {
+  background: linear-gradient(to right, var(--primary-container), var(--tertiary-container));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* ─── MODALS ────────────────────────────────────────────────────── */
 .mo{
   position:fixed;inset:0;background:rgba(14, 14, 16, 0.85);display:flex;align-items:center;
@@ -210,13 +228,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ni.act{background:var(--surface-container-highest);color:var(--primary);box-shadow:var(--glow-primary)}
 
 /* ─── TYPOGRAPHY ────────────────────────────────────────────────── */
-.display-lg  { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
-.headline-lg { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.5rem, 3vw, 2.0rem); font-weight: 700; line-height: 1.1; }
-.headline-md { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.display-lg  { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+.headline-lg { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.5rem, 3vw, 2.0rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.04em; }
+.headline-md { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.04em; }
 .title-lg    { font-family: 'Be Vietnam Pro', sans-serif; font-size: 1.375rem; font-weight: 600; }
 .title-md    { font-family: 'Be Vietnam Pro', sans-serif; font-size: 1.125rem; font-weight: 600; }
 .body-md     { font-family: 'Be Vietnam Pro', sans-serif; font-size: max(0.875rem, 14px); font-weight: 400; line-height: 1.5; }
-.label-md    { font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+.label-md    { font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
 
 /* ─── SEPARATORS & GROUPS ───────────────────────────────────────── */
 .tonal-break { margin: 16px 0; border: none; background: transparent; } /* Replaces old explicit line dividers */
@@ -286,8 +304,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ex-r{display:grid;grid-template-columns:34px 1fr 1fr 80px;gap:7px;align-items:center}
 
 /* ─── PROGRESS BAR ──────────────────────────────────────────────── */
-.pbar{height:6px;background:var(--c3);border-radius:3px;overflow:hidden}
-.pbar-fill{height:100%;background:var(--og);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.pbar{height:6px;background:var(--surface-container-high);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(to right, var(--primary-container), var(--tertiary-container));border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 
 /* ─── STRIPE (left accent border) ───────────────────────────────── */
 .stripe{border-left:3px solid var(--o);border-radius:0 24px 24px 0}

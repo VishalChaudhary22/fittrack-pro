@@ -520,3 +520,38 @@ Each page must be audited and updated to comply with the new design language.
 2. ✅ **Iron League adapts** — rank colors shift to new peach/ember palette for consistency
 3. ✅ **Progress Orbs → Dashboard only** — other pages keep flat `pbar` for space efficiency
 4. ✅ **Typography bleeds → Confirmed** — editorial-style intentional overflow on hero numbers (~10-15% margin bleed)
+
+---
+
+## Phase 6 — Advanced Stitch UI Patterns Integration (NEW)
+
+Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the following specific patterns and elements need to be integrated into our existing components to reach full 1:1 parity with the "Obsidian Performance" vision:
+
+### 6.1 Unified Glassmorphism
+- **Pattern:** Stitch uses `rgba(53, 52, 55, 0.6)` with `backdrop-filter: blur(20px)` heavily for structural cards (e.g., `.glass-card`).
+- **Plan:** Upgrade our `.card` baseline in `index.css` (or create a specific `.glass-card` utility) to apply this exact frosted texture to major dashboard cards, replacing opaque `surface-container` fills where applicable to let the deep canvas show through.
+
+### 6.2 "Ember Glow" & Signature Gradients
+- **Pattern:** High-intensity elements (like the BMI ring or selected states) use a specific shadow: `box-shadow: 0 0 20px rgba(248, 95, 27, 0.2)` (`.ember-glow`). Typography also uses `bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-tertiary-container`.
+- **Plan:**
+  - Create the `.ember-glow` utility class in `index.css` to standardize this exact shadow/glow.
+  - Apply the text-gradient pattern to the "Welcome Back" user name on the Dashboard.
+  - Apply the text-gradient or ember-glow to hero metrics (like the BMI number or streak count).
+
+### 6.3 Track-Tight / Tracking-Widest Typography
+- **Pattern:** Stitch utilizes extreme letter-spacing contrast. Display numbers use `tracking-tighter` (`-0.05em`) while small labels/subheaders use `tracking-widest` (`0.1em`) with uppercase formatting.
+- **Plan:**
+  - Update `.display-lg` and `.headline-lg` in `index.css` to enforce `letter-spacing: -0.04em`.
+  - Update `.label-md` and subheader inline styles to use `letter-spacing: 0.1em` with `text-transform: uppercase`.
+
+### 6.4 Concentric Ring Visualization
+- **Pattern:** Instead of flat bars for stats, Stitch uses a layered concentric ring system (e.g., the BMI indicator): an inner ring (`border-4 border-surface-container-lowest`), an outer active ring (`border-4 border-primary-container`), and an `.ember-glow`.
+- **Plan:** Refactor the BMI widget and the `ProgressOrb` component to use this exact CSS border-ring setup (or SVG equivalent with matching stroke-width and drop-shadows) rather than simple overlapping circles.
+
+### 6.5 Horizontal Gradient Progress Bars
+- **Pattern:** Activity/Hydration sub-cards use ultra-thin (`h-1`) progress bars with `bg-gradient-to-r from-primary-container to-tertiary-container` inside a `rounded-full` container.
+- **Plan:** Update our `pbar-fill` style in `index.css` to use this exact gradient mix instead of the solid or simple two-stop gradient. Apply this pattern to the Daily Goals or weekly volume bars on the Dashboard.
+
+### 6.6 Asymmetric Hero Imagery
+- **Pattern:** The "Live Suggestion" block uses a dark, grayscale background image overlaid with a bottom-to-top transparency mask, floating text, and a pulsing dot to create a highly premium, editorial feel.
+- **Plan:** Bring this aesthetic to the "Active Split" or "Next Workout" card. We will incorporate a subtle, dark-theme relevant background image (at 10–20% opacity with grayscale and gradient overlay) behind the active workout summary.

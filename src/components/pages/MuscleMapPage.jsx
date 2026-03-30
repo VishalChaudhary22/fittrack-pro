@@ -29,25 +29,25 @@ const RankBadge = ({ rank, size = 'md' }) => {
 const MuscleCard = ({ muscle, xp }) => {
   const rank = getRank(xp);
   return (
-    <div className="card" style={{
-      padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14,
-      border: `1px solid ${rank.color}18`,
+    <div className="card stripe" style={{
+      padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16,
+      border: 'none'
     }}>
       <div style={{
-        width: 40, height: 40, borderRadius: 12,
-        background: rank.bg, border: `1px solid ${rank.color}25`,
+        width: 44, height: 44, borderRadius: 12,
+        background: rank.bg, border: 'none', boxShadow: `0 4px 12px ${rank.color}30`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <Shield size={18} color={rank.color} />
+        <Shield size={20} color={rank.color} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>{muscle.label}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div className="headline-md" style={{ color: 'var(--on-surface)' }}>{muscle.label}</div>
           <RankBadge rank={rank} size="sm" />
         </div>
-        <div style={{ position: 'relative', height: 6, borderRadius: 3, background: 'var(--c3)', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'var(--surface-container-highest)', overflow: 'hidden' }}>
           <div style={{
-            height: '100%', borderRadius: 3,
+            height: '100%', borderRadius: 4,
             background: `linear-gradient(90deg, ${rank.color}80, ${rank.color})`,
             width: `${rank.progress * 100}%`,
             transition: 'width .6s cubic-bezier(.4,0,.2,1)',
@@ -55,8 +55,8 @@ const MuscleCard = ({ muscle, xp }) => {
         </div>
         <div style={{
           display: 'flex', justifyContent: 'space-between',
-          fontSize: 11, fontWeight: 600, color: 'var(--t2)',
-          marginTop: 4
+          fontSize: 12, fontWeight: 600, color: 'var(--on-surface-variant)',
+          marginTop: 6
         }}>
           <span style={{ color: rank.color }}>
             {Math.round(xp).toLocaleString()} XP
@@ -148,14 +148,14 @@ export default function MuscleMapPage() {
       <PageHeader title="Iron League" sub="Your monthly strength league — climb the ranks" />
 
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 14, background: 'var(--c2)', borderRadius: 14, padding: 3, border: '1px solid var(--bd)' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--surface-container-highest)', borderRadius: 14, padding: 4, border: 'none' }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
-            flex: 1, padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer',
-            fontSize: 13, fontWeight: 700, transition: 'all .2s',
-            background: activeTab === t.key ? 'var(--og)' : 'transparent',
-            color: activeTab === t.key ? '#fff' : 'var(--t2)',
-            boxShadow: activeTab === t.key ? '0 2px 12px rgba(232,84,13,.3)' : 'none',
+            flex: 1, padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700, transition: 'all .2s var(--ease-smooth)',
+            background: activeTab === t.key ? 'var(--primary)' : 'transparent',
+            color: activeTab === t.key ? 'var(--on-primary)' : 'var(--on-surface-variant)',
+            boxShadow: activeTab === t.key ? 'var(--shadow-md)' : 'none',
           }}>
             {t.label}
           </button>
@@ -168,33 +168,37 @@ export default function MuscleMapPage() {
       {activeTab === 'muscles' && (<>
         {/* Overall Rank Card */}
         <div className="card" style={{
-          padding: '24px 20px', marginBottom: 14, textAlign: 'center',
-          background: 'linear-gradient(135deg, var(--c1) 0%, rgba(232,84,13,.06) 100%)',
-          border: `1px solid ${overall.color}20`,
+          padding: '24px 20px', marginBottom: 16, textAlign: 'center',
+          background: 'var(--surface-container-low)',
+          border: 'none',
+          position: 'relative', overflow: 'hidden'
         }}>
+          {/* subtle glow overlay matching overall rank color */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(circle at 50% -20%, ${overall.color}20, transparent 70%)`, pointerEvents: 'none' }} />
+          
           <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
 
           {/* Rank Display */}
-          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <div className="tonal-break" style={{ marginTop: 24, padding: '16px', background: 'var(--surface-container-highest)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
             <div style={{
-              width: 48, height: 48, borderRadius: 14,
+              width: 56, height: 56, borderRadius: 14,
               background: overall.bg,
-              border: `2px solid ${overall.color}40`,
+              border: 'none', boxShadow: `0 8px 16px ${overall.color}30`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Trophy size={24} color={overall.color} />
+              <Trophy size={28} color={overall.color} />
             </div>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Overall Rank</div>
-              <div className="bb" style={{ fontSize: 28, color: overall.color, letterSpacing: '1px' }}>{overall.name}</div>
-              <div style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 600 }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Overall Rank</div>
+              <div className="headline-lg" style={{ color: overall.color, letterSpacing: '1px', marginTop: 2 }}>{overall.name}</div>
+              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 4 }}>{Math.round(overall.totalXP).toLocaleString()} Total XP</div>
             </div>
           </div>
         </div>
 
         {/* Rank Legend */}
         <div className="card" style={{ padding: '12px 14px', marginBottom: 14, overflow: 'hidden' }}>
-          <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px' }}>Rank Tiers</div>
+          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '.5px' }}>Rank Tiers</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {RANK_TIERS.filter((_, i) => i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12 || i === 13).map(tier => (
               <div key={tier.name} style={{
@@ -215,9 +219,9 @@ export default function MuscleMapPage() {
             <button key={f.key} onClick={() => setFilter(f.key)} style={{
               padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
               fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
-              background: filter === f.key ? 'var(--o2)' : 'var(--c1)',
-              color: filter === f.key ? 'var(--o)' : 'var(--t2)',
-              border: `1px solid ${filter === f.key ? 'rgba(232,84,13,.2)' : 'var(--bd)'}`,
+              background: filter === f.key ? 'rgba(232,84,13,.15)' : 'var(--surface-container-lowest)',
+              color: filter === f.key ? 'var(--primary)' : 'var(--on-surface-variant)',
+              border: `none`,
               transition: 'all .15s',
             }}>
               {f.label}
@@ -243,101 +247,103 @@ export default function MuscleMapPage() {
 
         {/* SECTION 1 — Overall Monthly Rank Hero */}
         <div className="card" style={{
-          padding: '24px 20px', marginBottom: 14, textAlign: 'center',
-          background: `linear-gradient(135deg, var(--c1) 0%, ${overall.color}10 100%)`,
-          border: `1px solid ${overall.color}25`,
+          padding: '32px 20px', marginBottom: 16, textAlign: 'center',
+          background: 'var(--surface-container-lowest)',
+          border: 'none', position: 'relative', overflow: 'hidden'
         }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(circle at 50% 0%, ${overall.color}15, transparent 60%)`, pointerEvents: 'none' }} />
+          
           <div style={{
-            width: 64, height: 64, borderRadius: 18,
+            width: 72, height: 72, borderRadius: 20,
             background: overall.bg,
-            border: `2px solid ${overall.color}40`,
+            border: 'none', boxShadow: `0 8px 16px ${overall.color}40`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 12px',
+            margin: '0 auto 16px', position: 'relative', zIndex: 1
           }}>
-            <Trophy size={30} color={overall.color} />
+            <Trophy size={36} color={overall.color} />
           </div>
-          <div className="bb" style={{ fontSize: 36, color: overall.color, letterSpacing: '2px' }}>{overall.name}</div>
-          <div style={{ fontSize: 14, color: 'var(--t2)', fontWeight: 600, marginTop: 4 }}>
+          <div className="headline-lg" style={{ fontSize: 40, color: overall.color, letterSpacing: '1px', position: 'relative', zIndex: 1 }}>{overall.name}</div>
+          <div style={{ fontSize: 16, color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 8, position: 'relative', zIndex: 1 }}>
             {Math.round(overall.totalXP).toLocaleString()} Monthly XP
           </div>
 
           {/* Progress to next tier */}
           {overall.progress < 1 && (
-            <div style={{ marginTop: 16, maxWidth: 300, margin: '16px auto 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t3)', marginBottom: 4 }}>
+            <div style={{ marginTop: 24, maxWidth: 300, margin: '24px auto 0', position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>
                 <span>{overall.name}</span>
                 <span>{Math.round(overall.nextXP).toLocaleString()} XP</span>
               </div>
-              <div style={{ height: 8, borderRadius: 4, background: 'var(--c3)', overflow: 'hidden' }}>
+              <div style={{ height: 10, borderRadius: 5, background: 'var(--surface-container-highest)', overflow: 'hidden' }}>
                 <div style={{
-                  height: '100%', borderRadius: 4,
+                  height: '100%', borderRadius: 5,
                   background: `linear-gradient(90deg, ${overall.color}80, ${overall.color})`,
                   width: `${overall.progress * 100}%`,
                   transition: 'width .6s cubic-bezier(.4,0,.2,1)',
                 }} />
               </div>
-              <div style={{ fontSize: 11, color: overall.color, fontWeight: 700, marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: overall.color, fontWeight: 700, marginTop: 8 }}>
                 {Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to next rank
               </div>
             </div>
           )}
 
           {/* Meta stats */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
-              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Days Left</div>
-              <div className="bb" style={{ fontSize: 20, color: 'var(--o)' }}>{daysInMonth}</div>
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            <div className="tonal-break" style={{ padding: '12px 18px', background: 'var(--surface-container-highest)', borderRadius: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Days Left</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)', marginTop: 4 }}>{daysInMonth}</div>
             </div>
-            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
-              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>This Week</div>
-              <div className="bb" style={{ fontSize: 20, color: thisWeekDays >= 4 ? 'var(--success)' : 'var(--o)' }}>{thisWeekDays}/7 <span style={{ fontSize: 11, fontFamily: "'DM Sans'", color: 'var(--t2)' }}>days</span></div>
+            <div className="tonal-break" style={{ padding: '12px 18px', background: 'var(--surface-container-highest)', borderRadius: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>This Week</div>
+              <div className="headline-lg" style={{ color: thisWeekDays >= 4 ? 'var(--success)' : 'var(--primary)', marginTop: 4 }}>{thisWeekDays}/7 <span style={{ fontSize: 12, fontFamily: 'Space Grotesk', color: 'var(--on-surface-variant)' }}>days</span></div>
             </div>
-            <div style={{ padding: '8px 14px', background: 'var(--c2)', borderRadius: 10, border: '1px solid var(--bd)' }}>
-              <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Muscles</div>
-              <div className="bb" style={{ fontSize: 20, color: 'var(--tx)' }}>{Object.values(muscleXP).filter(v => v > 0).length}/{MUSCLE_GROUPS.length}</div>
+            <div className="tonal-break" style={{ padding: '12px 18px', background: 'var(--surface-container-highest)', borderRadius: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Muscles</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 4 }}>{Object.values(muscleXP).filter(v => v > 0).length}/{MUSCLE_GROUPS.length}</div>
             </div>
           </div>
         </div>
 
         {/* SECTION 2 — Per-Muscle League Table */}
-        <div className="card" style={{ marginBottom: 14, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--bd)', background: 'var(--c2)' }}>
-            <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Shield size={12} color="var(--o)" /> Per-Muscle League Table
+        <div className="card" style={{ marginBottom: 16, overflow: 'hidden', border: 'none' }}>
+          <div style={{ padding: '16px 20px', background: 'var(--surface-container-lowest)' }}>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Shield size={14} color="var(--primary)" /> Per-Muscle League Table
             </div>
           </div>
           {/* Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 80px 60px', gap: 8, padding: '8px 16px', borderBottom: '1px solid var(--bd)', background: 'var(--c2)' }}>
-            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Muscle</div>
-            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rank</div>
-            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>XP</div>
-            <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Status</div>
+          <div className="tonal-break" style={{ display: 'grid', gridTemplateColumns: '1fr 90px 80px 60px', gap: 8, padding: '10px 20px', background: 'var(--surface-container-highest)' }}>
+            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Muscle</div>
+            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Rank</div>
+            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>XP</div>
+            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>Status</div>
           </div>
           {sortedMuscles.map((muscle, i) => {
             const xp = muscleXP[muscle.key] || 0;
             const rank = getRank(xp);
             const isWeakest = muscle.key === weakestMuscle?.key && xp < (muscleXP[sortedMuscles[0]?.key] || 0) * 0.3;
             return (
-              <div key={muscle.key} className="row-sep" style={{
+              <div key={muscle.key} className="stripe" style={{
                 display: 'grid', gridTemplateColumns: '1fr 90px 80px 60px', gap: 8,
-                padding: '10px 16px', alignItems: 'center',
-                background: isWeakest ? 'rgba(255,107,107,.06)' : 'transparent',
+                padding: '12px 20px', alignItems: 'center',
+                background: isWeakest ? 'rgba(255,107,107,.08)' : 'transparent',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, width: 16 }}>#{i + 1}</div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{muscle.label}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ fontSize: 12, color: 'var(--on-surface-dim)', fontWeight: 700, width: 20 }}>#{i + 1}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--on-surface)' }}>{muscle.label}</div>
                 </div>
                 <RankBadge rank={rank} size="sm" />
-                <div style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: rank.color }}>
+                <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: rank.color }}>
                   {Math.round(xp).toLocaleString()}
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {isWeakest ? (
-                    <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--danger)', textTransform: 'uppercase', background: 'rgba(255,107,107,.12)', padding: '2px 5px', borderRadius: 4 }}>Focus</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--danger)', textTransform: 'uppercase', background: 'rgba(255,107,107,.15)', padding: '3px 6px', borderRadius: 4 }}>Focus</span>
                   ) : xp > 0 ? (
-                    <TrendingUp size={12} color="var(--success)" />
+                    <TrendingUp size={14} color="var(--success)" />
                   ) : (
-                    <Minus size={12} color="var(--t3)" />
+                    <Minus size={14} color="var(--on-surface-dim)" />
                   )}
                 </div>
               </div>
@@ -346,31 +352,31 @@ export default function MuscleMapPage() {
         </div>
 
         {/* SECTION 3 — Percentile Benchmarks */}
-        <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <TrendingUp size={12} color="var(--o)" /> Where You Stand
+        <div className="card" style={{ padding: '20px', marginBottom: 16, border: 'none' }}>
+          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <TrendingUp size={14} color="var(--primary)" /> Where You Stand
           </div>
 
           {/* Benchmark bar */}
-          <div style={{ position: 'relative', marginBottom: 16 }}>
-            <div style={{ height: 10, borderRadius: 5, background: 'var(--c3)', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ position: 'relative', marginBottom: 20 }}>
+            <div style={{ height: 12, borderRadius: 6, background: 'var(--surface-container-highest)', overflow: 'hidden', position: 'relative' }}>
               <div style={{
-                height: '100%', borderRadius: 5,
+                height: '100%', borderRadius: 6,
                 background: 'linear-gradient(90deg, #CD7F32, #C0C0C0, #FFD700, #40E0D0, #FF69B4)',
                 width: `${benchmarkPct}%`,
                 transition: 'width .8s cubic-bezier(.4,0,.2,1)',
               }} />
             </div>
             {/* Benchmark markers */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
               {MONTHLY_BENCHMARKS.map(b => {
                 const pct = (b.totalXP / MONTHLY_BENCHMARKS[MONTHLY_BENCHMARKS.length - 1].totalXP) * 100;
                 return (
                   <div key={b.label} style={{
-                    fontSize: 8, color: 'var(--t3)', fontWeight: 600, textAlign: 'center',
-                    position: 'absolute', left: `${pct}%`, transform: 'translateX(-50%)', top: 20,
+                    fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textAlign: 'center',
+                    position: 'absolute', left: `${pct}%`, transform: 'translateX(-50%)', top: 24,
                   }}>
-                    <div style={{ width: 1, height: 6, background: 'var(--bd2)', margin: '0 auto 2px' }} />
+                    <div style={{ width: 2, height: 8, background: 'var(--surface-container-highest)', margin: '0 auto 4px', borderRadius: 1 }} />
                     {b.label}
                   </div>
                 );
@@ -379,14 +385,14 @@ export default function MuscleMapPage() {
           </div>
 
           {/* Text summary */}
-          <div style={{ marginTop: 36, padding: '10px 12px', background: 'var(--o3)', borderRadius: 10, border: '1px solid rgba(232,84,13,.15)' }}>
-            <div style={{ fontSize: 12, color: 'var(--t2)' }}>
-              Your overall XP (<strong style={{ color: 'var(--o)' }}>{Math.round(overall.totalXP).toLocaleString()}</strong>)
+          <div style={{ marginTop: 44, padding: '14px 16px', background: 'var(--surface-container-highest)', borderRadius: 12, border: 'none' }}>
+            <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', lineHeight: 1.5 }}>
+              Your overall XP (<strong style={{ color: 'var(--primary)' }}>{Math.round(overall.totalXP).toLocaleString()}</strong>)
               {benchmark.lower && benchmark.upper
-                ? <> places you in the <strong style={{ color: 'var(--o)' }}>{benchmark.lower.label}–{benchmark.upper.label}</strong> range.</>
+                ? <> places you in the <strong style={{ color: 'var(--primary)' }}>{benchmark.lower.label}–{benchmark.upper.label}</strong> range.</>
                 : benchmark.lower
-                  ? <> puts you beyond <strong style={{ color: 'var(--o)' }}>{benchmark.lower.label}</strong> level. Incredible!</>
-                  : <> is at the <strong style={{ color: 'var(--o)' }}>{benchmark.upper?.label || 'Beginner'}</strong> level. Keep training!</>
+                  ? <> puts you beyond <strong style={{ color: 'var(--primary)' }}>{benchmark.lower.label}</strong> level. Incredible!</>
+                  : <> is at the <strong style={{ color: 'var(--primary)' }}>{benchmark.upper?.label || 'Beginner'}</strong> level. Keep training!</>
               }
             </div>
           </div>
@@ -394,30 +400,31 @@ export default function MuscleMapPage() {
 
         {/* SECTION 4 — Monthly Rank History Timeline */}
         {monthlyRankHistory && monthlyRankHistory.length > 0 && (
-          <div className="card" style={{ padding: '16px 18px', marginBottom: 14 }}>
-            <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Calendar size={12} color="var(--o)" /> Rank History
+          <div className="card" style={{ padding: '20px', marginBottom: 16, border: 'none' }}>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Calendar size={14} color="var(--primary)" /> Rank History
             </div>
-            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6 }}>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
               {/* Current month (live) */}
               <div className="card" style={{
-                padding: '12px 14px', minWidth: 140, flexShrink: 0,
-                border: `2px solid ${overall.color}40`,
-                background: `linear-gradient(135deg, var(--c1), ${overall.color}08)`,
+                padding: '16px', minWidth: 160, flexShrink: 0,
+                border: 'none',
+                background: `linear-gradient(135deg, var(--surface-container-lowest), ${overall.color}15)`,
+                boxShadow: `0 4px 12px ${overall.color}20`
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ fontSize: 10, color: 'var(--o)', fontWeight: 700 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700 }}>
                     {new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                   </div>
-                  <span style={{ fontSize: 7, fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', background: 'rgba(81,207,102,.12)', padding: '2px 5px', borderRadius: 4 }}>Live</span>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', background: 'rgba(81,207,102,.15)', padding: '3px 6px', borderRadius: 4 }}>Live</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: overall.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Trophy size={16} color={overall.color} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: overall.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${overall.color}30` }}>
+                    <Trophy size={18} color={overall.color} />
                   </div>
                   <div>
-                    <div className="bb" style={{ fontSize: 14, color: overall.color }}>{overall.name}</div>
-                    <div style={{ fontSize: 10, color: 'var(--t2)' }}>{Math.round(overall.totalXP).toLocaleString()} XP</div>
+                    <div className="headline-md" style={{ color: overall.color }}>{overall.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{Math.round(overall.totalXP).toLocaleString()} XP</div>
                   </div>
                 </div>
               </div>
@@ -428,28 +435,29 @@ export default function MuscleMapPage() {
                 const isBest = bestMonth && hist.id === bestMonth.id;
                 return (
                   <div key={hist.id} className="card" style={{
-                    padding: '12px 14px', minWidth: 140, flexShrink: 0,
-                    border: `1px solid ${isBest ? 'var(--o)' : r.color + '20'}`,
-                    background: isBest ? 'var(--o3)' : 'var(--bg)',
+                    padding: '16px', minWidth: 160, flexShrink: 0,
+                    border: 'none',
+                    background: isBest ? 'var(--surface-container-low)' : 'var(--surface-container-lowest)',
                     position: 'relative',
                   }}>
                     {isBest && (
                       <div style={{
-                        position: 'absolute', top: -1, right: 10,
-                        fontSize: 7, fontWeight: 700, color: '#fff', textTransform: 'uppercase',
-                        background: 'var(--og)', padding: '2px 6px', borderRadius: '0 0 4px 4px',
+                        position: 'absolute', top: 0, right: 12,
+                        fontSize: 8, fontWeight: 700, color: 'var(--on-primary)', textTransform: 'uppercase',
+                        background: 'var(--primary)', padding: '4px 8px', borderRadius: '0 0 6px 6px',
+                        boxShadow: 'var(--shadow-sm)'
                       }}>
-                        <Award size={8} /> Best
+                        <Award size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} /> Best
                       </div>
                     )}
-                    <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600, marginBottom: 8 }}>{hist.label}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Trophy size={16} color={r.color} />
+                    <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, marginBottom: 12 }}>{hist.label}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trophy size={18} color={r.color} />
                       </div>
                       <div>
-                        <div className="bb" style={{ fontSize: 14, color: r.color }}>{r.name}</div>
-                        <div style={{ fontSize: 10, color: 'var(--t2)' }}>{Math.round(hist.xp).toLocaleString()} XP</div>
+                        <div className="headline-md" style={{ color: r.color }}>{r.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>{Math.round(hist.xp).toLocaleString()} XP</div>
                       </div>
                     </div>
                   </div>

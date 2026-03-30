@@ -4,6 +4,60 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
 import { clamp, O } from '../../utils/helpers';
 import { useApp } from '../../context/AppContext';
 
+// ─── PULSE INDICATOR ──────────────────────────────────────────────────────────
+export const PulseIndicator = ({ color = 'var(--primary)' }) => (
+  <span style={{
+    display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
+    background: color, boxShadow: `0 0 12px ${color}`, animation: 'pulse 2s var(--ease-smooth) infinite',
+    marginLeft: 6, verticalAlign: 'middle'
+  }} />
+);
+
+// ─── GLASS TOOLTIP ────────────────────────────────────────────────────────────
+export const GlassTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '10px 14px', borderRadius: 12, border: 'none', boxShadow: 'var(--shadow-ambient)', color: 'var(--on-surface)' }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: "'Be Vietnam Pro', sans-serif" }}>{label}</p>
+        {payload.map((p, i) => (
+          <p key={i} style={{ margin: '4px 0 0 0', fontSize: 12, color: p.color || 'var(--primary)', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>{p.name}: {p.value}</p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+// ─── PROGRESS ORB ─────────────────────────────────────────────────────────────
+export const ProgressOrb = ({ progress = 0, size = 120, label, subLabel }) => {
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
+  const curr = clamp(progress, 0, 100);
+  const circ = radius * 2 * Math.PI;
+  const dashoffset = circ - ((curr / 100) * circ);
+
+  return (
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
+        <defs>
+          <linearGradient id="orb-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--primary)" />
+            <stop offset="100%" stopColor="var(--primary-container)" />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--surface-container-high)" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="url(#orb-grad)" strokeWidth={strokeWidth} strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={dashoffset}
+          style={{ transition: 'stroke-dashoffset 1s var(--ease-spring)' }} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+        {label && <div className="headline-md" style={{ color: 'var(--on-surface)', lineHeight: 1 }}>{label}</div>}
+        {subLabel && <div style={{ fontSize: 10, color: 'var(--on-surface-variant)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{subLabel}</div>}
+      </div>
+    </div>
+  );
+};
+
 // ─── PORTAL (renders children at document.body to avoid transform stacking) ──
 export const Portal = ({ children }) => createPortal(children, document.body);
 // ─── STAT CARD ────────────────────────────────────────────────────────────────
@@ -13,17 +67,17 @@ export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge 
     onMouseEnter={e => { if (onClick) e.currentTarget.style.transform = 'scale(1.015)'; }}
     onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-      <div style={{ width: 38, height: 38, borderRadius: 12, background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(232,84,13,.08)' }}>
-        <Icon size={17} color="var(--o)" />
+      <div style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(232,84,13,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}>
+        <Icon size={17} color="var(--primary)" />
       </div>
       {badge && <span className="tag" style={{ fontSize: 9 }}>{badge}</span>}
-      {onClick && !badge && <ChevronRight size={14} color="var(--t3)" />}
+      {onClick && !badge && <ChevronRight size={14} color="var(--on-surface-dim)" />}
     </div>
-    <div style={{ fontSize: 11, color: 'var(--t2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 5 }}>{label}</div>
-    <div className="bb" style={{ fontSize: 34, color: 'var(--tx)', lineHeight: 1 }}>
-      {value}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--t2)', marginLeft: 4, fontFamily: "'DM Sans'" }}>{unit}</span>
+    <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 5 }}>{label}</div>
+    <div className="display-lg" style={{ color: 'var(--on-surface)', lineHeight: 1 }}>
+      {value}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--on-surface-variant)', marginLeft: 4, fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: 'normal' }}>{unit}</span>
     </div>
-    {sub && <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 5 }}>{sub}</div>}
+    {sub && <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 5 }}>{sub}</div>}
     {trend !== undefined && <div style={{ fontSize: 11, marginTop: 5, color: trend > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>{trend > 0 ? '▲' : '▼'} {Math.abs(trend).toFixed(1)} kg since last log</div>}
   </div>
 );
@@ -135,9 +189,9 @@ export const ThemeTogglePill = () => {
 export const PageHeader = ({ title, sub, action }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
     <div>
-      <div className="bb pt" style={{ fontSize: 32, color: 'var(--tx)', lineHeight: 1 }}>{title}</div>
-      <div className="abar" style={{ marginTop: 6 }} />
-      {sub && <div style={{ fontSize: 13, color: 'var(--t2)', marginTop: -4 }}>{sub}</div>}
+      <div className="headline-lg pt" style={{ color: 'var(--on-surface)', lineHeight: 1.1 }}>{title}</div>
+      <div style={{ width: 28, height: 3, background: 'var(--signature-gradient)', borderRadius: 3, marginTop: 6, marginBottom: 10 }} />
+      {sub && <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: -4 }}>{sub}</div>}
     </div>
     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
       <ThemeTogglePill />
@@ -181,10 +235,10 @@ export const ScrollPicker = ({ value, onChange, items, unit = '', fmtVal = v => 
         <div style={{ height: PAD }} />
         {items.map((item, i) => (
           <div key={i} className="picker-item" style={{
-            fontFamily: "'Bebas Neue',sans-serif",
+            fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700,
             fontSize: String(item) === String(value) ? 32 : 22,
-            color: String(item) === String(value) ? O : 'var(--t2)',
-            letterSpacing: '1px',
+            color: String(item) === String(value) ? 'var(--primary)' : 'var(--on-surface-variant)',
+            letterSpacing: '-0.5px',
           }} onClick={() => onChange(item)}>
             {fmtVal(item)}{unit ? ` ${unit}` : ''}
           </div>
@@ -200,12 +254,12 @@ export const ToastContainer = ({ toasts, removeToast }) => (
   <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 'var(--z-toast)', display: 'flex', flexDirection: 'column', gap: 10 }}>
     {toasts.map(t => (
       <div key={t.id} className={t.exiting ? 'toast-exit' : 'toast-enter'} style={{
-        background: t.type === 'error' ? 'rgba(255,59,48,.92)' : t.type === 'info' ? 'rgba(26,26,30,.92)' : 'rgba(232,84,13,.92)',
-        color: '#fff', padding: '14px 20px', borderRadius: 16, fontSize: 13, fontWeight: 600,
-        boxShadow: '0 8px 32px rgba(0,0,0,.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
-        fontFamily: "'DM Sans', sans-serif", minWidth: 240, maxWidth: 380,
-        border: `1px solid ${t.type === 'error' ? 'rgba(255,59,48,.3)' : t.type === 'info' ? 'rgba(255,255,255,.06)' : 'rgba(232,84,13,.3)'}`,
-        backdropFilter: 'blur(16px)',
+        background: t.type === 'error' ? 'rgba(255,59,48,.2)' : t.type === 'info' ? 'var(--surface-container-highest)' : 'rgba(248,95,27,.2)',
+        color: 'var(--on-surface)', padding: '14px 20px', borderRadius: 16, fontSize: 13, fontWeight: 600,
+        boxShadow: t.type === 'error' ? 'none' : 'var(--glow-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+        fontFamily: "'Be Vietnam Pro', sans-serif", minWidth: 240, maxWidth: 380,
+        border: `1px solid ${t.type === 'error' ? 'var(--error)' : t.type === 'info' ? 'var(--outline-variant)' : 'var(--primary-container)'}`,
+        backdropFilter: 'var(--glass-blur)',
       }} onClick={() => removeToast(t.id)}>
         <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0 }}>{t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'}</span>
         <span>{t.message}</span>
@@ -221,8 +275,8 @@ export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confi
     <Portal>
       <div className="mo">
         <div className="md" style={{ maxWidth: 380, textAlign: 'center' }}>
-          <div className="bb" style={{ fontSize: 22, marginBottom: 8 }}>{title}</div>
-          <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
+          <div className="headline-md" style={{ marginBottom: 8, color: 'var(--on-surface)' }}>{title}</div>
+          <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>Cancel</button>
             <button className={danger ? 'btn-danger' : 'btn-p'} style={{
@@ -237,7 +291,13 @@ export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confi
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 export const Skeleton = ({ width = '100%', height = 20, aspectRatio, borderRadius = 8, style = {} }) => (
-  <div className="skeleton-pulse" style={{ width, height, aspectRatio, borderRadius, background: 'var(--c3)', ...style }} />
+  <div style={{
+    width, height, aspectRatio, borderRadius,
+    background: 'linear-gradient(90deg, var(--surface-container-low) 25%, var(--surface-container-high) 50%, var(--surface-container-low) 75%)',
+    backgroundSize: '200%',
+    animation: 'shimmer 2s var(--ease-smooth) infinite',
+    ...style
+  }} />
 );
 
 export const SkeletonCard = () => (
@@ -256,12 +316,12 @@ export const SkeletonCard = () => (
 
 // ─── EMPTY STATE ──────────────────────────────────────────────────────────────
 export const EmptyState = ({ Icon, title, message, action, actionLabel }) => (
-  <div style={{ textAlign: 'center', padding: '60px 24px', border: '1px dashed var(--bd2)', borderRadius: 22, background: 'var(--c1)', boxShadow: 'var(--shadow)' }}>
-    <div style={{ width: 68, height: 68, borderRadius: 18, background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 0 24px rgba(232,84,13,.08)' }}>
-      <Icon size={28} color="var(--o)" />
+  <div style={{ textAlign: 'center', padding: '60px 24px', border: 'none', borderRadius: 24, background: 'var(--surface-container-low)', boxShadow: 'none' }}>
+    <div style={{ width: 68, height: 68, borderRadius: 18, background: 'var(--surface-container-high)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: 'var(--glow-primary)' }}>
+      <Icon size={28} color="var(--primary)" />
     </div>
-    <div className="bb" style={{ fontSize: 22, marginBottom: 8, color: 'var(--tx)' }}>{title}</div>
-    <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: action ? 20 : 0, lineHeight: 1.6 }}>{message}</div>
+    <div className="headline-md" style={{ marginBottom: 8, color: 'var(--on-surface)' }}>{title}</div>
+    <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: action ? 20 : 0, lineHeight: 1.6 }}>{message}</div>
     {action && <button className="btn-p" style={{ padding: '12px 24px' }} onClick={action}>{actionLabel}</button>}
   </div>
 );

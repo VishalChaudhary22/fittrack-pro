@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Scale, BarChart2, Ruler, Flame, Trophy, Target, ChevronDown, ChevronRight, Check, X, Zap, Repeat, Dumbbell, Home, Award, Activity, Shield } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal } from '../shared/SharedComponents';
+import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal, GlassTooltip, PulseIndicator, ProgressOrb } from '../shared/SharedComponents';
 import { MiniBodyMap } from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, displayWeight, displayHeight, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
@@ -109,16 +109,16 @@ export default function DashboardPage() {
 
       {/* Streak Card */}
       <div className="card stripe" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Flame size={20} color="var(--o)" /></div>
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Flame size={20} color="var(--primary)" /></div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
             <div>
-              <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
-              <div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>{streak.current}<span style={{ fontSize: 14, color: 'var(--t2)', fontFamily: "'DM Sans'", marginLeft: 3 }}>days</span></div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)' }}>{streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
-              <div className="bb" style={{ fontSize: 28, color: 'var(--tx)' }}>{streak.longest}<span style={{ fontSize: 14, color: 'var(--t2)', fontFamily: "'DM Sans'", marginLeft: 3 }}>days</span></div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
             </div>
           </div>
         </div>
@@ -126,39 +126,39 @@ export default function DashboardPage() {
       </div>
 
       {/* Goal Progress Card */}
-      <div className="card stripe" style={{ padding: '18px 20px', marginBottom: 14, cursor: 'pointer', transition: 'opacity .2s' }} onClick={() => setShowGoal(true)}>
+      <div className="card stripe" style={{ padding: '18px 20px', marginBottom: 14, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setShowGoal(true)}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Target size={16} color="var(--o)" /></div>
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Target size={16} color="var(--primary)" /></div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>Weight Goal</div>
-              <div style={{ fontSize: 11, color: 'var(--t2)' }}>Tap to update your target</div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>Tap to update your target</div>
             </div>
           </div>
-          <ChevronDown size={14} color="var(--t3)" />
+          <ChevronDown size={14} color="var(--on-surface-dim)" />
         </div>
         {user.weightGoal ? (<>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 14 }}>
             {[{ l: 'Target', v: isImpWeight ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImpWeight ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
-              <div key={s.l} style={{ background: 'var(--c2)', borderRadius: 10, padding: '10px 12px', border: '1px solid var(--bd)' }}>
-                <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
-                <div style={{ fontFamily: "'Bebas Neue'", fontSize: 20, color: 'var(--o)', letterSpacing: '1px' }}>{s.v}</div>
+              <div key={s.l} style={{ background: 'var(--surface-container-highest)', borderRadius: 10, padding: '10px 12px', border: 'none' }}>
+                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
+                <div className="headline-md" style={{ color: 'var(--primary)' }}>{s.v}</div>
               </div>
             ))}
           </div>
-          <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 12, color: 'var(--t2)' }}>Goal Completion</div>
-            <div style={{ fontSize: 12, color: 'var(--o)', fontWeight: 700 }}>{goalPct}%</div>
-          </div>
-          <div className="pbar"><div className="pbar-fill" style={{ width: `${goalPct}%` }} /></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--t3)', marginTop: 5 }}>
-            <span>{isImpWeight ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImpWeight ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <ProgressOrb progress={goalPct} size={80} label={`${goalPct}%`} subLabel="Done" />
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 600 }}>
+                <span>{isImpWeight ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImpWeight ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
+              </div>
+            </div>
           </div>
         </>) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--c2)', borderRadius: 10, border: '1px dashed var(--bd2)' }}>
-            <Target size={14} color="var(--t3)" />
-            <span style={{ fontSize: 13, color: 'var(--t2)' }}>Set your target weight & timeline</span>
-            <ChevronRight size={13} color="var(--t3)" style={{ marginLeft: 'auto' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none' }}>
+            <Target size={14} color="var(--on-surface-dim)" />
+            <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Set your target weight & timeline</span>
+            <ChevronRight size={13} color="var(--on-surface-dim)" style={{ marginLeft: 'auto' }} />
           </div>
         )}
       </div>
@@ -166,28 +166,28 @@ export default function DashboardPage() {
       {/* Chart + BMI */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 12, marginBottom: 12 }} className="g2">
         <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Weight Trend</div>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Weight Trend</div>
           <ResponsiveContainer width="100%" height={170}>
             <AreaChart data={chartData}>
-              <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#E8540D" stopOpacity={.18} /><stop offset="95%" stopColor="#E8540D" stopOpacity={0} /></linearGradient></defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--bd)" />
-              <XAxis dataKey="date" tick={{ fill: 'var(--t3)', fontSize: 9 }} interval="preserveStartEnd" />
-              <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--t3)', fontSize: 9 }} width={38} />
-              <Tooltip contentStyle={{ background: 'var(--c2)', border: '1px solid var(--bd)', borderRadius: 10, fontSize: 12 }} />
-              <Area type="monotone" dataKey="weight" stroke="#E8540D" strokeWidth={2} fill="url(#wg)" dot={{ fill: '#E8540D', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Weight (kg)" />
-              {user.weightGoal && <ReferenceLine y={user.weightGoal} stroke="rgba(232,84,13,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--o)', fontSize: 10, position: 'insideTopRight' }} />}
+              <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--outline-variant)" />
+              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" />
+              <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} />
+              <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />
+              <Area type="monotone" dataKey="weight" stroke="#F85F1B" strokeWidth={2} fill="url(#wg)" dot={{ fill: '#F85F1B', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Weight" />
+              {user.weightGoal && <ReferenceLine y={user.weightGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />}
             </AreaChart>
           </ResponsiveContainer>
         </div>
         <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>BMI Status</div>
-          <div className="bb" style={{ fontSize: 58, color: 'var(--o)', lineHeight: 1 }}>{bmi || '—'}</div>
+          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>BMI Status</div>
+          <div className="display-lg" style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', color: 'var(--primary)', lineHeight: 0.9, marginLeft: '-0.2rem' }}>{bmi || '—'}</div>
           <span className="tag" style={{ fontSize: 11 }}>{bmiCat.label}</span>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%', marginTop: 4 }}>
             {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => (
-              <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: bmiCat.label.startsWith(s.l) ? 'var(--o2)' : 'var(--c2)', border: `1px solid ${bmiCat.label.startsWith(s.l) ? 'rgba(232,84,13,.35)' : 'var(--bd)'}` }}>
-                <div style={{ fontSize: 10, color: bmiCat.label.startsWith(s.l) ? 'var(--o)' : 'var(--t2)', fontWeight: 700 }}>{s.l}</div>
-                <div style={{ fontSize: 9, color: 'var(--t3)' }}>{s.r}</div>
+              <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: bmiCat.label.startsWith(s.l) ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', border: `none` }}>
+                <div style={{ fontSize: 10, color: bmiCat.label.startsWith(s.l) ? 'var(--primary)' : 'var(--on-surface-variant)', fontWeight: 700 }}>{s.l}</div>
+                <div style={{ fontSize: 9, color: 'var(--on-surface-dim)' }}>{s.r}</div>
               </div>
             ))}
           </div>
@@ -197,27 +197,27 @@ export default function DashboardPage() {
       {/* Active Split + Recent */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 12 }} className="g2">
         <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Active Split</div>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Active Split</div>
           {activeSplit ? <>
-            <div style={{ fontFamily: "'Bebas Neue'", fontSize: 20, color: 'var(--o)', letterSpacing: '1px', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>{(() => { const I = { Repeat, Zap, Target, Dumbbell, Trophy, Home, Award }[activeSplit.icon] || Flame; return <I size={16} />; })()}{activeSplit.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 12 }}>{activeSplit.description}</div>
+            <div className="headline-md" style={{ color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>{(() => { const I = { Repeat, Zap, Target, Dumbbell, Trophy, Home, Award }[activeSplit.icon] || Flame; return <I size={18} />; })()}{activeSplit.name} <PulseIndicator color="var(--primary)" /></div>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{activeSplit.description}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {activeSplit.schedule.map((d, i) => (
-                <div key={i} style={{ padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600, background: d === 'Rest' ? 'var(--c2)' : 'var(--o2)', color: d === 'Rest' ? 'var(--t3)' : 'var(--o)', border: `1px solid ${d === 'Rest' ? 'var(--bd)' : 'rgba(232,84,13,.3)'}` }}>D{i + 1}: {d}</div>
+                <div key={i} style={{ padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600, background: d === 'Rest' ? 'var(--surface-container-lowest)' : 'var(--surface-container-highest)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--primary)' }}>D{i + 1}: {d}</div>
               ))}
             </div>
-          </> : <div style={{ color: 'var(--t2)', fontSize: 13 }}>No split active</div>}
+          </> : <div style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>No split active</div>}
         </div>
         <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Recent Sessions</div>
-          {recent.length === 0 ? <div style={{ color: 'var(--t3)', fontSize: 13 }}>No sessions yet — go crush it!</div> :
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Recent Sessions</div>
+          {recent.length === 0 ? <div style={{ color: 'var(--on-surface-dim)', fontSize: 13 }}>No sessions yet — go crush it!</div> :
             recent.map(w => (
-              <div key={w.id} className="row-sep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
+              <div key={w.id} className="tonal-break" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--surface-container-lowest)', borderRadius: 12 }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{w.dayName}</div>
-                  <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 2 }}>{fmt(w.date)} · {w.exercises?.length || 0} exercises</div>
+                  <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>{fmt(w.date)} · {w.exercises?.length || 0} exercises</div>
                 </div>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--o2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={12} color="var(--o)" /></div>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--surface-container-high)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={12} color="var(--primary)" /></div>
               </div>
             ))}
         </div>
@@ -227,25 +227,25 @@ export default function DashboardPage() {
       <div className="card" style={{ padding: 18, cursor: 'pointer', marginTop: 12 }} onClick={() => navigate('/muscle-map')}
         onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Activity size={13} color="var(--o)" /> Muscle Activity
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Activity size={13} color="var(--primary)" /> Muscle Activity
           </div>
-          <ChevronRight size={14} color="var(--t3)" />
+          <ChevronRight size={14} color="var(--on-surface-dim)" />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
               <Shield size={14} color={overallRank.color} />
-              <span className="bb" style={{ fontSize: 18, color: overallRank.color }}>{overallRank.name}</span>
+              <span className="headline-md" style={{ color: overallRank.color }}>{overallRank.name}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--t2)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
-            <div style={{ fontSize: 10, color: 'var(--t3)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
+            <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
+            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
               {weeklyMuscles.slice(0, 6).map(m => (
-                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--c3)', color: 'var(--t2)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
+                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
               ))}
-              {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--t3)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
+              {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--on-surface-dim)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
             </div>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function DashboardPage() {
         <div className="mo">
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <div className="bb" style={{ fontSize: 22 }}>Log Weight</div>
+              <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Weight</div>
               <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowLog(false)}><X size={14} /></button>
             </div>
             <div style={{ marginBottom: 16 }}>
@@ -277,16 +277,16 @@ export default function DashboardPage() {
         <div className="mo">
           <div className="md" style={{ maxWidth: 400 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div className="bb" style={{ fontSize: 22 }}>Set Weight Goal</div>
+              <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Set Weight Goal</div>
               <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowGoal(false)}><X size={14} /></button>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--o)' }}>{isImpWeight ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--primary)' }}>{isImpWeight ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
               <div><label>Target Weight ({isImpWeight ? 'lbs' : 'kg'})</label><ScrollPicker value={isImpWeight ? kgToLbs(goalTarget) : goalTarget} onChange={v => setGoalTarget(isImpWeight ? lbsToKg(v) : v)} items={wtItems} unit={isImpWeight ? 'lbs' : 'kg'} fmtVal={v => v.toFixed(1)} /></div>
               <div><label>Timeline (weeks)</label><ScrollPicker value={goalWeeks} onChange={setGoalWeeks} items={wkItems} unit="wks" /></div>
             </div>
             {goalTarget && goalWeeks && (
-              <div style={{ padding: '12px 14px', background: 'var(--o3)', borderRadius: 10, border: '1px solid rgba(232,84,13,.2)', fontSize: 12, color: 'var(--o)', marginBottom: 16 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none', fontSize: 12, color: 'var(--primary)', marginBottom: 16 }}>
                 {goalTarget < latestWeight
                   ? `Lose ${(latestWeight - goalTarget).toFixed(1)} kg in ${goalWeeks} weeks → ~${Math.round((latestWeight - goalTarget) * 7700 / goalWeeks / 7)} kcal/day deficit`
                   : goalTarget > latestWeight

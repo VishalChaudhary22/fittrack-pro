@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KINETIC // PERFORMANCE HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#ff7944",
+              "inverse-surface": "#fcf8fb",
+              "on-tertiary-container": "#5d433a",
+              "on-secondary": "#643220",
+              "secondary-fixed-dim": "#fcb298",
+              "secondary-fixed": "#ffc4b0",
+              "surface-container-low": "#131315",
+              "on-primary-container": "#441200",
+              "primary-dim": "#ff743c",
+              "secondary": "#ffb59b",
+              "on-surface": "#f6f3f5",
+              "tertiary-fixed": "#f1ccc0",
+              "on-primary-fixed": "#000000",
+              "outline-variant": "#48474a",
+              "on-primary": "#581900",
+              "on-primary-fixed-variant": "#541800",
+              "surface-container-highest": "#252528",
+              "on-tertiary-fixed-variant": "#674c43",
+              "surface-container-high": "#1f1f22",
+              "error-container": "#9f0519",
+              "outline": "#767577",
+              "error-dim": "#d7383b",
+              "surface-container": "#19191c",
+              "on-secondary-fixed": "#552715",
+              "surface-dim": "#0e0e10",
+              "surface-bright": "#2c2c2f",
+              "tertiary": "#ffdbcf",
+              "surface-variant": "#252528",
+              "on-secondary-container": "#ffc3ae",
+              "on-error-container": "#ffa8a3",
+              "on-error": "#490006",
+              "primary-fixed-dim": "#fb611e",
+              "on-surface-variant": "#acaaad",
+              "on-tertiary": "#664c42",
+              "surface-tint": "#ff9066",
+              "tertiary-fixed-dim": "#e3bfb3",
+              "background": "#0e0e10",
+              "primary": "#ff9066",
+              "on-secondary-fixed-variant": "#78422f",
+              "inverse-on-surface": "#555557",
+              "primary-container": "#ff7944",
+              "tertiary-dim": "#e3bfb3",
+              "error": "#ff716c",
+              "secondary-dim": "#f0a88e",
+              "surface": "#0e0e10",
+              "on-tertiary-fixed": "#483128",
+              "inverse-primary": "#aa3900",
+              "tertiary-container": "#f1ccc0",
+              "surface-container-lowest": "#000000",
+              "on-background": "#f6f3f5",
+              "secondary-container": "#6c3926"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+        }
+        .peach-glow {
+            box-shadow: 0 0 60px -15px rgba(255, 144, 102, 0.15);
+        }
+        body {
+            background-color: #0e0e10;
+            color: #f6f3f5;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface-dim selection:bg-primary selection:text-on-primary-fixed overflow-x-hidden">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-zinc-950/60 backdrop-blur-xl flex flex-col p-6 z-50">
+<div class="mb-12">
+<h1 class="text-2xl font-bold tracking-tighter text-orange-500 font-['Space_Grotesk']">KINETIC</h1>
+<p class="text-[10px] tracking-[0.2em] text-zinc-500 font-bold mt-1">PERFORMANCE HUD</p>
+</div>
+<nav class="flex flex-col gap-2 flex-1">
+<a class="flex items-center gap-3 px-4 py-3 text-orange-500 bg-zinc-800/50 rounded-lg hover:bg-zinc-800/30 transition-all duration-300 scale-98 active:scale-95" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30 transition-all duration-300 scale-98 active:scale-95" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-medium">Workout</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30 transition-all duration-300 scale-98 active:scale-95" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-medium">Diet</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30 transition-all duration-300 scale-98 active:scale-95" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-medium">Profile</span>
+</a>
+</nav>
+<button class="mt-auto bg-primary-container text-on-primary-fixed font-headline font-bold py-4 rounded-xl tracking-tighter hover:bg-primary transition-colors duration-300 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+            START WORKOUT
+        </button>
+</aside>
+<!-- TopAppBar (Shared Component) -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-zinc-950/20 backdrop-blur-md flex justify-between items-center px-8 py-4">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-orange-500 font-headline">KINETIC</span>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<span class="text-tertiary-dim text-sm font-medium">Session Active: 00:42:15</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<input class="bg-surface-container-highest border-none rounded-full px-6 py-2 text-sm w-64 focus:ring-1 focus:ring-primary text-on-surface-variant placeholder-outline" placeholder="Search Biometrics..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-zinc-400">
+<button class="hover:text-orange-400 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-orange-400 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant/20 overflow-hidden">
+<img alt="User profile" data-alt="Close up portrait of a fit athletic man with short hair looking confidently into the camera in a moody gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYiDZ2Z__O3M-Z5jM1y8jhYJjhOjUFZ4ol3pR7zFA_5BshNzeHrjdjGsXBMWzT4jP5Z2hnL6AOQKO6fzIlPT5ZKrWkO4NK6uF1ALrjpufXKs9_R3-kOSTEMeSXboYp3UadfIyqnPq7hIOEXf7rzDyCoZt5A5mnTjQrCmwd2ThurI-7_Btwbyv9ESeA5DVpMZ_DF2-5NMAKQ0M5hI99_Z66Xa-BOmxWWAE2m4BAJQWRE2IYKVb_DAGGrQ1N9CBmwtEqbSWru8sUVPE"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12">
+<!-- Hero Metric Section -->
+<section class="grid grid-cols-12 gap-8 mb-12">
+<div class="col-span-8 relative overflow-hidden bg-surface-container-low rounded-xl p-10 flex flex-col justify-end min-h-[400px]">
+<!-- Background Decoration -->
+<div class="absolute -right-20 -top-20 w-96 h-96 bg-primary/5 rounded-full blur-[100px]"></div>
+<div class="relative z-10">
+<p class="text-secondary font-medium tracking-[0.3em] uppercase text-xs mb-4">Current Body Mass</p>
+<div class="flex items-baseline gap-4 mb-2">
+<h2 class="text-[7rem] font-headline font-bold tracking-[-0.06em] text-on-background leading-none drop-shadow-2xl">
+                            84.5 <span class="text-3xl text-primary -ml-4">KG</span>
+</h2>
+<div class="bg-error-container/20 text-error px-4 py-2 rounded-full flex items-center gap-2 text-sm font-bold border border-error/10">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+                            -0.8 KG
+                        </div>
+</div>
+<p class="text-tertiary-dim max-w-md leading-relaxed">Your mass has stabilized over the last 14 days. Metabolic efficiency is currently optimized for hypertrophic response.</p>
+</div>
+<!-- Custom Weight Chart (Simulated SVG) -->
+<div class="absolute bottom-0 right-0 w-2/3 h-48 opacity-40">
+<svg class="w-full h-full" viewbox="0 0 400 100">
+<defs>
+<lineargradient id="peachGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#FFB59B" stop-opacity="0.6"></stop>
+<stop offset="100%" stop-color="#FFB59B" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,80 Q50,75 100,85 T200,60 T300,70 T400,40 V100 H0 Z" fill="url(#peachGradient)"></path>
+<path d="M0,80 Q50,75 100,85 T200,60 T300,70 T400,40" fill="none" stroke="#ff9066" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Body Map / Anatomical Visualization -->
+<div class="col-span-4 bg-surface-container-low rounded-xl p-8 relative overflow-hidden peach-glow border border-primary/5">
+<h3 class="font-headline text-xl mb-6 tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">accessibility_new</span>
+                    ANATOMICAL LOAD
+                </h3>
+<div class="relative h-[320px] flex justify-center">
+<!-- Placeholder for anatomical male silhouette with highlighted zones -->
+<img alt="Male athletic silhouette" class="h-full object-contain opacity-80 mix-blend-screen" data-alt="Stylized anatomical silhouette of a male athlete with glowing orange heat-map highlights on chest and biceps muscle groups" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMslkti7rnYQ5-CCcBGOIE0SUKVDFPjXPaju30h1FtWOFLDOl326DsBpZTwU3_QaIDlxeoyfNmJ76fV8R8rGyF3wJ1PveO4XHw5mUAQSyiv5iRcpWbaEwT2WyN0vD3mw1gVSgp0fEHp20zMCZOlfrNxf85VLcMYqmthR51dg2v0Ch8_ZqgFdOp_r0NzmDGMU1eVv8e5OxtWwsi4-TUHKI-ovmwlMI0T_9QxE5r1CHhpURusY6nRgdXHe94pi68657cgOnGiPeWNiE"/>
+<!-- HUD Labels -->
+<div class="absolute top-10 left-4 bg-surface-container-highest/60 glass-panel p-2 rounded-lg text-[10px] font-bold border-l-2 border-primary">
+                        CHEST: 94% RECOVERY
+                    </div>
+<div class="absolute bottom-20 right-4 bg-surface-container-highest/60 glass-panel p-2 rounded-lg text-[10px] font-bold border-l-2 border-primary">
+                        BICEPS: 12% STRAIN
+                    </div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Stats Section -->
+<section class="grid grid-cols-12 gap-8">
+<!-- BMI Card -->
+<div class="col-span-3 bg-surface-container-high rounded-xl p-6 glass-panel relative group overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">calculate</span>
+</div>
+<span class="text-xs font-bold tracking-widest text-zinc-500">BMI INDEX</span>
+</div>
+<div class="flex flex-col">
+<span class="text-5xl font-headline font-bold mb-1">24.1</span>
+<span class="text-secondary text-sm font-medium">OPTIMAL RANGE</span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[65%] shadow-[0_0_8px_rgba(255,144,102,0.5)]"></div>
+</div>
+</div>
+<!-- Streak Card -->
+<div class="col-span-3 bg-surface-container-high rounded-xl p-6 glass-panel relative group overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-orange-400">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<span class="text-xs font-bold tracking-widest text-zinc-500">CONSISTENCY</span>
+</div>
+<div class="flex flex-col">
+<span class="text-5xl font-headline font-bold mb-1">12 <span class="text-xl">DAYS</span></span>
+<span class="text-secondary text-sm font-medium">PERSONAL RECORD</span>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[120px]">calendar_today</span>
+</div>
+</div>
+<!-- Rank Card -->
+<div class="col-span-3 bg-surface-container-high rounded-xl p-6 glass-panel relative overflow-hidden border-t border-primary/10">
+<div class="flex justify-between items-start mb-8">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-yellow-500">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<span class="text-xs font-bold tracking-widest text-zinc-500">GLOBAL TIER</span>
+</div>
+<div class="flex flex-col">
+<span class="text-5xl font-headline font-bold mb-1">GOLD II</span>
+<span class="text-secondary text-sm font-medium">TOP 8% ELIGIBLE</span>
+</div>
+<div class="mt-6 flex gap-1">
+<div class="h-1 flex-1 bg-yellow-500/80"></div>
+<div class="h-1 flex-1 bg-yellow-500/80"></div>
+<div class="h-1 flex-1 bg-zinc-800"></div>
+</div>
+</div>
+<!-- Quick Action Card -->
+<div class="col-span-3 bg-primary-container/10 rounded-xl p-6 glass-panel relative overflow-hidden flex flex-col justify-between border border-primary/20">
+<h4 class="font-headline text-lg leading-tight">PRE-WORKOUT<br/>OPTIMIZATION</h4>
+<div class="space-y-3">
+<div class="flex items-center gap-3 text-xs bg-surface-container-highest/40 p-2 rounded-lg">
+<span class="material-symbols-outlined text-sm text-primary">water_drop</span>
+                        Hydration: +500ml Recommended
+                    </div>
+<div class="flex items-center gap-3 text-xs bg-surface-container-highest/40 p-2 rounded-lg">
+<span class="material-symbols-outlined text-sm text-primary">timer</span>
+                        Window: 15min Remaining
+                    </div>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary-fixed font-bold rounded-lg text-sm mt-4 hover:brightness-110 transition-all">
+                    LOG INTAKE
+                </button>
+</div>
+</section>
+<!-- Secondary Data Layer -->
+<section class="mt-8 grid grid-cols-12 gap-8">
+<!-- Workout History -->
+<div class="col-span-7 bg-surface-container-low rounded-xl p-8">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-headline text-xl tracking-tight">RECENT PERFORMANCE</h3>
+<button class="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
+                        FULL LOGS
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-high group hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">weight</span>
+</div>
+<div>
+<p class="font-bold text-sm">Heavy Pull Session</p>
+<p class="text-xs text-zinc-500">Back &amp; Biceps • 1h 12m</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">12,450 KG</p>
+<p class="text-xs text-secondary">VOLUME PR</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-high group hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-orange-400/10 flex items-center justify-center text-orange-400">
+<span class="material-symbols-outlined">directions_run</span>
+</div>
+<div>
+<p class="font-bold text-sm">HIIT Intervals</p>
+<p class="text-xs text-zinc-500">Cardio • 45m</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">620 KCAL</p>
+<p class="text-xs text-zinc-500">STEADY STATE</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Diet / Fuel Card -->
+<div class="col-span-5 bg-surface-container-low rounded-xl p-8 relative overflow-hidden">
+<h3 class="font-headline text-xl mb-6 tracking-tight">FUEL COMPOSITION</h3>
+<div class="flex items-center gap-8">
+<div class="relative w-32 h-32">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="100" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xl font-headline font-bold">72%</span>
+<span class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">DAILY</span>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold text-tertiary-dim uppercase">Protein</span>
+<span class="text-xs font-medium">182g / 220g</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[82%]"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold text-tertiary-dim uppercase">Carbs</span>
+<span class="text-xs font-medium">245g / 300g</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[70%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating HUD Overlay Elements (Ambient Glows) -->
+<div class="fixed bottom-10 right-10 flex flex-col gap-4 items-end pointer-events-none">
+<div class="glass-panel bg-zinc-950/40 px-6 py-4 rounded-xl border-l-4 border-primary pointer-events-auto">
+<p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Heart Rate</p>
+<div class="flex items-center gap-3">
+<span class="text-3xl font-headline font-bold text-error">72</span>
+<span class="text-xs text-zinc-400 font-medium">BPM</span>
+<div class="flex gap-1 items-end h-4">
+<div class="w-[2px] h-2 bg-error"></div>
+<div class="w-[2px] h-4 bg-error"></div>
+<div class="w-[2px] h-3 bg-error"></div>
+<div class="w-[2px] h-1 bg-error"></div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

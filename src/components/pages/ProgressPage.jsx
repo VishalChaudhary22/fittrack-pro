@@ -59,48 +59,50 @@ export default function ProgressPage() {
       <PageHeader title="Progress Charts" sub="Track your strength gains" />
 
       {/* Weekly / Monthly Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }} className="g2">
-        <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>This Week</div>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <div><div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>{weeklySummary.sessions}</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>sessions</div></div>
-            <div><div className="bb" style={{ fontSize: 28, color: 'var(--tx)' }}>{Math.round(weeklySummary.volume / 1000)}k</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>kg volume</div></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className="card" style={{ padding: '20px', border: 'none', background: 'var(--surface-container-low)' }}>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>This Week</div>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>{weeklySummary.sessions}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>sessions</div></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(weeklySummary.volume / 1000)}k</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>kg volume</div></div>
           </div>
-          {weeklySummary.volChange !== 0 && <div style={{ marginTop: 6, fontSize: 11, color: weeklySummary.volChange > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>{weeklySummary.volChange > 0 ? '▲' : '▼'} {Math.abs(weeklySummary.volChange)}% vs last week</div>}
-          {weeklySummary.sessions !== weeklySummary.lastSessions && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 2 }}>Last week: {weeklySummary.lastSessions} sessions</div>}
+          {weeklySummary.volChange !== 0 && <div className="tonal-break" style={{ marginTop: 16, padding: '8px 12px', borderRadius: 8, background: 'var(--surface-container-highest)', display: 'inline-block', fontSize: 12, color: weeklySummary.volChange > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>{weeklySummary.volChange > 0 ? '▲' : '▼'} {Math.abs(weeklySummary.volChange)}% vs last week</div>}
+          {weeklySummary.sessions !== weeklySummary.lastSessions && <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 8, fontWeight: 600 }}>Last week: {weeklySummary.lastSessions} sessions</div>}
         </div>
-        <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>This Month</div>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <div><div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>{monthlySummary.sessions}</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>sessions</div></div>
-            <div><div className="bb" style={{ fontSize: 28, color: 'var(--tx)' }}>{monthlySummary.avgPerWeek}</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>avg/week</div></div>
-            <div><div className="bb" style={{ fontSize: 28, color: 'var(--tx)' }}>{Math.round(monthlySummary.volume / 1000)}k</div><div style={{ fontSize: 10, color: 'var(--t2)' }}>total vol</div></div>
+        <div className="card" style={{ padding: '20px', border: 'none', background: 'var(--surface-container-low)' }}>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>This Month</div>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>{monthlySummary.sessions}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>sessions</div></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{monthlySummary.avgPerWeek}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>avg/week</div></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(monthlySummary.volume / 1000)}k</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>total vol</div></div>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }} className="g3">
-        <div><label>Split</label><select value={ss} onChange={e => { setSs(e.target.value); setSd(''); setSe(''); }}>{splits.filter(s => !s.comingSoon).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
-        <div><label>Day</label><select value={sd} onChange={e => { setSd(e.target.value); setSe(''); }}><option value="">All Days</option>{days.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
-        <div><label>Exercise</label><select value={se} onChange={e => setSe(e.target.value)}><option value="">— Select —</option>{exN.map(n => <option key={n} value={n}>{n}</option>)}</select></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Split</label><select value={ss} onChange={e => { setSs(e.target.value); setSd(''); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>{splits.filter(s => !s.comingSoon).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Day</label><select value={sd} onChange={e => { setSd(e.target.value); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}><option value="">All Days</option>{days.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
+        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Exercise</label><select value={se} onChange={e => setSe(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}><option value="">— Select —</option>{exN.map(n => <option key={n} value={n}>{n}</option>)}</select></div>
       </div>
 
       {se && cd.length > 0 ? (<>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }} className="g4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
           <StatCard label="Personal Record" value={pr} unit="kg" Icon={Trophy} />
           <StatCard label="Est. 1RM" value={est1rm} unit="kg" Icon={Target} badge="Epley" />
           <StatCard label="Sessions" value={cd.length} unit="" Icon={Activity} />
           {cd.length >= 2 && <StatCard label="Progress" value={`+${(cd[cd.length - 1].maxWeight - cd[0].maxWeight).toFixed(1)}`} unit="kg" Icon={TrendingUp} />}
         </div>
-        <div className="bb" style={{ fontSize: 18, marginBottom: 12, color: 'var(--o)' }}>{se}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="g2">
+        <div className="headline-md" style={{ marginBottom: 16, color: 'var(--primary)' }}>{se}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {[{ title: 'Max Weight (kg)', key: 'maxWeight', type: 'area' }, { title: 'Volume (reps × kg)', key: 'volume', type: 'bar' }, { title: 'Avg Reps/Set', key: 'avgReps', type: 'line' }, { title: 'Est. 1RM (kg)', key: 'est1rm', type: 'area' }].map(ch => (
-            <div key={ch.key} className="card" style={{ padding: 16 }}>
-              <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 10 }}>{ch.title}</div>
-              <ResponsiveContainer width="100%" height={160}>
-                {ch.type === 'area' ? (<AreaChart data={cd}><defs><linearGradient id={`cg-${ch.key}`} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#E8540D" stopOpacity={.18} /><stop offset="95%" stopColor="#E8540D" stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="var(--bd)" /><XAxis dataKey="date" tick={{ fill: 'var(--t3)', fontSize: 9 }} /><YAxis tick={{ fill: 'var(--t3)', fontSize: 9 }} /><Tooltip contentStyle={{ background: 'var(--c2)', border: '1px solid var(--bd)', borderRadius: 8, fontSize: 11 }} /><Area type="monotone" dataKey={ch.key} stroke="#E8540D" strokeWidth={2} fill={`url(#cg-${ch.key})`} dot={{ fill: '#E8540D', r: 3, strokeWidth: 0 }} /></AreaChart>)
-                  : ch.type === 'bar' ? (<BarChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--bd)" /><XAxis dataKey="date" tick={{ fill: 'var(--t3)', fontSize: 9 }} /><YAxis tick={{ fill: 'var(--t3)', fontSize: 9 }} /><Tooltip contentStyle={{ background: 'var(--c2)', border: '1px solid var(--bd)', borderRadius: 8, fontSize: 11 }} /><Bar dataKey={ch.key} fill="#E8540D" radius={[4, 4, 0, 0]} fillOpacity={.8} /></BarChart>)
-                    : (<LineChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--bd)" /><XAxis dataKey="date" tick={{ fill: 'var(--t3)', fontSize: 9 }} /><YAxis tick={{ fill: 'var(--t3)', fontSize: 9 }} /><Tooltip contentStyle={{ background: 'var(--c2)', border: '1px solid var(--bd)', borderRadius: 8, fontSize: 11 }} /><Line type="monotone" dataKey={ch.key} stroke="#E8540D" strokeWidth={2} dot={{ fill: '#E8540D', r: 3, strokeWidth: 0 }} /></LineChart>)}
+            <div key={ch.key} className="card stripe" style={{ padding: 20, border: 'none' }}>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <TrendingUp size={14} color="var(--primary)" /> {ch.title}
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                {ch.type === 'area' ? (<AreaChart data={cd}><defs><linearGradient id={`cg-${ch.key}`} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={.18} /><stop offset="95%" stopColor="var(--primary)" stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} /><Area type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={2} fill={`url(#cg-${ch.key})`} dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} /></AreaChart>)
+                  : ch.type === 'bar' ? (<BarChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} cursor={{ fill: 'var(--surface-container-lowest)' }} itemStyle={{ color: 'var(--primary)' }} /><Bar dataKey={ch.key} fill="var(--primary)" radius={[6, 6, 0, 0]} fillOpacity={.9} /></BarChart>)
+                    : (<LineChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} /><Line type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} /></LineChart>)}
               </ResponsiveContainer>
             </div>
           ))}

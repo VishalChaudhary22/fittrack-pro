@@ -161,22 +161,77 @@
 
 ---
 
-### 3.9 Powerlifting Split — Build Out
+### 3.9 Iron Forge Elite — Premium Powerlifting Program
 
-**Goal:** Complete the `comingSoon: true` powerlifting split in `splits.js`.
+**Goal:** Replace the `comingSoon: true` powerlifting split stub with a fully populated **premium 8-week peaking program**, locked behind a ₹1,000 in-app purchase.
+
+**Program name:** `IRON FORGE ELITE` — fits the Iron League theme. Tagline: *"8-Week Strength Peak · Squat · Bench · Deadlift"*.
+
+**Source:** Adapted from the YODDHA 8 Week Male 2 Program (RPE-based peaking block). Methodology: RPE-guided top sets + percentage-based back-off sets (-12.5% to -15%).
+
+---
+
+#### Program Structure (4 Days/Week)
+
+| Day | Weekday | Focus | Main Lifts | Accessories (3×8-12 Progressive Overload) |
+|:---:|---------|-------|-----------|------------------------------------------|
+| **1** | Monday | Primary Squat + Secondary Bench | Competition Squat, Tempo (3-1-X) Bench + Comp Bench | DB RDL, DB Chest Press, Tricep Extensions, Lateral Raises |
+| **2** | Wednesday | Primary Deadlift + Tertiary Bench | Competition Deadlift, Larsen Press / Comp Bench | Leg Press, Lat Pulldown, Single-Arm DB Row, BB Bicep Curl |
+| **3** | Friday | Secondary Squat + Primary Bench | Paused Squat / Comp Squat, Competition Bench | DB Bench, Hamstring Curls, Tricep Pushdowns, Lateral Raises |
+| **4** | Saturday | Secondary Deadlift | Comp. Deadlift (Paused or Regular) | Leg Extensions, Lat Pulldown, Seated Row, Hammer Curls |
+
+#### 8-Week Intensity Arc (Main Lifts)
+
+| Week | RPE | Phase |
+|------|-----|-------|
+| 1 | @5–6 | Accumulation |
+| 2 | @6–7 | Accumulation |
+| 3 | @7 | Intensification |
+| 4 | @7–8 | Intensification |
+| 5 | @8 | Peak |
+| 6 | @8–9 | Peak |
+| 7 | @9–9.5 | Competition Prep |
+| 8 | @10 | Competition / Max |
+
+Back-off sets: **-12.5% to -15%** of the top set weight for that week.
+
+Weekly RPE notes are stored in each exercise's `notes` field (e.g., `"W1:1x3@5,1x5@5,2x5(-12.5%)|W2:..."`). The existing workout logger already renders `notes` as a guide line — no new input type needed.
+
+---
+
+#### Premium Lock System (₹1,000)
+
+- `splits.js`: Add `premium: true, price: 1000, currency: 'INR'` to the `pl` split entry.
+- `AppContext.jsx`: Add `purchasedPrograms[]` state (localStorage) + `purchaseProgram(splitId)` helper.
+- `SplitsPage` / split card renderer: Detect `premium: true && !purchasedPrograms.includes(id)` → show locked card overlay (gold shimmer border, lock icon, "₹1,000 · Unlock" CTA).
+- `PremiumProgramModal.jsx` **[NEW]**: Opens on locked card tap. Shows program preview, feature list, price, and a simulated UPI payment flow. On "Confirm", calls `purchaseProgram('pl')` and unlocks.
+
+> **Payment note:** No real payment gateway. Simulated flow — UPI QR placeholder → user taps "Confirm" → unlocked in localStorage. Razorpay integration can be added later.
+
+---
+
+#### Open Questions (resolve before implementing)
+
+1. **Program name confirmed?** Going with "IRON FORGE ELITE" or prefer something else?
+2. **RPE notes format** — shorthand `W1:1x3@5,1x5@5` vs readable prose `Week 1: 1×3 at RPE 5, then 1×5 at RPE 5, then 2×5 at -12.5%`?
+3. **Payment mock acceptable**, or want a Razorpay/UPI deep-link stub?
+
+---
 
 **Requirements:**
-- Program style: 5/3/1 variant (Wendler) — 4-day upper/lower with main compound + accessories.
-- Structure:
-  - **Day 1 — Squat:** Back Squat (main) + Leg Press, Walking Lunges, Leg Curls, Calf Raises.
-  - **Day 2 — Bench:** Bench Press (main) + Incline DB Press, Cable Flyes, Tricep Pushdowns, Face Pulls.
-  - **Day 3 — Deadlift:** Deadlift (main) + Romanian Deadlift, Barbell Row, Back Extensions, Leg Curls.
-  - **Day 4 — OHP:** Overhead Press (main) + Lateral Raises, Rear Delt Flyes, Bicep Curls, Hammer Curls.
-- Add percentage-based programming note in exercise `notes` field (e.g., "Week 1: 65% 1RM × 5, Week 2: 75% × 3, Week 3: 85% × 1+").
-- Remove `comingSoon: true` from the split entry.
+- Remove `comingSoon: true` from the `pl` split entry.
+- Add `premium: true`, `price: 1000`, `currency: 'INR'` to the `pl` entry.
+- Populate all 4 days with full exercise list, sets, repsRange, muscle mappings, and 8-week RPE notes.
+- Add `purchasedPrograms` state to `AppContext.jsx`.
+- Build `PremiumProgramModal` with gold Iron League styling.
+- Update split card UI to show lock overlay for unpurchased premium splits.
 
-**Files to modify:**
-- `src/data/splits.js` — populate the `pl` split object, remove `comingSoon: true`
+**Files to modify / create:**
+- `src/data/splits.js` — populate `pl` split, add `premium: true`, remove `comingSoon: true`
+- `src/data/premiumPrograms.js` — **[NEW]** premium metadata (name, price, features, badge)
+- `src/context/AppContext.jsx` — add `purchasedPrograms[]` + `purchaseProgram()` helper
+- `src/components/shared/PremiumProgramModal.jsx` — **[NEW]** paywall modal
+- `src/components/pages/SplitsPage.jsx` (or wherever split cards render) — locked overlay UI
 
 ---
 

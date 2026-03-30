@@ -43,19 +43,19 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
   return (
     <Portal>
     <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(8px)' }}>
-      <div style={{ background: 'var(--c1)', border: '1px solid var(--o)', borderRadius: 24, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, boxShadow: '0 12px 48px rgba(232,84,13,.25)', minWidth: 260 }}>
+      <div style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', border: 'none', borderRadius: 24, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, boxShadow: 'var(--shadow-ambient)', minWidth: 260 }}>
         <div style={{ position: 'relative', width: 56, height: 56 }}>
           <svg width={56} height={56} style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--c3)" strokeWidth={4} />
-            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--o)" strokeWidth={4} strokeDasharray={150.8} strokeDashoffset={150.8 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
+            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--surface-container-highest)" strokeWidth={4} />
+            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--primary)" strokeWidth={4} strokeDasharray={150.8} strokeDashoffset={150.8 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
           </svg>
-          <Timer size={18} color="var(--o)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+          <Timer size={18} color="var(--primary)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
         </div>
         <div>
-          <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
-          <div className="bb" style={{ fontSize: 32, color: 'var(--o)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
+          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
+          <div className="headline-lg" style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
         </div>
-        <button onClick={onCancel} style={{ background: 'none', border: '1px solid var(--bd)', borderRadius: 10, padding: '8px', cursor: 'pointer', color: 'var(--t3)', marginLeft: 'auto' }}><X size={16} /></button>
+        <button onClick={onCancel} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer', color: 'var(--on-surface-dim)', marginLeft: 'auto' }}><X size={16} /></button>
       </div>
     </div>
     </Portal>
@@ -144,18 +144,18 @@ export default function WorkoutPage() {
     return (
       <div className="pg-in" style={{ padding: '20px' }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <Trophy size={42} color="var(--o)" style={{ marginBottom: 10 }} />
-          <div className="bb" style={{ fontSize: 28, color: 'var(--o)' }}>WORKOUT COMPLETE!</div>
-          <div style={{ color: 'var(--t2)', fontSize: 13, marginTop: 4 }}>Great job crushing your session today.</div>
+          <Trophy size={42} color="var(--primary)" style={{ marginBottom: 10, filter: 'drop-shadow(var(--glow-primary))' }} />
+          <div className="headline-lg" style={{ color: 'var(--primary)' }}>WORKOUT COMPLETE!</div>
+          <div style={{ color: 'var(--on-surface-variant)', fontSize: 13, marginTop: 4 }}>Great job crushing your session today.</div>
         </div>
 
-        <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: 'center', background: 'var(--c1)', borderRadius: 16, border: `1px solid var(--o2)` }}>
+        <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: 'center', background: 'var(--surface-container-low)', borderRadius: 16, border: 'none' }}>
           <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginBottom: 20 }}>
-            <div><div className="bb" style={{ fontSize: 24, color: 'var(--o)' }}>+{totalXP.toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>XP Gained</div></div>
-            <div style={{ width: 1, background: 'var(--bd)' }}></div>
-            <div><div className="bb" style={{ fontSize: 24, color: 'var(--tx)' }}>{totalSets}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>Sets</div></div>
-            <div style={{ width: 1, background: 'var(--bd)' }}></div>
-            <div><div className="bb" style={{ fontSize: 24, color: 'var(--tx)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
+            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>+{totalXP.toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>XP Gained</div></div>
+            <div style={{ width: 1, background: 'var(--surface-container-highest)' }}></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{totalSets}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Sets</div></div>
+            <div style={{ width: 1, background: 'var(--surface-container-highest)' }}></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
           </div>
           <div style={{ maxWidth: 160, margin: '0 auto' }}>
             <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
@@ -175,13 +175,13 @@ export default function WorkoutPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
         <button className="btn-g" onClick={() => { setSession(null); setTimer(null); }} style={{ fontSize: 13 }}>← Back</button>
         <div style={{ flex: 1 }}>
-          <div className="bb" style={{ fontSize: 22 }}>{session.day.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--t2)' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+          <div className="headline-md" style={{ color: 'var(--on-surface)' }}>{session.day.name}</div>
+          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600, textTransform: 'uppercase' }}>Rest:</span>
-          <Timer size={20} color="var(--t3)" />
-          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 13, padding: '4px 8px', background: 'var(--c3)', border: '1px solid var(--bd)', borderRadius: 8, color: 'var(--t2)' }}>
+          <span style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 600, textTransform: 'uppercase' }}>Rest:</span>
+          <Timer size={20} color="var(--on-surface-dim)" />
+          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 13, padding: '4px 8px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 8, color: 'var(--on-surface)' }}>
             {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
           </select>
         </div>
@@ -190,42 +190,43 @@ export default function WorkoutPage() {
         <div key={ex.id} className="card" style={{ marginBottom: 10, padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
             <div>
-              <div className="bb" style={{ fontSize: 16 }}>{ex.sv || ex.name}</div>
+              <div className="headline-md" style={{ color: 'var(--on-surface)' }}>{ex.sv || ex.name}</div>
               {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 5, fontSize: 12, padding: '4px 10px', width: 'auto' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
-              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag-d" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Target: {ex.repsRange}</span>}</div>
+              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Target: {ex.repsRange}</span>}</div>
             </div>
             <button className="btn-g" style={{ fontSize: 11, padding: '5px 9px' }} onClick={() => addS(ei)}>+ Set</button>
           </div>
-          <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700 }}>{h}</div>)}</div>
+          <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700 }}>{h}</div>)}</div>
           {ex.sets.map((s, si) => (
-            <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1 }}>
-              <div style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 700 }}>{si + 1}</div>
+            <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1, gap: 10 }}>
+              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
               <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
               <input type="number" step=".5" placeholder="kg" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <div style={{ display: 'flex', gap: 3 }}>
+              <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
                 <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
                   flex: 1,
                   height: 32, borderRadius: 6,
-                  background: s.done ? 'var(--o)' : 'transparent',
-                  border: `2px solid ${s.done ? 'var(--o)' : 'var(--bd2)'}`,
-                  color: s.done ? '#fff' : 'var(--t3)',
+                  background: s.done ? 'var(--primary)' : 'transparent',
+                  border: `none`,
+                  boxShadow: s.done ? 'none' : 'inset 0 0 0 2px var(--surface-container-highest)',
+                  color: s.done ? 'var(--on-primary)' : 'var(--on-surface-dim)',
                   cursor: 'pointer', fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all .15s'
+                  transition: 'background .15s, box-shadow .15s'
                 }}>
-                  {s.done ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> : ''}
+                  {s.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                 </button>
                 {ex.sets.length > 1 && (
                   <button onClick={() => rmS(ei, si)} style={{
-                    background: 'transparent', border: '1px solid var(--bd)',
-                    borderRadius: 8, color: 'var(--t3)', cursor: 'pointer',
+                    background: 'transparent', border: 'none',
+                    borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer',
                     padding: '7px 5px', fontSize: 10
                   }}>✕</button>
                 )}
               </div>
             </div>
           ))}
-          {ex.notes && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 5, fontStyle: 'italic' }}>{ex.notes}</div>}
+          {ex.notes && <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginTop: 5, fontStyle: 'italic' }}>{ex.notes}</div>}
         </div>
       ))}
       <div className="card" style={{ marginBottom: 10, padding: 14 }}><label>Session Notes</label><textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical' }} /></div>
@@ -267,11 +268,13 @@ export default function WorkoutPage() {
           {wDays.map(day => {
             const last = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             return (
-              <div key={day.id} className="card" style={{ padding: 16, cursor: 'pointer', transition: 'transform .2s,border-color .2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--o)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--bd)'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag-d" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 10, color: 'var(--t3)' }}>Last: {fmt(last.date)}</span>}</div>
-                <div className="bb" style={{ fontSize: 16, marginBottom: 8 }}>{day.name}</div>
-                {day.exercises.slice(0, 4).map(ex => <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--t2)', padding: '3px 0', borderBottom: '1px solid var(--bd)' }}><span>{ex.name}</span><span style={{ color: 'var(--t2)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
-                {day.exercises.length > 4 && <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 4 }}>+{day.exercises.length - 4} more</div>}
+              <div key={day.id} className="card stripe" style={{ padding: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Last: {fmt(last.date)}</span>}</div>
+                <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 8 }}>{day.name}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {day.exercises.slice(0, 4).map(ex => <div key={ex.id} className="tonal-break" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--on-surface-variant)', padding: '6px 8px', background: 'var(--surface-container-lowest)', borderRadius: 8 }}><span>{ex.name}</span><span style={{ color: 'var(--on-surface-dim)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
+                </div>
+                {day.exercises.length > 4 && <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginTop: 8 }}>+{day.exercises.length - 4} more</div>}
                 <button className="btn-p" style={{ width: '100%', marginTop: 12, padding: '10px' }} onClick={() => start(day)}>Start Session →</button>
               </div>
             );

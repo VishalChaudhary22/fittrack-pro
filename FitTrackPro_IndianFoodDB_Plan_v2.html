@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FitTrack Pro — Indian Food DB + Meal Logger Plan v2</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0b0d;color:#ececf2;padding:24px 16px 72px;line-height:1.5}
+  .wrap{max-width:1100px;margin:0 auto}
+  .header{display:flex;gap:14px;align-items:flex-start;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#E8540D,#FF7A3D);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+  h1{font-size:28px;font-weight:800;letter-spacing:.6px;color:#E8540D}
+  .sub{font-size:13px;color:#8d8d95;margin-top:4px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;background:#131317;border:1px solid rgba(255,255,255,.06);padding:6px;border-radius:14px;margin-bottom:18px}
+  .tab{border:none;background:transparent;color:#8d8d95;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+  .tab.active{background:#E8540D;color:#fff}
+  .panel{display:none}
+  .panel.active{display:block}
+  .grid{display:grid;gap:12px}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{background:#121216;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:16px;margin-bottom:12px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#8d8d95;margin-bottom:12px}
+  .metric{background:#18181d;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;text-align:center}
+  .metric .v{font-size:30px;font-weight:800;color:#E8540D}
+  .metric .l{font-size:10px;color:#8d8d95;text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+  .row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .row:last-child{border-bottom:none}
+  .muted{color:#9b9ba2;font-size:13px}
+  .good{color:#6BCB77}.warn{color:#FFD166}.bad{color:#FF6B6B}.accent{color:#E8540D}
+  .pill{display:inline-block;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.5px;margin-right:6px}
+  .p-new{background:rgba(232,84,13,.15);color:#E8540D;border:1px solid rgba(232,84,13,.25)}
+  .p-mod{background:rgba(255,209,102,.12);color:#FFD166;border:1px solid rgba(255,209,102,.2)}
+  .p-ai{background:rgba(59,139,212,.12);color:#79c0ff;border:1px solid rgba(121,192,255,.2)}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .list div{font-size:13px;color:#d8d8df}
+  .list div span{color:#E8540D;margin-right:8px}
+  .code{background:#0a0a0d;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow:auto;white-space:pre-wrap;color:#cfe1ff}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8d8d95}
+  .phase{border-left:2px solid rgba(232,84,13,.45);padding-left:14px;margin-bottom:18px}
+  .phase .t{font-size:16px;font-weight:800;margin-bottom:4px}
+  .phase .d{font-size:13px;color:#9b9ba2;margin-bottom:8px}
+  .phase ul{padding-left:18px;color:#d8d8df}
+  .phase li{margin:6px 0}
+  .footer{margin-top:18px;font-size:12px;color:#8d8d95}
+  @media (max-width:640px){h1{font-size:24px}.tab{flex:1 1 calc(50% - 6px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">🍛</div>
+    <div>
+      <h1>FitTrack Pro — Indian Food DB + Meal Logger Plan v2</h1>
+      <div class="sub">Built for Antigravity workflows · implementation-ready architecture · AI model routing to reduce token burn</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="architecture">Architecture</button>
+    <button class="tab" data-tab="schema">Schema</button>
+    <button class="tab" data-tab="roadmap">Roadmap</button>
+    <button class="tab" data-tab="ai">AI Workflow</button>
+    <button class="tab" data-tab="prompts">Prompt Pack</button>
+  </div>
+
+  <section id="overview" class="panel active">
+    <div class="grid g3" style="margin-bottom:14px">
+      <div class="metric"><div class="v">6</div><div class="l">Core files</div></div>
+      <div class="metric"><div class="v">4</div><div class="l">Delivery phases</div></div>
+      <div class="metric"><div class="v">100-150</div><div class="l">Foods for v1 launch</div></div>
+    </div>
+
+    <div class="card">
+      <h2>What this build becomes</h2>
+      <div class="list">
+        <div><span>→</span>A real React food logging module inside FitTrack Pro, not a planning-only HTML demo.</div>
+        <div><span>→</span>Searchable Indian food database with standardized serving sizes, grams, macros, and diet-type filters.</div>
+        <div><span>→</span>Daily logging, meal grouping, recent foods, custom foods, edit/delete flows, and backward-compatible migration from old calorie-only logs.</div>
+        <div><span>→</span>Dashboard and Diet page integration with calorie + protein + carbs + fat progress and simple smart suggestions.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Plan improvements over v1</h2>
+      <div class="row"><div><strong>Scope control</strong><div class="muted">Launch with 100–150 high-frequency foods first, then expand.</div></div><div class="good">Reduces QA risk</div></div>
+      <div class="row"><div><strong>Data quality</strong><div class="muted">Add source, confidence, state, and unit rules so values are explainable.</div></div><div class="good">Improves trust</div></div>
+      <div class="row"><div><strong>Product usability</strong><div class="muted">Add recent foods, favorites, quick-add, and custom grams in v1.</div></div><div class="good">Higher daily usage</div></div>
+      <div class="row"><div><strong>Migration safety</strong><div class="muted">Preserve old calorie entries and progressively enrich new ones.</div></div><div class="good">Safer release</div></div>
+      <div class="row"><div><strong>Antigravity friendliness</strong><div class="muted">Break work into small prompts with clear acceptance criteria and diff review.</div></div><div class="good">Lower token waste</div></div>
+    </div>
+  </section>
+
+  <section id="architecture" class="panel">
+    <div class="card">
+      <h2>Recommended files</h2>
+      <div class="row"><div><code>src/data/foods/indianFoods.js</code><div class="muted">Master dataset with normalized food objects.</div></div><span class="pill p-new">NEW</span></div>
+      <div class="row"><div><code>src/data/foods/foodCategories.js</code><div class="muted">Category metadata, icons, labels, sort order.</div></div><span class="pill p-new">NEW</span></div>
+      <div class="row"><div><code>src/utils/foodUtils.js</code><div class="muted">Search, macro calculation, serving conversion, validation helpers.</div></div><span class="pill p-new">NEW</span></div>
+      <div class="row"><div><code>src/pages/FoodLogPage.jsx</code><div class="muted">Main food logger screen.</div></div><span class="pill p-new">NEW</span></div>
+      <div class="row"><div><code>src/context/AppContext.jsx</code><div class="muted">Food log state, migration, selectors, persistence.</div></div><span class="pill p-mod">MODIFY</span></div>
+      <div class="row"><div><code>src/pages/DashboardPage.jsx</code><div class="muted">Macro widget and nutrition summary.</div></div><span class="pill p-mod">MODIFY</span></div>
+      <div class="row"><div><code>src/pages/DietPage.jsx</code><div class="muted">Link out to logger, recent entries, goal reminders.</div></div><span class="pill p-mod">MODIFY</span></div>
+      <div class="row"><div><code>src/data/constants.js</code><div class="muted">Nav config and route label.</div></div><span class="pill p-mod">MODIFY</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Product decisions</h2>
+      <div class="list">
+        <div><span>→</span>Keep search fully local for speed and zero API cost.</div>
+        <div><span>→</span>Separate <strong>base foods</strong> from <strong>recipes/dishes</strong> for cleaner nutrition logic.</div>
+        <div><span>→</span>Store computed macros on each log entry so history remains stable even if the database changes later.</div>
+        <div><span>→</span>Allow custom entries for homemade or restaurant food from day one.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="schema" class="panel">
+    <div class="card">
+      <h2>Food object v2</h2>
+      <div class="code">{
+  id: 'dal-toor-cooked',
+  name: 'Toor Dal (cooked)',
+  nameAlt: ['arhar dal', 'toovar dal', 'pigeon pea dal'],
+  category: 'dal',
+  subcategory: 'legume-curry',
+  itemType: 'base-food', // 'base-food' | 'dish' | 'drink' | 'supplement'
+  state: 'cooked',
+  defaultServingGrams: 150,
+  per100g: { calories: 116, protein: 7, carbs: 20, fat: 0.4, fiber: 4 },
+  servings: [
+    { id: 'katori-150', label: '1 katori', grams: 150 },
+    { id: 'cup-240', label: '1 cup', grams: 240 },
+    { id: 'g-100', label: '100g', grams: 100 }
+  ],
+  dietTypes: ['vegan','veg','egg','nonveg'],
+  tags: ['lunch','dinner','high-fiber'],
+  source: 'curated-estimate',
+  confidence: 'medium', // 'high' | 'medium' | 'low'
+  notes: 'Home-style, moderate oil assumption'
+}</div>
+    </div>
+
+    <div class="card">
+      <h2>Food log entry v2</h2>
+      <div class="code">{
+  id: gId(),
+  userId: user.id,
+  date: '2026-03-21',
+  mealType: 'Lunch',
+  foodId: 'dal-toor-cooked',
+  foodName: 'Toor Dal (cooked)',
+  servingId: 'katori-150',
+  servingLabel: '1 katori',
+  grams: 150,
+  quantity: 1,
+  calories: 174,
+  protein: 10.5,
+  carbs: 30,
+  fat: 0.6,
+  fiber: 6,
+  sourceType: 'database', // 'database' | 'custom'
+  custom: null,
+  createdAt: Date.now(),
+  updatedAt: Date.now()
+}</div>
+    </div>
+
+    <div class="card">
+      <h2>Migration rules</h2>
+      <div class="list">
+        <div><span>→</span>If an old entry has only calories, keep it renderable as a legacy item.</div>
+        <div><span>→</span>Use safe fallbacks: protein/carbs/fat/fiber default to 0 for old entries.</div>
+        <div><span>→</span>Mark legacy entries with <code>sourceType: 'legacy'</code> so the UI can label them.</div>
+        <div><span>→</span>Never recalculate old logged macros from updated food data unless the user explicitly edits the item.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap" class="panel">
+    <div class="phase">
+      <div class="t">Phase 1 — Data foundation</div>
+      <div class="d">Build a trustworthy v1 dataset and utilities before any UI polish.</div>
+      <ul>
+        <li>Create 100–150 high-frequency foods first across dal, roti, rice, veg, dairy, eggs/chicken/fish, snacks, fruits, drinks, and supplements.</li>
+        <li>Define category constants, serving conventions, and validation helpers.</li>
+        <li>Add a dataset audit script for duplicate ids, missing grams, invalid macros, and empty tags.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="t">Phase 2 — FoodLogPage MVP</div>
+      <div class="d">Ship the core behavior end to end.</div>
+      <ul>
+        <li>Search by name and alt names.</li>
+        <li>Select meal slot, serving, quantity, or custom grams.</li>
+        <li>Log entry, edit entry, delete entry, and group by meal.</li>
+        <li>Show daily totals for calories, protein, carbs, fat, and fiber.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="t">Phase 3 — Integration and retention</div>
+      <div class="d">Make it useful every day inside FitTrack Pro.</div>
+      <ul>
+        <li>Dashboard mini-bars for Cals, P, C, F.</li>
+        <li>Diet page "Log Food" CTA and remaining macro hints.</li>
+        <li>Recent foods, favorites, quick-add from yesterday, and date navigation.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="t">Phase 4 — Smarter nutrition layer</div>
+      <div class="d">Only after MVP is stable.</div>
+      <ul>
+        <li>Weekly macro summary and adherence chart.</li>
+        <li>Recipe builder for homemade dishes.</li>
+        <li>Goal-aware suggestions like protein-first or low-fat options.</li>
+        <li>Optional photo logging later, not in MVP.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="ai" class="panel">
+    <div class="card">
+      <h2>Model routing for Antigravity</h2>
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Use it for</th><th>Avoid using it for</th><th>Token-saving rule</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Opus 4.6</strong></td>
+            <td>Architecture, tricky refactors, migrations, debugging unclear failures, reviewing generated code before merge.</td>
+            <td>Bulk low-risk data entry, repetitive formatting, small copy edits.</td>
+            <td>Use only for planning, hard bugs, or final review of important diffs.</td>
+          </tr>
+          <tr>
+            <td><strong>Gemini 3.1 Pro High</strong></td>
+            <td>Large-file reasoning, feature implementation with multiple files, code review with context, drafting exact change plans.</td>
+            <td>Tiny UI text changes or repetitive dataset expansion.</td>
+            <td>Use when task spans several files but does not need Opus-level deep reasoning.</td>
+          </tr>
+          <tr>
+            <td><strong>Gemini 3.1 Pro Low</strong></td>
+            <td>Single-feature coding, medium-complexity CRUD work, generating helper utilities, route wiring, test scaffolds.</td>
+            <td>Messy bug hunts across the whole app.</td>
+            <td>Make this your default coding model.</td>
+          </tr>
+          <tr>
+            <td><strong>Gemini 3.1 Flash</strong></td>
+            <td>Summaries, prompt cleanup, changelogs, TODO extraction, file inventory, converting notes into concise tasks.</td>
+            <td>Core logic, migrations, or important implementation.</td>
+            <td>Use for prep and compression, not final coding.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Optimal workflow</h2>
+      <div class="list">
+        <div><span>1</span>Use <strong>Flash</strong> to condense your notes into a clean task brief before you start a coding session.</div>
+        <div><span>2</span>Use <strong>Pro Low</strong> as the default builder for one well-scoped unit of work.</div>
+        <div><span>3</span>Escalate to <strong>Pro High</strong> only when the task spans multiple files or the first pass is weak.</div>
+        <div><span>4</span>Bring in <strong>Opus 4.6</strong> for architecture, migrations, or final review of risky code.</div>
+        <div><span>5</span>After each completed feature, ask Flash to summarize what changed and update your running spec.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Context rules to reduce token burn</h2>
+      <div class="list">
+        <div><span>→</span>Do not paste the entire project every time; paste only the relevant files plus a short project brief.</div>
+        <div><span>→</span>Keep one master build note with architecture, decisions, and "do not change" constraints.</div>
+        <div><span>→</span>Ask for plan first, approve it, then request code.</div>
+        <div><span>→</span>Batch only related changes together; never mix unrelated UI, data, and auth tasks in one prompt.</div>
+        <div><span>→</span>After merge, start a new thread for the next major task using the updated brief.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="prompts" class="panel">
+    <div class="card">
+      <h2>Master brief template</h2>
+      <div class="code">Project: FitTrack Pro
+Current module: Indian Food DB + Meal Logger
+Stack: React single-page app, local state/localStorage now, backend later
+Design rules: premium dark UI, orange accent, mobile first
+Do not change: auth flow, workout logging behavior, existing theme primitives
+Current task: [one feature only]
+Relevant files: [list only the needed files]
+Acceptance criteria:
+1. ...
+2. ...
+3. ...
+First respond with: plan, touched files, edge cases, and risks. Do not code until approved.</div>
+    </div>
+
+    <div class="card">
+      <h2>Recommended Antigravity sequence</h2>
+      <div class="list">
+        <div><span>A</span>Flash: "Compress these notes into a clean implementation brief under 250 words."</div>
+        <div><span>B</span>Pro Low: "Implement Phase 1 dataset scaffold and validation helpers only."</div>
+        <div><span>C</span>Pro High: "Review the generated data schema and suggest structural corrections before I continue."</div>
+        <div><span>D</span>Opus 4.6: "Review the migration logic and food logging architecture for bugs, edge cases, and maintainability."</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">This file is meant to be pasted into Antigravity as the updated plan/spec, or kept as your working implementation guide.</div>
+</div>
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

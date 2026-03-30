@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nutrition &amp; Fuel - Performance HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#aa3900",
+              "tertiary-fixed": "#f1ccc0",
+              "error-dim": "#d7383b",
+              "outline-variant": "#48474a",
+              "secondary-fixed-dim": "#fcb298",
+              "secondary-container": "#6c3926",
+              "on-tertiary-container": "#5d433a",
+              "primary-fixed-dim": "#fb611e",
+              "secondary-fixed": "#ffc4b0",
+              "secondary": "#ffb59b",
+              "surface-dim": "#0e0e10",
+              "secondary-dim": "#f0a88e",
+              "primary-dim": "#ff743c",
+              "primary-fixed": "#ff7944",
+              "on-error": "#490006",
+              "tertiary": "#ffdbcf",
+              "error": "#ff716c",
+              "on-secondary-fixed": "#552715",
+              "on-secondary-container": "#ffc3ae",
+              "error-container": "#9f0519",
+              "surface": "#0e0e10",
+              "on-secondary": "#643220",
+              "on-primary-container": "#441200",
+              "on-surface": "#f6f3f5",
+              "on-surface-variant": "#acaaad",
+              "tertiary-dim": "#e3bfb3",
+              "tertiary-fixed-dim": "#e3bfb3",
+              "background": "#0e0e10",
+              "surface-variant": "#252528",
+              "inverse-on-surface": "#555557",
+              "primary": "#ff9066",
+              "on-tertiary-fixed-variant": "#674c43",
+              "primary-container": "#ff7944",
+              "surface-container-low": "#131315",
+              "surface-container-lowest": "#000000",
+              "surface-bright": "#2c2c2f",
+              "on-background": "#f6f3f5",
+              "tertiary-container": "#f1ccc0",
+              "surface-container-highest": "#252528",
+              "on-secondary-fixed-variant": "#78422f",
+              "on-tertiary-fixed": "#483128",
+              "on-error-container": "#ffa8a3",
+              "inverse-surface": "#fcf8fb",
+              "surface-tint": "#ff9066",
+              "on-primary-fixed-variant": "#541800",
+              "surface-container-high": "#1f1f22",
+              "on-primary-fixed": "#000000",
+              "surface-container": "#19191c",
+              "on-primary": "#581900",
+              "outline": "#767577",
+              "on-tertiary": "#664c42"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e10;
+            color: #f6f3f5;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .headline-tracking {
+            letter-spacing: -0.04em;
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .peach-glow {
+            box-shadow: 0 0 40px 0 rgba(248, 95, 27, 0.15);
+        }
+        .active-ring {
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+    </style>
+</head>
+<body class="bg-surface-dim selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-zinc-950/60 backdrop-blur-xl flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-xl font-headline font-bold tracking-tighter text-zinc-100 dark:text-zinc-50">Nutrition &amp; Fuel</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-zinc-400 hover:bg-white/10 transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-zinc-400 hover:bg-white/10 transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-10">
+<!-- HUD Macro Overview Section -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+<!-- Asymmetric Headline & Quick Stats -->
+<div class="md:col-span-4 space-y-4">
+<h1 class="text-5xl font-headline font-bold headline-tracking text-on-surface">Daily <br/><span class="text-primary">Metabolism</span></h1>
+<p class="text-tertiary-dim leading-relaxed max-w-xs">Tracking kinetic energy and thermal fuel intake for peak metabolic performance.</p>
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest text-secondary font-medium">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                    High Intensity Mode
+                </div>
+</div>
+<!-- Macro Rings HUD -->
+<div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Concentric Rings Card -->
+<div class="bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center relative overflow-hidden group">
+<!-- Ambient Glow -->
+<div class="absolute inset-0 bg-primary/5 blur-[100px] pointer-events-none"></div>
+<div class="relative w-48 h-48">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background Tracks -->
+<circle class="text-surface-variant/40" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-surface-variant/40" cx="50" cy="50" fill="transparent" r="35" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-surface-variant/40" cx="50" cy="50" fill="transparent" r="25" stroke="currentColor" stroke-width="8"></circle>
+<!-- Progress Rings -->
+<circle class="text-primary active-ring" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="70" stroke-linecap="round" stroke-width="8"></circle>
+<circle class="text-secondary active-ring" cx="50" cy="50" fill="transparent" r="35" stroke="currentColor" stroke-dasharray="219.9" stroke-dashoffset="80" stroke-linecap="round" stroke-width="8"></circle>
+<circle class="text-tertiary active-ring" cx="50" cy="50" fill="transparent" r="25" stroke="currentColor" stroke-dasharray="157.1" stroke-dashoffset="40" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-xs font-bold text-tertiary-dim uppercase tracking-widest">Remaining</span>
+<span class="text-3xl font-headline font-bold headline-tracking">642</span>
+<span class="text-[10px] text-on-surface-variant">KCAL</span>
+</div>
+</div>
+<!-- Macro Legend -->
+<div class="flex gap-4 mt-6">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Protein</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Carbs</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Fats</span>
+</div>
+</div>
+</div>
+<!-- Secondary Metrics -->
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-highest rounded-xl p-6 flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary">restaurant</span>
+<span class="text-xs font-bold text-secondary uppercase tracking-widest">Consumed</span>
+</div>
+<div>
+<span class="text-4xl font-headline font-bold headline-tracking">1,858</span>
+<div class="w-full bg-surface-variant rounded-full h-1 mt-2">
+<div class="bg-primary h-1 rounded-full" style="width: 74%"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-highest rounded-xl p-6 flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-tertiary">water_drop</span>
+<span class="text-xs font-bold text-tertiary-dim uppercase tracking-widest">Hydration</span>
+</div>
+<div>
+<span class="text-4xl font-headline font-bold headline-tracking">2.4<span class="text-lg ml-1 opacity-50">L</span></span>
+<p class="text-[10px] text-on-surface-variant mt-1">80% of daily target reached</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Food Log Feed -->
+<section class="space-y-8">
+<div class="flex items-end justify-between px-2">
+<h2 class="text-2xl font-headline font-bold headline-tracking">Fuel Log</h2>
+<span class="text-secondary text-sm font-medium">Tuesday, Oct 24</span>
+</div>
+<div class="space-y-12">
+<!-- Meal Group: Breakfast -->
+<div class="space-y-4">
+<div class="flex items-center gap-4 px-2">
+<div class="h-px flex-1 bg-gradient-to-r from-transparent via-outline-variant/20 to-transparent"></div>
+<span class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Breakfast • 420 kcal</span>
+<div class="h-px flex-1 bg-gradient-to-r from-transparent via-outline-variant/20 to-transparent"></div>
+</div>
+<div class="space-y-3">
+<!-- Food Item -->
+<div class="bg-surface-container-low/60 glass-panel rounded-xl p-4 flex items-center gap-4 group transition-all hover:bg-surface-container-high">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-highest">
+<img alt="" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="close-up of artisan avocado toast on sourdough bread with a poached egg and microgreens on a dark plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZF8HUkJr9gwGZfHEZYwy_284rFuNvgFPp92bacA3bph8-sOsMbRWV0SvdLWyW9oOsDO_kyBxt5ZqPDcx3THAT4xhtEaVk_SUQ84vsZTG2n2ANI1L1FDjujDdw9rEWJ01tcw0Seuo91Jg_V0g-0TXOGRkRLdE408IVJnJvG7JSUJGhuPW0giecSwzimazzFzLOQobNh8WTgvHjDb6ih9QnbP1sYrv5ic6HwoVPaHtf9m8wn4dKQt7C-1psSPuhbJJ30-C7E9s_kEE"/>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Avocado Toast w/ Egg</h3>
+<p class="text-xs text-tertiary-dim">2 slices • 32g Carbs • 18g Fat</p>
+</div>
+<div class="text-right">
+<span class="text-lg font-headline font-bold text-primary">310</span>
+<p class="text-[10px] text-on-surface-variant uppercase">kcal</p>
+</div>
+</div>
+<!-- Food Item -->
+<div class="bg-surface-container-low/60 glass-panel rounded-xl p-4 flex items-center gap-4 group transition-all hover:bg-surface-container-high">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-highest text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">coffee</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Black Coffee</h3>
+<p class="text-xs text-tertiary-dim">12oz • 0g Carbs</p>
+</div>
+<div class="text-right">
+<span class="text-lg font-headline font-bold text-primary">5</span>
+<p class="text-[10px] text-on-surface-variant uppercase">kcal</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Meal Group: Lunch -->
+<div class="space-y-4">
+<div class="flex items-center gap-4 px-2">
+<div class="h-px flex-1 bg-gradient-to-r from-transparent via-outline-variant/20 to-transparent"></div>
+<span class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Lunch • 850 kcal</span>
+<div class="h-px flex-1 bg-gradient-to-r from-transparent via-outline-variant/20 to-transparent"></div>
+</div>
+<div class="space-y-3">
+<div class="bg-surface-container-low/60 glass-panel rounded-xl p-4 flex items-center gap-4 group transition-all hover:bg-surface-container-high">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-highest">
+<img alt="" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="a gourmet grain bowl with grilled salmon, quinoa, roasted sweet potatoes, and kale in a dark ceramic bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKn7-WdxhIKyvuXyQQv3ug4QZwuqYdzLqXF7qXGmPDUVyYXarlO6j8EVJIB8cR-0MJr-U5E5REbnDC5QOBW5UxcNvQAVOuxjwNzakStSkHWhrcUNy8VGF21FJxZ-dqR_uxjlkxbXhVXLzsYbI6c20ktDOvsN8uV76xrWh7GJe2vISe6w3K_JB1UoHbKJO5Qasp2IUEdvTeThTMDZi7wJpI3EojwD7eMap7psKVwyn9d-YPY3CGqSvuPhb8-rDpIASj7gKA8zu3YYg"/>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Grilled Salmon Bowl</h3>
+<p class="text-xs text-tertiary-dim">1 bowl • 45g Protein • 52g Carbs</p>
+</div>
+<div class="text-right">
+<span class="text-lg font-headline font-bold text-primary">640</span>
+<p class="text-[10px] text-on-surface-variant uppercase">kcal</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-32 right-8 w-16 h-16 rounded-full glass-panel bg-primary text-on-primary-fixed flex items-center justify-center active:scale-90 transition-all peach-glow z-50">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center pb-6 pt-3 px-4 bg-zinc-950/80 backdrop-blur-2xl rounded-t-[24px] z-50 shadow-[0_0_40px_0_rgba(248,95,27,0.1)]">
+<a class="flex flex-col items-center justify-center bg-orange-500/20 text-orange-400 rounded-2xl px-6 py-2 active:scale-90 duration-150 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">ev_station</span>
+<span class="text-[10px] font-medium mt-1 font-body">Fuel</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-6 py-2 hover:text-orange-300 active:scale-90 duration-150 transition-all" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-[10px] font-medium mt-1 font-body">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-6 py-2 hover:text-orange-300 active:scale-90 duration-150 transition-all" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-[10px] font-medium mt-1 font-body">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-6 py-2 hover:text-orange-300 active:scale-90 duration-150 transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium mt-1 font-body">Profile</span>
+</a>
+</nav>
+</body></html>

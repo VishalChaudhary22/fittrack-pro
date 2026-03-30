@@ -15,16 +15,16 @@ export const Sidebar = () => {
   const isActive = (path) => path === '/' ? currentPath === '/' : currentPath.startsWith(path);
 
   return (
-    <div className="ds" style={{ width: sb ? 220 : 54, background: 'var(--c1)', borderRight: '1px solid var(--bd)', display: 'flex', flexDirection: 'column', transition: 'width .22s cubic-bezier(.4,0,.2,1)', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
-      <div style={{ padding: '16px 12px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
-        <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--og)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Dumbbell size={15} color="#fff" /></div>
-        {sb && <div className="bb" style={{ fontSize: 16, letterSpacing: '2px', color: 'var(--o)', whiteSpace: 'nowrap' }}>FITTRACK PRO</div>}
+    <div className="ds" style={{ width: sb ? 230 : 54, background: 'var(--surface-container-low)', borderRight: 'none', display: 'flex', flexDirection: 'column', transition: 'width .22s var(--ease-spring)', flexShrink: 0, position: 'sticky', top: 0, height: '100dvh', overflow: 'hidden', zIndex: 'var(--z-nav)' }}>
+      <div style={{ padding: '24px 16px 16px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
+        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--signature-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: 'var(--glow-primary)' }}><Dumbbell size={18} color="var(--on-primary)" /></div>
+        {sb && <div className="headline-md" style={{ color: 'var(--on-surface)', whiteSpace: 'nowrap' }}>FITTRACK</div>}
       </div>
-      {sb && <div style={{ padding: '11px 12px', borderBottom: '1px solid var(--bd)', display: 'flex', gap: 9, alignItems: 'center' }}>
-        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--og)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Bebas Neue'", color: '#fff', fontSize: 12, flexShrink: 0 }}>{user?.avatar}</div>
+      {sb && <div style={{ padding: '0 16px 16px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--on-surface)', fontSize: 12, flexShrink: 0 }}>{user?.avatar}</div>
         <div style={{ overflow: 'hidden' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
-          <div style={{ fontSize: 9, color: 'var(--t3)' }}>{user?.isAdmin ? '⚡ Admin' : 'Member'}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>{user?.isAdmin ? '⚡ Admin' : 'Member'}</div>
         </div>
       </div>}
       <nav style={{ padding: '7px 5px', flex: 1, overflowY: 'auto' }}>
@@ -44,13 +44,13 @@ export const Sidebar = () => {
           </div>
         ))}
       </nav>
-      <div style={{ padding: '8px 5px', borderTop: '1px solid var(--bd)' }}>
+      <div style={{ padding: '8px 8px', marginTop: 8 }}>
         <div className="ni" onClick={toggleTheme} style={{ justifyContent: sb ? 'flex-start' : 'center' }}>
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           {sb && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
         </div>
       </div>
-      {sb && <div style={{ padding: '10px 14px', borderTop: '1px solid var(--bd)', fontSize: 9, color: 'var(--t3)' }}>FitTrack Pro v5.0</div>}
+      {sb && <div style={{ padding: '10px 20px 20px 20px', fontSize: 11, color: 'var(--on-surface-dim)' }}>FitTrack Pro v5.1</div>}
     </div>
   );
 };
@@ -70,20 +70,20 @@ export const BottomNav = () => {
       <nav className="bn">
         {NAV_MOBILE_MAIN.map(({ id, label, Icon, path }) => (
           <button key={id} onClick={() => { navigate(path); setShowMore(false); }} style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-            background: 'none', border: 'none', cursor: 'pointer', padding: '5px 2px',
-            color: isActive(path) ? 'var(--o)' : 'var(--t3)', transition: 'color .15s', minWidth: 0,
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+            background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px',
+            color: isActive(path) ? 'var(--primary)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
           }}>
-            <Icon size={18} />
-            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '.3px', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
+            <Icon size={20} />
+            <span style={{ fontSize: 9, fontWeight: 600, fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '.3px', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
           </button>
         ))}
         <button onClick={() => setShowMore(!showMore)} style={{
-          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-          background: 'none', border: 'none', cursor: 'pointer', padding: '5px 2px',
-          color: showMore || moreActive ? 'var(--o)' : 'var(--t3)', transition: 'color .15s', minWidth: 0,
+          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+          background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px',
+          color: showMore || moreActive ? 'var(--primary)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
         }}>
-          <MoreHorizontal size={18} />
+          <MoreHorizontal size={20} />
           <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '.3px', textTransform: 'uppercase' }}>More</span>
         </button>
       </nav>
@@ -93,8 +93,8 @@ export const BottomNav = () => {
         <div style={{ position: 'fixed', inset: 0, zIndex: 'calc(var(--z-nav) - 1)' }} onClick={() => setShowMore(false)}>
           <div style={{
             position: 'fixed', bottom: 'calc(52px + env(safe-area-inset-bottom))', left: 8, right: 8,
-            background: 'var(--c1)', border: '1px solid var(--bd)', borderRadius: 16, padding: '8px',
-            boxShadow: '0 -8px 32px rgba(0,0,0,.5)', zIndex: 'var(--z-nav)',
+            background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', border: 'none', borderRadius: 24, padding: '16px',
+            boxShadow: 'var(--shadow-ambient)', zIndex: 'var(--z-nav)',
           }} onClick={e => e.stopPropagation()}>
             {NAV_MOBILE_MORE.map(({ id, label, Icon, path }) => (
               <div key={id} className={`ni ${isActive(path) ? 'act' : ''}`}

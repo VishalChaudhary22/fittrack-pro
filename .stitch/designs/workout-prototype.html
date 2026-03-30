@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed-variant": "#78422f",
+              "tertiary-container": "#f1ccc0",
+              "error": "#ff716c",
+              "on-background": "#f6f3f5",
+              "primary-fixed": "#ff7944",
+              "secondary-container": "#6c3926",
+              "primary-dim": "#ff743c",
+              "on-secondary-container": "#ffc3ae",
+              "on-primary-fixed-variant": "#541800",
+              "on-tertiary-fixed-variant": "#674c43",
+              "surface-tint": "#ff9066",
+              "primary-container": "#ff7944",
+              "surface-variant": "#252528",
+              "error-container": "#9f0519",
+              "surface-dim": "#0e0e10",
+              "surface": "#0e0e10",
+              "tertiary": "#ffdbcf",
+              "on-error": "#490006",
+              "on-primary": "#581900",
+              "tertiary-fixed": "#f1ccc0",
+              "inverse-surface": "#fcf8fb",
+              "tertiary-fixed-dim": "#e3bfb3",
+              "surface-container-high": "#1f1f22",
+              "outline": "#767577",
+              "secondary-fixed": "#ffc4b0",
+              "error-dim": "#d7383b",
+              "on-primary-fixed": "#000000",
+              "primary-fixed-dim": "#fb611e",
+              "on-surface-variant": "#acaaad",
+              "tertiary-dim": "#e3bfb3",
+              "primary": "#ff9066",
+              "on-primary-container": "#441200",
+              "secondary-fixed-dim": "#fcb298",
+              "on-tertiary-container": "#5d433a",
+              "on-error-container": "#ffa8a3",
+              "inverse-primary": "#aa3900",
+              "secondary": "#ffb59b",
+              "on-secondary-fixed": "#552715",
+              "surface-container": "#19191c",
+              "on-tertiary": "#664c42",
+              "inverse-on-surface": "#555557",
+              "surface-bright": "#2c2c2f",
+              "on-secondary": "#643220",
+              "surface-container-lowest": "#000000",
+              "background": "#0e0e10",
+              "surface-container-low": "#131315",
+              "outline-variant": "#48474a",
+              "on-surface": "#f6f3f5"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .glass-card {
+        backdrop-filter: blur(20px);
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .burning-ember {
+        background: linear-gradient(to right, #ff9066, #ff7944);
+      }
+      .peach-glow {
+        box-shadow: 0 0 40px -10px rgba(255, 144, 102, 0.15);
+      }
+    </style>
+</head>
+<body class="bg-surface-dim text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface-variant/60 backdrop-blur-xl">
+<div class="flex items-center gap-3">
+<div class="relative flex items-center justify-center">
+<span class="absolute w-3 h-3 bg-primary rounded-full animate-ping opacity-75"></span>
+<span class="relative w-2.5 h-2.5 bg-primary rounded-full"></span>
+</div>
+<h1 class="text-xl font-headline font-bold tracking-tighter text-primary uppercase">Pull Day 1</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-highest px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">timer</span>
+<span class="font-headline font-bold text-on-background tracking-tight">00:42:15</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-highest rounded-full hover:bg-surface-variant transition-all active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-3xl mx-auto space-y-10">
+<!-- Exercise Section: Deadlifts -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-2">
+<div>
+<h2 class="text-3xl font-headline font-bold tracking-tight text-on-background">Deadlifts</h2>
+<p class="text-tertiary-dim text-sm mt-1">Conventional stance • Focus on drive</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-surface-container-highest text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">Power</span>
+</div>
+</div>
+<div class="space-y-3">
+<!-- Set 1 -->
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between group transition-all">
+<div class="flex items-center gap-6">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline font-bold text-primary">1</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Weight (kg)</label>
+<input class="w-20 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="140" type="number"/>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Reps</label>
+<input class="w-16 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="5" type="number"/>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm">check</span>
+</button>
+</div>
+<!-- Set 2 -->
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between group transition-all">
+<div class="flex items-center gap-6">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline font-bold text-primary">2</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Weight (kg)</label>
+<input class="w-20 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="140" type="number"/>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Reps</label>
+<input class="w-16 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="5" type="number"/>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm">check</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Dynamic Visualization Card -->
+<div class="bg-surface-container-low rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/5 blur-[80px] rounded-full"></div>
+<div class="relative z-10 flex items-center justify-between">
+<div>
+<h4 class="text-on-surface-variant font-bold text-xs uppercase tracking-widest mb-2">Current Intensity</h4>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-headline font-bold text-on-background tracking-tighter">84</span>
+<span class="text-primary font-bold text-lg">%</span>
+</div>
+</div>
+<div class="w-24 h-24 relative">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle class="stroke-surface-variant" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
+<circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="84, 100" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Exercise Section: Lat Pulldowns -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-2">
+<div>
+<h2 class="text-3xl font-headline font-bold tracking-tight text-on-background">Lat Pulldowns</h2>
+<p class="text-tertiary-dim text-sm mt-1">Wide grip • Full stretch</p>
+</div>
+<span class="bg-surface-container-highest text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">Volume</span>
+</div>
+<div class="space-y-3">
+<!-- Set 1 -->
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between group transition-all">
+<div class="flex items-center gap-6">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline font-bold text-primary">1</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Weight (kg)</label>
+<input class="w-20 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="65" type="number"/>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Reps</label>
+<input class="w-16 bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-xl font-headline font-bold p-0 text-on-background placeholder:text-outline-variant transition-all" placeholder="12" type="number"/>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm">check</span>
+</button>
+</div>
+<!-- Add Set Button -->
+<button class="w-full py-4 rounded-xl border-2 border-dashed border-outline-variant/30 text-on-surface-variant font-bold text-sm flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">add</span>
+                    Add Set
+                </button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-center items-center px-8 pb-8 pt-4">
+<div class="bg-surface-variant/40 backdrop-blur-2xl rounded-t-[24px] rounded-b-[32px] w-full max-w-lg px-4 py-4 flex items-center justify-between shadow-2xl peach-glow">
+<div class="flex items-center gap-6 px-4">
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-[#e3bfb3] opacity-70 transition-all group-hover:text-primary">format_list_bulleted</span>
+<span class="text-[10px] font-medium font-label text-[#e3bfb3] opacity-70 uppercase tracking-tighter">Exercises</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-[#e3bfb3] opacity-70 transition-all group-hover:text-primary">monitoring</span>
+<span class="text-[10px] font-medium font-label text-[#e3bfb3] opacity-70 uppercase tracking-tighter">Stats</span>
+</button>
+</div>
+<button class="burning-ember text-on-primary-fixed rounded-xl px-10 py-4 font-headline font-bold text-sm uppercase tracking-wider shadow-lg active:scale-[0.98] transition-all hover:brightness-110">
+                Finish Workout
+            </button>
+</div>
+</nav>
+<!-- Overlay Ambient Glows (HUD Atmosphere) -->
+<div class="fixed top-1/4 -left-20 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-1/4 -right-20 w-96 h-96 bg-secondary/5 blur-[120px] rounded-full pointer-events-none"></div>
+</body></html>

@@ -193,12 +193,12 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
   if (loadError) return (
     <div style={{
       width: '100%', aspectRatio: '1/2', borderRadius,
-      background: 'var(--c3)', border: '1px dashed var(--bd2)',
+      background: 'var(--surface-container-high)', border: 'none',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 6,
     }}>
-      {label && <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{label}</div>}
-      <div style={{ fontSize: 10, color: 'var(--t3)' }}>Image unavailable</div>
+      {label && <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{label}</div>}
+      <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Image unavailable</div>
     </div>
   );
 
@@ -206,7 +206,7 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
     <div style={{ textAlign: 'center', width: '100%' }}>
       {label && (
         <div style={{
-          fontSize: 9, color: 'var(--t3)', fontWeight: 700,
+          fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700,
           textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1.5px',
         }}>{label}</div>
       )}

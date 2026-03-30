@@ -302,6 +302,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 /* ─── EXERCISE ROW GRID ─────────────────────────────────────────── */
 .ex-r{display:grid;grid-template-columns:34px 1fr 1fr 80px;gap:7px;align-items:center}
+.set-row { display: grid; grid-template-columns: 34px 1fr 1fr 44px; gap: 8px; align-items: center; }
+.add-set-btn {
+  width: 100%; padding: 12px; margin-top: 10px; border-radius: 12px;
+  border: 1.5px dashed var(--outline-variant); background: transparent;
+  font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-surface-dim);
+  cursor: pointer; transition: all .2s var(--ease-smooth);
+}
+.add-set-btn:hover { border-color: var(--primary-container); color: var(--primary); }
 
 /* ─── PROGRESS BAR ──────────────────────────────────────────────── */
 .pbar{height:6px;background:var(--surface-container-high);border-radius:3px;overflow:hidden}

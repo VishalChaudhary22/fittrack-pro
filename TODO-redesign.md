@@ -555,3 +555,127 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 ### 6.6 Asymmetric Hero Imagery
 - **Pattern:** The "Live Suggestion" block uses a dark, grayscale background image overlaid with a bottom-to-top transparency mask, floating text, and a pulsing dot to create a highly premium, editorial feel.
 - **Plan:** Bring this aesthetic to the "Active Split" or "Next Workout" card. We will incorporate a subtle, dark-theme relevant background image (at 10–20% opacity with grayscale and gradient overlay) behind the active workout summary.
+
+---
+
+## Phase 7 — Active Workout Session Reskin (Stitch: Active Workout Screen)
+
+> Source: Stitch-generated "Active Workout" mockup for the `WorkoutPage.jsx` active session view (`if (session)` branch).
+> **Status:** Planning — do not implement until approved.
+> **Files affected:** `WorkoutPage.jsx` only. No changes to business logic — purely visual upgrades.
+
+### Gap Analysis: Current vs Stitch Target
+
+| # | Gap | Current State | Stitch Target |
+|---|-----|--------------|---------------|
+| W1 | **Rest Timer** | Small modal with SVG ring | Full-width hero section with `5rem–7rem` Space Grotesk countdown, ambient blob bg |
+| W2 | **Exercise Header** | `headline-md` name + small muscle chip | `2xl font-headline` name + `.label-md` subline `"Muscle • Focus Type"` in `tracking-widest` |
+| W3 | **Set Row Grid** | 4-col `.ex-r` grid: `SET \| REPS \| KG \| DONE` | 12-col CSS grid: `col-span-2/4/4/2` with separate `lbs` and `Reps` columns + rounded full-row card |
+| W4 | **"Add Set" Button** | Small `+ Set` btn in exercise header | Full-width dashed### 7.1 Hero Rest Timer Redesign
+**Replace the modal-based timer with an inline hero section at the top of the active session.**
+- [x] Remove the `Portal`-based `RestTimer` overlay
+- [x] Add a new `HeroRestTimer` section rendered **inside** the session view, above the exercise list
+- [x] Style: `rounded-2xl bg-surface-container-low p-8`, relative overflow for the ambient blob
+- [x] Add ambient blob background: `absolute -top-12 -right-12 w-48 h-48 bg-primary-container/5 rounded-full blur-3xl` (CSS via inline style)
+- [x] Timer display: `.display-lg` at `5rem` (or `clamp(4rem, 12vw, 7rem)`) with Space Grotesk, `tracking-tighter`
+- [x] Add `+30s` ghost pill button and `Skip` ember-gradient pill button in a flex row below the number
+- [x] Restore audio beep and `onDone` callback from the existing `RestTimer` component
+- [x] Timer still auto-starts when a set is marked done (existing `upd()` logic — keep as-is)
+- [x] Add a `label-md` session name above the timer: `"Active Session: {session.day.name}"` with a `PulseIndicator` dot
+
+### 7.2 Exercise Block Header Upgrade
+**Upgrade each exercise section header to match the Stitch 2xl + subline format.**
+  - [x] Replace `headline-md` exercise name with `font-size: 1.5rem; font-weight: 700; letter-spacing: -0.04em` (or `.headline-md` with explicit override) — `text-on-surface`
+  - [x] Add a `.label-md` subline below the name: `"{ex.muscle} • {ex.focusType}"` (e.g., `"Chest • Primary Strength"`)
+    - Map `ex.type` / `ex.repsRange` to a focus label: `strength` if repsRange `1-5`, `hypertrophy` if `6-12`, `endurance` if `12+`
+  - [x] Move the `+ Set` button to the right of the header block (already there — keep position consistent)
+  - [x] Add an info icon (`ℹ`) button to the right of the header for future exercise info modal
+
+### 7.3 Set Row Grid Redesign
+**Redesign the set rows from a 4-col `.ex-r` grid to a styled 12-column-equivalent card layout.**
+- [x] Replace `.ex-r` with a new `.set-row` grid: `grid-template-columns: 34px 1fr 1fr 44px`
+- [x] Wrap each set row in a `rounded-xl bg-surface-container-low p-3` card div with `hover:bg-surface-container` transition
+- [x] Column header row: same 4 columns, styled with `var(--outline)` color (#aa8a7f) and `letter-spacing: 0.1em uppercase` — use `color: 'var(--outline)'` inline
+- [x] Completed sets: reduce opacity to `0.6` and add a subtle strikethrough or completed accent (existing fade — keep)
+- [x] Add `.set-row` to `index.css`:
+  ```css
+  .set-row { display: grid; grid-template-columns: 34px 1fr 1fr 44px; gap: 8px; align-items: center; }
+  ```
+
+### 7.4 "Add Set" Full-Width Dashed Button
+**Replace the small header `+ Set` button with a full-width dashed border button below the set list.**
+- [x] Remove the `+ Set` button from the exercise header row
+- [x] Add a full-width button below `{ex.sets.map(...)}`:
+  ```jsx
+  <button className="add-set-btn" onClick={() => addS(ei)}>+ Add Set</button>
+  ```
+- [x] Style `.add-set-btn` in `index.css`:
+  ```css
+  .add-set-btn {
+    width: 100%; padding: 12px; margin-top: 10px; border-radius: 12px;
+    border: 1.5px dashed var(--outline-variant); background: transparent;
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-surface-dim);
+    cursor: pointer; transition: all .2s var(--ease-smooth);
+  }
+  .add-set-btn:hover { border-color: var(--primary-container); color: var(--primary); }
+  ```
+
+### 7.5 "Live Tracking" Fixed Floating Pill
+**Add a fixed bottom-right live session indicator when a workout is active.**
+- [x] Render conditionally when `session` is truthy (inside active session view)
+- [x] Use `Portal` to render at document root level
+- [x] Structure:
+  ```jsx
+  <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998,
+    display: 'flex', alignItems: 'center', gap: 8,
+    background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)',
+    padding: '8px 16px', borderRadius: 999,
+    border: '1px solid rgba(248, 95, 27, 0.2)' }}>
+    <PulseIndicator color="var(--primary-container)" />
+    <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: '10px' }}>Live tracking</span>
+  </div>
+  ```
+- [x] Ensure it does not overlap the FAB finish button — adjust `bottom` offset as needed
+
+### 7.6 Finish / Discard Section
+**Redesign the finish section to include both Finish and Discard, styled per Stitch spec.**
+- [x] Keep the existing `finishBtnRef` intersection observer logic
+- [x] Wrap Finish + Discard in a section with `paddingTop: 32`
+- [x] `Finish Workout` button: use `.btn-p` with `ember-gradient` style (already has it), full width, `padding: 20px`, `fontSize: 18`, `borderRadius: 16`, `letter-spacing: 0.1em`
+- [x] Add `Discard Workout` as a ghost text-only button below, styled as a danger link:
+  ```jsx
+  <button onClick={() => { setSession(null); setTimer(null); }}
+    style={{ width: '100%', marginTop: 14, background: 'none', border: 'none',
+             padding: '12px', cursor: 'pointer', fontSize: '0.75rem',
+             fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 500,
+             letterSpacing: '0.1em', textTransform: 'uppercase',
+             color: 'var(--error, #ffb4ab)', opacity: 0.8, transition: 'opacity .2s' }}>
+    Discard Workout
+  </button>
+  ```
+- [x] Remove the existing `← Back` button from the session header (replaced by `Discard` at bottom)ick={() => { setSession(null); setTimer(null); }}
+    style={{ width: '100%', marginTop: 14, background: 'none', border: 'none',
+             padding: '12px', cursor: 'pointer', fontSize: '0.75rem',
+             fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 500,
+             letterSpacing: '0.1em', textTransform: 'uppercase',
+             color: 'var(--error, #ffb4ab)', opacity: 0.8, transition: 'opacity .2s' }}>
+    Discard Workout
+  </button>
+  ```
+- [ ] Remove the existing `← Back` button from the session header (replaced by `Discard` at bottom)
+
+### 7.7 Header Color Adjustment (Column Labels)
+**Change the column header row color from `on-surface-dim` to the softer `outline` token.**
+- [x] Update the 4-column header row (`SET / REPS / KG / DONE`) to use `color: 'var(--outline)'` for a lower-contrast HUD feel matching the Stitch spec
+
+---
+
+### Priority Order
+1. **7.4** Add Set dashed button (simplest, highest visual impact)
+2. **7.7** Column header color (trivial)
+3. **7.2** Exercise block header upgrade
+4. **7.3** Set row grid redesign
+5. **7.6** Finish/Discard section
+6. **7.5** Live tracking pill
+7. **7.1** Hero rest timer (most complex — last)

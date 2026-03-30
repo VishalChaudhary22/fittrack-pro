@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
+import { PageHeader, EmptyState, Portal, PulseIndicator } from '../shared/SharedComponents';
 import { gId, tod, fmt } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
 
-// ─── REST TIMER ───────────────────────────────────────────────────────────────
+// ─── HERO REST TIMER (Inline Session) ─────────────────────────────────────────
 const RestTimer = ({ seconds, onDone, onCancel }) => {
   const [left, setLeft] = useState(seconds);
   const intRef = useRef(null);
@@ -17,7 +17,6 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
       setLeft(p => {
         if (p <= 1) {
           clearInterval(intRef.current);
-          // Beep
           try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
@@ -36,29 +35,26 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
     return () => clearInterval(intRef.current);
   }, [seconds, onDone]);
 
-  const pct = ((seconds - left) / seconds) * 100;
+  useEffect(() => { setLeft(seconds); }, [seconds]);
+
   const mins = Math.floor(left / 60);
   const secs = left % 60;
 
   return (
-    <Portal>
-    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(8px)' }}>
-      <div style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', border: 'none', borderRadius: 24, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, boxShadow: 'var(--shadow-ambient)', minWidth: 260 }}>
-        <div style={{ position: 'relative', width: 56, height: 56 }}>
-          <svg width={56} height={56} style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--surface-container-highest)" strokeWidth={4} />
-            <circle cx={28} cy={28} r={24} fill="none" stroke="var(--primary)" strokeWidth={4} strokeDasharray={150.8} strokeDashoffset={150.8 * (1 - pct / 100)} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
-          </svg>
-          <Timer size={18} color="var(--primary)" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+    <section style={{ marginBottom: 40, position: 'relative' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 24, background: 'var(--surface-container-low)', padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '2px solid rgba(248, 95, 27, 0.2)' }}>
+        <div style={{ position: 'absolute', top: -48, right: -48, width: 192, height: 192, background: 'rgba(248, 95, 27, 0.05)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }}></div>
+        <h2 className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--on-surface-variant)', marginBottom: 16 }}>Rest Timer</h2>
+        <div className="headline-lg" style={{ fontSize: 'clamp(4rem, 12vw, 7rem)', lineHeight: 1, fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', position: 'relative' }}>
+          {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
+          <span style={{ position: 'absolute', top: 16, right: -32, fontSize: '2rem', fontWeight: 300, color: 'var(--primary)', letterSpacing: 0 }}>s</span>
         </div>
-        <div>
-          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Rest Timer</div>
-          <div className="headline-lg" style={{ color: 'var(--primary)', letterSpacing: '1px' }}>{mins}:{secs.toString().padStart(2, '0')}</div>
+        <div style={{ display: 'flex', gap: 16, marginTop: 32, zIndex: 1 }}>
+          <button onClick={() => setLeft(p => p + 30)} style={{ padding: '8px 24px', borderRadius: 999, background: 'var(--surface-container-highest)', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-surface)', border: 'none', cursor: 'pointer' }}>+30s</button>
+          <button onClick={onCancel} style={{ padding: '8px 32px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', fontSize: 14, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-primary-container)', border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(248,95,27,0.2)' }}>Skip</button>
         </div>
-        <button onClick={onCancel} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer', color: 'var(--on-surface-dim)', marginLeft: 'auto' }}><X size={16} /></button>
       </div>
-    </div>
-    </Portal>
+    </section>
   );
 };
 
@@ -172,91 +168,121 @@ export default function WorkoutPage() {
 
   if (session) return (
     <div className="pg-in">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <button className="btn-g" onClick={() => { setSession(null); setTimer(null); }} style={{ fontSize: 13 }}>← Back</button>
-        <div style={{ flex: 1 }}>
-          <div className="headline-md" style={{ color: 'var(--on-surface)' }}>{session.day.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 600, textTransform: 'uppercase' }}>Rest:</span>
-          <Timer size={20} color="var(--on-surface-dim)" />
-          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 13, padding: '4px 8px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 8, color: 'var(--on-surface)' }}>
+      {/* Top Header Status */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8, marginTop: 8 }}>
+        <PulseIndicator color="var(--primary-container)" />
+        <span className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--on-surface-variant)' }}>
+          Active Session: {session.day.name}
+        </span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Timer size={16} color="var(--on-surface-dim)" />
+          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '2px 6px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 6, color: 'var(--on-surface)', letterSpacing: '0.05em' }}>
             {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
           </select>
         </div>
       </div>
-      {session.exs.map((ex, ei) => (
-        <div key={ex.id} className="card" style={{ marginBottom: 10, padding: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-            <div>
-              <div className="headline-md" style={{ color: 'var(--on-surface)' }}>{ex.sv || ex.name}</div>
-              {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 5, fontSize: 12, padding: '4px 10px', width: 'auto' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
-              <div style={{ marginTop: 5, display: 'flex', gap: 5 }}>{ex.muscle && <span className="tag" style={{ fontSize: 9 }}>{ex.muscle}</span>}{ex.repsRange && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Target: {ex.repsRange}</span>}</div>
-            </div>
-            <button className="btn-g" style={{ fontSize: 11, padding: '5px 9px' }} onClick={() => addS(ei)}>+ Set</button>
-          </div>
-          <div className="ex-r" style={{ marginBottom: 5 }}>{['SET', 'REPS', 'KG', 'DONE'].map(h => <div key={h} style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700 }}>{h}</div>)}</div>
-          {ex.sets.map((s, si) => (
-            <div key={si} className="ex-r" style={{ marginBottom: 5, opacity: s.done ? .6 : 1, gap: 10 }}>
-              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
-              <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <input type="number" step=".5" placeholder="kg" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ padding: '7px 8px', fontSize: 13 }} />
-              <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
-                  flex: 1,
-                  height: 32, borderRadius: 6,
-                  background: s.done ? 'var(--primary)' : 'transparent',
-                  border: `none`,
-                  boxShadow: s.done ? 'none' : 'inset 0 0 0 2px var(--surface-container-highest)',
-                  color: s.done ? 'var(--on-primary)' : 'var(--on-surface-dim)',
-                  cursor: 'pointer', fontSize: 14,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'background .15s, box-shadow .15s'
-                }}>
-                  {s.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                </button>
-                {ex.sets.length > 1 && (
-                  <button onClick={() => rmS(ei, si)} style={{
-                    background: 'transparent', border: 'none',
-                    borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer',
-                    padding: '7px 5px', fontSize: 10
-                  }}>✕</button>
-                )}
-              </div>
-            </div>
-          ))}
-          {ex.notes && <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginTop: 5, fontStyle: 'italic' }}>{ex.notes}</div>}
-        </div>
-      ))}
-      <div className="card" style={{ marginBottom: 10, padding: 14 }}><label>Session Notes</label><textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical' }} /></div>
-      <button ref={finishBtnRef} className="btn-p" style={{ width: '100%', padding: '14px', fontSize: 16, borderRadius: 12 }} onClick={finish}>Finish Workout</button>
-
+      
+      {/* Rest Timer rendered inline */}
       {timer?.active && <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 16 }}>
+        {session.exs.map((ex, ei) => {
+          const focusType = ex.repsRange === '1-5' ? 'Strength' : (ex.repsRange === '15-20' || ex.repsRange === '12+') ? 'Endurance' : 'Hypertrophy';
+          
+          return (
+            <div key={ex.id} className="exercise-block">
+              {/* Exercise Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+                <div>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {ex.sv || ex.name}
+                  </h3>
+                  {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 0, marginBottom: 4, fontSize: 11, padding: '2px 8px', width: 'auto', borderRadius: 6, background: 'var(--surface-container)', border: 'none' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
+                  <p className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {ex.muscle || 'Full Body'} • {focusType}
+                  </p>
+                </div>
+                <button style={{ background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                </button>
+              </div>
 
-      {showFAB && session && (
-        <Portal>
-          <button
-            className="btn-p"
-            onClick={finish}
-            style={{
-              position: 'fixed',
-              bottom: window.innerWidth <= 768 ? 80 : 24,
-              right: 16,
-              zIndex: 9999,
-              padding: '12px 20px',
-              fontSize: 14,
-              borderRadius: 24,
-              display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: '0 4px 24px rgba(232,84,13,.5)',
-              animation: 'fabIn .3s cubic-bezier(.4,0,.2,1)',
-            }}
-            aria-label="Finish workout session"
-          >
-            <Check size={15} /> Finish
-          </button>
-        </Portal>
+              {/* Set Grid Headers */}
+              <div className="set-row" style={{ padding: '0 12px', marginBottom: 8 }}>
+                {['SET', 'REPS', 'KG', 'DONE'].map((h, i) => (
+                  <div key={h} style={{ fontSize: 9, color: 'var(--outline)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: i === 3 ? 'right' : 'left' }}>{h}</div>
+                ))}
+              </div>
+
+              {/* Set Rows */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {ex.sets.map((s, si) => (
+                  <div key={si} className="set-row" style={{ 
+                    background: 'var(--surface-container-low)', padding: 12, borderRadius: 12, transition: 'all 0.2s', 
+                    opacity: s.done ? 0.7 : 1, filter: s.done ? 'grayscale(50%)' : 'none' 
+                  }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-container-low)'}>
+                    
+                    <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
+                    
+                    <div style={{ paddingRight: 8 }}>
+                      <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ width: '100%', background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
+                    </div>
+                    
+                    <div style={{ paddingRight: 8 }}>
+                      <input type="number" step=".5" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ width: '100%', background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
+                        width: 38, height: 38, borderRadius: 10,
+                        background: s.done ? 'var(--surface-container-highest)' : 'var(--surface-container-highest)',
+                        color: s.done ? 'var(--primary)' : 'var(--on-surface-variant)',
+                        border: s.done ? '1px solid var(--primary-container)' : '1px solid transparent',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all .2s'
+                      }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = s.done ? 'var(--primary)' : 'var(--on-surface-variant)'}>
+                        <Check size={18} strokeWidth={s.done ? 3 : 2} />
+                      </button>
+                      {ex.sets.length > 1 && (
+                        <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: '6px 4px', fontSize: 10 }} title="Remove set">✕</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <button className="add-set-btn" onClick={() => addS(ei)}>+ Add Set</button>
+              {ex.notes && <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 8, fontStyle: 'italic', paddingLeft: 4 }}>{ex.notes}</div>}
+            </div>
+          );
+        })}
+      </div>
+      {session.notes !== undefined && (
+        <div className="card glass-card" style={{ marginTop: 32, padding: 16 }}>
+          <label className="label-md" style={{ color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Session Notes</label>
+          <textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical', width: '100%', background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 12, border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
+        </div>
       )}
+
+      {/* Stacked Finish / Discard */}
+      <section ref={finishBtnRef} style={{ paddingTop: 32, paddingBottom: 64 }}>
+        <button onClick={finish} style={{ width: '100%', padding: '20px', fontSize: 18, borderRadius: 16, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(248,95,27,0.3)', transition: 'transform 0.1s' }} onMouseDown={e => e.currentTarget.style.transform='scale(0.98)'} onMouseUp={e => e.currentTarget.style.transform='scale(1)'}>
+          Finish Workout
+        </button>
+        <button onClick={() => { setSession(null); setTimer(null); }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
+          Discard Workout
+        </button>
+      </section>
+
+      {/* Floating Live Indicator */}
+      <Portal>
+        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)' }}>
+          <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
+            <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
+            <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
+          </span>
+          <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Live tracking</span>
+        </div>
+      </Portal>
     </div>
   );
 

@@ -29,6 +29,7 @@ export default function AuthModal() {
       activityLevel: f.activityLevel || 'moderate', workoutDays: parseInt(f.workoutDays) || 4,
       isAdmin: false, activeSplitId: 'ppl', joinDate: tod(),
       avatar: f.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+      avatarType: 'preset', avatarUrl: null,
     };
     setUsers(p => [...p, u]);
     login(u);

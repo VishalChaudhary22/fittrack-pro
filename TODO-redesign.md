@@ -1003,3 +1003,407 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
 11. **8.11** Verify final section ordering is correct
 12. **8.12** Token / CSS prerequisite audit
 13. **8.13** Anti-pattern compliance sweep
+
+---
+
+## Phase 8 — Bug Fixes (Post-Implementation)
+
+> These issues were identified after the initial Phase 8 implementation and must be resolved before the analytics page is considered production-ready.
+
+---
+
+### BUG-01 · Volume Trend — BarChart → Smooth AreaChart
+
+**Observed:** The Volume Trend hero section renders as a vertical bar chart.  
+**Expected:** A smooth, filled area line chart matching the Stitch reference design — a single continuous curve with a gradient fill beneath it (warm orange/ember fill fading to transparent at the bottom).
+
+**Fix:**
+- [ ] Replace `<BarChart>` + `<Bar>` in the Volume Trend hero section with:
+  ```jsx
+  <AreaChart data={cd}>
+    <defs>
+      <linearGradient id="vol-gradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%"  stopColor="var(--primary-container)" stopOpacity={0.45} />
+        <stop offset="95%" stopColor="var(--primary-container)" stopOpacity={0} />
+      </linearGradient>
+    </defs>
+    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+    <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
+    <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
+    <Tooltip cursor={false} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
+    <Area type="monotone" dataKey="volume" stroke="var(--primary-container)" strokeWidth={2.5} fill="url(#vol-gradient)" dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: 'var(--primary)', strokeWidth: 0 }} />
+  </AreaChart>
+  ```
+- [ ] `type="monotone"` produces the smooth Bézier curve — **do not use `"linear"`**
+- [ ] Stroke: `var(--primary-container)` (Burning Ember `#F85F1B`) — not `var(--primary)` (Ember Peach)
+- [ ] Import `Area` from `recharts` if not already imported (alongside existing `AreaChart`)
+
+---
+
+### BUG-02 · Personal Best Card — Medal Icon at Top Right
+
+**Observed:** The PB card has no visible icon at top right. The current `workspace_premium` Material Symbol is placed as a near-invisible watermark (10% opacity, absolute positioned) rather than as the prominent medal graphic shown in the reference.  
+**Expected:** A medal/award icon at 100% opacity positioned in the top-right corner of the card, acting as the card's primary visual identity badge — matching the reference screenshot (right side, large, dark tonal).
+
+**Fix:**
+- [ ] Add a visible medal icon to the top-right of the PB card container:
+  ```jsx
+  <div style={{
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 56,
+    height: 64,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--surface-container-highest)',
+    borderRadius: '12px 12px 0 0',
+    borderBottom: '4px solid var(--surface-container)',
+    color: 'var(--on-surface-variant)',
+  }}>
+    <span className="material-symbols-outlined" style={{ fontSize: 36, color: 'var(--on-surface-dim)' }}>
+      military_tech
+    </span>
+  </div>
+  ```
+- [ ] Use Material Symbol `military_tech` (medal/award icon) — this matches the star-badge shape in the reference
+- [ ] Ensure `material-symbols-outlined` font is loaded in `index.html` (it already is — verify the import includes `FILL@0..1`)
+- [ ] Keep the existing faint watermark (10% opacity) OR remove it — do not duplicate the icon. Prefer keeping only the visible top-right version since the watermark adds noise at low opacity alongside the visible icon.
+- [ ] PB card `overflow: hidden` must remain so the icon sits flush against the card border
+
+---
+
+### BUG-03 · Personal Best Card — Share Button Shows Text, Not Icon
+
+**Observed:** The Share button at the bottom right of the PB card renders the literal string `"share"` instead of the Material Symbols share icon glyph.  
+**Root cause:** The `material-symbols-outlined` font may not be loading correctly, or the `<span>` tag with `className="material-symbols-outlined"` is being treated as raw text by a render path that strips unknown class names.
+
+**Fix:**
+- [ ] Verify that `index.html` has the Material Symbols font link with the correct `FILL` axis range:
+  ```html
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  ```
+- [ ] Replace the `<span className="material-symbols-outlined">share</span>` approach with an inline SVG share icon to guarantee render independence from font loading:
+  ```jsx
+  {/* Share SVG icon — no font dependency */}
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+  ```
+- [ ] Same fix should be applied to the `workspace_premium` / `military_tech` icons if they also render as text — use Lucide icons from the existing `lucide-react` import as a fallback (e.g., `import { Share2, Award } from 'lucide-react'`)
+- [ ] Preferred approach: **use Lucide React** throughout the PB card since it's already a project dependency, avoiding Material Symbols font-loading fragility entirely:
+  - Medal icon: `<Award size={36} color="var(--on-surface-dim)" />` inside the top-right badge
+  - Share icon: `<Share2 size={20} color="currentColor" />` inside the share button
+
+---
+
+### BUG-04 · Nav Label — "Progress" → "Analytics"
+
+**Observed:** The bottom navigation bar and sidebar still show `"Progress"` as the tab label.  
+**Expected:** Label should read `"Analytics"` to match the renamed page.
+
+**Fix:**
+- [ ] In `src/data/constants.js` — update **both** nav arrays (desktop sidebar + mobile bottom nav):
+  - Line 18: `{ id: 'progress', label: 'Progress', ... }` → change `label` to `'Analytics'`
+  - Line 30: same change
+  - Keep `id: 'progress'` and `path: '/progress'` unchanged (route and active state logic depends on these)
+
+---
+
+### Bug Fix Priority Order
+1. **BUG-04** Nav label (one-line change, lowest risk)
+2. **BUG-03** Share icon (font-loading fix or SVG/Lucide swap)
+3. **BUG-02** Medal icon at top right of PB card
+4. **BUG-01** Volume Trend → AreaChart (chart type change, isolated to one section)
+
+---
+
+## Phase 9 — Profile Page Redesign (Kinetic Elite) [COMPLETED]
+
+> **Goal:** Completely rebuild `ProfilePage.jsx` to match the visual aesthetic from the Stitch design spec, while preserving all existing functionality (edit profile, unit toggles, theme toggle, export/import, logout). The page will be restructured into three new top sections before the existing content: (1) Avatar Hero, (2) Muscle Mastery top-4 from Iron League, (3) Elite Achievements. The remainder of the existing page (Personal Details, settings toggles) will follow, restyled to match the Kinetic Elite theme.
+
+---
+
+### Research Summary
+
+**Existing profile page (`ProfilePage.jsx`):**
+- `user.avatar` currently stores a 2-letter text initial (`"VC"`), not an image path
+- Two-column desktop layout: left sidebar (avatar initials, BMI/BMR/TDEE, toggles, export/logout) + right card (Personal Details form)
+- BMI, BMR, TDEE calculated inline using `calcBMI`, `calcBMR`, `calcTDEE` utilities
+- `getStreak()` available from `useApp()` for Streak achievement
+- `workoutLogs` available for Volume King and Heavy Hitter achievement computation
+- `user.weight` available for 2.5× bodyweight Heavy Hitter check
+
+**Iron League data available for import:**
+- `calcAllMuscleXP(workoutLogs, splits, user?.id)` → `{ chest, back, shoulders, ... }` (12 muscle groups)
+- `getRank(xp)` → `{ name, color, bg, progress, nextXP }`
+- `MUSCLE_GROUPS` → sorted by XP descending → slice top 4
+- `getOverallRank(muscleXP)` → `{ name, color, totalXP, progress }` — used for LVL badge and rank label
+
+**Avatar system — current state:**
+- `user.avatar` is a 2-char text string (`"VC"`) used as initials in Profile and Layout header
+- No image URL or type field currently exists on the user object
+- `INIT_USERS` in `sample.js` and new-user creation in `AuthModal.jsx` both set `avatar` to initials — both need extending
+
+---
+
+### 9.1 — Data Model Extension: `avatarType` + `avatarUrl`
+
+**Files:** `src/data/sample.js`, `src/components/pages/AuthModal.jsx`, `src/components/pages/ProfilePage.jsx`, `src/components/layout/Layout.jsx`
+
+- Add `avatarType: 'preset'` and `avatarUrl: null` to `INIT_USERS[0]` in `sample.js`
+- In `AuthModal.jsx` new-user creation (line 31), add `avatarType: 'preset', avatarUrl: null` to the user object
+- In `ProfilePage.jsx` `save()` function, persist `avatarType` and `avatarUrl` as passthrough fields
+- **Keep `user.avatar` (initials) intact** — it is still used by `Layout.jsx` header as text fallback; do not remove it
+- **Update `Layout.jsx` sidebar header (line 24):** Replace the initials-only circle with a conditional render — if `user?.avatarUrl` exists, render `<img src={user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />`, else keep the text initials. This ensures the sidebar avatar updates when the user picks a character or uploads a photo.
+- **Also in `Layout.jsx` line 27:** Replace emoji `'⚡ Admin'` with JSX using Lucide `<Zap size={10} />` — import `Zap` from `lucide-react`. This fixes the same anti-pattern flagged for ProfilePage.
+
+---
+
+### 9.2 — Avatar Hero Section
+
+**Position:** Replaces the entire left `230px` sidebar. The page becomes single-column, full-width.
+
+**Design (matches Stitch reference exactly):**
+- Centered layout: ambient glow blob behind avatar → avatar card → LVL badge → name → rank sub-label → Edit + Share CTA row
+- Avatar container: `128×128px`, `border-radius: 24px`, inner `border-radius: 18px` for image, `padding: 4px`, `border: 2px solid rgba(255,181,155,0.20)`, `boxShadow: var(--glow-primary)`, `background: var(--surface-container)`
+- If `user.avatarUrl` → render `<img>` covering the container. Else → render initials text with `Space Grotesk` font
+- LVL badge: `position: absolute`, `bottom: -8, right: -8`, use existing `var(--signature-gradient)` token (DO NOT re-specify gradient literals), `border-radius: 8px`, `12px` bold text. Level = `Math.min(99, Math.floor(overall.totalXP / 5000) + 1)`
+- Name: `Space Grotesk`, `28px`, `700`, uppercase, `letterSpacing: -0.03em`
+- Rank sub-label row: Lucide `Shield` icon + `"{overall.name} · Iron League"`, `13px`, `var(--on-surface-variant)`
+- **Edit Profile button:** Uses `var(--signature-gradient)` token as `background` (reuses existing token instead of raw `linear-gradient(135deg, var(--primary-container), var(--primary))`). `color: var(--on-primary)`, `border-radius: 14px`, `font-weight: 700`, `font-size: 13px`, `text-transform: uppercase`, `letter-spacing: 0.12em`. **The `onClick` scrolls to the Personal Details card (9.6)** — use `document.getElementById('personal-details').scrollIntoView({ behavior: 'smooth' })` and set `setEd(true)` to enter edit mode simultaneously. It does NOT open the avatar picker.
+- Share button: icon-only, `var(--surface-container-highest)` tonal bg, `48×48px`, `border-radius: 14px`
+- **Clicking the avatar image/initials** opens the Avatar Picker Modal (9.3), indicated by a hoverable overlay with `<Camera size={24} />` icon centered, `background: rgba(0,0,0,0.5)`, `borderRadius: 18px` to match the inner image container.
+
+---
+
+### 9.3 — Avatar Picker Modal
+
+**Character roster (12 presets):**
+
+| ID | Character | Universe |
+|----|-----------|----------|
+| `iron-man` | Iron Man | Marvel |
+| `captain-america` | Captain America | Marvel |
+| `black-panther` | Black Panther | Marvel |
+| `doctor-strange` | Doctor Strange | Marvel |
+| `wonder-woman` | Wonder Woman | DC |
+| `batman` | Batman | DC |
+| `superman` | Superman | DC |
+| `aquaman` | Aquaman | DC |
+| `aang` | Aang | Avatar TLA |
+| `zuko` | Zuko | Avatar TLA |
+| `toph` | Toph | Avatar TLA |
+| `katara` | Katara | Avatar TLA |
+
+**Image generation:**
+- All images generated using `generate_image` tool during implementation
+- Style: cinematic dark background, amber/orange rim lighting, stylized portrait bust, consistent mood across all 12
+- Saved to: `public/avatars/{id}.png`
+
+**Modal design:**
+- Full-screen overlay: `position: fixed`, `inset: 0`, `background: rgba(0,0,0,0.7)`, `backdropFilter: blur(24px)`, `zIndex: var(--z-modal)`
+- **Escape key handler:** `useEffect` with `keydown` listener → close modal on `Escape`
+- **Click outside to close:** Click on the overlay backdrop (outside the bottom sheet) closes modal
+- Bottom sheet card: slide up from bottom, `border-radius: 24px 24px 0 0`, `background: var(--surface-container-low)`, max height 80vh with `overflowY: auto`
+- 3-column grid (`repeat(3, 1fr)`), each cell: `80×80px` image + character name label below
+- Selected state: `2px solid var(--primary)` ring + `boxShadow: var(--glow-primary)`
+- Last cell: "Upload" tile with `Camera` lucide icon + `<input type="file" accept="image/*">` hidden trigger
+- **Upload handler:** Use `FileReader.readAsDataURL()` but **first resize to max 256×256 and compress** using a `<canvas>` element to keep the base64 string under ~50KB. This prevents localStorage overflow (5MB limit). Pseudocode:
+  ```js
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const max = 256;
+    const scale = Math.min(max / img.width, max / img.height);
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    // Save dataUrl as avatarUrl
+  };
+  img.src = reader.result;
+  ```
+- **On preset selection:** `setUsers(prev => prev.map(u => u.id === user.id ? { ...u, avatarUrl: selectedUrl, avatarType: 'preset' } : u))`
+- **On upload selection:** `setUsers(prev => prev.map(u => u.id === user.id ? { ...u, avatarUrl: compressedDataUrl, avatarType: 'upload' } : u))` — note `avatarType: 'upload'` (NOT `'preset'`)
+- Universe tabs (Marvel / DC / Avatar TLA / Upload) to filter the grid
+
+---
+
+### 9.4 — Muscle Mastery Section (Top 4 from Iron League)
+
+**Position:** Immediately after the BMI/BMR/TDEE stats strip (9.8).
+
+**Data:**
+```js
+const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
+const overall  = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
+const top4     = useMemo(() =>
+  [...MUSCLE_GROUPS].sort((a,b) => (muscleXP[b.key]||0) - (muscleXP[a.key]||0)).slice(0,4),
+  [muscleXP]);
+```
+
+**Render per muscle row:**
+- Left: `Space Grotesk`, `13px`, `700`, uppercase, muscle label
+- Right top: `9px` rank name label (`BRONZE II`, etc.)
+- Right bottom: `14px`, `700` XP value — `var(--primary)` if active (xp > 200), else `var(--on-surface-variant)`
+- Bar: `12px` pill, `background: var(--surface-container-lowest)`, inner fill:
+  - Active: `linear-gradient(90deg, var(--primary-container), var(--primary))` + `boxShadow: 0 0 12px rgba(248,95,27,0.4)`
+  - Inactive: `var(--surface-container-highest)` flat fill, no shadow
+- Bar width: `Math.max(2, rank.progress * 100)%` (minimum 2% for visual affordance)
+
+---
+
+### 9.5 — Elite Achievements Section
+
+**Achievements (computed via `useMemo`):**
+
+| ID | Icon | Label | Unlock Condition |
+|----|------|-------|-----------------|
+| `streak` | `Flame` | 7 Day Streak | `streak.current >= 7` (see note below) |
+| `volume-king` | `Dumbbell` | Volume King | Monthly volume `>= 50,000 kg` |
+| `heavy-hitter` | `Trophy` | Heavy Hitter | Any set weight `>= user.weight * 2.5` |
+| `early-bird` | `Clock` | Early Bird | Locked — `workoutLog.startTime` not yet in data model; description explains unlock condition |
+
+**Important — `getStreak()` call pattern:** `getStreak` is a `useCallback` from `useApp()`. Call it ONCE above the achievements memo and store the result:
+```js
+const streak = getStreak(); // Call once, outside useMemo
+const achievements = useMemo(() => {
+  // use streak.current inside here
+}, [streak, workoutLogs, user]);
+```
+Do NOT call `getStreak()` inside the `useMemo` callback — it would cause a stale closure if the dependency array omits `getStreak`, and unnecessary re-computation if it includes it.
+
+**Card render:**
+- Grid: `repeat(2, 1fr)`, `gap: 16`
+- Each card: `background: var(--surface-container-low)`, `border-radius: 20px`, `padding: 20px`, **no border**
+- Locked state: `opacity: 0.40` on entire card wrapper
+- Icon container (unlocked): `48×48px`, `border-radius: 14px`, `background: rgba(255,181,155,0.10)`
+- Icon container (locked): `48×48px`, `border-radius: 14px`, `background: var(--surface-container-highest)`
+- Icon color (unlocked): `var(--primary)` / locked: `var(--on-surface-variant)`
+- Title: `Space Grotesk`, `12px`, `700`, uppercase, `letterSpacing: 0.08em`
+- Description: `10px`, `var(--on-surface-variant)`, `lineHeight: 1.5`
+
+---
+
+### 9.6 — Restyled Personal Details Form
+
+**Replace** the 2-column `230px + 1fr` sidebar layout with a single full-width card:
+- Remove outer `display: grid` wrapper entirely — the page becomes a clean single-column stack
+- Card: `background: var(--surface-container-low)`, `border-radius: 20px`, `padding: 24px`, **no border**
+- Header row: "Personal Details" headline-md left, `[Edit]` / `[✓ Save]` button right
+  - Save button: ember gradient (`linear-gradient(135deg, var(--primary-container), var(--primary))`), `color: var(--on-primary)`, `border-radius: 12px`
+  - Edit button: `background: var(--surface-container-highest)`, `border-radius: 12px`
+- Field display rows: `background: var(--surface-container)`, `border-radius: 12px`, `padding: 12px 14px`, **no `border-bottom`**
+- Field label: `10px`, `700`, uppercase, `var(--on-surface-dim)` 
+- Fields grid: `repeat(auto-fit, minmax(200px, 1fr))`, `gap: 14`
+- Replace `⚡ Admin` emoji with `<Zap size={10} />` from lucide-react
+
+---
+
+### 9.7 — Settings & Actions Card
+
+**Single card below Personal Details:**
+- Card styling: same as 9.6 — `var(--surface-container-low)`, `border-radius: 20px`, **no border**
+- "Settings" section header: `label-md` class, uppercase, `var(--on-surface-dim)`, `marginBottom: 16`
+- Row separator between toggle rows: `height: 1px`, `background: var(--surface-container-highest)` — **not `var(--outline-variant)`**
+- Toggle segments: keep existing pill segmented design — just wrap in new container
+- **Logout button:** `background: rgba(255,107,107,0.08)`, `color: var(--danger)`, `border-radius: 12px`, full-width, flex center, `border: none`. **Must NOT use `btn-d` class** — that class has `border: 1px solid var(--outline-variant)` which violates our anti-pattern rules. Restyle inline with explicit `border: 'none'`.
+- Export/Import row: two tonal buttons side-by-side, `background: var(--surface-container-highest)`, `border-radius: 12px`, `border: 'none'`, `cursor: 'pointer'`
+- **All `marginBottom` between sections:** Use `16px` gap between settings rows, `24px` between the last toggle and the export/import row, `16px` between export/import and logout
+
+---
+
+### 9.8 — BMI / BMR / TDEE Stats Strip
+
+Move from left sidebar to a horizontal inline strip between Avatar Hero and Muscle Mastery:
+- Layout: `display: grid`, `gridTemplateColumns: repeat(3, 1fr)`, `gap: 12`, `marginBottom: 32`
+- Each cell: `background: var(--surface-container-low)`, `border-radius: 16px`, `padding: 20px`, **no border**
+- BMI value: `.display-lg`, `color: var(--primary)`
+- BMR/TDEE value: `.headline-lg`, `color: var(--on-surface)`
+- Unit label: `10px`, uppercase, `var(--on-surface-dim)`
+- BMI category: `8px`, `background: var(--surface-container-highest)`, `border-radius: 8px`, `color: var(--on-surface-variant)`, `padding: 3px 8px`
+
+---
+
+### 9.9 — Final Page Structure
+
+```
+1. PageHeader "My Profile" (existing — no change)
+2. Avatar Hero (9.2) + Avatar Picker Modal (9.3)    [marginBottom: 32]
+3. BMI / BMR / TDEE Stats Strip (9.8)                [marginBottom: 32]
+4. Muscle Mastery Top-4 (9.4)                         [marginBottom: 40]
+5. Elite Achievements 2×2 grid (9.5)                  [marginBottom: 40]
+6. Personal Details Card (9.6)  id="personal-details" [marginBottom: 24]
+7. Settings & Actions Card (9.7)                      [marginBottom: 24]
+```
+
+**Remove:**
+- The entire `display: grid, gridTemplateColumns: '230px 1fr'` outer `<div>` wrapper with `className="g2"`
+- The `.g2` responsive class reference (if used in CSS)
+- Both inner `className="card"` wrappers from the old sidebar and details panel — replace with the new section structure above
+
+---
+
+### 9.10 — New Imports Required for `ProfilePage.jsx`
+
+```jsx
+import { useState, useMemo } from 'react';
+import { LogOut, Download, Upload, Share2, Flame, Dumbbell, Trophy, Clock, BarChart2, Camera, Zap, Shield } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
+import { ACTIVITY } from '../../data/constants';
+import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
+import { fmt, kgToLbs, cmToFtIn } from '../../utils/helpers';
+import { exportData, importData } from '../../utils/storage';
+import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
+```
+
+---
+
+### 9.11 — Avatar Image Generation Plan
+
+During implementation, use `generate_image` tool for each of the 12 character portraits:
+- **Style:** Cinematic dark gym/action background with warm amber/orange rim lighting from the side. Each portrait is a close-up bust, cleansed from messy environments, consistent across all 12.
+- **Output path:** `public/avatars/{id}.png`
+- Generate all 12 in parallel during the implementation step to save time.
+
+---
+
+### 9.12 — Anti-Pattern Compliance Checklist
+
+- [ ] No `border: '1px solid var(--outline-variant)'` on any card (also applies to logout button — must not use `btn-d` class)
+- [ ] No `boxShadow: 'var(--shadow-md)'` on standard cards — glow only on avatar
+- [ ] No `#ffffff` or `#000000` literals
+- [ ] No emoji as icons — replace `⚡ Admin` with `<Zap size={10} />` in **both ProfilePage.jsx AND Layout.jsx** (line 27)
+- [ ] No `font-family: 'Bebas Neue'` — replace with `'Space Grotesk'`
+- [ ] No `border-bottom: '2px solid ...'` on field display rows — use `borderRadius: 12` containers instead
+- [ ] No inline `style={{ border: 'none' }}` workarounds (cards already have no border by default from design system)
+- [ ] Achievement grid cards must have `border-radius: 20px` (not `12px` or `8px`)
+- [ ] Use `var(--signature-gradient)` token for ember gradient buttons — do NOT re-specify `linear-gradient(135deg, ...)` inline when the token already exists
+- [ ] Old `.g2` responsive class wrapper must be fully removed — verify no leftover `className="g2"` in output
+- [ ] `avatarType` must be `'upload'` (not `'preset'`) when user uploads a custom image
+- [ ] Uploaded avatar must be canvas-resized to max 256×256 and JPEG-compressed to ~50KB before storing in localStorage
+- [ ] Avatar Picker Modal must support `Escape` key to close and click-outside-to-close
+
+---
+
+### Priority Order (Phase 9)
+
+1. **9.1** Data model: `avatarType` + `avatarUrl` fields (+ Layout.jsx avatar/admin fixes)
+2. **9.11** Generate character portrait images → `public/avatars/`
+3. **9.10** Update imports in `ProfilePage.jsx`
+4. **9.2** Avatar Hero section (single-column layout conversion)
+5. **9.8** BMI/BMR/TDEE stats strip
+6. **9.4** Muscle Mastery Top-4
+7. **9.5** Elite Achievements
+8. **9.6** Personal Details card restyle
+9. **9.7** Settings & Actions card restyle
+10. **9.3** Avatar Picker Modal (+ canvas-compress upload handler)
+11. **9.9** Verify final section order + marginBottom consistency
+12. **9.12** Anti-pattern sweep (expanded 13-point checklist)

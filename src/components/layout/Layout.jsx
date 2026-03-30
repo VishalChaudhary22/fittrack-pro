@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dumbbell, Sun, Moon, MoreHorizontal } from 'lucide-react';
+import { Dumbbell, Sun, Moon, MoreHorizontal, Zap } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE } from '../../data/constants';
 
@@ -21,10 +21,12 @@ export const Sidebar = () => {
         {sb && <div className="headline-md" style={{ color: 'var(--on-surface)', whiteSpace: 'nowrap' }}>FITTRACK</div>}
       </div>
       {sb && <div style={{ padding: '0 16px 16px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--on-surface)', fontSize: 12, flexShrink: 0 }}>{user?.avatar}</div>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--on-surface)', fontSize: 12, flexShrink: 0, overflow: 'hidden' }}>
+          {user?.avatarUrl ? <img src={user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user?.avatar}
+        </div>
         <div style={{ overflow: 'hidden' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>{user?.isAdmin ? '⚡ Admin' : 'Member'}</div>
+          <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', display: 'flex', alignItems: 'center', gap: 4 }}>{user?.isAdmin ? <><Zap size={10} color="var(--primary)" /> Admin</> : 'Member'}</div>
         </div>
       </div>}
       <nav style={{ padding: '7px 5px', flex: 1, overflowY: 'auto' }}>

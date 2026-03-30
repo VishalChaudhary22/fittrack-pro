@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Trophy, Activity, TrendingUp, Flame, Target } from 'lucide-react';
+import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
 import { best1RMFromSets, calc1RM } from '../../utils/calculations';
@@ -178,13 +178,19 @@ export default function ProgressPage() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={cd}>
+            <AreaChart data={cd}>
+              <defs>
+                <linearGradient id="vol-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="var(--primary-container)" stopOpacity={0.45} />
+                  <stop offset="95%" stopColor="var(--primary-container)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
               <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
               <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
-              <Tooltip cursor={{ fill: 'var(--surface-container)' }} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
-              <Bar dataKey="volume" fill="var(--primary-container)" radius={[8, 8, 4, 4]} />
-            </BarChart>
+              <Tooltip cursor={false} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
+              <Area type="monotone" dataKey="volume" stroke="var(--primary-container)" strokeWidth={2.5} fill="url(#vol-gradient)" dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: 'var(--primary)', strokeWidth: 0 }} />
+            </AreaChart>
           </ResponsiveContainer>
         </section>
 
@@ -195,8 +201,8 @@ export default function ProgressPage() {
           <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* 8.5 PB Glow Card */}
             <div className="card" style={{ padding: 32, background: 'var(--surface-container-low)', boxShadow: 'var(--glow-primary)', border: '1px solid rgba(255, 181, 155, 0.20)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', right: -16, top: -16, opacity: 0.10, fontSize: 120 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 'inherit' }}>workspace_premium</span>
+              <div style={{ position: 'absolute', top: 16, right: 16, width: 56, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-highest)', borderRadius: '12px 12px 0 0', borderBottom: '4px solid var(--surface-container)', color: 'var(--on-surface-variant)' }}>
+                <Award size={36} color="var(--on-surface-dim)" />
               </div>
               <div className="label-md" style={{ color: 'var(--primary)', letterSpacing: '0.2em', marginBottom: 24 }}>Personal Best</div>
               <div className="display-lg" style={{ color: 'var(--on-surface)' }}>{pr}</div>
@@ -211,7 +217,7 @@ export default function ProgressPage() {
                   </div>
                 </div>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255, 181, 155, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-                  <span className="material-symbols-outlined">share</span>
+                  <Share2 size={20} color="currentColor" />
                 </div>
               </div>
             </div>

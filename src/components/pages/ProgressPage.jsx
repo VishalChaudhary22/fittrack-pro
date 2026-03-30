@@ -26,9 +26,10 @@ export default function ProgressPage() {
       const vol = ex.sets.reduce((a, s) => a + (s.reps || 0) * (s.weight || 0), 0);
       const ar = +(ex.sets.reduce((a, s) => a + (s.reps || 0), 0) / ex.sets.length).toFixed(1);
       const est1rm = best1RMFromSets(ex.sets);
-      return { date: fmt(log.date), maxWeight: mx, volume: Math.round(vol), avgReps: ar, sets: ex.sets.length, est1rm };
+      const dayName = split?.days?.find(d => d.id === log.dayId)?.name || 'Session';
+      return { date: fmt(log.date), rawDate: log.date, dayName, maxWeight: mx, volume: Math.round(vol), avgReps: ar, sets: ex.sets.length, est1rm };
     }).filter(Boolean);
-  }, [se, sd, ul]);
+  }, [se, sd, ul, split]);
   const pr = cd.length ? Math.max(...cd.map(d => d.maxWeight)) : 0;
   const est1rm = cd.length ? Math.max(...cd.map(d => d.est1rm)) : 0;
 
@@ -56,59 +57,252 @@ export default function ProgressPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Progress Charts" sub="Track your strength gains" />
+      <PageHeader title="Workout Analytics" sub="Performance data per exercise" />
 
-      {/* Weekly / Monthly Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <div className="card" style={{ padding: '20px', border: 'none', background: 'var(--surface-container-low)' }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>This Week</div>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>{weeklySummary.sessions}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>sessions</div></div>
-            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(weeklySummary.volume / 1000)}k</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>kg volume</div></div>
-          </div>
-          {weeklySummary.volChange !== 0 && <div className="tonal-break" style={{ marginTop: 16, padding: '8px 12px', borderRadius: 8, background: 'var(--surface-container-highest)', display: 'inline-block', fontSize: 12, color: weeklySummary.volChange > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>{weeklySummary.volChange > 0 ? '▲' : '▼'} {Math.abs(weeklySummary.volChange)}% vs last week</div>}
-          {weeklySummary.sessions !== weeklySummary.lastSessions && <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 8, fontWeight: 600 }}>Last week: {weeklySummary.lastSessions} sessions</div>}
-        </div>
-        <div className="card" style={{ padding: '20px', border: 'none', background: 'var(--surface-container-low)' }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>This Month</div>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>{monthlySummary.sessions}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>sessions</div></div>
-            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{monthlySummary.avgPerWeek}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>avg/week</div></div>
-            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(monthlySummary.volume / 1000)}k</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 600 }}>total vol</div></div>
-          </div>
-        </div>
+      {/* 8.8 Filter Controls Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 32 }}>
+        <select value={ss} onChange={e => { setSs(e.target.value); setSd(''); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+          {splits.filter(s => !s.comingSoon).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+        <select value={sd} onChange={e => { setSd(e.target.value); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+          <option value="">Any Day</option>
+          {days.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        <select value={se} onChange={e => setSe(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+          <option value="">Select Lift</option>
+          {exN.map(n => <option key={n} value={n}>{n}</option>)}
+        </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Split</label><select value={ss} onChange={e => { setSs(e.target.value); setSd(''); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>{splits.filter(s => !s.comingSoon).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
-        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Day</label><select value={sd} onChange={e => { setSd(e.target.value); setSe(''); }} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}><option value="">All Days</option>{days.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
-        <div className="input-group"><label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>Exercise</label><select value={se} onChange={e => setSe(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}><option value="">— Select —</option>{exN.map(n => <option key={n} value={n}>{n}</option>)}</select></div>
+      {/* 8.9 Weekly Summary Context Strip */}
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 32, alignItems: 'baseline' }}>
+        <div>
+          <span className="label-md" style={{ color: 'var(--on-surface-dim)', marginRight: 8 }}>This Week</span>
+          <span className="headline-md" style={{ color: 'var(--primary)', fontSize: '1.25rem' }}>{weeklySummary.sessions}</span>
+          <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginLeft: 4 }}>sessions</span>
+        </div>
+        <div>
+          <span className="label-md" style={{ color: 'var(--on-surface-dim)', marginRight: 8 }}>Vol</span>
+          <span className="headline-md" style={{ color: 'var(--primary)', fontSize: '1.25rem' }}>{Math.round(weeklySummary.volume / 1000)}k</span>
+          <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginLeft: 4 }}>kg</span>
+        </div>
+        {weeklySummary.volChange !== 0 && (
+          <div style={{ fontSize: 12, fontWeight: 700, color: weeklySummary.volChange > 0 ? 'var(--success)' : 'var(--danger)' }}>
+            {weeklySummary.volChange > 0 ? '+' : ''}{weeklySummary.volChange}% vs last week
+          </div>
+        )}
+        <div style={{ width: 1, height: 16, background: 'var(--surface-container-highest)', alignSelf: 'center' }}></div>
+        <div>
+          <span className="label-md" style={{ color: 'var(--on-surface-dim)', marginRight: 8 }}>Monthly</span>
+          <span className="headline-md" style={{ color: 'var(--primary)', fontSize: '1.25rem' }}>{monthlySummary.sessions}</span>
+          <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginLeft: 4 }}>sessions</span>
+        </div>
+        <div>
+          <span className="headline-md" style={{ color: 'var(--primary)', fontSize: '1.25rem' }}>~{monthlySummary.avgPerWeek}</span>
+          <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginLeft: 4 }}>/week avg</span>
+        </div>
       </div>
 
       {se && cd.length > 0 ? (<>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
-          <StatCard label="Personal Record" value={pr} unit="kg" Icon={Trophy} />
-          <StatCard label="Est. 1RM" value={est1rm} unit="kg" Icon={Target} badge="Epley" />
-          <StatCard label="Sessions" value={cd.length} unit="" Icon={Activity} />
-          {cd.length >= 2 && <StatCard label="Progress" value={`+${(cd[cd.length - 1].maxWeight - cd[0].maxWeight).toFixed(1)}`} unit="kg" Icon={TrendingUp} />}
+        {/* 8.2 Hero Exercise Title */}
+        <section style={{ marginBottom: 32 }}>
+          <span className="label-md" style={{ color: 'var(--primary)', display: 'block', marginBottom: 8 }}>
+            Performance Analytics
+          </span>
+          <h2 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
+            fontWeight: 700,
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            color: 'var(--on-surface)',
+            textTransform: 'uppercase',
+          }}>
+            {se.includes(' ')
+              ? <>{se.split(' ').slice(0, Math.ceil(se.split(' ').length / 2)).join(' ')}
+                  <br />
+                  <span style={{ color: 'var(--primary-container)' }}>
+                    {se.split(' ').slice(Math.ceil(se.split(' ').length / 2)).join(' ')}
+                  </span>
+                </>
+              : se
+            }
+          </h2>
+        </section>
+
+        {/* 8.3 Bento Stat Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+          {/* Card 1 - Estimated 1RM */}
+          <div className="card" style={{ borderLeft: '4px solid var(--primary)', padding: 24, background: 'var(--surface-container-low)' }}>
+             <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 12 }}>ESTIMATED 1RM</div>
+             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                <span className="display-lg" style={{ color: 'var(--on-surface)' }}>{est1rm}</span>
+                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface-variant)' }}>KG</span>
+             </div>
+             {cd.length > 0 && (
+               <div style={{ fontSize: 13, fontWeight: 600, color: cd[cd.length - 1].est1rm - cd[0].est1rm >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+                 {cd[cd.length - 1].est1rm - cd[0].est1rm >= 0 ? '▲ +' : '▼ '}{(cd[cd.length - 1].est1rm - cd[0].est1rm).toFixed(1)} kg vs first session
+               </div>
+             )}
+          </div>
+          {/* Card 2 - Personal Record */}
+          <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>
+             <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 12 }}>PERSONAL RECORD</div>
+             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                <span className="display-lg" style={{ color: 'var(--on-surface)' }}>{pr}</span>
+                <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface-variant)' }}>KG</span>
+             </div>
+             <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 500 }}>
+               Achieved: {cd.length && cd.find(d => d.maxWeight === pr)?.rawDate ? new Date(cd.find(d => d.maxWeight === pr)?.rawDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown'}
+             </div>
+          </div>
+          {/* Card 3 - Total Sessions */}
+          <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>
+             <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 16 }}>TOTAL SESSIONS</div>
+             <span className="display-lg" style={{ color: 'var(--on-surface)' }}>{cd.length}</span>
+          </div>
         </div>
-        <div className="headline-md" style={{ marginBottom: 16, color: 'var(--primary)' }}>{se}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-          {[{ title: 'Max Weight (kg)', key: 'maxWeight', type: 'area' }, { title: 'Volume (reps × kg)', key: 'volume', type: 'bar' }, { title: 'Avg Reps/Set', key: 'avgReps', type: 'line' }, { title: 'Est. 1RM (kg)', key: 'est1rm', type: 'area' }].map(ch => (
-            <div key={ch.key} className="card stripe" style={{ padding: 20, border: 'none' }}>
+        {/* 8.4 Volume Trend Hero Chart */}
+        <section className="card" style={{ padding: 32, background: 'var(--surface-container-low)', marginBottom: 32 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+            <div>
+              <h3 className="headline-md" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                VOLUME TREND
+              </h3>
+              <p style={{ color: 'var(--on-surface-variant)', fontSize: 13, marginTop: 4 }}>Total load lifted per session</p>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <span style={{ background: 'var(--surface-container-highest)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 700, color: 'var(--on-surface)' }}>1M</span>
+              <span style={{ color: 'var(--on-surface-variant)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>3M</span>
+              <span style={{ color: 'var(--on-surface-variant)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>6M</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={cd}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
+              <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
+              <Tooltip cursor={{ fill: 'var(--surface-container)' }} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
+              <Bar dataKey="volume" fill="var(--primary-container)" radius={[8, 8, 4, 4]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </section>
+
+        {/* 8.5 & 8.6 Stacked Layout */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+          
+          {/* Left Column: PB Card + Focus Groups */}
+          <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* 8.5 PB Glow Card */}
+            <div className="card" style={{ padding: 32, background: 'var(--surface-container-low)', boxShadow: 'var(--glow-primary)', border: '1px solid rgba(255, 181, 155, 0.20)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: -16, top: -16, opacity: 0.10, fontSize: 120 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 'inherit' }}>workspace_premium</span>
+              </div>
+              <div className="label-md" style={{ color: 'var(--primary)', letterSpacing: '0.2em', marginBottom: 24 }}>Personal Best</div>
+              <div className="display-lg" style={{ color: 'var(--on-surface)' }}>{pr}</div>
+              <div style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginTop: 8, marginBottom: 32 }}>
+                {cd.find(d => d.maxWeight === pr) ? `${cd.find(d => d.maxWeight === pr).avgReps} avg reps · ${cd.find(d => d.maxWeight === pr).sets} sets` : 'No sets data'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>Date Achieved</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>
+                    {cd.find(d => d.maxWeight === pr)?.rawDate ? new Date(cd.find(d => d.maxWeight === pr).rawDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown'}
+                  </div>
+                </div>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255, 181, 155, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                  <span className="material-symbols-outlined">share</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 8.5 Focus Groups */}
+            <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>
+              <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 16 }}>Focus Groups</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {(() => {
+                  const exDef = split?.days.flatMap(d => d.exercises).find(e => e.name === se);
+                  const pM = exDef?.primaryMuscle || exDef?.muscle || null;
+                  const sM = exDef?.secondaryMuscles || [];
+                  if (!pM && sM.length === 0) return <span style={{ background: 'var(--surface-container-highest)', borderRadius: 24, fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 12px' }}>General</span>;
+                  return (
+                    <>
+                      {pM && <span style={{ background: 'var(--surface-container-highest)', borderRadius: 24, fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 12px' }}>{pM}</span>}
+                      {sM.map(m => <span key={m} style={{ background: 'var(--surface-container-highest)', borderRadius: 24, fontSize: 10, fontWeight: 700, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 12px' }}>{m}</span>)}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* 8.6 Recent Sessions Log Column */}
+          <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column' }}>
+            <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', height: '100%' }}>
+              <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 24 }}>Session Log</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {[...cd].reverse().slice(0, 5).map((entry, idx) => (
+                  <div key={idx} className="cascade-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 16, background: 'var(--surface-container)', transition: 'background 0.2s var(--ease-smooth)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div style={{ width: 48, height: 48, background: 'var(--surface-container-highest)', borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', fontWeight: 600 }}>{new Date(entry.rawDate).toLocaleDateString('en-US', { month: 'short' })}</span>
+                        <span style={{ fontSize: 18, color: 'var(--on-surface)', fontWeight: 700, lineHeight: 1 }}>{new Date(entry.rawDate).getDate()}</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--on-surface)', marginBottom: 2 }}>{entry.dayName}</div>
+                        <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{entry.sets} sets · {entry.volume.toLocaleString()} kg volume</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div className="headline-md" style={{ color: 'var(--on-surface)', fontSize: '1.25rem', marginBottom: 2 }}>{entry.maxWeight} × {entry.avgReps}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: entry.maxWeight === pr ? 'var(--primary)' : idx === 0 ? 'var(--success)' : 'var(--on-surface-variant)' }}>
+                        {entry.maxWeight === pr ? 'New PB' : idx === 0 ? 'Latest' : 'Session'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 8.7 Secondary Charts Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+          {[{ title: 'Est. 1RM over time', key: 'est1rm', type: 'area' }, { title: 'Avg Reps/Set', key: 'avgReps', type: 'line' }].map(ch => (
+            <div key={ch.key} className="card" style={{ padding: 24, border: 'none', background: 'var(--surface-container-low)' }}>
               <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <TrendingUp size={14} color="var(--primary)" /> {ch.title}
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                {ch.type === 'area' ? (<AreaChart data={cd}><defs><linearGradient id={`cg-${ch.key}`} x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={.18} /><stop offset="95%" stopColor="var(--primary)" stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} /><Area type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={2} fill={`url(#cg-${ch.key})`} dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} /></AreaChart>)
-                  : ch.type === 'bar' ? (<BarChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} cursor={{ fill: 'var(--surface-container-lowest)' }} itemStyle={{ color: 'var(--primary)' }} /><Bar dataKey={ch.key} fill="var(--primary)" radius={[6, 6, 0, 0]} fillOpacity={.9} /></BarChart>)
-                    : (<LineChart data={cd}><CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} /><XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} /><YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} /><Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} /><Line type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} /></LineChart>)}
+              <ResponsiveContainer width="100%" height={160}>
+                {ch.type === 'area' ? (
+                  <AreaChart data={cd}>
+                    <defs>
+                      <linearGradient id={`cg2-${ch.key}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={.18} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
+                    <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
+                    <Tooltip contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
+                    <Area type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={2} fill={`url(#cg2-${ch.key})`} dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                  </AreaChart>
+                ) : (
+                  <LineChart data={cd}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
+                    <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
+                    <Tooltip contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
+                    <Line type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                  </LineChart>
+                )}
               </ResponsiveContainer>
             </div>
           ))}
         </div>
       </>) : (
-        <EmptyState Icon={TrendingUp} title={se ? 'No data yet' : 'Select an exercise'} message="Log workouts to see strength progression charts" />
+        <EmptyState Icon={TrendingUp} title={se ? 'No data yet' : 'Choose Your Lift'} message={se ? 'Log workouts to see strength progression charts' : 'Select split, day, and exercise above to unlock your performance analytics'} />
       )}
     </div>
   );

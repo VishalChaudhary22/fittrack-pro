@@ -679,3 +679,327 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 5. **7.6** Finish/Discard section
 6. **7.5** Live tracking pill
 7. **7.1** Hero rest timer (most complex — last)
+
+---
+
+## Phase 8 — Workout Analytics Page Redesign (ProgressPage → Analytics)
+
+> **Source reference:** Provided "Kinetic Elite" analytics HTML mockup — `BENCH PRESS / Performance Analytics` screen.
+> **Status:** Planning — do not implement until approved.
+> **Files affected:** `ProgressPage.jsx` only (rename display title, not file). No changes to backend logic.
+> **Theme:** Inherit the full Kinetic Elite token system (Space Grotesk + Be Vietnam Pro, Obsidian Canvas, Ember Peach/Burning Ember palette, glassmorphism) already defined in Phases 1–6.
+
+### What We Keep (Unchanged)
+- All state variables: `ss` (split), `sd` (day/split dropdown), `se` (exercise) — keep exactly as-is
+- All `useMemo` calculations: `cd`, `pr`, `est1rm`, `weeklySummary`, `monthlySummary`, `exN`
+- All Recharts chart instances (AreaChart, BarChart, LineChart) — layout changes only, not data logic
+- The `best1RMFromSets` / `calc1RM` utility imports
+- Split → Day → Exercise dropdown cascade logic
+- Dark mode / Light mode theme toggle support (already globally managed by `data-theme` attribute)
+
+### Pre-Requisite: Extend `cd` Data Shape
+> **Why:** Several sub-tasks (8.3, 8.5, 8.6) need data that the current `cd` entries don't carry.
+> The `cd` `useMemo` callback currently stores `date: fmt(log.date)` — a formatted display string
+> like `"31 Mar"`. The raw ISO date is lost, making it impossible to show "Achieved: Oct 14, 2023"
+> or derive month/day numbers for the session log date boxes.
+
+- [ ] Add `rawDate: log.date` to each `cd` entry (preserves the original ISO string)
+- [ ] Add `dayName: days.find(d => d.id === log.dayId)?.name || 'Session'` to each `cd` entry
+- [ ] Final `cd` shape per entry:
+  ```js
+  { date: fmt(log.date), rawDate: log.date, dayName, maxWeight, volume, avgReps, sets, est1rm }
+  ```
+
+---
+
+### 8.1 Rename Page Title (Display Only)
+- [ ] Change the `<PageHeader title="Progress Charts" sub="Track your strength gains" />` to:
+  - Title: `"Workout Analytics"` (matches the new screen identity)
+  - Sub: `"Performance data per exercise"` (more precise for analytics context)
+- [ ] ~~Add a super-label above the headline~~ — **Removed:** the `"Performance Analytics"` super-label lives in the hero exercise section (8.2) only, to avoid duplication
+
+---
+
+### 8.2 Hero Exercise Name Display
+**When an exercise is selected (`se` is set), replace the plain `headline-md` exercise name with an asymmetric editorial hero title.**
+
+- [ ] Wrap the exercise name in a new hero section (replaces the current plain `<div className="headline-md">`):
+  ```jsx
+  <section style={{ marginBottom: 32 }}>
+    <span className="label-md" style={{ color: 'var(--primary)', display: 'block', marginBottom: 8 }}>
+      Performance Analytics
+    </span>
+    <h2 style={{
+      fontFamily: "'Space Grotesk', sans-serif",
+      fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
+      fontWeight: 700,
+      letterSpacing: '-0.04em',
+      lineHeight: 1,
+      color: 'var(--on-surface)',
+      textTransform: 'uppercase',
+    }}>
+      {/* Split exercise name into two lines — guard single-word names */}
+      {se.includes(' ')
+        ? <>{se.split(' ').slice(0, Math.ceil(se.split(' ').length / 2)).join(' ')}
+            <br />
+            <span style={{ color: 'var(--primary-container)' }}>
+              {se.split(' ').slice(Math.ceil(se.split(' ').length / 2)).join(' ')}
+            </span>
+          </>
+        : se  /* Single-word names render on one line — no empty <br/> */
+      }
+    </h2>
+  </section>
+  ```
+- [ ] Only render this hero section when `se` is set — fallback to the empty state path as before
+- [ ] On mobile (< 480px), reduce to `clamp(2rem, 10vw, 3rem)` via responsive CSS or inline clamp
+
+---
+
+### 8.3 Key Stats Bento Grid (Top Stat Cards)
+**Replace the current `StatCard` row with a bento-style 3-column grid matching the reference's 1RM / Max Weight / Total Sets cards.**
+
+- [ ] Render the bento grid when `se && cd.length > 0`:
+  ```
+  Grid layout: 3 columns on md+, 1 column on mobile
+  Cards use: bg-surface-container-low, rounded-2xl (1.5rem), no border
+  ```
+- [ ] **Card 1 — Estimated 1RM** (Primary accent card):
+  - Left border accent: `border-left: 4px solid var(--primary)` — the only border allowed (accent rule exception)
+  - Super-label: `"ESTIMATED 1RM"` in `.label-md`
+  - Hero number: `est1rm` value in `.display-lg` (Space Grotesk, ~3.5rem)
+  - Unit: `"KG"` in `on-surface-variant`, `font-bold`
+  - Trend: Pull from `cd` — compare last value to first value. Show `▲ +X kg vs first session` in `var(--success)` or `▼` in `var(--danger)`
+  - ⚠️ **Token check:** verify `--success` and `--danger` survive the Phase 1 token migration — they're semantic colors not part of the M3 surface system. If removed, re-add as `--success: #51CF66` / `--danger: #FF6B6B` in the new token set
+
+- [ ] **Card 2 — Personal Record (Max Weight)**:
+  - Super-label: `"PERSONAL RECORD"` in `.label-md`
+  - Hero number: `pr` value in `.display-lg`
+  - Unit: `"KG"`
+  - Sub-label: `"Achieved: {date of session with max weight}"` — use `cd.find(d => d.maxWeight === pr)?.rawDate` (requires the `rawDate` field from Pre-Requisite above)
+  - No left border
+
+- [ ] **Card 3 — Total Sessions**:
+  - Super-label: `"TOTAL SESSIONS"` in `.label-md`
+  - Hero number: `cd.length` in `.display-lg`
+  - Unit: `"SESSIONS"`
+  - Sub-label: Pull `monthlySummary.avgPerWeek` → `"~{avg} per week"` 
+  - No left border
+
+- [ ] Apply `cascade-item` staggered animation (Phase 1.6) to the 3 cards
+
+---
+
+### 8.4 Volume Trend Chart (Primary Chart — Hero Section)
+**Elevate the Volume (reps × kg) BarChart to a full-width hero section with a premium glass card treatment.**
+
+- [ ] Move the `volume` bar chart out of the 2-column grid and into a standalone full-width section above the chart grid
+- [ ] Wrap in a `rounded-[2rem] bg-surface-container-low p-8 shadow-2xl overflow-hidden` card (matching the reference's `rounded-[2rem]` section)
+- [ ] **Card header row:**
+  - Left: `"VOLUME TREND"` in `.headline-md`, Space Grotesk — plus a sub-label `"Total load lifted per session"` in `on-surface-variant`
+  - Right: Time range pill buttons `[1M] [3M] [6M]` — visual only for now (state wiring is a future task; default shows all `cd` data)
+  - **Default active pill:** `1M` starts with the active style; `3M` and `6M` are inactive
+  - Active pill style: `bg-surface-container-highest rounded-lg px-3 py-1 text-xs font-bold`
+  - Inactive pill style: `text-on-surface-variant rounded-lg px-3 py-1 text-xs font-bold` (no bg fill)
+
+- [ ] **Chart upgrades (BarChart for volume):**
+  - Use `fill="var(--primary-container)"` (Burning Ember `#F85F1B`) for bars instead of primary peach
+  - Bar radius: `[8, 8, 0, 0]`
+  - CartesianGrid: `strokeDasharray="3 3"`, stroke `var(--surface-container-highest)`, `vertical={false}` — keep
+  - X/Y axis tick styling: `fill: 'var(--on-surface-variant)'`, `fontSize: 10`, `fontWeight: 600`
+  - **Glassmorphic Tooltip:** Replace plain `contentStyle` with `.glass-tooltip` approach:
+    ```
+    contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }}
+    ```
+  - Height: `h-64` (256px) — larger than current 180px to make the hero chart prominent
+  - Add X-axis date labels at the bottom in `tracking-widest uppercase text-[10px] on-surface-variant/40` style (already handled by XAxis, just verify tick formatting via `fmt()`)
+
+---
+
+### 8.5 Personal Best Glow Card + Focus Groups
+**Add a premium PB highlight card to the left column (below the bento grid), matching the reference's `glow-primary` pattern.**
+
+- [ ] Render only when `se && cd.length > 0`
+- [ ] Two-column layout (below chart): `lg:grid-cols-5` — Left col `lg:col-span-2`, Right col `lg:col-span-3`
+- [ ] **Personal Best card** (`lg:col-span-2`):
+  ```
+  bg: var(--surface-container-highest)
+  border: 1px solid rgba(255, 181, 155, 0.2)  [ghost border exception — low opacity]
+  box-shadow: var(--glow-primary)  [LED emission at 10%]
+  padding: 2rem
+  border-radius: 2rem
+  overflow: hidden, position: relative
+  ```
+  - Background watermark icon: absolute `workspace_premium` Material Symbol at `opacity: 0.10`, positioned `-right-4 -top-4 text-9xl`
+  - Super-label: `"Personal Best"` in `.label-md`, `color: var(--primary)`, `letterSpacing: '0.2em'`, `marginBottom: 24`
+  - Hero number: `pr` in `.display-lg` (clamp `3rem–4rem`), `color: var(--on-surface)`, `letterSpacing: '-0.04em'`
+  - Sub-label: Best set details — derive from `cd`: `const pbSession = cd.find(d => d.maxWeight === pr)`, then show `"{pbSession.avgReps} avg reps · {pbSession.sets} sets"` (not `"{sets} reps · {sets} sets"` — that was a copy-paste error)
+  - **Date achieved row** (bottom of card):
+    - Left: `"Date Achieved"` label (`.label-md` 10px) + formatted date from `pbSession.rawDate` (use `new Date(pbSession.rawDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })` for full format like `"October 14, 2023"`)
+    - Right: Share icon button — `w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary` (Material Symbols `share` icon)
+
+- [ ] **Focus Groups card** (below PB card, same `lg:col-span-2`):
+  - `bg: var(--surface-container-low)`, `padding: 1.5rem`, `border-radius: 1.5rem`
+  - Super-label: `"Focus Groups"` in `.label-md`, `marginBottom: 16`
+  - **Data source:** Look up the selected exercise in the active split's days:
+    ```js
+    const exDef = split?.days.flatMap(d => d.exercises).find(e => e.name === se);
+    const primaryMuscle = exDef?.primaryMuscle || exDef?.muscle || null;
+    const secondaryMuscles = exDef?.secondaryMuscles || [];
+    ```
+    ⚠️ `exN` is just a list of exercise name strings — it has no muscle data. The lookup must go through `split.days[].exercises[]` which carries `muscle`, `primaryMuscle`, and `secondaryMuscles` fields.
+  - If `primaryMuscle` is found → render as primary chip; each `secondaryMuscles` entry → secondary chip. If no match (exercise only in logs, not in current split) → show a single `"General"` placeholder chip
+  - Primary chip style: `bg-surface-container-highest rounded-full text-[10px] font-bold text-primary uppercase tracking-wider px-3 py-1`
+  - Secondary chip style: same but `text-on-surface-variant`
+
+---
+
+### 8.6 Recent Sessions Log (Right Column)
+**Replace / supplement the chart grid with a session log list matching the reference's "RECENT SESSIONS" pattern.**
+
+- [ ] In the right `lg:col-span-3` column, render the last 5 sessions from `cd` (sorted by date desc)
+- [ ] **Section header:**
+  - Left: `"RECENT SESSIONS"` in `.headline-md`
+  - Right: `"View All"` text-link style in `text-primary text-xs font-bold underline cursor-pointer`
+- [ ] **Session row card** (per `cd` entry):
+  ```
+  bg: var(--surface-container-low)
+  padding: 20px
+  border-radius: 1.5rem   // rounded-2xl
+  hover: bg-surface-container-high
+  transition: background 0.2s var(--ease-smooth)
+  ```
+  - Left cluster:
+    - Date box: `w-12 h-12 bg-surface-container-highest rounded-xl` — parse `entry.rawDate` to render month abbr (top, 10px, `on-surface-variant`) via `new Date(entry.rawDate).toLocaleDateString('en-US', { month: 'short' })`, and day number (bottom, 18px bold, `on-surface`) via `new Date(entry.rawDate).getDate()`
+    - Text block: Session name from `entry.dayName` (populated via Pre-Requisite `cd` extension — falls back to `"Session"`) + `"{sets} sets · {volume.toLocaleString()} kg volume"` in `on-surface-variant text-xs`
+  - Right cluster:
+    - Top: `"{maxWeight} × {avgReps}"` in `.headline-md` — Space Grotesk, `font-bold`
+    - Badge: If this row is the PB session (`entry.maxWeight === pr`) → `"New PB"` in `text-primary uppercase text-[10px] font-bold tracking-widest`. If most recent (index 0 in reversed list) → `"Latest"` in `text-green-500`. Otherwise `"Session"` in `on-surface-variant`
+- [ ] Apply `cascade-item` stagger to each session row
+
+---
+
+### 8.7 Secondary Charts Section (Collapsed Grid)
+**Keep the `est1rm` Area chart and `avgReps` Line chart in a 2-column subordinate grid below the session log.**
+
+- [ ] Move this grid below the 5-column layout (PB card + session log)
+- [ ] Grid: `grid-cols-1 md:grid-cols-2 gap-4`
+- [ ] Card wrapper: `bg-surface-container-low rounded-2xl p-6` — no border
+- [ ] Chart header uses `.label-md` + `<TrendingUp size={14} color="var(--primary)" />` icon inline
+- [ ] Chart height: 160px (subordinate, less prominent than the hero volume chart)
+- [ ] **Replace tooltip styling** — the current charts reference `boxShadow: 'var(--shadow-md)'` which **doesn't exist** in `index.css` (resolves to nothing). Replace with the same glassmorphic tooltip from 8.4:
+  ```js
+  contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }}
+  ```
+- [ ] Remove the Max Weight AreaChart from this grid (it's redundant with the PB bento card above)
+- [ ] Remove the Volume BarChart from this grid (it's now the hero section in 8.4)
+- [ ] **Grid now contains only 2 charts:** `Est. 1RM over time` (Area) + `Avg Reps/Set` (Line)
+
+---
+
+### 8.8 Filter Controls (Dropdowns) — Reskin
+**Keep the 3 dropdowns (Split, Day, Exercise) but upgrade their visual styling to match the Kinetic Elite input system.**
+
+- [ ] Move the filter row between the page header and the hero exercise display (before any exercise-specific content)
+- [ ] Grid: `grid-cols-1 md:grid-cols-3 gap-3`
+- [ ] Labels: `.label-md` style (`text-xs uppercase tracking-widest on-surface-dim font-bold`) — already close, verify exact match
+- [ ] Select elements:
+  ```css
+  padding: 12px 16px;
+  border-radius: 1rem;               /* rounded-2xl */
+  background: var(--surface-container-highest);
+  border: none;                      /* No-Line Rule */
+  color: var(--on-surface);
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  ```
+- [ ] On focus: apply `outline: 2px solid var(--primary-container)` (accessible, not a line border) and `outline-offset: 2px`
+- [ ] Do **NOT** add the bottom-bar input style here — dropdowns look better as rounded boxes vs text inputs
+
+---
+
+### 8.9 Weekly/Monthly Summary Cards — Reskin
+**Keep the summary data but integrate it into the bento grid pattern, not standalone cards above everything.**
+
+- [ ] Merge the `weeklySummary` and `monthlySummary` data into a single horizontal "context strip" bar between the filter controls and the hero exercise title
+- [ ] Strip layout: `flex gap-6 flex-wrap` — no card background, just inline stats separated by tonal dividers
+- [ ] Each stat: super-label (`.label-md`, `on-surface-dim`) + value (`headline-md`, `primary`) + unit (12px, `on-surface-variant`)
+- [ ] Stats to show (preserve all 5 meaningful data points from the original cards):
+  1. `This Week: {weeklySummary.sessions} sessions`
+  2. `Vol: {Math.round(weeklySummary.volume / 1000)}k kg`
+  3. `{weeklySummary.volChange > 0 ? '+' : ''}{weeklySummary.volChange}% vs last week` (in success/danger color)
+  4. `Monthly: {monthlySummary.sessions} sessions`
+  5. `~{monthlySummary.avgPerWeek}/week avg`
+- [ ] If no exercise is selected yet, the summary strip still shows — it's always-visible workout context data
+- [ ] Remove the current two standalone summary cards (`card` divs at the top of the page)
+
+---
+
+### 8.10 Empty State — Upgrade
+**When no exercise is selected, replace the generic EmptyState with an on-brand version.**
+
+- [ ] Keep the `<EmptyState>` component but update props:
+  - `title="Select an exercise"` → `title="Choose Your Lift"`
+  - `message="Log workouts to see strength progression charts"` → `message="Select split, day, and exercise above to unlock your performance analytics"`
+- [ ] The EmptyState component itself will already use the Kinetic Elite token system once Phase 2.11 is implemented
+
+---
+
+### 8.11 Section Ordering (Final Page Layout)
+The redesigned page renders in this top-to-bottom order:
+
+```
+1. [ALWAYS]  Page Header — "Workout Analytics" + "Performance Analytics" super-label
+2. [ALWAYS]  Filter Controls — Split / Day / Exercise dropdowns (3-col grid)
+3. [ALWAYS]  Weekly Summary Context Strip — inline stats
+4. [NO_SEL]  Empty State — "Choose Your Lift" (when se is not set)
+5. [SELECTED] Hero Exercise Title — editorial asymmetric UPPERCASE two-line display
+6. [SELECTED] Bento Stat Grid — 3 cards: Est. 1RM (accent) / PR / Sessions
+7. [SELECTED] Volume Trend Chart — full-width hero chart section
+8. [SELECTED] 5-col layout:
+              Left (col-span-2): PB Glow Card + Focus Groups card (stacked)
+              Right (col-span-3): Recent Sessions log (last 5)
+9. [SELECTED] Secondary Charts Grid — 2 charts: Est. 1RM trend + Avg Reps/Set
+```
+
+---
+
+### 8.12 Tokens & CSS Additions Required
+All tokens from Phases 1–6 apply. Additionally verify these are present before implementation:
+- [ ] `--glow-primary` — `0 0 20px rgba(255, 181, 155, 0.10)` (Phase 1.2)
+- [ ] `--glass-bg` — `rgba(53, 52, 55, 0.60)` (Phase 1.2)
+- [ ] `--glass-blur-sm` — `blur(12px)` (Phase 1.2)
+- [ ] `--ease-smooth` — `cubic-bezier(0.4, 0, 0.2, 1)` (Phase 1.6)
+- [ ] `cascade-item` stagger animation (Phase 1.6)
+- [ ] `.display-lg` — Space Grotesk `clamp(2.5rem, 5vw, 3.5rem)`, weight 700, letter-spacing -0.04em (Phases 1.3 + 6.3)
+- [ ] `.headline-md` — Space Grotesk, already defined (Phase 1.3)
+- [ ] `.label-md` — Be Vietnam Pro, uppercase, tracking-widest (Phase 1.3)
+
+---
+
+### 8.13 Anti-Pattern Compliance Checklist
+- [ ] No `1px solid` borders — only the left-accent border on the 1RM bento card (explicit exception) and the ghost PB glow card border at 20% opacity
+- [ ] No `Bebas Neue` or `DM Sans` references
+- [ ] All chart tooltips use glassmorphic `contentStyle` (no solid background)
+- [ ] No `var(--c1)`, `var(--c2)`, `var(--c3)`, `var(--bd)` references
+- [ ] All rounded corners ≥ 12px (0.75rem)
+- [ ] Hero number font uses Space Grotesk via `.display-lg`
+- [ ] Touch targets on all interactive elements (range pills, dropdowns) ≥ 44px height
+
+---
+
+### Priority Order (Phase 8)
+1. **8.8** Filter dropdowns reskin (simplest — isolated, no layout change)
+2. **8.9** Remove summary cards → inline context strip
+3. **8.3** Bento stat grid (high impact, replaces StatCard row)
+4. **8.2** Hero exercise title (editorial layout)
+5. **8.4** Volume trend hero chart (isolated section)
+6. **8.6** Recent sessions log (right column list)
+7. **8.5** PB glow card + focus groups (left column)
+8. **8.7** Secondary charts subordinate grid
+9. **8.1** Rename page title + super-label
+10. **8.10** Empty state copy update
+11. **8.11** Verify final section ordering is correct
+12. **8.12** Token / CSS prerequisite audit
+13. **8.13** Anti-pattern compliance sweep

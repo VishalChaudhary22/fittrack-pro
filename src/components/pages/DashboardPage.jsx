@@ -92,25 +92,26 @@ export default function DashboardPage() {
   const kgLeft = isImpWeight && kgLeftRaw ? kgToLbs(parseFloat(kgLeftRaw)) : kgLeftRaw;
   const isLoss = user.weightGoal && latestWeight > user.weightGoal;
 
-  // Goal-aware trend arrow: green = moving toward goal, red = moving away
+  // Goal-aware trend arrow based on log-to-log change (CURRENT vs PREVIOUS)
+  // green = moving toward goal, red = moving away
   const trendArrow = useMemo(() => {
-    const gained = monthDelta > 0;
+    const weightUp = trend !== undefined && trend > 0;
     if (!user.weightGoal) {
       // No goal set — just show direction with neutral color
-      return { up: gained, color: 'var(--on-surface-dim)' };
+      return { up: weightUp, color: 'var(--on-surface-dim)' };
     }
     if (isLoss) {
       // Goal: lose weight. Down = good (green), Up = bad (red)
-      return gained
+      return weightUp
         ? { up: true,  color: 'var(--error)' }
         : { up: false, color: 'var(--success)' };
     } else {
       // Goal: gain weight. Up = good (green), Down = bad (red)
-      return gained
+      return weightUp
         ? { up: true,  color: 'var(--success)' }
         : { up: false, color: 'var(--error)' };
     }
-  }, [monthDelta, isLoss, user.weightGoal]);
+  }, [trend, isLoss, user.weightGoal]);
 
   const saveLog = () => {
     const w = parseFloat(logWeight);

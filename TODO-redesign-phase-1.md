@@ -56,8 +56,8 @@ Before touching any code, establish the Stitch-native design language and genera
 
 ### 0.1 Generate `.stitch/DESIGN.md` Source of Truth
 Follow the `generate-design-md` workflow to create the Stitch-formatted design system.
-- [ ] Create `.stitch/` directory in project root
-- [ ] Translate `DESIGN.md` (Kinetic Elite spec) into `.stitch/DESIGN.md` following the taste-design output format:
+- [x] Create `.stitch/` directory in project root
+- [x] Translate `DESIGN.md` (Kinetic Elite spec) into `.stitch/DESIGN.md` following the taste-design output format:
   - **§1 Visual Theme & Atmosphere** — with numerical ratings:
     - Density: **7** ("Daily App Balanced" leaning dense — workout data is information-heavy)
     - Variance: **6** ("Offset Asymmetric" — editorial bleeds on hero numbers, but structured data tables)
@@ -76,13 +76,13 @@ Follow the `generate-design-md` workflow to create the Stitch-formatted design s
   - **§5 Layout Principles** — asymmetric hero, no-line rule, tonal depth stacking
   - **§6 Motion & Interaction** — spring physics, staggered reveals, perpetual micro-loops
   - **§7 Anti-Patterns (Banned)** — explicit NEVER DO list
-- [ ] Ensure `.stitch/DESIGN.md` includes hex codes in parentheses after every descriptive name
-- [ ] Validate that the DESIGN.md uses natural language descriptions (not Tailwind classes) per taste-design best practices
+- [x] Ensure `.stitch/DESIGN.md` includes hex codes in parentheses after every descriptive name
+- [x] Validate that the DESIGN.md uses natural language descriptions (not Tailwind classes) per taste-design best practices
 
 ### 0.2 Stitch MCP Prototype Screens (Visual Validation)
 Before coding, generate reference screens in Stitch to validate the Obsidian Performance aesthetic.
-- [ ] Create Stitch project (or use existing) via `create_project` → title: "FitTrack Pro — Kinetic Elite"
-- [ ] Generate **Dashboard** screen via `generate_screen_from_text` using Enhanced Prompt Pipeline:
+- [x] Create Stitch project (or use existing) via `create_project` → title: "FitTrack Pro — Kinetic Elite"
+- [x] Generate **Dashboard** screen via `generate_screen_from_text` using Enhanced Prompt Pipeline:
   ```
   A high-performance fitness dashboard with a "heads-up display" (HUD) aesthetic.
   Dark obsidian background. Information layered in 3D space using glassmorphism.
@@ -103,11 +103,11 @@ Before coding, generate reference screens in Stitch to validate the Obsidian Per
   4. Weight Chart: Area chart with glass tooltip, warm peach fill
   5. Body Map: Anatomical silhouette with trained muscle highlights
   ```
-- [ ] Generate **Workout** screen with exercise grid, bottom-bar inputs, floating timer
-- [ ] Generate **Diet** screen with macro rings and food log cards
-- [ ] Download all generated HTML + screenshots to `.stitch/designs/` via `curl`
-- [ ] Review screens with user — iterate via `edit_screens` if needed
-- [ ] Use approved screens as visual reference during Phase 2–3 code implementation
+- [x] Generate **Workout** screen with exercise grid, bottom-bar inputs, floating timer
+- [x] Generate **Diet** screen with macro rings and food log cards
+- [x] Download all generated HTML + screenshots to `.stitch/designs/` via `curl`
+- [x] Review screens with user — iterate via `edit_screens` if needed
+- [x] Use approved screens as visual reference during Phase 2–3 code implementation
 
 ---
 
@@ -116,13 +116,13 @@ Before coding, generate reference screens in Stitch to validate the Obsidian Per
 The entire CSS variable system must be rebuilt to match the Kinetic Elite spec. This phase touches `index.css` only — no component changes.
 
 ### 1.1 Replace Font Import
-- [ ] Remove `Bebas Neue` + `DM Sans` Google Fonts import
-- [ ] Add `Space Grotesk` (weights: 500, 700) + `Be Vietnam Pro` (weights: 400, 500, 600, 700)
-- [ ] Update `body { font-family }` to `'Be Vietnam Pro', sans-serif`
+- [x] Remove `Bebas Neue` + `DM Sans` Google Fonts import
+- [x] Add `Space Grotesk` (weights: 500, 700) + `Be Vietnam Pro` (weights: 400, 500, 600, 700)
+- [x] Update `body { font-family }` to `'Be Vietnam Pro', sans-serif`
 
 ### 1.2 Replace Color Token System (Dark Theme)
-- [ ] Redefine `--bg` → `#131315` (was `#050506`)
-- [ ] Replace 3-tier surface (`--c1/c2/c3`) with 5-tier system:
+- [x] Redefine `--bg` → `#131315` (was `#050506`)
+- [x] Replace 3-tier surface (`--c1/c2/c3`) with 5-tier system:
   - `--surface`: `#131315`
   - `--surface-container-lowest`: `#0E0E10`
   - `--surface-container-low`: `#1A1A1D`
@@ -130,30 +130,30 @@ The entire CSS variable system must be rebuilt to match the Kinetic Elite spec. 
   - `--surface-container-high`: `#2B2B2E`
   - `--surface-container-highest`: `#353437`
   - `--surface-variant`: `#353437` (used at 60% opacity for glass)
-- [ ] Redefine orange accent tokens:
+- [x] Redefine orange accent tokens:
   - `--primary`: `#FFB59B` (peach — for text/icon accents)
   - `--primary-container`: `#F85F1B` (deep ember — for fills/CTAs)
   - `--on-primary`: `#FFFFFF`
   - `--signature-gradient`: `linear-gradient(135deg, #FFB59B, #F85F1B)` ("burning ember")
-- [ ] Redefine text color tokens:
+- [x] Redefine text color tokens:
   - `--on-surface`: `#EAEAF0` (primary text)
   - `--on-surface-variant`: `#E3BFB3` (secondary text — warm, NOT grey)
   - `--on-surface-dim`: `#6E6E76` (tertiary/metadata)
-- [ ] Redefine border tokens:
+- [x] Redefine border tokens:
   - `--outline-variant`: `rgba(90, 65, 56, 0.15)` ("ghost border" — 15% opacity only)
   - Remove `--bd` and `--bd2` (solid borders are banned)
-- [ ] Redefine shadow tokens:
+- [x] Redefine shadow tokens:
   - `--shadow-ambient`: `0 20px 40px rgba(0,0,0,0.4)` (diffused only)
   - `--glow-primary`: `0 0 20px rgba(255,181,155,0.10)` (LED emission)
   - Remove  `--shadow` and `--shadow-lg` (standard drops are banned)
-- [ ] Add glassmorphism tokens:
+- [x] Add glassmorphism tokens:
   - `--glass-bg`: `rgba(53, 52, 55, 0.60)`
   - `--glass-blur`: `blur(20px)`
   - `--glass-blur-sm`: `blur(12px)`
 
 ### 1.3 Replace Typography Scale
-- [ ] Remove `.bb` class (Bebas Neue reference)
-- [ ] Add new typography utility classes:
+- [x] Remove `.bb` class (Bebas Neue reference)
+- [x] Add new typography utility classes:
 
 ```css
 .display-lg  { font-family: 'Space Grotesk', sans-serif; font-size: 3.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
@@ -166,31 +166,31 @@ The entire CSS variable system must be rebuilt to match the Kinetic Elite spec. 
 ```
 
 ### 1.4 Replace Separator Rules
-- [ ] Remove `.sep` class entirely
-- [ ] Remove `.row-sep` border-bottom rule
-- [ ] Remove `.dv` divider (line-based)
-- [ ] Add `.tonal-break` class that uses background-color shift instead of lines
+- [x] Remove `.sep` class entirely
+- [x] Remove `.row-sep` border-bottom rule
+- [x] Remove `.dv` divider (line-based)
+- [x] Add `.tonal-break` class that uses background-color shift instead of lines
 
 ### 1.5 Update Light Theme Tokens (Warm Beige Direction)
-- [ ] Rebase light theme to warm beige/cream palette instead of neutral white:
+- [x] Rebase light theme to warm beige/cream palette instead of neutral white:
   - `--surface`: `#F5F0EB` (warm linen)
   - `--surface-container-lowest`: `#EDE7E0` (recessed warm)
   - `--surface-container-low`: `#FAF6F2` (lifted cream)
   - `--surface-container`: `#FFFFFF` (card white)
   - `--surface-container-high`: `#FFFFFF`
   - `--surface-container-highest`: `#FFFFFF`
-- [ ] Update accent colors to match the peach/ember palette in light context
-- [ ] Ensure "No-Line" rule also applies in light theme (tonal shifts, not borders)
-- [ ] Secondary text uses warm tones (e.g., `#7A6B62`) instead of cold greys
+- [x] Update accent colors to match the peach/ember palette in light context
+- [x] Ensure "No-Line" rule also applies in light theme (tonal shifts, not borders)
+- [x] Secondary text uses warm tones (e.g., `#7A6B62`) instead of cold greys
 
 ### 1.6 Motion & Animation Philosophy (NEW — Gap G3/G6)
 Define the unified motion engine in `index.css` as CSS custom properties and keyframes.
-- [ ] Define spring-physics-style easing tokens:
+- [x] Define spring-physics-style easing tokens:
   - `--ease-spring`: `cubic-bezier(0.175, 0.885, 0.32, 1.275)` (overshoot for interactive elements)
   - `--ease-smooth`: `cubic-bezier(0.4, 0, 0.2, 1)` (standard Material-like)
   - `--ease-decel`: `cubic-bezier(0, 0, 0.2, 1)` (entry)
   - `--ease-accel`: `cubic-bezier(0.4, 0, 1, 1)` (exit)
-- [ ] Add **staggered cascade reveal** keyframe for list/card mounting:
+- [x] Add **staggered cascade reveal** keyframe for list/card mounting:
   ```css
   @keyframes cascadeIn {
     from { opacity: 0; transform: translateY(12px); }
@@ -202,26 +202,26 @@ Define the unified motion engine in `index.css` as CSS custom properties and key
   .cascade-item:nth-child(3) { animation-delay: 120ms; }
   /* ... up to n */
   ```
-- [ ] Add **perpetual pulse** keyframe for live indicators:
+- [x] Add **perpetual pulse** keyframe for live indicators:
   ```css
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%      { opacity: 0.5; transform: scale(1.15); }
   }
   ```
-- [ ] Add **shimmer** keyframe for premium loading states:
+- [x] Add **shimmer** keyframe for premium loading states:
   ```css
   @keyframes shimmer {
     0%   { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
   ```
-- [ ] **Performance constraint:** All animations must use ONLY `transform` and `opacity`. Never animate `top`, `left`, `width`, `height`, `margin`, or `padding`
-- [ ] Replace current `pgIn` / `pgOut` page transition keyframes with spring-eased variants
+- [x] **Performance constraint:** All animations must use ONLY `transform` and `opacity`. Never animate `top`, `left`, `width`, `height`, `margin`, or `padding`
+- [x] Replace current `pgIn` / `pgOut` page transition keyframes with spring-eased variants
 
 ### 1.7 Anti-Pattern Enforcement List (NEW — Gap G4)
 Add explicit CSS-level guardrails. These are documented in `.stitch/DESIGN.md` and enforced in Phase 5 audit.
-- [ ] Add comment block in `index.css` header:
+- [x] Add comment block in `index.css` header:
   ```css
   /*
    * ─── KINETIC ELITE: BANNED PATTERNS ────────────────────────
@@ -241,16 +241,16 @@ Add explicit CSS-level guardrails. These are documented in `.stitch/DESIGN.md` a
 
 ### 1.8 Responsive Design Rules (NEW — Gap G5)
 Add responsive tokens and rules to `index.css`.
-- [ ] Add `clamp()` typography scaling for display/headline classes:
+- [x] Add `clamp()` typography scaling for display/headline classes:
   ```css
   .display-lg { font-size: clamp(2.5rem, 5vw, 3.5rem); }
   .headline-lg { font-size: clamp(1.5rem, 3vw, 2.0rem); }
   ```
-- [ ] Ensure body text minimum is `0.875rem` (14px) — never smaller
-- [ ] Add `min-height: 100dvh` rule (not `100vh`) for full-height sections (iOS Safari fix)
-- [ ] Ensure all interactive elements have minimum `44px` touch targets (already partially done — verify)
-- [ ] Add mobile-first collapse rule: all multi-column grids → single column below 768px (existing — verify coverage)
-- [ ] Verify no horizontal overflow on mobile — add `overflow-x: hidden` on `body` (existing — keep)
+- [x] Ensure body text minimum is `0.875rem` (14px) — never smaller
+- [x] Add `min-height: 100dvh` rule (not `100vh`) for full-height sections (iOS Safari fix)
+- [x] Ensure all interactive elements have minimum `44px` touch targets (already partially done — verify)
+- [x] Add mobile-first collapse rule: all multi-column grids → single column below 768px (existing — verify coverage)
+- [x] Verify no horizontal overflow on mobile — add `overflow-x: hidden` on `body` (existing — keep)
 
 ---
 
@@ -259,80 +259,80 @@ Add responsive tokens and rules to `index.css`.
 All shared components in `SharedComponents.jsx` and `Layout.jsx` must be updated.
 
 ### 2.1 Card System
-- [ ] Remove `border: 1px solid var(--bd)` from `.card` class
-- [ ] Remove `::before` gradient pseudo-element
-- [ ] Replace `box-shadow: var(--shadow)` with `box-shadow: none` (tonal layering only)
-- [ ] Use `background: var(--surface-container-low)` on `--surface` pages to create depth
-- [ ] Add `.card-float` variant for floating elements using `box-shadow: var(--shadow-ambient)`
-- [ ] Remove `.card-p` class or merge into new system
-- [ ] Ensure all rounded corners stay within 12px–24px scale
-- [ ] Add **staggered cascade animation** to card lists (`.cascade-item` class from Phase 1.6)
+- [x] Remove `border: 1px solid var(--bd)` from `.card` class
+- [x] Remove `::before` gradient pseudo-element
+- [x] Replace `box-shadow: var(--shadow)` with `box-shadow: none` (tonal layering only)
+- [x] Use `background: var(--surface-container-low)` on `--surface` pages to create depth
+- [x] Add `.card-float` variant for floating elements using `box-shadow: var(--shadow-ambient)`
+- [x] Remove `.card-p` class or merge into new system
+- [x] Ensure all rounded corners stay within 12px–24px scale
+- [x] Add **staggered cascade animation** to card lists (`.cascade-item` class from Phase 1.6)
 
 ### 2.2 Button System
-- [ ] `.btn-p`: Update gradient to `var(--signature-gradient)`, border-radius to `1.5rem` (24px), remove border
-- [ ] `.btn-p:hover`: Use orange glow (`var(--glow-primary)`) instead of transform lift
-- [ ] `.btn-g` (ghost button): Remove border, use `var(--surface-container-highest)` fill, white text
-- [ ] `.btn-d` (outline button): Replace solid border with ghost border at 20% opacity
+- [x] `.btn-p`: Update gradient to `var(--signature-gradient)`, border-radius to `1.5rem` (24px), remove border
+- [x] `.btn-p:hover`: Use orange glow (`var(--glow-primary)`) instead of transform lift
+- [x] `.btn-g` (ghost button): Remove border, use `var(--surface-container-highest)` fill, white text
+- [x] `.btn-d` (outline button): Replace solid border with ghost border at 20% opacity
 
 ### 2.3 Input System
-- [ ] Remove full border from `input, select, textarea`
-- [ ] Use `var(--surface-container-lowest)` as background
-- [ ] Add `border-bottom: 2px solid transparent` (default)
-- [ ] On focus: `border-bottom-color: var(--primary-container)` — no box border, no focus ring glow
-- [ ] Update `label` styles to use `.label-md` class
+- [x] Remove full border from `input, select, textarea`
+- [x] Use `var(--surface-container-lowest)` as background
+- [x] Add `border-bottom: 2px solid transparent` (default)
+- [x] On focus: `border-bottom-color: var(--primary-container)` — no box border, no focus ring glow
+- [x] Update `label` styles to use `.label-md` class
 
 ### 2.4 Modal System
-- [ ] `.mo` (overlay): Keep `backdrop-filter: blur(16px)`, add surface-dim for background scrim
-- [ ] `.md` (modal card): Apply glassmorphism — `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`, remove border
-- [ ] Add rounded corners at 24px (already 28px — bring down to 24px to match scale)
+- [x] `.mo` (overlay): Keep `backdrop-filter: blur(16px)`, add surface-dim for background scrim
+- [x] `.md` (modal card): Apply glassmorphism — `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`, remove border
+- [x] Add rounded corners at 24px (already 28px — bring down to 24px to match scale)
 
 ### 2.5 Navigation — Sidebar
-- [ ] Remove all `border-right`, `borderBottom`, `borderTop` on sidebar dividers
-- [ ] Replace with tonal background shifts between sections
-- [ ] Apply glassmorphism to sidebar: `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`
-- [ ] Update `.ni.act` (active nav item): Use `--glow-primary` for active state
-- [ ] Replace `Bebas Neue` branding in header with `Space Grotesk` `.headline-md`
+- [x] Remove all `border-right`, `borderBottom`, `borderTop` on sidebar dividers
+- [x] Replace with tonal background shifts between sections
+- [x] Apply glassmorphism to sidebar: `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`
+- [x] Update `.ni.act` (active nav item): Use `--glow-primary` for active state
+- [x] Replace `Bebas Neue` branding in header with `Space Grotesk` `.headline-md`
 
 ### 2.6 Navigation — Bottom Nav (Mobile)
-- [ ] Apply glassmorphism: `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`
-- [ ] Remove `border-top: 1px solid`
-- [ ] Update "More" sheet to also use glassmorphism + remove border
+- [x] Apply glassmorphism: `background: var(--glass-bg)`, `backdrop-filter: var(--glass-blur)`
+- [x] Remove `border-top: 1px solid`
+- [x] Update "More" sheet to also use glassmorphism + remove border
 
 ### 2.7 Tags & Chips
-- [ ] Update `.tag` to use `var(--surface-container-low)` background
-- [ ] For selected state: add ghost border with `var(--primary)` at 20% opacity
-- [ ] Use `.label-md` for text styling
+- [x] Update `.tag` to use `var(--surface-container-low)` background
+- [x] For selected state: add ghost border with `var(--primary)` at 20% opacity
+- [x] Use `.label-md` for text styling
 
 ### 2.8 Toast System
-- [ ] Apply glassmorphism to toast containers
-- [ ] Remove explicit borders
-- [ ] Maintain backdrop-filter blur (already has blur — keep)
-- [ ] Use spring-eased entry animation (`var(--ease-spring)`) instead of linear/ease
+- [x] Apply glassmorphism to toast containers
+- [x] Remove explicit borders
+- [x] Maintain backdrop-filter blur (already has blur — keep)
+- [x] Use spring-eased entry animation (`var(--ease-spring)`) instead of linear/ease
 
 ### 2.9 StatCard Component
-- [ ] Replace `className="bb"` with `className="display-lg"` for hero numbers
-- [ ] Replace icon container orange glow with LED emission glow (`box-shadow: var(--glow-primary)`)
-- [ ] Remove card border (handled by Phase 2.1)
-- [ ] Update secondary text color from `var(--t2)` to `var(--on-surface-variant)` (#E3BFB3)
+- [x] Replace `className="bb"` with `className="display-lg"` for hero numbers
+- [x] Replace icon container orange glow with LED emission glow (`box-shadow: var(--glow-primary)`)
+- [x] Remove card border (handled by Phase 2.1)
+- [x] Update secondary text color from `var(--t2)` to `var(--on-surface-variant)` (#E3BFB3)
 
 ### 2.10 PageHeader Component
-- [ ] Replace `className="bb pt"` with `className="headline-lg"`
-- [ ] Replace `.abar` accent bar with a subtle gradient underline using `--signature-gradient`
-- [ ] Update subtitle color to `var(--on-surface-variant)`
+- [x] Replace `className="bb pt"` with `className="headline-lg"`
+- [x] Replace `.abar` accent bar with a subtle gradient underline using `--signature-gradient`
+- [x] Update subtitle color to `var(--on-surface-variant)`
 
 ### 2.11 EmptyState Component
-- [ ] Replace `className="bb"` with `className="headline-md"`
-- [ ] Replace dashed border with tonal card background
-- [ ] Apply LED glow to icon container
+- [x] Replace `className="bb"` with `className="headline-md"`
+- [x] Replace dashed border with tonal card background
+- [x] Apply LED glow to icon container
 
 ### 2.12 ConfirmDialog
-- [ ] Replace `className="bb"` with `className="headline-md"`
-- [ ] Apply glassmorphism to modal content
+- [x] Replace `className="bb"` with `className="headline-md"`
+- [x] Apply glassmorphism to modal content
 
 ### 2.13 ScrollPicker
-- [ ] Replace `fontFamily: "'Bebas Neue'"` with `'Space Grotesk'`
-- [ ] Update fade gradients to use new surface tokens
-- [ ] Replace `.picker-wrap` border with ghost border or remove
+- [x] Replace `fontFamily: "'Bebas Neue'"` with `'Space Grotesk'`
+- [x] Update fade gradients to use new surface tokens
+- [x] Replace `.picker-wrap` border with ghost border or remove
 
 ---
 
@@ -341,158 +341,158 @@ All shared components in `SharedComponents.jsx` and `Layout.jsx` must be updated
 Each page must be audited and updated to comply with the new design language.
 
 ### 3.1 DashboardPage
-- [ ] Replace all `className="bb"` with appropriate token class (`display-lg`, `headline-lg`, etc.)
-- [ ] Replace all `border-bottom`, `borderBottom` inline styles with tonal shifts or whitespace
-- [ ] Update all `color: 'var(--t2)'` → `color: 'var(--on-surface-variant)'`
-- [ ] Update all `background: 'var(--c1)'` → `background: 'var(--surface-container-low)'`
-- [ ] Update all `background: 'var(--c2)'` → `background: 'var(--surface-container)'`
-- [ ] Update weight chart tooltip to use glassmorphism
-- [ ] Replace flat progress bars with **Progress Orbs** (concentric circles) for volume visualization (**Dashboard only** — other pages keep flat bars for space efficiency)
-- [ ] Add **Pulse indicator** next to active workout sessions
-- [ ] Make hero weight number use `display-lg` (3.5rem) with **intentional editorial bleed** — let numbers overflow container margins by ~10-15% for a high-fashion HUD feel
+- [x] Replace all `className="bb"` with appropriate token class (`display-lg`, `headline-lg`, etc.)
+- [x] Replace all `border-bottom`, `borderBottom` inline styles with tonal shifts or whitespace
+- [x] Update all `color: 'var(--t2)'` → `color: 'var(--on-surface-variant)'`
+- [x] Update all `background: 'var(--c1)'` → `background: 'var(--surface-container-low)'`
+- [x] Update all `background: 'var(--c2)'` → `background: 'var(--surface-container)'`
+- [x] Update weight chart tooltip to use glassmorphism
+- [x] Replace flat progress bars with **Progress Orbs** (concentric circles) for volume visualization (**Dashboard only** — other pages keep flat bars for space efficiency)
+- [x] Add **Pulse indicator** next to active workout sessions
+- [x] Make hero weight number use `display-lg` (3.5rem) with **intentional editorial bleed** — let numbers overflow container margins by ~10-15% for a high-fashion HUD feel
 
 ### 3.2 WorkoutPage
-- [ ] Replace all borders with tonal shifts
-- [ ] Update exercise row grid (`.ex-r`) separators — remove `row-sep`, use spacing
-- [ ] Replace `bb` class references with Space Grotesk classes
-- [ ] Update input fields to bottom-bar style
-- [ ] Apply glassmorphism to floating workout timer (if present)
+- [x] Replace all borders with tonal shifts
+- [x] Update exercise row grid (`.ex-r`) separators — remove `row-sep`, use spacing
+- [x] Replace `bb` class references with Space Grotesk classes
+- [x] Update input fields to bottom-bar style
+- [x] Apply glassmorphism to floating workout timer (if present)
 
 ### 3.3 SplitsPage
-- [ ] Replace split card borders with tonal layering
-- [ ] Update split icons container with LED glow on active
-- [ ] Replace all typography references
+- [x] Replace split card borders with tonal layering
+- [x] Update split icons container with LED glow on active
+- [x] Replace all typography references
 
 ### 3.4 DietPage
-- [ ] Replace all borders and separators
-- [ ] Update stat displays with new typography scale
-- [ ] Replace calorie log card borders with tonal backgrounds
+- [x] Replace all borders and separators
+- [x] Update stat displays with new typography scale
+- [x] Replace calorie log card borders with tonal backgrounds
 
 ### 3.5 ProfilePage
-- [ ] Replace all borders
-- [ ] Update form inputs to bottom-bar style
-- [ ] Update toggle components with new accent colors
+- [x] Replace all borders
+- [x] Update form inputs to bottom-bar style
+- [x] Update toggle components with new accent colors
 
 ### 3.6 MuscleMapPage
-- [ ] Replace all typography references
-- [ ] Update muscle group chips to new tag system
-- [ ] Replace card borders with tonal shifts
+- [x] Replace all typography references
+- [x] Update muscle group chips to new tag system
+- [x] Replace card borders with tonal shifts
 
 ### 3.7 ProgressPage
-- [ ] Replace progress bars with Progress Orbs
-- [ ] Update chart tooltips to glassmorphism
-- [ ] Replace all borders and separators
+- [x] Replace progress bars with Progress Orbs
+- [x] Update chart tooltips to glassmorphism
+- [x] Replace all borders and separators
 
 ### 3.8 WeightLogPage & MeasurementsPage
-- [ ] Replace borders, update typography, apply tonal cards
-- [ ] Update input styles to bottom-bar
+- [x] Replace borders, update typography, apply tonal cards
+- [x] Update input styles to bottom-bar
 
 ### 3.9 WorkoutHistoryPage
-- [ ] Replace all borders with tonal layering
-- [ ] Update history card styles
+- [x] Replace all borders with tonal layering
+- [x] Update history card styles
 
 ### 3.10 ContactPage
-- [ ] Apply glassmorphism to contact form card
-- [ ] Update form inputs to bottom-bar style
+- [x] Apply glassmorphism to contact form card
+- [x] Update form inputs to bottom-bar style
 
 ### 3.11 AuthModal
-- [ ] Apply glassmorphism to auth modal
-- [ ] Update input fields to bottom-bar style
-- [ ] Update Google button styling
+- [x] Apply glassmorphism to auth modal
+- [x] Update input fields to bottom-bar style
+- [x] Update Google button styling
 
 ---
 
 ## Phase 4 — New Custom Components
 
 ### 4.1 Progress Orbs (Dashboard Only)
-- [ ] Create `ProgressOrb` component — concentric SVG circles with `tertiary_container` gradients
-- [ ] Use on **Dashboard only** — other pages keep flat `pbar` for space efficiency
-- [ ] Animate fill on mount with a smooth arc transition using `var(--ease-spring)`
-- [ ] Add a perpetual subtle shimmer micro-animation on the filled arc
+- [x] Create `ProgressOrb` component — concentric SVG circles with `tertiary_container` gradients
+- [x] Use on **Dashboard only** — other pages keep flat `pbar` for space efficiency
+- [x] Animate fill on mount with a smooth arc transition using `var(--ease-spring)`
+- [x] Add a perpetual subtle shimmer micro-animation on the filled arc
 
 ### 4.2 Pulse Indicator
-- [ ] Create `PulseIndicator` component — small `primary`-colored dot with CSS `@keyframes pulse` animation
-- [ ] Add next to "Live Workout" text / active workout session indicator
-- [ ] Use `animation: pulse 2s var(--ease-smooth) infinite` — spring feel, not linear
-- [ ] This is a **perpetual micro-interaction** per taste-design §8
+- [x] Create `PulseIndicator` component — small `primary`-colored dot with CSS `@keyframes pulse` animation
+- [x] Add next to "Live Workout" text / active workout session indicator
+- [x] Use `animation: pulse 2s var(--ease-smooth) infinite` — spring feel, not linear
+- [x] This is a **perpetual micro-interaction** per taste-design §8
 
 ### 4.3 Glassmorphic Tooltip
-- [ ] Create `GlassTooltip` component for Recharts chart tooltips
-- [ ] Apply `backdrop-filter: var(--glass-blur-sm)`, `background: var(--glass-bg)`, no border
-- [ ] Use in all chart `<Tooltip content={...} />` slots
+- [x] Create `GlassTooltip` component for Recharts chart tooltips
+- [x] Apply `backdrop-filter: var(--glass-blur-sm)`, `background: var(--glass-bg)`, no border
+- [x] Use in all chart `<Tooltip content={...} />` slots
 
 ### 4.4 Skeleton Shimmer Loader (NEW — Gap G6 alignment)
-- [ ] Update existing `Skeleton` component to use the new `shimmer` keyframe from Phase 1.6
-- [ ] Ensure skeleton dimensions match actual layout dimensions (taste-design §5: no generic circular spinners)
-- [ ] Use `background: linear-gradient(90deg, var(--surface-container-low) 25%, var(--surface-container-high) 50%, var(--surface-container-low) 75%)` with `background-size: 200%`
+- [x] Update existing `Skeleton` component to use the new `shimmer` keyframe from Phase 1.6
+- [x] Ensure skeleton dimensions match actual layout dimensions (taste-design §5: no generic circular spinners)
+- [x] Use `background: linear-gradient(90deg, var(--surface-container-low) 25%, var(--surface-container-high) 50%, var(--surface-container-low) 75%)` with `background-size: 200%`
 
 ---
 
 ## Phase 5 — Polish & Verification
 
 ### 5.1 Audit: No-Line Rule
-- [ ] `grep` entire codebase for `border:`, `border-bottom:`, `border-top:`, `border-left:`, `border-right:` (inline styles)
-- [ ] `grep` for `1px solid` in index.css
-- [ ] Remove or replace every instance with tonal shift or whitespace
-- [ ] Exception: Ghost borders at 15% opacity are allowed for accessibility
+- [x] `grep` entire codebase for `border:`, `border-bottom:`, `border-top:`, `border-left:`, `border-right:` (inline styles)
+- [x] `grep` for `1px solid` in index.css
+- [x] Remove or replace every instance with tonal shift or whitespace
+- [x] Exception: Ghost borders at 15% opacity are allowed for accessibility
 
 ### 5.2 Audit: Typography Migration
-- [ ] `grep` for `Bebas Neue` — must be zero matches
-- [ ] `grep` for `DM Sans` — must be zero matches
-- [ ] `grep` for `className="bb"` — must be zero matches
-- [ ] `grep` for `.bb` in CSS — must be zero matches
+- [x] `grep` for `Bebas Neue` — must be zero matches
+- [x] `grep` for `DM Sans` — must be zero matches
+- [x] `grep` for `className="bb"` — must be zero matches
+- [x] `grep` for `.bb` in CSS — must be zero matches
 
 ### 5.3 Audit: Old Token References
-- [ ] `grep` for `var(--c1)`, `var(--c2)`, `var(--c3)` — must be zero matches
-- [ ] `grep` for `var(--bd)` and `var(--bd2)` — must be zero matches
-- [ ] `grep` for `var(--t2)`, `var(--t3)`, `var(--t4)` — must be zero matches
-- [ ] `grep` for `var(--shadow)` and `var(--shadow-lg)` — must be zero matches
+- [x] `grep` for `var(--c1)`, `var(--c2)`, `var(--c3)` — must be zero matches
+- [x] `grep` for `var(--bd)` and `var(--bd2)` — must be zero matches
+- [x] `grep` for `var(--t2)`, `var(--t3)`, `var(--t4)` — must be zero matches
+- [x] `grep` for `var(--shadow)` and `var(--shadow-lg)` — must be zero matches
 
 ### 5.4 Audit: Corner Radius
-- [ ] `grep` for `border-radius` values — all must be within 12px–24px scale (0.75rem–1.5rem)
-- [ ] No sharp 90° corners anywhere
+- [x] `grep` for `border-radius` values — all must be within 12px–24px scale (0.75rem–1.5rem)
+- [x] No sharp 90° corners anywhere
 
 ### 5.5 Audit: Anti-Patterns (NEW — Gap G4)
-- [ ] `grep` for `#000000` or `#000` — must be zero matches (pure black banned)
-- [ ] `grep` for `linear` in animation/transition — verify no linear easing (spring/cubic-bezier only)
-- [ ] `grep` for `animate.*top\|animate.*left\|animate.*width\|animate.*height` — must be zero (layout properties banned)
-- [ ] `grep` for `100vh` — must be zero (use `100dvh` for iOS Safari)
-- [ ] Verify all accent colors have saturation below 80%
+- [x] `grep` for `#000000` or `#000` — must be zero matches (pure black banned)
+- [x] `grep` for `linear` in animation/transition — verify no linear easing (spring/cubic-bezier only)
+- [x] `grep` for `animate.*top\|animate.*left\|animate.*width\|animate.*height` — must be zero (layout properties banned)
+- [x] `grep` for `100vh` — must be zero (use `100dvh` for iOS Safari)
+- [x] Verify all accent colors have saturation below 80%
 
 ### 5.6 Audit: Motion & Stagger (NEW — Gap G3/G6)
-- [ ] Verify all list/card groups use `.cascade-item` staggered entry
-- [ ] Verify no components mount instantly without animation
-- [ ] Verify PulseIndicator has perpetual infinite-loop animation
-- [ ] Verify all animations use only `transform` and `opacity` (no layout properties)
-- [ ] Check spring easing is used for interactive elements (buttons, toggles)
+- [x] Verify all list/card groups use `.cascade-item` staggered entry
+- [x] Verify no components mount instantly without animation
+- [x] Verify PulseIndicator has perpetual infinite-loop animation
+- [x] Verify all animations use only `transform` and `opacity` (no layout properties)
+- [x] Check spring easing is used for interactive elements (buttons, toggles)
 
 ### 5.7 Audit: Responsive (NEW — Gap G5)
-- [ ] Test on 375px viewport — verify single-column collapse
-- [ ] Verify no horizontal scroll on any page at 375px
-- [ ] Verify all tap targets ≥ 44px
-- [ ] Verify `clamp()` is used for display/headline typography
-- [ ] Verify body text never drops below 14px
+- [x] Test on 375px viewport — verify single-column collapse
+- [x] Verify no horizontal scroll on any page at 375px
+- [x] Verify all tap targets ≥ 44px
+- [x] Verify `clamp()` is used for display/headline typography
+- [x] Verify body text never drops below 14px
 
 ### 5.8 Visual Verification
-- [ ] Run `npm run dev` and verify each page:
-  - [ ] Dashboard — hero numbers at 56px, no borders, tonal cards, progress orbs, staggered card reveal
-  - [ ] Workout — exercise grid uses spacing not lines, inputs have bottom-bar focus
-  - [ ] Splits — cards float with tonal layering, no borders, cascade entry animation
-  - [ ] Diet — stat cards use new typography, warm secondary text
-  - [ ] Profile — inputs with bottom-bar, no border boxes
-  - [ ] Muscle Map — chips use tonal styling, no sharp borders
-  - [ ] History — history rows separated by whitespace, not lines
-  - [ ] Modals — glassmorphism on overlay and content card
-  - [ ] Bottom Nav (mobile) — glass effect, no top border
-  - [ ] Sidebar (desktop) — glass effect, no section borders
-- [ ] Verify light theme parity (warm beige — all token changes reflected)
-- [ ] Test on mobile viewport (375px) — ensure touch targets and spacing are maintained
-- [ ] Screen reader test — ensure ghost borders provide sufficient visual separation for accessibility
+- [x] Run `npm run dev` and verify each page:
+  - [x] Dashboard — hero numbers at 56px, no borders, tonal cards, progress orbs, staggered card reveal
+  - [x] Workout — exercise grid uses spacing not lines, inputs have bottom-bar focus
+  - [x] Splits — cards float with tonal layering, no borders, cascade entry animation
+  - [x] Diet — stat cards use new typography, warm secondary text
+  - [x] Profile — inputs with bottom-bar, no border boxes
+  - [x] Muscle Map — chips use tonal styling, no sharp borders
+  - [x] History — history rows separated by whitespace, not lines
+  - [x] Modals — glassmorphism on overlay and content card
+  - [x] Bottom Nav (mobile) — glass effect, no top border
+  - [x] Sidebar (desktop) — glass effect, no section borders
+- [x] Verify light theme parity (warm beige — all token changes reflected)
+- [x] Test on mobile viewport (375px) — ensure touch targets and spacing are maintained
+- [x] Screen reader test — ensure ghost borders provide sufficient visual separation for accessibility
 
 ### 5.9 Stitch Cross-Reference (NEW — Gap G7/G9)
-- [ ] Compare implemented pages side-by-side with Stitch-generated reference screens from Phase 0.2
-- [ ] Ensure coded output matches the approved Stitch mockups in: color, typography, spacing, motion
-- [ ] Document any intentional deviations in `.stitch/DEVIATIONS.md`
+- [x] Compare implemented pages side-by-side with Stitch-generated reference screens from Phase 0.2
+- [x] Ensure coded output matches the approved Stitch mockups in: color, typography, spacing, motion
+- [x] Document any intentional deviations in `.stitch/DEVIATIONS.md`
 
 ---
 
@@ -663,7 +663,7 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
     Discard Workout
   </button>
   ```
-- [ ] Remove the existing `← Back` button from the session header (replaced by `Discard` at bottom)
+- [x] Remove the existing `← Back` button from the session header (replaced by `Discard` at bottom)
 
 ### 7.7 Header Color Adjustment (Column Labels)
 **Change the column header row color from `on-surface-dim` to the softer `outline` token.**
@@ -703,9 +703,9 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 > like `"31 Mar"`. The raw ISO date is lost, making it impossible to show "Achieved: Oct 14, 2023"
 > or derive month/day numbers for the session log date boxes.
 
-- [ ] Add `rawDate: log.date` to each `cd` entry (preserves the original ISO string)
-- [ ] Add `dayName: days.find(d => d.id === log.dayId)?.name || 'Session'` to each `cd` entry
-- [ ] Final `cd` shape per entry:
+- [x] Add `rawDate: log.date` to each `cd` entry (preserves the original ISO string)
+- [x] Add `dayName: days.find(d => d.id === log.dayId)?.name || 'Session'` to each `cd` entry
+- [x] Final `cd` shape per entry:
   ```js
   { date: fmt(log.date), rawDate: log.date, dayName, maxWeight, volume, avgReps, sets, est1rm }
   ```
@@ -713,17 +713,17 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 ---
 
 ### 8.1 Rename Page Title (Display Only)
-- [ ] Change the `<PageHeader title="Progress Charts" sub="Track your strength gains" />` to:
+- [x] Change the `<PageHeader title="Progress Charts" sub="Track your strength gains" />` to:
   - Title: `"Workout Analytics"` (matches the new screen identity)
   - Sub: `"Performance data per exercise"` (more precise for analytics context)
-- [ ] ~~Add a super-label above the headline~~ — **Removed:** the `"Performance Analytics"` super-label lives in the hero exercise section (8.2) only, to avoid duplication
+- [x] ~~Add a super-label above the headline~~ — **Removed:** the `"Performance Analytics"` super-label lives in the hero exercise section (8.2) only, to avoid duplication
 
 ---
 
 ### 8.2 Hero Exercise Name Display
 **When an exercise is selected (`se` is set), replace the plain `headline-md` exercise name with an asymmetric editorial hero title.**
 
-- [ ] Wrap the exercise name in a new hero section (replaces the current plain `<div className="headline-md">`):
+- [x] Wrap the exercise name in a new hero section (replaces the current plain `<div className="headline-md">`):
   ```jsx
   <section style={{ marginBottom: 32 }}>
     <span className="label-md" style={{ color: 'var(--primary)', display: 'block', marginBottom: 8 }}>
@@ -751,20 +751,20 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
     </h2>
   </section>
   ```
-- [ ] Only render this hero section when `se` is set — fallback to the empty state path as before
-- [ ] On mobile (< 480px), reduce to `clamp(2rem, 10vw, 3rem)` via responsive CSS or inline clamp
+- [x] Only render this hero section when `se` is set — fallback to the empty state path as before
+- [x] On mobile (< 480px), reduce to `clamp(2rem, 10vw, 3rem)` via responsive CSS or inline clamp
 
 ---
 
 ### 8.3 Key Stats Bento Grid (Top Stat Cards)
 **Replace the current `StatCard` row with a bento-style 3-column grid matching the reference's 1RM / Max Weight / Total Sets cards.**
 
-- [ ] Render the bento grid when `se && cd.length > 0`:
+- [x] Render the bento grid when `se && cd.length > 0`:
   ```
   Grid layout: 3 columns on md+, 1 column on mobile
   Cards use: bg-surface-container-low, rounded-2xl (1.5rem), no border
   ```
-- [ ] **Card 1 — Estimated 1RM** (Primary accent card):
+- [x] **Card 1 — Estimated 1RM** (Primary accent card):
   - Left border accent: `border-left: 4px solid var(--primary)` — the only border allowed (accent rule exception)
   - Super-label: `"ESTIMATED 1RM"` in `.label-md`
   - Hero number: `est1rm` value in `.display-lg` (Space Grotesk, ~3.5rem)
@@ -772,37 +772,37 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
   - Trend: Pull from `cd` — compare last value to first value. Show `▲ +X kg vs first session` in `var(--success)` or `▼` in `var(--danger)`
   - ⚠️ **Token check:** verify `--success` and `--danger` survive the Phase 1 token migration — they're semantic colors not part of the M3 surface system. If removed, re-add as `--success: #51CF66` / `--danger: #FF6B6B` in the new token set
 
-- [ ] **Card 2 — Personal Record (Max Weight)**:
+- [x] **Card 2 — Personal Record (Max Weight)**:
   - Super-label: `"PERSONAL RECORD"` in `.label-md`
   - Hero number: `pr` value in `.display-lg`
   - Unit: `"KG"`
   - Sub-label: `"Achieved: {date of session with max weight}"` — use `cd.find(d => d.maxWeight === pr)?.rawDate` (requires the `rawDate` field from Pre-Requisite above)
   - No left border
 
-- [ ] **Card 3 — Total Sessions**:
+- [x] **Card 3 — Total Sessions**:
   - Super-label: `"TOTAL SESSIONS"` in `.label-md`
   - Hero number: `cd.length` in `.display-lg`
   - Unit: `"SESSIONS"`
   - Sub-label: Pull `monthlySummary.avgPerWeek` → `"~{avg} per week"` 
   - No left border
 
-- [ ] Apply `cascade-item` staggered animation (Phase 1.6) to the 3 cards
+- [x] Apply `cascade-item` staggered animation (Phase 1.6) to the 3 cards
 
 ---
 
 ### 8.4 Volume Trend Chart (Primary Chart — Hero Section)
 **Elevate the Volume (reps × kg) BarChart to a full-width hero section with a premium glass card treatment.**
 
-- [ ] Move the `volume` bar chart out of the 2-column grid and into a standalone full-width section above the chart grid
-- [ ] Wrap in a `rounded-[2rem] bg-surface-container-low p-8 shadow-2xl overflow-hidden` card (matching the reference's `rounded-[2rem]` section)
-- [ ] **Card header row:**
+- [x] Move the `volume` bar chart out of the 2-column grid and into a standalone full-width section above the chart grid
+- [x] Wrap in a `rounded-[2rem] bg-surface-container-low p-8 shadow-2xl overflow-hidden` card (matching the reference's `rounded-[2rem]` section)
+- [x] **Card header row:**
   - Left: `"VOLUME TREND"` in `.headline-md`, Space Grotesk — plus a sub-label `"Total load lifted per session"` in `on-surface-variant`
   - Right: Time range pill buttons `[1M] [3M] [6M]` — visual only for now (state wiring is a future task; default shows all `cd` data)
   - **Default active pill:** `1M` starts with the active style; `3M` and `6M` are inactive
   - Active pill style: `bg-surface-container-highest rounded-lg px-3 py-1 text-xs font-bold`
   - Inactive pill style: `text-on-surface-variant rounded-lg px-3 py-1 text-xs font-bold` (no bg fill)
 
-- [ ] **Chart upgrades (BarChart for volume):**
+- [x] **Chart upgrades (BarChart for volume):**
   - Use `fill="var(--primary-container)"` (Burning Ember `#F85F1B`) for bars instead of primary peach
   - Bar radius: `[8, 8, 0, 0]`
   - CartesianGrid: `strokeDasharray="3 3"`, stroke `var(--surface-container-highest)`, `vertical={false}` — keep
@@ -819,9 +819,9 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 ### 8.5 Personal Best Glow Card + Focus Groups
 **Add a premium PB highlight card to the left column (below the bento grid), matching the reference's `glow-primary` pattern.**
 
-- [ ] Render only when `se && cd.length > 0`
-- [ ] Two-column layout (below chart): `lg:grid-cols-5` — Left col `lg:col-span-2`, Right col `lg:col-span-3`
-- [ ] **Personal Best card** (`lg:col-span-2`):
+- [x] Render only when `se && cd.length > 0`
+- [x] Two-column layout (below chart): `lg:grid-cols-5` — Left col `lg:col-span-2`, Right col `lg:col-span-3`
+- [x] **Personal Best card** (`lg:col-span-2`):
   ```
   bg: var(--surface-container-highest)
   border: 1px solid rgba(255, 181, 155, 0.2)  [ghost border exception — low opacity]
@@ -838,7 +838,7 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
     - Left: `"Date Achieved"` label (`.label-md` 10px) + formatted date from `pbSession.rawDate` (use `new Date(pbSession.rawDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })` for full format like `"October 14, 2023"`)
     - Right: Share icon button — `w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary` (Material Symbols `share` icon)
 
-- [ ] **Focus Groups card** (below PB card, same `lg:col-span-2`):
+- [x] **Focus Groups card** (below PB card, same `lg:col-span-2`):
   - `bg: var(--surface-container-low)`, `padding: 1.5rem`, `border-radius: 1.5rem`
   - Super-label: `"Focus Groups"` in `.label-md`, `marginBottom: 16`
   - **Data source:** Look up the selected exercise in the active split's days:
@@ -857,11 +857,11 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
 ### 8.6 Recent Sessions Log (Right Column)
 **Replace / supplement the chart grid with a session log list matching the reference's "RECENT SESSIONS" pattern.**
 
-- [ ] In the right `lg:col-span-3` column, render the last 5 sessions from `cd` (sorted by date desc)
-- [ ] **Section header:**
+- [x] In the right `lg:col-span-3` column, render the last 5 sessions from `cd` (sorted by date desc)
+- [x] **Section header:**
   - Left: `"RECENT SESSIONS"` in `.headline-md`
   - Right: `"View All"` text-link style in `text-primary text-xs font-bold underline cursor-pointer`
-- [ ] **Session row card** (per `cd` entry):
+- [x] **Session row card** (per `cd` entry):
   ```
   bg: var(--surface-container-low)
   padding: 20px
@@ -875,35 +875,35 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
   - Right cluster:
     - Top: `"{maxWeight} × {avgReps}"` in `.headline-md` — Space Grotesk, `font-bold`
     - Badge: If this row is the PB session (`entry.maxWeight === pr`) → `"New PB"` in `text-primary uppercase text-[10px] font-bold tracking-widest`. If most recent (index 0 in reversed list) → `"Latest"` in `text-green-500`. Otherwise `"Session"` in `on-surface-variant`
-- [ ] Apply `cascade-item` stagger to each session row
+- [x] Apply `cascade-item` stagger to each session row
 
 ---
 
 ### 8.7 Secondary Charts Section (Collapsed Grid)
 **Keep the `est1rm` Area chart and `avgReps` Line chart in a 2-column subordinate grid below the session log.**
 
-- [ ] Move this grid below the 5-column layout (PB card + session log)
-- [ ] Grid: `grid-cols-1 md:grid-cols-2 gap-4`
-- [ ] Card wrapper: `bg-surface-container-low rounded-2xl p-6` — no border
-- [ ] Chart header uses `.label-md` + `<TrendingUp size={14} color="var(--primary)" />` icon inline
-- [ ] Chart height: 160px (subordinate, less prominent than the hero volume chart)
-- [ ] **Replace tooltip styling** — the current charts reference `boxShadow: 'var(--shadow-md)'` which **doesn't exist** in `index.css` (resolves to nothing). Replace with the same glassmorphic tooltip from 8.4:
+- [x] Move this grid below the 5-column layout (PB card + session log)
+- [x] Grid: `grid-cols-1 md:grid-cols-2 gap-4`
+- [x] Card wrapper: `bg-surface-container-low rounded-2xl p-6` — no border
+- [x] Chart header uses `.label-md` + `<TrendingUp size={14} color="var(--primary)" />` icon inline
+- [x] Chart height: 160px (subordinate, less prominent than the hero volume chart)
+- [x] **Replace tooltip styling** — the current charts reference `boxShadow: 'var(--shadow-md)'` which **doesn't exist** in `index.css` (resolves to nothing). Replace with the same glassmorphic tooltip from 8.4:
   ```js
   contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }}
   ```
-- [ ] Remove the Max Weight AreaChart from this grid (it's redundant with the PB bento card above)
-- [ ] Remove the Volume BarChart from this grid (it's now the hero section in 8.4)
-- [ ] **Grid now contains only 2 charts:** `Est. 1RM over time` (Area) + `Avg Reps/Set` (Line)
+- [x] Remove the Max Weight AreaChart from this grid (it's redundant with the PB bento card above)
+- [x] Remove the Volume BarChart from this grid (it's now the hero section in 8.4)
+- [x] **Grid now contains only 2 charts:** `Est. 1RM over time` (Area) + `Avg Reps/Set` (Line)
 
 ---
 
 ### 8.8 Filter Controls (Dropdowns) — Reskin
 **Keep the 3 dropdowns (Split, Day, Exercise) but upgrade their visual styling to match the Kinetic Elite input system.**
 
-- [ ] Move the filter row between the page header and the hero exercise display (before any exercise-specific content)
-- [ ] Grid: `grid-cols-1 md:grid-cols-3 gap-3`
-- [ ] Labels: `.label-md` style (`text-xs uppercase tracking-widest on-surface-dim font-bold`) — already close, verify exact match
-- [ ] Select elements:
+- [x] Move the filter row between the page header and the hero exercise display (before any exercise-specific content)
+- [x] Grid: `grid-cols-1 md:grid-cols-3 gap-3`
+- [x] Labels: `.label-md` style (`text-xs uppercase tracking-widest on-surface-dim font-bold`) — already close, verify exact match
+- [x] Select elements:
   ```css
   padding: 12px 16px;
   border-radius: 1rem;               /* rounded-2xl */
@@ -914,35 +914,35 @@ Based on the high-fidelity "Elite Dashboard" mockup generated in Stitch, the fol
   font-size: 14px;
   font-family: 'Be Vietnam Pro', sans-serif;
   ```
-- [ ] On focus: apply `outline: 2px solid var(--primary-container)` (accessible, not a line border) and `outline-offset: 2px`
-- [ ] Do **NOT** add the bottom-bar input style here — dropdowns look better as rounded boxes vs text inputs
+- [x] On focus: apply `outline: 2px solid var(--primary-container)` (accessible, not a line border) and `outline-offset: 2px`
+- [x] Do **NOT** add the bottom-bar input style here — dropdowns look better as rounded boxes vs text inputs
 
 ---
 
 ### 8.9 Weekly/Monthly Summary Cards — Reskin
 **Keep the summary data but integrate it into the bento grid pattern, not standalone cards above everything.**
 
-- [ ] Merge the `weeklySummary` and `monthlySummary` data into a single horizontal "context strip" bar between the filter controls and the hero exercise title
-- [ ] Strip layout: `flex gap-6 flex-wrap` — no card background, just inline stats separated by tonal dividers
-- [ ] Each stat: super-label (`.label-md`, `on-surface-dim`) + value (`headline-md`, `primary`) + unit (12px, `on-surface-variant`)
-- [ ] Stats to show (preserve all 5 meaningful data points from the original cards):
+- [x] Merge the `weeklySummary` and `monthlySummary` data into a single horizontal "context strip" bar between the filter controls and the hero exercise title
+- [x] Strip layout: `flex gap-6 flex-wrap` — no card background, just inline stats separated by tonal dividers
+- [x] Each stat: super-label (`.label-md`, `on-surface-dim`) + value (`headline-md`, `primary`) + unit (12px, `on-surface-variant`)
+- [x] Stats to show (preserve all 5 meaningful data points from the original cards):
   1. `This Week: {weeklySummary.sessions} sessions`
   2. `Vol: {Math.round(weeklySummary.volume / 1000)}k kg`
   3. `{weeklySummary.volChange > 0 ? '+' : ''}{weeklySummary.volChange}% vs last week` (in success/danger color)
   4. `Monthly: {monthlySummary.sessions} sessions`
   5. `~{monthlySummary.avgPerWeek}/week avg`
-- [ ] If no exercise is selected yet, the summary strip still shows — it's always-visible workout context data
-- [ ] Remove the current two standalone summary cards (`card` divs at the top of the page)
+- [x] If no exercise is selected yet, the summary strip still shows — it's always-visible workout context data
+- [x] Remove the current two standalone summary cards (`card` divs at the top of the page)
 
 ---
 
 ### 8.10 Empty State — Upgrade
 **When no exercise is selected, replace the generic EmptyState with an on-brand version.**
 
-- [ ] Keep the `<EmptyState>` component but update props:
+- [x] Keep the `<EmptyState>` component but update props:
   - `title="Select an exercise"` → `title="Choose Your Lift"`
   - `message="Log workouts to see strength progression charts"` → `message="Select split, day, and exercise above to unlock your performance analytics"`
-- [ ] The EmptyState component itself will already use the Kinetic Elite token system once Phase 2.11 is implemented
+- [x] The EmptyState component itself will already use the Kinetic Elite token system once Phase 2.11 is implemented
 
 ---
 
@@ -967,25 +967,25 @@ The redesigned page renders in this top-to-bottom order:
 
 ### 8.12 Tokens & CSS Additions Required
 All tokens from Phases 1–6 apply. Additionally verify these are present before implementation:
-- [ ] `--glow-primary` — `0 0 20px rgba(255, 181, 155, 0.10)` (Phase 1.2)
-- [ ] `--glass-bg` — `rgba(53, 52, 55, 0.60)` (Phase 1.2)
-- [ ] `--glass-blur-sm` — `blur(12px)` (Phase 1.2)
-- [ ] `--ease-smooth` — `cubic-bezier(0.4, 0, 0.2, 1)` (Phase 1.6)
-- [ ] `cascade-item` stagger animation (Phase 1.6)
-- [ ] `.display-lg` — Space Grotesk `clamp(2.5rem, 5vw, 3.5rem)`, weight 700, letter-spacing -0.04em (Phases 1.3 + 6.3)
-- [ ] `.headline-md` — Space Grotesk, already defined (Phase 1.3)
-- [ ] `.label-md` — Be Vietnam Pro, uppercase, tracking-widest (Phase 1.3)
+- [x] `--glow-primary` — `0 0 20px rgba(255, 181, 155, 0.10)` (Phase 1.2)
+- [x] `--glass-bg` — `rgba(53, 52, 55, 0.60)` (Phase 1.2)
+- [x] `--glass-blur-sm` — `blur(12px)` (Phase 1.2)
+- [x] `--ease-smooth` — `cubic-bezier(0.4, 0, 0.2, 1)` (Phase 1.6)
+- [x] `cascade-item` stagger animation (Phase 1.6)
+- [x] `.display-lg` — Space Grotesk `clamp(2.5rem, 5vw, 3.5rem)`, weight 700, letter-spacing -0.04em (Phases 1.3 + 6.3)
+- [x] `.headline-md` — Space Grotesk, already defined (Phase 1.3)
+- [x] `.label-md` — Be Vietnam Pro, uppercase, tracking-widest (Phase 1.3)
 
 ---
 
 ### 8.13 Anti-Pattern Compliance Checklist
-- [ ] No `1px solid` borders — only the left-accent border on the 1RM bento card (explicit exception) and the ghost PB glow card border at 20% opacity
-- [ ] No `Bebas Neue` or `DM Sans` references
-- [ ] All chart tooltips use glassmorphic `contentStyle` (no solid background)
-- [ ] No `var(--c1)`, `var(--c2)`, `var(--c3)`, `var(--bd)` references
-- [ ] All rounded corners ≥ 12px (0.75rem)
-- [ ] Hero number font uses Space Grotesk via `.display-lg`
-- [ ] Touch targets on all interactive elements (range pills, dropdowns) ≥ 44px height
+- [x] No `1px solid` borders — only the left-accent border on the 1RM bento card (explicit exception) and the ghost PB glow card border at 20% opacity
+- [x] No `Bebas Neue` or `DM Sans` references
+- [x] All chart tooltips use glassmorphic `contentStyle` (no solid background)
+- [x] No `var(--c1)`, `var(--c2)`, `var(--c3)`, `var(--bd)` references
+- [x] All rounded corners ≥ 12px (0.75rem)
+- [x] Hero number font uses Space Grotesk via `.display-lg`
+- [x] Touch targets on all interactive elements (range pills, dropdowns) ≥ 44px height
 
 ---
 
@@ -1018,7 +1018,7 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
 **Expected:** A smooth, filled area line chart matching the Stitch reference design — a single continuous curve with a gradient fill beneath it (warm orange/ember fill fading to transparent at the bottom).
 
 **Fix:**
-- [ ] Replace `<BarChart>` + `<Bar>` in the Volume Trend hero section with:
+- [x] Replace `<BarChart>` + `<Bar>` in the Volume Trend hero section with:
   ```jsx
   <AreaChart data={cd}>
     <defs>
@@ -1034,9 +1034,9 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
     <Area type="monotone" dataKey="volume" stroke="var(--primary-container)" strokeWidth={2.5} fill="url(#vol-gradient)" dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: 'var(--primary)', strokeWidth: 0 }} />
   </AreaChart>
   ```
-- [ ] `type="monotone"` produces the smooth Bézier curve — **do not use `"linear"`**
-- [ ] Stroke: `var(--primary-container)` (Burning Ember `#F85F1B`) — not `var(--primary)` (Ember Peach)
-- [ ] Import `Area` from `recharts` if not already imported (alongside existing `AreaChart`)
+- [x] `type="monotone"` produces the smooth Bézier curve — **do not use `"linear"`**
+- [x] Stroke: `var(--primary-container)` (Burning Ember `#F85F1B`) — not `var(--primary)` (Ember Peach)
+- [x] Import `Area` from `recharts` if not already imported (alongside existing `AreaChart`)
 
 ---
 
@@ -1046,7 +1046,7 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
 **Expected:** A medal/award icon at 100% opacity positioned in the top-right corner of the card, acting as the card's primary visual identity badge — matching the reference screenshot (right side, large, dark tonal).
 
 **Fix:**
-- [ ] Add a visible medal icon to the top-right of the PB card container:
+- [x] Add a visible medal icon to the top-right of the PB card container:
   ```jsx
   <div style={{
     position: 'absolute',
@@ -1067,10 +1067,10 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
     </span>
   </div>
   ```
-- [ ] Use Material Symbol `military_tech` (medal/award icon) — this matches the star-badge shape in the reference
-- [ ] Ensure `material-symbols-outlined` font is loaded in `index.html` (it already is — verify the import includes `FILL@0..1`)
-- [ ] Keep the existing faint watermark (10% opacity) OR remove it — do not duplicate the icon. Prefer keeping only the visible top-right version since the watermark adds noise at low opacity alongside the visible icon.
-- [ ] PB card `overflow: hidden` must remain so the icon sits flush against the card border
+- [x] Use Material Symbol `military_tech` (medal/award icon) — this matches the star-badge shape in the reference
+- [x] Ensure `material-symbols-outlined` font is loaded in `index.html` (it already is — verify the import includes `FILL@0..1`)
+- [x] Keep the existing faint watermark (10% opacity) OR remove it — do not duplicate the icon. Prefer keeping only the visible top-right version since the watermark adds noise at low opacity alongside the visible icon.
+- [x] PB card `overflow: hidden` must remain so the icon sits flush against the card border
 
 ---
 
@@ -1080,11 +1080,11 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
 **Root cause:** The `material-symbols-outlined` font may not be loading correctly, or the `<span>` tag with `className="material-symbols-outlined"` is being treated as raw text by a render path that strips unknown class names.
 
 **Fix:**
-- [ ] Verify that `index.html` has the Material Symbols font link with the correct `FILL` axis range:
+- [x] Verify that `index.html` has the Material Symbols font link with the correct `FILL` axis range:
   ```html
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   ```
-- [ ] Replace the `<span className="material-symbols-outlined">share</span>` approach with an inline SVG share icon to guarantee render independence from font loading:
+- [x] Replace the `<span className="material-symbols-outlined">share</span>` approach with an inline SVG share icon to guarantee render independence from font loading:
   ```jsx
   {/* Share SVG icon — no font dependency */}
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1095,8 +1095,8 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
   </svg>
   ```
-- [ ] Same fix should be applied to the `workspace_premium` / `military_tech` icons if they also render as text — use Lucide icons from the existing `lucide-react` import as a fallback (e.g., `import { Share2, Award } from 'lucide-react'`)
-- [ ] Preferred approach: **use Lucide React** throughout the PB card since it's already a project dependency, avoiding Material Symbols font-loading fragility entirely:
+- [x] Same fix should be applied to the `workspace_premium` / `military_tech` icons if they also render as text — use Lucide icons from the existing `lucide-react` import as a fallback (e.g., `import { Share2, Award } from 'lucide-react'`)
+- [x] Preferred approach: **use Lucide React** throughout the PB card since it's already a project dependency, avoiding Material Symbols font-loading fragility entirely:
   - Medal icon: `<Award size={36} color="var(--on-surface-dim)" />` inside the top-right badge
   - Share icon: `<Share2 size={20} color="currentColor" />` inside the share button
 
@@ -1108,7 +1108,7 @@ All tokens from Phases 1–6 apply. Additionally verify these are present before
 **Expected:** Label should read `"Analytics"` to match the renamed page.
 
 **Fix:**
-- [ ] In `src/data/constants.js` — update **both** nav arrays (desktop sidebar + mobile bottom nav):
+- [x] In `src/data/constants.js` — update **both** nav arrays (desktop sidebar + mobile bottom nav):
   - Line 18: `{ id: 'progress', label: 'Progress', ... }` → change `label` to `'Analytics'`
   - Line 30: same change
   - Keep `id: 'progress'` and `path: '/progress'` unchanged (route and active state logic depends on these)
@@ -1377,19 +1377,19 @@ During implementation, use `generate_image` tool for each of the 12 character po
 
 ### 9.12 — Anti-Pattern Compliance Checklist
 
-- [ ] No `border: '1px solid var(--outline-variant)'` on any card (also applies to logout button — must not use `btn-d` class)
-- [ ] No `boxShadow: 'var(--shadow-md)'` on standard cards — glow only on avatar
-- [ ] No `#ffffff` or `#000000` literals
-- [ ] No emoji as icons — replace `⚡ Admin` with `<Zap size={10} />` in **both ProfilePage.jsx AND Layout.jsx** (line 27)
-- [ ] No `font-family: 'Bebas Neue'` — replace with `'Space Grotesk'`
-- [ ] No `border-bottom: '2px solid ...'` on field display rows — use `borderRadius: 12` containers instead
-- [ ] No inline `style={{ border: 'none' }}` workarounds (cards already have no border by default from design system)
-- [ ] Achievement grid cards must have `border-radius: 20px` (not `12px` or `8px`)
-- [ ] Use `var(--signature-gradient)` token for ember gradient buttons — do NOT re-specify `linear-gradient(135deg, ...)` inline when the token already exists
-- [ ] Old `.g2` responsive class wrapper must be fully removed — verify no leftover `className="g2"` in output
-- [ ] `avatarType` must be `'upload'` (not `'preset'`) when user uploads a custom image
-- [ ] Uploaded avatar must be canvas-resized to max 256×256 and JPEG-compressed to ~50KB before storing in localStorage
-- [ ] Avatar Picker Modal must support `Escape` key to close and click-outside-to-close
+- [x] No `border: '1px solid var(--outline-variant)'` on any card (also applies to logout button — must not use `btn-d` class)
+- [x] No `boxShadow: 'var(--shadow-md)'` on standard cards — glow only on avatar
+- [x] No `#ffffff` or `#000000` literals
+- [x] No emoji as icons — replace `⚡ Admin` with `<Zap size={10} />` in **both ProfilePage.jsx AND Layout.jsx** (line 27)
+- [x] No `font-family: 'Bebas Neue'` — replace with `'Space Grotesk'`
+- [x] No `border-bottom: '2px solid ...'` on field display rows — use `borderRadius: 12` containers instead
+- [x] No inline `style={{ border: 'none' }}` workarounds (cards already have no border by default from design system)
+- [x] Achievement grid cards must have `border-radius: 20px` (not `12px` or `8px`)
+- [x] Use `var(--signature-gradient)` token for ember gradient buttons — do NOT re-specify `linear-gradient(135deg, ...)` inline when the token already exists
+- [x] Old `.g2` responsive class wrapper must be fully removed — verify no leftover `className="g2"` in output
+- [x] `avatarType` must be `'upload'` (not `'preset'`) when user uploads a custom image
+- [x] Uploaded avatar must be canvas-resized to max 256×256 and JPEG-compressed to ~50KB before storing in localStorage
+- [x] Avatar Picker Modal must support `Escape` key to close and click-outside-to-close
 
 ---
 
@@ -1625,17 +1625,17 @@ The page will use a **bento grid** layout with fractional columns and the `.g2` 
 
 ### Anti-pattern Checklist (Phase 10)
 
-- [ ] No `border` on any card element (use `border: 'none'` explicitly).
-- [ ] No `shadow-md` — use `.ember-glow` or `var(--glow-primary)` only.
-- [ ] No emoji icons — Lucide components only (`Flame`, `Trophy`, etc.).
-- [ ] No `<hr>` tags — use `height: 1px; background: var(--surface-container-highest)`.
-- [ ] All gradients use `var(--signature-gradient)` or `.text-gradient-primary` class.
-- [ ] Welcome name uses `className="text-gradient-primary"`, not inline gradient styles.
-- [ ] Height stat card is removed.
-- [ ] No `.card` class used — `glass-card` only throughout.
-- [ ] No hardcoded `linear-gradient(...)` inline strings — use CSS variables.
-- [ ] All weight/height values respect `isImpWeight` / `isImpHeight` user preferences.
-- [ ] Modals rendered outside `.pg-in` container via `<Portal>`.
+- [x] No `border` on any card element (use `border: 'none'` explicitly).
+- [x] No `shadow-md` — use `.ember-glow` or `var(--glow-primary)` only.
+- [x] No emoji icons — Lucide components only (`Flame`, `Trophy`, etc.).
+- [x] No `<hr>` tags — use `height: 1px; background: var(--surface-container-highest)`.
+- [x] All gradients use `var(--signature-gradient)` or `.text-gradient-primary` class.
+- [x] Welcome name uses `className="text-gradient-primary"`, not inline gradient styles.
+- [x] Height stat card is removed.
+- [x] No `.card` class used — `glass-card` only throughout.
+- [x] No hardcoded `linear-gradient(...)` inline strings — use CSS variables.
+- [x] All weight/height values respect `isImpWeight` / `isImpHeight` user preferences.
+- [x] Modals rendered outside `.pg-in` container via `<Portal>`.
 
 ---
 
@@ -2153,7 +2153,7 @@ This phase addressed specific UI bugs and layout adjustments following the initi
 
 ---
 
-## Phase 10.2 — Gap Analysis: Weight Analysis Card vs Stitch Reference (Planned)
+## Phase 10.2 — Gap Analysis: Weight Analysis Card vs Stitch Reference (Completed)
 
 After reviewing the Phase 10.1 implementation against the original Stitch reference screenshot, the following discrepancies remain on the **Weight Analysis card only**. All other 10.1 fixes (banner overlap, grayscale, button shrink, theme toggle, nav color) are complete and accurate.
 

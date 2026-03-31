@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -25,7 +25,7 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
             osc.frequency.value = 880; g.gain.value = 0.3;
             osc.start(); osc.stop(ctx.currentTime + 0.2);
             setTimeout(() => { const o2 = ctx.createOscillator(); const g2 = ctx.createGain(); o2.connect(g2); g2.connect(ctx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(ctx.currentTime + 0.3); }, 250);
-          } catch (e) { /* no audio */ }
+          } catch (error) { /* no audio */ }
           onDone();
           return 0;
         }
@@ -69,7 +69,7 @@ export default function WorkoutPage() {
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
 
   const finishBtnRef = useRef(null);
-  const [showFAB, setShowFAB] = useState(true);
+  const [, setShowFAB] = useState(true);
 
   useEffect(() => {
     if (!finishBtnRef.current) return;
@@ -84,7 +84,6 @@ export default function WorkoutPage() {
   const start = day => {
     const exs = day.exercises.map(ex => {
       const prev = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-      const pe = prev?.exercises?.find(e => e.name === ex.name);
       return {
         ...ex, sv: ex.variants ? ex.variants[0] : null,
         sets: Array.from({ length: ex.sets || 3 }, () => {
@@ -92,7 +91,8 @@ export default function WorkoutPage() {
         }),
       };
     });
-    setSession({ day, exs, notes: '' }); setDone(null);
+    const timestamp = new Date().getTime();
+    setSession({ day, exs, notes: '', startTime: timestamp }); setDone(null);
   };
 
   const upd = (ei, si, f, v) => setSession(p => {
@@ -109,8 +109,10 @@ export default function WorkoutPage() {
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
   const finish = () => {
+    const endTimestamp = new Date().getTime();
     const log = {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
+      durationMinutes: session.startTime ? Math.round((endTimestamp - session.startTime) / 60000) : null,
       exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 })) })).filter(ex => ex.sets.length > 0),
     };
     setWorkoutLogs(p => [...p, log]); setDone(log); setTimer(null);

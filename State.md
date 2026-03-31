@@ -1,144 +1,227 @@
-# Fittrack Pro - Project State
+# FitTrack Pro — Project State
 
-This document provides a comprehensive overview of the current state of **Fittrack Pro**, including its tech stack, file structure, styling themes, and implemented features.
+> Ground truth for the current state of the codebase. Updated manually after each meaningful batch of changes. **Do not copy from design plans or TODO files** — only write what's actually running.
 
 ---
 
 ## 🛠️ Tech Stack
 
-The application is built using a modern, lightweight, and robust frontend stack:
-
-- **Core Framework**: React (v19.2.4)
-- **Routing**: React Router DOM (v7.13.1)
-- **Data Visualization**: Recharts (v3.8.0)
-- **Icons**: Lucide React
-- **Build Tool**: Vite (v8)
-- **Linter**: ESLint (v9)
+| Package | Version |
+|---------|---------|
+| React | 19.2.4 |
+| React Router DOM | 7.13.1 |
+| Recharts | 3.8.0 |
+| Lucide React | 0.577.0 |
+| Vite | 8.0.0 |
+| ESLint | 9.39.4 |
 
 ---
 
 ## 📂 File Structure
 
-The project follows a component-based directory structure, organized by feature domains:
-
 ```text
 fittrack-pro/
-├── README.md
-├── State.md (This file)
-├── vercel.json              # Vercel SPA routing rewrite rules
+├── State.md                     # This file
+├── todo-redesign-phase-1.md     # Kinetic Elite redesign task log (completed)
+├── TODO-male-anatomy.md
+├── TODO-female-anatomy.md
+├── TODO.md
+├── vercel.json                  # SPA rewrite rules for Vercel
 ├── index.html
 ├── package.json
 ├── vite.config.js
-├── eslint.config.js
-├── TODO-male-anatomy.md     # Male muscle asset reference & verification
-├── TODO-female-anatomy.md   # Female muscle asset implementation plan
+├── public/
+│   └── muscles/
+│       ├── male/                # 17 PNGs (base + highlight per group)
+│       └── female/              # 15 PNGs (2 bases, 6 back, 7 front highlights)
 └── src/
-    ├── App.jsx                # Main application component with routing
-    ├── main.jsx               # Entry point
-    ├── index.css              # Global styles, variables, themes, key animations
-    ├── App.css                # App-specific styling rules
-    ├── assets/                # Static assets (images, external fonts)
+    ├── App.jsx                  # Root router + auth gate
+    ├── main.jsx
+    ├── index.css                # All global tokens, typography, animations
+    ├── App.css
+    ├── assets/
     ├── components/
-    │   ├── layout/            # Layout components (Sidebar, BottomNav)
-    │   ├── pages/             # Distinct routable pages (Dashboards, Logs, Maps)
-    │   └── shared/            # Reusable UI components (ToastContainer, Cards, Buttons)
+    │   ├── layout/
+    │   │   └── Layout.jsx       # Sidebar (desktop) + BottomNav (mobile)
+    │   ├── pages/               # One file per route
+    │   │   ├── AuthModal.jsx
+    │   │   ├── DashboardPage.jsx
+    │   │   ├── WorkoutPage.jsx
+    │   │   ├── SplitsPage.jsx
+    │   │   ├── DietPage.jsx
+    │   │   ├── ProgressPage.jsx
+    │   │   ├── MuscleMapPage.jsx
+    │   │   ├── ProfilePage.jsx
+    │   │   ├── WeightLogPage.jsx
+    │   │   ├── MeasurementsPage.jsx
+    │   │   ├── WorkoutHistoryPage.jsx
+    │   │   └── ContactPage.jsx
+    │   └── shared/
+    │       ├── SharedComponents.jsx   # All shared UI components
+    │       └── BodyMapSVG.jsx         # Canvas-based anatomical renderer
     ├── context/
-    │   └── AppContext.jsx     # Global state provider (User sessions, Toast notifications)
-    ├── data/                  # Static data models / mock data
-    ├── hooks/                 # Custom React hooks
-    └── utils/                 # Utility functions and helpers
+    │   └── AppContext.jsx        # Global state (user, logs, splits, toasts)
+    ├── data/
+    │   ├── constants.js          # NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE
+    │   ├── splits.js             # Default split programs
+    │   ├── muscleData.js         # XP calc, rank system, muscle groups
+    │   ├── diets.js              # Macro targets / diet presets
+    │   ├── rankBenchmarks.js
+    │   └── sample.js
+    ├── hooks/
+    └── utils/
 ```
 
 ---
 
-## 🎨 Theme Details (Orange / Dark Mode)
+## 🎨 Design System
 
-Fittrack Pro features a highly polished **Dark Mode (Default)** and an alternative **Light Mode**, driven by CSS variables in `index.css`. The design uses modern aesthetics with vibrant orange accents, glassmorphism hints, and custom typography (`Bebas Neue` for strong accents and `DM Sans` for smooth readability).
+The app uses the **"Kinetic Elite"** design system, defined in `index.css`. It was fully migrated away from the original `Bebas Neue` / `DM Sans` / `#050506` stack.
 
-### Dynamic Theme Switch
-Themes are managed using the `data-theme` attribute (e.g., `<html data-theme="dark">` or `<html data-theme="light">`).
+### Typography
+- **Display / Headlines**: `Space Grotesk` (500, 700) — tight tracking (`-0.04em`), used for metrics, page headings, and the app wordmark
+- **Body / Labels**: `Be Vietnam Pro` (400, 500, 600, 700) — wide tracking (`0.1em`) on uppercase labels, normal on prose
+- CSS utility classes: `.display-lg`, `.headline-lg`, `.headline-md`, `.title-lg`, `.title-md`, `.body-md`, `.label-md`
 
-### Palette Highlights
+### Color Tokens
 
-| Theme | Background | Surfaces / Cards | Text | Special Effects |
-|-------|------------|------------------|------|-----------------|
-| **Dark** | Deep Black (`#050506`) | Off-blacks (`#111113`, `#161619`) | Off-white (`#EAEAF0`) | Soft ambient glow shadows (`rgba(232,84,13,.04)`) |
-| **Light** | Light Gray (`#F2F2F5`) | Pure Whites (`#FFFFFF`, `#F7F7F9`) | Dark Gray (`#1A1A1E`) | Crisp, lightweight drop shadows (`rgba(0,0,0,.06)`) |
-| **Semantic** | Adaptive Semantic | `var(--success)`, `var(--danger)`, `var(--error)` | Adaptive | Positive trends (`#51CF66`), warnings (`#FF6B6B`), and destructive actions (`#FF3B30`) |
+**Dark theme (default):**
 
-### Standardized Actions
-- **Primary Action**: `.btn-p` (Orange gradient, used for confirms/starts).
-- **Secondary Action**: `.btn-g` (Grey, used for back/cancel).
-- **Danger Action**: `.btn-danger` (Red gradient, used for destructive confirms).
-- **Categorical Tags**: `.tag-d` (Subtle grey for muscle groups/day types to reduce visual clutter).
+| Token | Value | Role |
+|-------|-------|------|
+| `--surface` | `#131315` | Page background |
+| `--surface-container-lowest` | `#0E0E10` | Recessed wells |
+| `--surface-container-low` | `#1A1A1D` | Cards |
+| `--surface-container` | `#212124` | Elevated cards |
+| `--surface-container-high` | `#2B2B2E` | Hover states |
+| `--surface-container-highest` | `#353437` | Chips, ghost fills |
+| `--primary` | `#FFB59B` | Ember Peach — accent text, icons, active states |
+| `--primary-container` | `#F85F1B` | Burning Ember — CTA fills, gradient end |
+| `--signature-gradient` | `135deg, #FFB59B → #F85F1B` | Buttons, branding |
+| `--on-surface` | `#EAEAF0` | Primary text |
+| `--on-surface-variant` | `#E3BFB3` | Secondary text (warm, not grey) |
+| `--on-surface-dim` | `#6E6E76` | Metadata, disabled |
+| `--outline-variant` | `rgba(90,65,56,0.15)` | Ghost borders (accessibility only) |
+| `--glass-bg` | `rgba(53,52,55,0.60)` | Glassmorphic card fill |
 
-### Orange Accent (Signature)
-- **Base Color**: `#E8540D` (`--o`)
-- **Gradient**: `linear-gradient(135deg, #E8540D, #FF6B35)` (`--og`)
-- **Usage**: Used prominently across Primary Buttons (`.btn-p`), Navigation Action States (`.ni.act`), Tags (`.tag`), dynamic Progress Bars (`.pbar-fill`), and interactive elements to provide a striking, energetic contrast. Recent UI polish reduced overly aggressive orange usage in informational tags and lists to improve visual hierarchy and readability.
+**Light theme:** Warm linen palette (`#F5F0EB` base), same ember accent.
 
-### UI Characteristics
-- Smooth `0.25s` cubic-bezier transition states on buttons, cards, and interactives.
-- Deep, highly defined box-shadows on cards and Modals (`--shadow`, `--shadow-lg`) providing physical layering.
-- Polished Modal (`.mo`, `.md`) components utilizing background blurs (`backdrop-filter`).
-- Built-in visual skeleton loading states and toast notifications integrated into CSS animations (`@keyframes`).
-- **Standardized Form Markers**: Square checkboxes (`var(--o)`) replace simple text/icons for better interaction clarity in trackers.
-- **Enhanced Data Density**: Blank-by-default inputs with placeholders prevent data coercion and improve logging intent.
+### Key Rules
+- **No solid 1px borders** — depth comes from tonal background shifts between surface tiers
+- **No standard drop shadows** — only `--shadow-ambient` (diffused) or `--glow-primary` (LED emission at 10% opacity)
+- **No `Bebas Neue` or `DM Sans`** — zero remaining references in the codebase
+- **Animations use only `transform` / `opacity`** — no layout property animation
 
----
-
-## ✨ Implemented Features
-
-The application incorporates a rich set of pages aimed at a comprehensive fitness tracking experience:
-
-1. **Authentication Layer**  
-   - Users must authenticate through the `AuthModal.jsx` before accessing the app.
-2. **Dashboard Overview**  
-   - `DashboardPage.jsx`: The primary landing interface displaying summarized health data, metrics, or recent activities.
-   - **Recent Updates:** BMI status labels feature improved readability, and the Weight Change trend indicator strictly compares the latest logged weight against the immediately previous entry. Muscle mini-tags updated to subtle grey to reduce visual clutter.
-3. **Workout & Split Management**  
-   - `SplitsPage.jsx`: Organize routines by muscle groups or scheduling protocols. Now accessible directly from the primary mobile bottom navigation.
-   - `WorkoutPage.jsx`: The active session tracker.
-   - **Recent Updates:** The tracker UI features a prominent "Rest Timer" control, blank-by-default input fields for reps/weight, corrected checkbox column alignments (`DONE` markers), and a new rich **Post-Workout Summary** screen that dynamically highlights worked muscles on the `BodyMapSVG` and calculates Session XP, Sets, and Volume.
-   - `WorkoutHistoryPage.jsx`: Comprehensive log of past workout sessions.
-4. **Nutrition & Diet**  
-   - `DietPage.jsx`: Interface for meal tracking and macro logging.
-5. **Body Tracking & Analytics**  
-   - `WeightLogPage.jsx`: Specific interface for body weight tracking.
-   - `MeasurementsPage.jsx`: To track body dimensions.
-   - `ProgressPage.jsx`: A data visualization page (using `recharts`) showcasing performance and body changes over time.
-6. **Detailed Anatomical Visualization**  
-    - `MuscleMapPage.jsx` & `BodyMapSVG.jsx`: A dedicated visual map highlighting muscle groups and areas of focus based on accumulated XP.
-    - **Recent Updates:** Implemented a **Monthly XP Reset** system (with Consistency and Volume bonuses) to encourage sustained routines. Added a "Past Performance" widget to track historical monthly ranks. The `BodyMapSVG` renders on an HTML5 Canvas using a pixel-compositing technique that extracts coral-red highlights over a teal-blue base, showing **Primary vs Secondary Muscle Engagement** with biomechanically-accurate alpha blending.
-    - **Anatomy Status:**
-      - 🟢 **Male** — 17 PNGs committed, rendering in production. See `TODO-male-anatomy.md`.
-      - 🟢 **Female** — 15 clean custom PNGs committed to `public/muscles/female/` (2 bases, 6 back highlights, 7 front highlights), replacing all defective placeholders. Rendering live in production. See `Female-Anatomy-Build-2-0.md`.
-      - 🟢 **Fallback** — Canvas renders a styled placeholder if any image fails to load, preventing invisible collapse.
-7. **User Personalization**  
-   - `ProfilePage.jsx`: Manage personal information, settings, and potentially theme toggling.
-   - `ContactPage.jsx`: Provide feedback or reach support.
-8. **App Structure & Responsiveness**  
-   - Uses `Sidebar` for desktop and `BottomNav` for a dynamic app-like experience on mobile.
-   - Context-managed global Toast System (`ToastContainer`) for immediate user feedback.
-9. **Deployment & Environment**
-    - Corrected client-side routing logic for **Vercel Deployment** via `vercel.json` rewrites, ensuring no 404 errors on page reloads.
+### Animations
+- Spring easing tokens: `--ease-spring`, `--ease-smooth`, `--ease-decel`, `--ease-accel`
+- `@keyframes cascadeIn` — staggered card/list mount (`.cascade-item`, delays up to `:nth-child(5)`)
+- `@keyframes pulse` — perpetual live indicator (used on `PulseIndicator` component)
+- `@keyframes shimmer` — skeleton loading gradient sweep
+- `@keyframes pgIn / pgOut` — page entry/exit transitions
 
 ---
 
-## 🏆 Recent Major Enhancements (Phases 1 & 2)
+## ✨ Shared Components (`SharedComponents.jsx`)
 
-- **Biomechanical XP Accuracy**: Exercises now track `primary` (100% XP) and `secondary` (30% XP) muscle engagement with corresponding visual dimming on the body map.
-- **Progress Ladder 2.0**: Shifted to a **Monthly Reset** logic with overall and per-muscle ranking, including consistency bonuses and past-performance tracking.
-- **Male Anatomy**: 17 PNGs fully implemented and live in production.
-- **Design Standardization**: Overhauled typography, color contrast, and action buttons to ensure premium dark/light mode consistency.
-- **Rest Timer System**: High-visibility timer with custom tones integrated directly into the tracker workflow.
-- **Canvas Fallback & Post-Processing**: Graceful placeholder prevents invisible canvas collapse on image load failures. Additionally, a dynamic `stripBackground()` canvas filter runs at render time to clean up baked-in artifacts (checkered patterns and text labels) from AI-generated female anatomy PNGs.
+All exported from `src/components/shared/SharedComponents.jsx`:
+
+| Component | What it does |
+|-----------|-------------|
+| `PulseIndicator` | Animated 8px dot with `pulse` keyframe + LED glow. Used on live session and dashboard suggestion banners. |
+| `GlassTooltip` | Glassmorphic Recharts tooltip. Used across all charts. |
+| `ProgressOrb` | SVG arc ring with ember peach gradient fill. Animated via `stroke-dashoffset`. Currently used in Dashboard goal progress card. |
+| `StatCard` | Standard metric card with icon, display-lg value, trend arrow, and optional badge. |
+| `ThemeTogglePill` | Sliding day/night knob toggle. Rendered in `PageHeader` and Dashboard header. |
+| `PageHeader` | Title + ember gradient underline + `ThemeTogglePill` + optional action slot. |
+| `ScrollPicker` | Snap-scroll wheel for number/weight selection. Used in Log Weight and Set Goal modals. |
+| `ToastContainer` | Fixed top-right toast stack with glassmorphic backdrop. |
+| `ConfirmDialog` | Glassmorphic modal with confirm/cancel. |
+| `Skeleton` / `SkeletonCard` | Shimmer skeleton using the `shimmer` keyframe. |
+| `EmptyState` | LED-glow icon container + headline + optional CTA button. |
+| `Portal` | `createPortal` wrapper for z-index escape (modals, floating pill). |
 
 ---
 
-## 🔲 Pending Tasks
+## 📑 Pages
 
-| Task | Description | Reference |
-|------|-------------|----------|
-| `stripBackground()` finalized | The function was simplified to ONLY strip solid black backgrounds to transparent (Option A). White checkerboard stripping was removed. | `Female-Anatomy-Build-2-0.md` |
-| `back-calves` / `back-forearms` | Optionally add to `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` | Minor code change |
+### `/` — Dashboard
+Rebuilt around the Kinetic Elite aesthetic. Key sections:
+- **Welcome header**: editorial-style `"WELCOME BACK, [NAME]"` in Space Grotesk with text-gradient on first name. Theme toggle pill lives here, not in a sidebar section.
+- **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow (colour changes based on whether weight direction matches goal direction — not just up/down). BMI card has a concentric CSS ring with ember glow + per-range insight text.
+- **Sessions / Streak**: 2-col glass card row with current-week session count, all-time total, and current/longest streak.
+- **Placeholder activity cards**: Steps, Calories Burned, Water Intake — show `—` with a `PulseIndicator + "Coming Soon"` label. No real data sources yet.
+- **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
+- **Weight Trend chart**: `AreaChart` (Recharts) with `GlassTooltip` and an optional goal reference line.
+- **Live Suggestion banner**: Grayscale gym image with gradient overlay, `PulseIndicator`, active split name and schedule chips, "Start Workout" CTA.
+- **Iron League widget**: `MiniBodyMap` + rank badge + weekly muscle group count. Links to `/muscle-map`.
+
+### `/workout` — Workout Tracker
+Three states: **day picker → active session → post-session summary**.
+
+**Day picker**: Cards with left accent stripe, last-session date, exercise preview, "Start Session →" CTA.
+
+**Active session**:
+- Session header with `PulseIndicator` + session name + rest-length selector
+- `HeroRestTimer`: inline section (not a modal) — `clamp(4rem, 12vw, 7rem)` Space Grotesk countdown, ambient blob background, `+30s` ghost pill + `Skip` ember pill
+- Exercise blocks: `1.5rem / -0.04em` header, `.label-md` muscle/focusType subline, info icon button
+- Set grid: `.set-row` layout (`34px 1fr 1fr 44px`), each row is a `surface-container-low` card that lifts to `surface-container` on hover. Completed rows dim to 0.7 opacity. Bottom-bar focus styling on inputs.
+- `.add-set-btn`: full-width dashed ghost button below each set list
+- Session notes: glassmorphic card with resizable textarea
+- Finish/Discard: "FINISH WORKOUT" ember gradient full-width button + "DISCARD WORKOUT" error-coloured text-only button beneath
+- **Floating live pill**: fixed bottom-right Portal — glass pill with animated pulse dot + "Live tracking" label
+
+**Post-session summary**: XP / Sets / Volume row + `BodyMapSVG` mini-map of muscles trained. "Log Another" + "View Map →" actions.
+
+### `/splits` — Split Management
+View and manage training split programs. Accessible from the primary mobile bottom nav.
+
+### `/diet` — Diet & Nutrition
+Macro tracking and meal logging interface.
+
+### `/progress` — Analytics
+Recharts-powered per-exercise performance charts: AreaChart, BarChart, LineChart. Split → Day → Exercise cascade dropdowns.
+
+### `/muscle-map` — Muscle Map
+`MuscleMapPage.jsx` + `BodyMapSVG.jsx`. Monthly XP reset system with consistency and volume bonuses. Full rank ladder. "Past Performance" widget for historical monthly ranks.
+
+**Anatomy asset status:**
+- 🟢 **Male** — 17 PNGs, rendering in production
+- 🟢 **Female** — 15 PNGs in `public/muscles/female/` (2 bases, 6 back highlights, 7 front highlights), rendering in production
+- 🟢 **Fallback** — Canvas renders a styled placeholder if any image fails to load
+
+`BodyMapSVG` renders via HTML5 Canvas pixel compositing — coral-red highlights over teal-blue base, with alpha-blended secondary muscle dimming for primary vs secondary engagement.
+
+### `/profile` — Profile
+User settings, unit preferences (kg/lbs), theme toggle, personal info.
+
+### `/history` — Workout History
+Log of completed sessions with date, volume, and exercise breakdown.
+
+### `/weight-log` — Weight Log
+Dedicated view for body weight history entries.
+
+### `/measurements` — Measurements
+Body dimension tracking.
+
+### `/contact` — Contact
+Feedback / support form.
+
+---
+
+## 🗺️ Layout & Navigation
+
+- **Desktop**: collapsible `Sidebar` (230px expanded, 54px icon-only). No right border — tonal background separation only. `headline-md` "FITTRACK" wordmark in Space Grotesk. Active nav items use `--glow-primary` and `--primary-container` colour.
+- **Mobile**: fixed `BottomNav` — glassmorphic fill, no top border. "More" sheet opens a second-level glassmorphic card with secondary routes.
+- **Auth gate**: `AuthModal` blocks all routes until a user is selected/created.
+
+---
+
+## 🔲 Known Gaps / Pending Work
+
+| Item | Notes |
+|------|-------|
+| Steps / Calories / Water data | Placeholder cards on Dashboard, no real data source wired |
+| `back-calves` / `back-forearms` | Not in `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` |
+| `ProgressOrb` usage | Only on Dashboard goal card — not yet on other pages |
+| `cascade-item` stagger | Defined in CSS but not applied broadly across card lists |
+| Phase 2–5 redesign items | Remaining token migrations, per-page audits, and Stitch cross-reference in `todo-redesign-phase-1.md` |

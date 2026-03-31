@@ -2128,3 +2128,25 @@ No-split fallback content (when `activeSplit` is null):
 5. **R6** Fix Live Suggestion banner image + schedule pills + CTA
 6. **R5** Add 3 placeholder activity cards
 7. **Cleanup** Import additions/removals
+
+---
+
+## Phase 10.1 — Post-Implementation Bug Fixes (Completed)
+
+This phase addressed specific UI bugs and layout adjustments following the initial Phase 10 implementation on the Dashboard.
+
+### Objectives
+
+1.  **Weight Analysis Card Alignment**: Restructured the "Weight Analysis" card to identically match the Stitch design reference. Swapped the label out for "PERFORMANCE TREND" as a small subtitle, and made "WEIGHT ANALYSIS" the bold primary headline. Moved "CURRENT" and "PREVIOUS" weight statistics into a side-by-side flex layout beneath the primary weight value.
+2.  **Live Suggestion Banner Overlap**: Fixed the overlapping issue where the "START WORKOUT" button blocked the D1/D2/D3 schedule pills. Removed `position: absolute` from the button, placing it within the standard document flex flow below the schedule pills with a `16px` margin.
+3.  **Live Suggestion Banner Image Grayscale**: Adjusted the background image filter from `grayscale(50%)` to `grayscale(100%)` and tweaked opacity to `0.5` to achieve the fully desaturated, high-contrast look present in the original design.
+4.  **Log Weight Button Sizing**: Shrunk the "Log Weight" header button by approximately 30% (padding from `10px 18px` to `7px 13px`, font size from `13px` to `10px`) to better balance the header hierarchy.
+5.  **Dashboard Theme Toggle Integration**: Reintroduced the `ThemeTogglePill` directly onto the Dashboard page header, positioned just under the Log Weight button. Additionally, reduced the text size within the toggle pill by 10% (from `8px` to `7px`) across the entire application.
+6.  **Navigation Active State Coloring**: Updated the active icon color for both the mobile Bottom Navigation and the desktop Sidebar Navigation. Swapped the softer peach `var(--primary)` color for the more vibrant orange `var(--primary-container)` (`#F85F1B`) for better visual distinction when a tab is active.
+
+### Files Modified
+
+*   `src/components/pages/DashboardPage.jsx` (Fixes 1-5)
+*   `src/components/shared/SharedComponents.jsx` (Fix 5: ThemeTogglePill font size)
+*   `src/index.css` (Fix 6: `.ni.act` color variable)
+*   `src/components/layout/Layout.jsx` (Fix 6: BottomNav active color variables)

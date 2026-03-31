@@ -225,7 +225,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   white-space:nowrap;user-select:none;border:none;
 }
 .ni:hover{background:var(--surface-container-high);color:var(--on-surface)}
-.ni.act{background:var(--surface-container-highest);color:var(--primary);box-shadow:var(--glow-primary)}
+.ni.act{background:var(--surface-container-highest);color:var(--primary-container);box-shadow:var(--glow-primary)}
 
 /* ─── TYPOGRAPHY ────────────────────────────────────────────────── */
 .display-lg  { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }

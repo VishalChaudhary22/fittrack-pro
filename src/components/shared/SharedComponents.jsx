@@ -127,7 +127,7 @@ export const ThemeTogglePill = () => {
         pointerEvents: 'none'
       }}>
         <span style={{
-          fontSize: 8,
+          fontSize: 7,
           fontWeight: 800,
           color: isDark ? '#FFF' : '#000',
           letterSpacing: '0.5px'

@@ -74,7 +74,7 @@ export const BottomNav = () => {
           <button key={id} onClick={() => { navigate(path); setShowMore(false); }} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
             background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px',
-            color: isActive(path) ? 'var(--primary)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
+            color: isActive(path) ? 'var(--primary-container)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
           }}>
             <Icon size={20} />
             <span style={{ fontSize: 9, fontWeight: 600, fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '.3px', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
@@ -83,7 +83,7 @@ export const BottomNav = () => {
         <button onClick={() => setShowMore(!showMore)} style={{
           flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
           background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px',
-          color: showMore || moreActive ? 'var(--primary)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
+          color: showMore || moreActive ? 'var(--primary-container)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
         }}>
           <MoreHorizontal size={20} />
           <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '.3px', textTransform: 'uppercase' }}>More</span>

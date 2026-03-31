@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, Shield, TrendingDown, TrendingUp, Footprints, Droplets } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb } from '../shared/SharedComponents';
+import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 import { MiniBodyMap } from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
@@ -138,47 +138,54 @@ export default function DashboardPage() {
             {new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
           <Dumbbell size={120} style={{ position: 'absolute', top: -16, right: -16, opacity: 0.06, color: 'var(--on-surface)' }} />
-          <button className="btn-p" style={{ position: 'absolute', top: 0, right: 0, padding: '10px 18px', fontSize: 13 }} onClick={() => setShowLog(true)}>
+          <button className="btn-p" style={{ position: 'absolute', top: 0, right: 0, padding: '7px 13px', fontSize: 10 }} onClick={() => setShowLog(true)}>
             + Log Weight
           </button>
+          <div style={{ position: 'absolute', top: 38, right: 0 }}>
+            <ThemeTogglePill />
+          </div>
         </header>
 
         {/* Row 1: Weight Snapshot + BMI  (1fr / 1fr) */}
         <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
           {/* Weight Snapshot */}
           <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
               <div>
-                <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>WEIGHT ANALYSIS</div>
-                <div style={{ fontSize: 9, color: 'var(--on-surface-dim)' }}>PERFORMANCE TREND</div>
+                <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>PERFORMANCE TREND</div>
+                <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>WEIGHT ANALYSIS</div>
               </div>
               <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700 }}>
                 {monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'lbs' : 'kg'} THIS MONTH
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', marginBottom: 8 }}>
-              <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 700, color: 'var(--on-surface)' }}>
-                {isImpWeight ? kgToLbs(latestWeight) : latestWeight}
-              </span>
-              <span style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginLeft: 4 }}>
-                {isImpWeight ? 'lbs' : 'kg'}
-              </span>
-            </div>
-            {monthDelta <= 0 
-              ? <TrendingDown size={20} color="var(--primary)" /> 
-              : <TrendingUp size={20} color="var(--error)" />
-            }
-            <div style={{ display: 'flex', gap: 16, marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--surface-container-highest)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, marginTop: 16 }}>
               <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>Latest Log</div>
-                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{fmt(allUserLogs[allUserLogs.length - 1]?.date || '')}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>Previous</div>
-                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>
-                  {allUserLogs.length >= 2 ? (isImpWeight ? kgToLbs(allUserLogs[allUserLogs.length - 2].weight) : allUserLogs[allUserLogs.length - 2].weight) + ' ' + (isImpWeight ? 'lbs' : 'kg') : '—'}
+                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>CURRENT</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1 }}>
+                    {isImpWeight ? kgToLbs(latestWeight) : latestWeight}
+                  </span>
+                  <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>{isImpWeight ? 'lbs' : 'kg'}</span>
+                </div>
+                <div style={{ marginTop: 4 }}>
+                  {monthDelta <= 0
+                    ? <TrendingDown size={18} color="var(--primary)" />
+                    : <TrendingUp size={18} color="var(--error)" />
+                  }
                 </div>
               </div>
+              {allUserLogs.length >= 2 && (
+                <div>
+                  <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>PREVIOUS</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, color: 'var(--on-surface-variant)', opacity: 0.55, lineHeight: 1 }}>
+                      {isImpWeight ? kgToLbs(allUserLogs[allUserLogs.length - 2].weight) : allUserLogs[allUserLogs.length - 2].weight}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--on-surface-dim)' }}>{isImpWeight ? 'lbs' : 'kg'}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -334,9 +341,9 @@ export default function DashboardPage() {
 
         {/* Live Suggestion Banner */}
         <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 180, marginBottom: 16 }}>
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5YpbGNIoffyZlhuSOD4j3ahpYBQQfFB1zqtCjL7_BUk6tA9p0a2lG1HEdiThIXTYVvnA-b2UjzmbZYd6rat_MwXd9ODZuWMaRe032I3mzdPojqaOMzCMuRODYzlRH9HlY4iTumjwp8hBdSRz10dmucVjk_M38BsbuYmWp1pWbWzth6YNIBRy9LJp_cEya6moQ0MDMrpczz829a-mzevNqgxlRdofFwnDBCoEoiIqa-dekVLFyHK3u02-qrQe5iqKtus-ZsA1--JiE" alt="Gym" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', opacity: 0.45, filter: 'grayscale(50%)' }} />
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5YpbGNIoffyZlhuSOD4j3ahpYBQQfFB1zqtCjL7_BUk6tA9p0a2lG1HEdiThIXTYVvnA-b2UjzmbZYd6rat_MwXd9ODZuWMaRe032I3mzdPojqaOMzCMuRODYzlRH9HlY4iTumjwp8hBdSRz10dmucVjk_M38BsbuYmWp1pWbWzth6YNIBRy9LJp_cEya6moQ0MDMrpczz829a-mzevNqgxlRdofFwnDBCoEoiIqa-dekVLFyHK3u02-qrQe5iqKtus-ZsA1--JiE" alt="Gym" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', opacity: 0.5, filter: 'grayscale(100%)' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background) 15%, transparent 100%)' }}></div>
-          <div style={{ position: 'relative', zIndex: 1, padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%', minHeight: 180 }}>
+          <div style={{ position: 'relative', zIndex: 1, padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', minHeight: 180 }}>
             {activeSplit ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -345,7 +352,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="headline-md" style={{ color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>{activeSplit.name}</div>
                 <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 10, maxWidth: '75%' }}>{activeSplit.description}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
                   {activeSplit.schedule.slice(0, 4).map((d, i) => (
                     <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.07)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>
                       D{i + 1}: {d}
@@ -357,6 +364,9 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
+                <button className="btn-p" style={{ alignSelf: 'flex-start', background: 'var(--signature-gradient)', borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, border: 'none', padding: '10px 20px' }} onClick={() => navigate('/workout')}>
+                  START WORKOUT
+                </button>
               </>
             ) : (
               <>
@@ -364,14 +374,14 @@ export default function DashboardPage() {
                   <PulseIndicator color="var(--on-surface-dim)" />
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>NO ACTIVE SPLIT</span>
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', maxWidth: '75%' }}>
+                <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', maxWidth: '75%', marginBottom: 16 }}>
                   Set up a training split to get personalised workout recommendations.
                 </div>
+                <button className="btn-p" style={{ alignSelf: 'flex-start', background: 'var(--signature-gradient)', borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, border: 'none', padding: '10px 20px' }} onClick={() => navigate('/splits')}>
+                  SET UP A SPLIT
+                </button>
               </>
             )}
-            <button className="btn-p" style={{ position: 'absolute', bottom: 24, right: 24, background: 'var(--signature-gradient)', borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, border: 'none', padding: '10px 18px' }} onClick={() => navigate(activeSplit ? '/workout' : '/splits')}>
-              {activeSplit ? "START WORKOUT" : "SET UP A SPLIT"}
-            </button>
           </div>
         </div>
 

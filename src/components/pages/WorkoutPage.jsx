@@ -285,9 +285,8 @@ export default function WorkoutPage() {
           {showFAB && (
             <button 
               onClick={finish}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: 'none', boxShadow: '0 4px 12px rgba(248, 95, 27, 0.3)', cursor: 'pointer' }}>
-              <Trophy size={10} color="var(--on-primary-container)" />
-              <span className="label-md" style={{ color: 'var(--on-primary-container)', fontSize: 9, fontWeight: 700 }}>Finish Workout</span>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', cursor: 'pointer' }}>
+              <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Finish Workout</span>
             </button>
           )}
 

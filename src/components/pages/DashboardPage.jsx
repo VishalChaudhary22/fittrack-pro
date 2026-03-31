@@ -149,17 +149,22 @@ export default function DashboardPage() {
         {/* Row 1: Weight Snapshot + BMI  (1fr / 1fr) */}
         <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
           {/* Weight Snapshot */}
-          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none' }}>
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', position: 'relative' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
               <div>
                 <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>PERFORMANCE TREND</div>
-                <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>WEIGHT ANALYSIS</div>
+                <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 2, lineHeight: 1.1 }}>WEIGHT<br/>ANALYSIS</div>
               </div>
-              <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700 }}>
+              <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700, position: 'relative', zIndex: 1 }}>
                 {monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'lbs' : 'kg'} THIS MONTH
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, marginTop: 16 }}>
+            
+            <svg viewBox="0 0 300 80" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 10, left: 0, width: '100%', height: 60, opacity: 0.3, pointerEvents: 'none', zIndex: 0 }}>
+              <path d="M 0 50 Q 80 10, 150 30 T 300 10" fill="none" stroke="var(--primary-container)" strokeWidth="3" />
+            </svg>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 16, position: 'relative', zIndex: 1 }}>
               <div>
                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>CURRENT</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
@@ -168,13 +173,15 @@ export default function DashboardPage() {
                   </span>
                   <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>{isImpWeight ? 'lbs' : 'kg'}</span>
                 </div>
-                <div style={{ marginTop: 4 }}>
-                  {monthDelta <= 0
-                    ? <TrendingDown size={18} color="var(--primary)" />
-                    : <TrendingUp size={18} color="var(--error)" />
-                  }
-                </div>
               </div>
+              
+              <div style={{ alignSelf: 'center', marginTop: 16, opacity: 0.9 }}>
+                {monthDelta <= 0
+                  ? <TrendingDown size={22} color="var(--primary)" />
+                  : <TrendingUp size={22} color="var(--error)" />
+                }
+              </div>
+
               {allUserLogs.length >= 2 && (
                 <div>
                   <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>PREVIOUS</div>

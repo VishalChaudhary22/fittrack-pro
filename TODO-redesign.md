@@ -2150,3 +2150,84 @@ This phase addressed specific UI bugs and layout adjustments following the initi
 *   `src/components/shared/SharedComponents.jsx` (Fix 5: ThemeTogglePill font size)
 *   `src/index.css` (Fix 6: `.ni.act` color variable)
 *   `src/components/layout/Layout.jsx` (Fix 6: BottomNav active color variables)
+
+---
+
+## Phase 10.2 — Gap Analysis: Weight Analysis Card vs Stitch Reference (Planned)
+
+After reviewing the Phase 10.1 implementation against the original Stitch reference screenshot, the following discrepancies remain on the **Weight Analysis card only**. All other 10.1 fixes (banner overlap, grayscale, button shrink, theme toggle, nav color) are complete and accurate.
+
+### Gap 1 — "WEIGHT ANALYSIS" Title Size
+
+**Stitch reference**: The title "WEIGHT ANALYSIS" is rendered in very large, heavy text — it visually spans two lines and dominates the top half of the card. It appears to be at least `headline-lg` scale (`clamp(1.5rem, 3vw, 2rem)`) or larger.
+
+**Current implementation**: Uses `headline-md` (`1.5rem` / 24px), which appears noticeably smaller than the reference.
+
+**Planned fix**: Change from `className="headline-md"` to `className="headline-lg"` on the "WEIGHT ANALYSIS" text in `DashboardPage.jsx` line 156.
+
+---
+
+### Gap 2 — Decorative Mini-Sparkline / Trend Curve
+
+**Stitch reference**: A subtle **orange/coral curved SVG line** runs across the lower portion of the card, sweeping from left to right between and below the CURRENT and PREVIOUS values. This gives the card its "Performance Trend" visual identity.
+
+**Current implementation**: No decorative curve exists. The bottom of the card is just the CURRENT / PREVIOUS flex row with no visual element connecting them.
+
+**Planned fix**: Add a lightweight inline `<svg>` element (or a `position: absolute` CSS pseudo-element) between the header and the numbers row. The curve should:
+- Use `stroke: var(--primary-container)` (`#F85F1B`) at ~30% opacity
+- Be a simple quadratic Bézier (`<path>` with `Q` command) sweeping from bottom-left to center-right
+- Sit behind the numbers with `position: absolute` and low `z-index`
+- Not interfere with the text layout
+
+Example SVG approach:
+```jsx
+<svg
+  viewBox="0 0 300 80"
+  style={{
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    width: '100%',
+    height: 80,
+    opacity: 0.3,
+    pointerEvents: 'none'
+  }}
+>
+  <path
+    d="M 0 60 Q 100 10, 200 40 T 300 20"
+    fill="none"
+    stroke="#F85F1B"
+    strokeWidth="2"
+  />
+</svg>
+```
+
+The card's `<div>` wrapper needs `position: relative` (already has it via glass-card styling) for this to work.
+
+---
+
+### Gap 3 — Trend Arrow Placement
+
+**Stitch reference**: The small orange down-arrow appears **horizontally between** the CURRENT and PREVIOUS values, roughly at the midpoint, visually sitting on or near the sparkline curve.
+
+**Current implementation**: The `TrendingDown`/`TrendingUp` icon is placed **below** the CURRENT weight number in a separate `<div>` with `marginTop: 4`.
+
+**Planned fix**: Move the trend icon out of the CURRENT column and into the flex gap between CURRENT and PREVIOUS. Restructure the bottom flex row to be a 3-part layout:
+```
+[ CURRENT column ] [ Trend Icon (centered) ] [ PREVIOUS column ]
+```
+The icon should be vertically centered relative to the numbers and use `alignSelf: 'center'`.
+
+---
+
+### Files to Modify
+
+| File | Change |
+|---|---|
+| `src/components/pages/DashboardPage.jsx` | All 3 gaps (title size, SVG sparkline, icon position) |
+
+### Priority Order
+
+1. **Gap 1** — Title size (`headline-md` → `headline-lg`) — trivial, 1 line
+2. **Gap 3** — Trend arrow placement — small restructure of flex layout
+3. **Gap 2** — Mini-sparkline SVG — new visual element, needs positioning tuning

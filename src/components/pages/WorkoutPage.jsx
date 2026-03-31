@@ -69,7 +69,7 @@ export default function WorkoutPage() {
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
 
   const finishBtnRef = useRef(null);
-  const [, setShowFAB] = useState(true);
+  const [showFAB, setShowFAB] = useState(true);
 
   useEffect(() => {
     if (!finishBtnRef.current) return;
@@ -100,7 +100,7 @@ export default function WorkoutPage() {
     s[si] = { ...s[si], [f]: f === 'done' ? v : v };
     e[ei] = { ...e[ei], sets: s };
     // Auto-start timer when marking set done
-    if (f === 'done' && v) setTimer({ active: true });
+    if (f === 'done' && v) setTimer({ active: true, ei, si });
     return { ...p, exs: e };
   });
 
@@ -184,8 +184,7 @@ export default function WorkoutPage() {
         </div>
       </div>
       
-      {/* Rest Timer rendered inline */}
-      {timer?.active && <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />}
+      {/* Rest Timer (moved inline to sets) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 16 }}>
         {session.exs.map((ex, ei) => {
           const focusType = ex.repsRange === '1-5' ? 'Strength' : (ex.repsRange === '15-20' || ex.repsRange === '12+') ? 'Endurance' : 'Hypertrophy';
@@ -218,10 +217,14 @@ export default function WorkoutPage() {
               {/* Set Rows */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {ex.sets.map((s, si) => (
-                  <div key={si} className="set-row" style={{ 
-                    background: 'var(--surface-container-low)', padding: 12, borderRadius: 12, transition: 'all 0.2s', 
-                    opacity: s.done ? 0.7 : 1, filter: s.done ? 'grayscale(50%)' : 'none' 
-                  }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-container-low)'}>
+                  <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {timer?.active && timer.ei === ei && timer.si === si && (
+                      <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />
+                    )}
+                    <div className="set-row" style={{ 
+                      background: 'var(--surface-container-low)', padding: 12, borderRadius: 12, transition: 'all 0.2s', 
+                      opacity: s.done ? 0.7 : 1, filter: s.done ? 'grayscale(50%)' : 'none' 
+                    }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-container-low)'}>
                     
                     <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
                     
@@ -249,6 +252,7 @@ export default function WorkoutPage() {
                       )}
                     </div>
                   </div>
+                  </div>
                 ))}
               </div>
               
@@ -275,14 +279,25 @@ export default function WorkoutPage() {
         </button>
       </section>
 
-      {/* Floating Live Indicator */}
+      {/* Floating Indicators */}
       <Portal>
-        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)' }}>
-          <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
-            <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
-            <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
-          </span>
-          <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Live tracking</span>
+        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+          {showFAB && (
+            <button 
+              onClick={finish}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: 'none', boxShadow: '0 4px 12px rgba(248, 95, 27, 0.3)', cursor: 'pointer' }}>
+              <Trophy size={10} color="var(--on-primary-container)" />
+              <span className="label-md" style={{ color: 'var(--on-primary-container)', fontSize: 9, fontWeight: 700 }}>Finish Workout</span>
+            </button>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)' }}>
+            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
+              <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
+              <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
+            </span>
+            <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Live tracking</span>
+          </div>
         </div>
       </Portal>
     </div>

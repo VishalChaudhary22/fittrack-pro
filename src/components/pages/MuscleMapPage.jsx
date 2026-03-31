@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Shield, Trophy, Crown, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Shield, Trophy, Sparkles, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
@@ -79,6 +79,23 @@ export default function MuscleMapPage() {
   const [activeTab, setActiveTab] = useState('leaderboard'); // 'leaderboard' | 'friends' | 'mystats'
   const [selectedPlayer, setSelectedPlayer] = useState(null); // player object or null
   const [filter, setFilter] = useState('all');
+  const [muscleFilter, setMuscleFilter] = useState('all');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setFilterOpen(false); // reset on tab change
+  }, [activeTab]);
 
   const muscleXP = useMemo(
     () => calcAllMuscleXP(workoutLogs, splits, user?.id),
@@ -104,8 +121,16 @@ export default function MuscleMapPage() {
       .map((p, i) => ({ ...p, rank: i + 1 }));
   }, [overall.totalXP, overall.name, muscleXP, user]);
 
-  const podium = fullLeaderboard.slice(0, 3);
-  const myRank = fullLeaderboard.find(p => p.isMe)?.rank;
+  const filteredLeaderboard = useMemo(() => {
+    if (muscleFilter === 'all') return fullLeaderboard;
+    return [...fullLeaderboard]
+      .sort((a, b) => (b.muscleXP?.[muscleFilter] || 0) - (a.muscleXP?.[muscleFilter] || 0))
+      .map((p, i) => ({ ...p, rank: i + 1 }));
+  }, [fullLeaderboard, muscleFilter]);
+
+  const podium = filteredLeaderboard.slice(0, 3);
+  const myRank = filteredLeaderboard.find(p => p.isMe)?.rank;
+  const topPercent = Math.max(1, Math.ceil((myRank / filteredLeaderboard.length) * 100));
 
   const filtered = useMemo(() => {
     if (filter === 'all') return MUSCLE_GROUPS;
@@ -133,7 +158,7 @@ export default function MuscleMapPage() {
     startOfWeek.setHours(0, 0, 0, 0);
     const uniqueDates = new Set(
       workoutLogs
-        .filter(l => (l.userId === user?.id || l.userId === 'vishal') && new Date(l.date) >= startOfWeek)
+        .filter(l => (l.userId === user?.id || l.userId === 'vishal') && new Date(l.date + 'T00:00:00') >= startOfWeek)
         .map(l => l.date)
     );
     return uniqueDates.size;
@@ -170,6 +195,47 @@ export default function MuscleMapPage() {
     <div className="pg-in">
       <PageHeader title="Iron League" sub="Your monthly strength league — climb the ranks" />
 
+      {/* ACHIEVEMENT BANNER (Global Only) */}
+      {activeTab === 'leaderboard' && (
+        <div className="glass-card" style={{
+          padding: '20px', marginBottom: 20, borderRadius: 20, position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: -40, right: -40, width: 120, height: 120,
+            background: 'rgba(248,95,27,0.1)', borderRadius: '50%', filter: 'blur(30px)',
+          }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div>
+              <div style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--primary)',
+                fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6,
+              }}>
+                IRON LEAGUE STANDING
+              </div>
+              <div style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 28,
+                color: 'var(--on-surface)', lineHeight: 1.2, marginBottom: 6,
+              }}>
+                {myRank === 1 ? 'You are #1!' : `You are in the top ${topPercent}%`}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
+                {overall.progress < 1
+                  ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to reach the next tier`
+                  : '✦ Max tier reached'}
+              </div>
+            </div>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+              background: 'linear-gradient(135deg, #FFB59B, #F85F1B)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 24px rgba(232,84,13,0.3)',
+            }}>
+              <Sparkles size={28} color="#fff" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tab Switcher */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4, border: 'none' }}>
         {tabs.map(t => (
@@ -189,41 +255,6 @@ export default function MuscleMapPage() {
       {/* TAB 1: LEADERBOARD                                 */}
       {/* ═══════════════════════════════════════════════════ */}
       {activeTab === 'leaderboard' && (<>
-        
-        {/* ACHIEVEMENT BANNER */}
-        <div className="glass-card" style={{
-          padding: '20px', borderRadius: 20, marginBottom: 24,
-          display: 'flex', alignItems: 'center', gap: 16,
-          position: 'relative', overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute', top: -30, right: -30, width: 150, height: 150,
-            background: 'radial-gradient(circle, rgba(248,95,27,0.15) 0%, transparent 70%)',
-            pointerEvents: 'none'
-          }} />
-          <div style={{
-            width: 48, height: 48, borderRadius: 14,
-            background: 'linear-gradient(135deg, #FFB59B, #F85F1B)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 16px rgba(248,95,27,0.4)', flexShrink: 0,
-          }}>
-            <Trophy size={24} color="#fff" />
-          </div>
-          <div>
-            <div style={{
-              fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 700,
-              color: 'var(--on-surface)', marginBottom: 4, lineHeight: 1.2
-            }}>
-              You are rank #{myRank}
-            </div>
-            <div style={{
-              fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 12, fontWeight: 600,
-              color: 'var(--primary)',
-            }}>
-              {overall.progress < 1 ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to Next Tier` : 'Max Tier Reached!'}
-            </div>
-          </div>
-        </div>
 
         {/* PODIUM — Top 3 Players */}
         <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 28, padding: '0 8px' }}>
@@ -233,8 +264,9 @@ export default function MuscleMapPage() {
             // Medal color by actual rank, not by slot index
             const medalColor = player.rank === 1 ? 'var(--primary)'
               : player.rank === 2 ? '#C0C0C0'
-              : 'var(--outline-variant)';
+              : '#CD7F32';
             const rankLabel = player.rank === 1 ? '1st' : player.rank === 2 ? '2nd' : '3rd';
+            const podiumXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
 
             return (
               <div key={player.id} style={{
@@ -243,16 +275,19 @@ export default function MuscleMapPage() {
               }} onClick={() => setSelectedPlayer(player)}>
                 <div style={{ position: 'relative', marginBottom: isCenter ? 16 : 12 }}>
                   {isCenter && (
-                    <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)' }}>
-                      <Crown size={22} color="var(--primary)" fill="rgba(255,181,155,0.3)" />
+                    <div style={{ position: 'absolute', top: -30, left: '50%', transform: 'translateX(-50%)' }}>
+                      <Trophy size={24} color="#CD7F32" />
                     </div>
                   )}
-                  <AvatarInitials
-                    initials={player.initials}
-                    color={medalColor}
-                    size={isCenter ? 72 : 56}
-                    borderWidth={isCenter ? 4 : 2}
-                  />
+                  <div style={{
+                    width: isCenter ? 72 : 56, height: isCenter ? 72 : 56, borderRadius: '50%',
+                    border: `${isCenter ? 4 : 3}px solid ${medalColor}`, background: `${medalColor}15`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+                    fontSize: isCenter ? 22 : 17, color: medalColor,
+                  }}>
+                    {player.rank}
+                  </div>
                   <div style={{
                     position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)',
                     padding: '2px 10px', borderRadius: 20, fontSize: 10, fontWeight: 800,
@@ -276,16 +311,68 @@ export default function MuscleMapPage() {
                   fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
                   fontSize: isCenter ? 13 : 11, color: medalColor, marginTop: 2,
                 }}>
-                  {player.totalXP >= 1000 ? `${(player.totalXP / 1000).toFixed(1)}K` : player.totalXP} XP
+                  {podiumXP >= 1000 ? `${(podiumXP / 1000).toFixed(1)}K` : podiumXP} XP
                 </div>
               </div>
             );
           })}
         </section>
 
-        {/* SCROLLABLE RANKED LIST (all ranks — podium users also appear here) */}
+        {/* LIST HEADER & FILTER (Fix 3 & Fix 5) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 16px 8px', position: 'relative', zIndex: 10 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+            Rank & Athlete
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+              {muscleFilter === 'all' ? 'Total XP' : 'Muscle XP'}
+            </span>
+            <div ref={filterRef} style={{ position: 'relative' }}>
+              <button 
+                onClick={() => setFilterOpen(!filterOpen)}
+                style={{
+                  background: muscleFilter === 'all' ? 'var(--surface-container-highest)' : 'var(--primary)',
+                  color: muscleFilter === 'all' ? 'var(--on-surface)' : 'var(--on-primary)',
+                  border: 'none', padding: '4px 8px', borderRadius: 12, cursor: 'pointer',
+                  fontSize: 10, fontWeight: 700, fontFamily: "'Be Vietnam Pro', sans-serif",
+                  boxShadow: muscleFilter !== 'all' ? '0 0 12px rgba(248,95,27,0.4)' : 'none',
+                }}
+              >
+                {muscleFilter === 'all' ? 'All Muscles' : MUSCLE_GROUPS.find(m => m.key === muscleFilter)?.label} ▾
+              </button>
+              {filterOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: 8,
+                  background: 'rgba(53,52,55,0.9)', backdropFilter: 'blur(16px)',
+                  borderRadius: 16, padding: 8, minWidth: 160,
+                  boxShadow: 'var(--shadow-ambient)', border: '1px solid var(--outline-variant)'
+                }}>
+                  <div 
+                    onClick={() => { setMuscleFilter('all'); setFilterOpen(false); }}
+                    style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: muscleFilter === 'all' ? 'var(--primary)' : 'var(--on-surface)', borderRadius: 8, background: muscleFilter === 'all' ? 'rgba(255,181,155,0.1)' : 'transparent' }}
+                  >
+                    All Muscles
+                  </div>
+                  {MUSCLE_GROUPS.map(m => (
+                    <div 
+                      key={m.key}
+                      onClick={() => { setMuscleFilter(m.key); setFilterOpen(false); }}
+                      style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: muscleFilter === m.key ? 'var(--primary)' : 'var(--on-surface)', borderRadius: 8, background: muscleFilter === m.key ? 'rgba(255,181,155,0.1)' : 'transparent' }}
+                    >
+                      {m.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* SCROLLABLE RANKED LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {fullLeaderboard.map(player => (
+          {filteredLeaderboard.map(player => {
+            const rowXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
+            return (
             <div key={player.id}
               onClick={() => setSelectedPlayer(player)}
               className="glass-card"
@@ -313,7 +400,7 @@ export default function MuscleMapPage() {
 
               <AvatarInitials
                 initials={player.initials}
-                color={player.isMe ? 'var(--primary)' : 'var(--outline-variant)'}
+                color={player.color}
                 size={40} borderWidth={1}
               />
 
@@ -337,7 +424,7 @@ export default function MuscleMapPage() {
                   fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 11,
                   color: 'var(--on-surface-variant)', marginTop: 2
                 }}>
-                  {player.tier}
+                  {muscleFilter === 'all' ? player.tier : MUSCLE_GROUPS.find(m => m.key === muscleFilter)?.label}
                 </div>
               </div>
 
@@ -346,14 +433,15 @@ export default function MuscleMapPage() {
                   fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
                   fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface)'
                 }}>
-                  {player.totalXP >= 1000 ? `${(player.totalXP / 1000).toFixed(1)}K` : player.totalXP}
+                  {rowXP >= 1000 ? `${(rowXP / 1000).toFixed(1)}K` : rowXP}
                 </div>
                 <div style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)', letterSpacing: '.08em' }}>
                   XP
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </>)}
 

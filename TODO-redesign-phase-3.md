@@ -821,3 +821,296 @@ the `glass-card` class on list rows too, accepting the 60% vs 40% difference.
   reused in the `PlayerDetailModal` if exported, or duplicated.
 - **`MuscleCard` sub-component**: Keep the existing `MuscleCard` component defined inside
   `MuscleMapPage.jsx` (lines 28–73). Used in the My Stats muscle filter list.
+
+---
+
+## 🐛 Phase 3 — Bug Fixes & Enhancements (Post-Ship)
+
+> **Status:** Planned · Not yet implemented
+> **Reference screenshots:** Stitch-generated ranking card, podium, and table designs
+> **Gap analysis:** Reviewed 2026-04-01 against live codebase — see corrections & additions below
+
+These items were identified after the initial Phase 3 ship.
+Original 5 fixes have been corrected for accuracy; 3 new bugs added (Fixes 6–8).
+
+---
+
+### Fix 1 — Achievement Banner: Match Stitch Design Exactly
+
+**Problem:** The current banner (`MuscleMapPage.jsx` L193–226) doesn't match the Stitch reference:
+- Label reads `"You are rank #X"` but Stitch shows **"IRON LEAGUE STANDING"** small label + hero `"You are in the top X%"` text
+- Icon is `<Trophy />` (not `<Zap />` as the original Task 4d spec claimed) — Stitch shows a sparkle/star icon
+- Banner sits **inside** the `activeTab === 'leaderboard'` block (below tabs) — Stitch shows it **above** the tab switcher
+
+**Implementation steps:**
+- [ ] Add `Sparkles` to the lucide-react import on L2 (replaces `Trophy` usage in banner only — `Trophy` is still used elsewhere in My Stats tab)
+- [ ] Compute `topPercent` above the return statement:
+  ```js
+  const topPercent = Math.ceil((myRank / fullLeaderboard.length) * 100);
+  ```
+  Show `"You are #1!"` when `myRank === 1`
+- [ ] **Move banner JSX above the tab `<nav>`** — currently at L194 inside `{activeTab === 'leaderboard' && (<>`, it needs to be rendered **before** the tab switcher `<div>` (L174), unconditionally on the Global tab. Simplest approach: render banner before the tab `<nav>`, wrap in `{activeTab === 'leaderboard' && ( ... )}` separately
+- [ ] Replace current banner content:
+  - Small label: `"IRON LEAGUE STANDING"` in `var(--primary)`, `10px`, uppercase, `letterSpacing: '1px'`
+  - Hero text: `"You are in the top {topPercent}%"` — `28px`, `fontWeight: 800`, `lineHeight: 1.2`, `color: 'var(--on-surface)'`
+  - Sub-text: `"{Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to reach the next tier"` — `13px`, `color: 'var(--on-surface-variant)'`
+  - Right side: `<Sparkles size={28} />` in a `52×52` ember-gradient circle with `boxShadow: '0 0 24px rgba(232,84,13,0.3)'`
+- [ ] Keep `.glass-card` class ✅ (already used) — no hard-coded dark backgrounds
+
+**Files to touch:** `src/components/pages/MuscleMapPage.jsx` (L2 imports, L194–226 banner JSX, move above L174)
+
+---
+
+### Fix 2 — Podium: Match Stitch Design (Rank Numbers + Trophy Icon)
+
+**Problem:** Current podium (`MuscleMapPage.jsx` L228–284) uses `<AvatarInitials>` with initials text + `<Crown>` above #1. Stitch shows:
+- A **large rank number** ("1", "2", "3") inside the circle — no initials
+- **Trophy icon** (`<Trophy />`) centred above the #1 circle (not Crown)
+- **Bronze** ring for #3: `'#CD7F32'` (current code uses `'var(--outline-variant)'` which is nearly invisible)
+
+**Implementation steps:**
+- [ ] Replace `<AvatarInitials>` in the podium section (L250–255) with a plain circle `<div>` showing `player.rank` as large text:
+  - `width/height`: `72px` (center), `56px` (sides); `borderRadius: '50%'`
+  - `border`: `3–4px solid {medalColor}`; `background: '{medalColor}15'`
+  - Inner text: rank number, `fontFamily: "'Space Grotesk', sans-serif"`, `22px` bold (center) / `17px` (sides)
+- [ ] Replace `<Crown>` (L247) with `<Trophy size={24} />` above the center circle
+  - Color: `'#CD7F32'` (bronze/copper as per Stitch screenshot) or `'var(--primary)'`
+- [ ] Update medal colors (L234–236): `rank===1` → `'var(--primary)'`, `rank===2` → `'#C0C0C0'`, `rank===3` → `'#CD7F32'`
+- [ ] **Note:** After this change, `<AvatarInitials>` is only used in the **ranked list rows** (not podium). `Crown` import becomes dead code — remove from L2 imports unless used elsewhere
+- [ ] Keep click handler → `setSelectedPlayer(player)` for modal ✅
+
+**Files to touch:** `src/components/pages/MuscleMapPage.jsx` (L2 imports, L228–284 podium section)
+
+---
+
+### Fix 3 — Ranked List: Column Headers + Avatar Visibility
+
+**Problem (a): No column headers.**
+Stitch shows `"RANK & ATHLETE"` (left) and `"TOTAL XP"` (right) as small uppercase column labels above the list. Currently there are none above the ranked list (L286–357).
+
+**Problem (b): Avatars too faint.**
+`AvatarInitials.jsx` L5–6: `border: ${borderWidth}px solid ${color}60` (38% opacity) and `background: ${color}15` (8% opacity) — nearly invisible on dark cards.
+Ranked list L316: passes `color='var(--outline-variant)'` for non-"You" rows — `--outline-variant` resolves to `rgba(90,65,56,0.15)` which is effectively invisible.
+
+**Implementation steps — Column Headers:**
+- [ ] Add header row above the ranked list `<div>` (before L287):
+  ```jsx
+  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 16px 8px' }}>
+    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+      Rank & Athlete
+    </span>
+    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+      Total XP
+    </span>
+  </div>
+  ```
+  **⚠️ Note:** In JSX use plain `&` for ampersand (not HTML entity `&amp;`). The `&amp;` only applies inside raw HTML.
+
+**Implementation steps — Avatar Visibility:**
+- [ ] In `AvatarInitials.jsx` (L5–6), increase opacity while keeping dynamic `borderWidth` prop:
+  ```js
+  // Before:
+  border: `${borderWidth}px solid ${color}60`,
+  background: `${color}15`,
+  // After:
+  border: `${borderWidth}px solid ${color}`,   // full opacity border
+  background: `${color}25`,                     // ~15% opacity fill (up from ~8%)
+  ```
+  Also bump `fontWeight: 800` (L9, currently 700)
+- [ ] In ranked list rows (L316): pass `color={player.color}` for **all** players, not `'var(--outline-variant)'`:
+  ```js
+  // Before:
+  color={player.isMe ? 'var(--primary)' : 'var(--outline-variant)'}
+  // After:
+  color={player.color}
+  ```
+
+**Files to touch:** `src/components/shared/AvatarInitials.jsx` (L5–6, L9), `src/components/pages/MuscleMapPage.jsx` (L286 header, L316 color prop)
+
+---
+
+### Fix 4 — My Stats: Muscle Map Shows "Untrained" After Logging Workouts
+
+**Root cause analysis (corrected):**
+
+The TODO previously described this as a `startOfMonth` construction bug. That was **inaccurate** — `startOfMonth` is constructed via `new Date()` + `setDate(1)` + `setHours(0,0,0,0)` (L135–137 of `muscleData.js`) which correctly uses local time.
+
+The **actual bug** is on the **comparison side** (L141):
+```js
+new Date(l.date) >= startOfMonth
+```
+If `l.date` is a bare date string like `"2026-03-31"` (no time component), then `new Date("2026-03-31")` parses as **midnight UTC**, which is `2026-03-30T18:30:00` in IST (UTC−5:30). This means a workout logged on March 31 can be filtered out because it appears to fall on March 30 in local time.
+
+**The same bug exists in `getWeeklyMuscles()`** (L294 of `muscleData.js`):
+```js
+new Date(l.date) >= startOfWeek
+```
+
+**Additional root cause candidates (hypotheses — not yet confirmed):**
+- **Exercise name mismatch**: Logged exercise name not found in `exPrimaryMap` or `exMuscleMap` → 0 XP
+- **Missing `muscle` field**: `exMuscleMap` only populated if `ex.muscle` exists in split definition
+
+**Implementation steps:**
+- [ ] **Fix date parsing** in `muscleData.js` — `calcAllMuscleXP()` L141:
+  ```js
+  // Before (L141):
+  new Date(l.date) >= startOfMonth
+  // After:
+  new Date(l.date + 'T00:00:00') >= startOfMonth
+  ```
+- [ ] **Apply same fix** to `getWeeklyMuscles()` L294:
+  ```js
+  // Before (L294):
+  new Date(l.date) >= startOfWeek
+  // After:
+  new Date(l.date + 'T00:00:00') >= startOfWeek
+  ```
+- [ ] **Also fix `thisWeekDays` in `MuscleMapPage.jsx`** L136 which has the same pattern:
+  ```js
+  // Before (L136):
+  new Date(l.date) >= startOfWeek
+  // After:
+  new Date(l.date + 'T00:00:00') >= startOfWeek
+  ```
+- [ ] **Add dev warning**: After L142 in `muscleData.js`, add:
+  ```js
+  if (userLogs.length === 0) {
+    console.warn('calcAllMuscleXP: no logs found for user', userId, 'this month. Total logs:', workoutLogs.length);
+  }
+  ```
+- [ ] **(Investigate)** Verify splits data structure: confirm exercises have at least one of `primaryMuscle`, `muscle`, or `secondaryMuscles` — log missing mappings
+- [ ] **(Smoke test)** Temporarily hardcode `muscleXP = { chest: 5000, back: 3000 }` in `MuscleMapPage.jsx` to confirm `<BodyMapSVG>` renders highlights — isolates SVG rendering vs XP calculation bug
+
+**Files to touch:** `src/data/muscleData.js` (L141, L294), `src/components/pages/MuscleMapPage.jsx` (L136, smoke test)
+
+---
+
+### Fix 5 — Exercise Filter Dropdown on Global Tab
+
+**Feature:** A sleek pill-button dropdown above the ranked list to filter/re-sort by a specific muscle group. When active, the leaderboard sorts by `player.muscleXP[selectedMuscle]` instead of `player.totalXP`.
+
+**Design:**
+- Trigger: small pill `"All Muscles ▾"` in top-right of the column header row (inline with "RANK & ATHLETE")
+- Active filter: pill turns amber (`var(--primary)`) with glow
+- Dropdown: floating dark glass panel (`position: absolute`, `zIndex: 50`, `minWidth: 180px`) with smooth scale/opacity transition — **not** a native `<select>`
+- Click-outside closes it
+
+**Implementation steps:**
+- [ ] Add state: `muscleFilter = 'all'`, `filterOpen = false`
+- [ ] Add `filteredLeaderboard` useMemo:
+  ```js
+  const filteredLeaderboard = useMemo(() => {
+    if (muscleFilter === 'all') return fullLeaderboard;
+    return [...fullLeaderboard]
+      .sort((a, b) => (b.muscleXP?.[muscleFilter] || 0) - (a.muscleXP?.[muscleFilter] || 0))
+      .map((p, i) => ({ ...p, rank: i + 1 }));
+  }, [fullLeaderboard, muscleFilter]);
+  ```
+- [ ] Update `podium` and ranked list to use `filteredLeaderboard`
+- [ ] Merge the column-header row (Fix 3) with the filter pill — layout: `[RANK & ATHLETE] ... [All Muscles ▾]`
+- [ ] Implement custom dropdown menu:
+  - Options: `[{ key: 'all', label: 'All Muscles' }, ...MUSCLE_GROUPS.map(m => ({ key: m.key, label: m.label }))]`
+  - Click option → `setMuscleFilter(key)`, `setFilterOpen(false)`
+  - Click-outside: `useEffect` with `mousedown` on `document`, ref on the dropdown container
+- [ ] When `muscleFilter !== 'all'`, XP column shows muscle-specific XP; sub-label under name shows muscle name
+- [ ] `useEffect` to reset `filterOpen = false` when `activeTab` changes
+
+**Files to touch:** `src/components/pages/MuscleMapPage.jsx` only
+
+---
+
+### Fix 6 — PlayerDetailModal: Progress Bar Renders at Wrong Width ⚡ NEW
+
+**Problem:** `getRank()` and `getOverallRank()` return `progress` as a **0–1 float** (e.g., `0.82`), but the modal uses it directly as a CSS percentage, resulting in a bar that's `0.82%` wide instead of `82%`.
+
+**Affected lines in `PlayerDetailModal.jsx`:**
+- **L168**: `width: '${overall.progress}%'` → shows ~1px wide bar instead of 82% filled
+- **L171**: `<span>{overall.progress}%</span>` → shows "0.82%" text instead of "82%"
+- **L214**: `width: '${m.rankInfo.progress}%'` → per-muscle mini bars also broken
+
+**Implementation steps:**
+- [ ] Fix overall rank progress bar (L168):
+  ```js
+  // Before:
+  width: `${overall.progress}%`
+  // After:
+  width: `${overall.progress * 100}%`
+  ```
+- [ ] Fix overall rank progress text (L171):
+  ```js
+  // Before:
+  <span>{overall.progress}%</span>
+  // After:
+  <span>{Math.round(overall.progress * 100)}%</span>
+  ```
+- [ ] Fix per-muscle mini progress bars (L214):
+  ```js
+  // Before:
+  width: `${m.rankInfo.progress}%`
+  // After:
+  width: `${m.rankInfo.progress * 100}%`
+  ```
+
+**Files to touch:** `src/components/shared/PlayerDetailModal.jsx` (L168, L171, L214)
+
+---
+
+### Fix 7 — PlayerDetailModal: Light Theme Hard-coded Dark Backgrounds ⚡ NEW
+
+**Problem:** The per-muscle breakdown rows in `PlayerDetailModal.jsx` L188 use:
+```js
+background: 'rgba(53,52,55,0.2)'  // Hard-coded dark RGBA
+```
+This renders as a dark translucent tint on light-theme backgrounds, making the rows look broken.
+
+This is the same class of bug noted in the leaderboard list rows (Fix 3's light-theme note), but specific to the modal.
+
+**Implementation steps:**
+- [ ] Replace hard-coded RGBA in per-muscle rows (L188):
+  ```js
+  // Before:
+  background: 'rgba(53,52,55,0.2)'
+  // After:
+  background: 'var(--surface-container-highest)'
+  ```
+  Alternatively, use the `glass-card` class if the frosted effect is desired.
+
+**Files to touch:** `src/components/shared/PlayerDetailModal.jsx` (L188)
+
+---
+
+### Fix 8 — Import Cleanup Alignment ⚡ NEW
+
+**Problem:** After implementing Fixes 1–2, the import statement in `MuscleMapPage.jsx` needs updating:
+- `Crown` is imported (L2) but only used in the podium. Fix 2 replaces it with `Trophy` (already imported). `Crown` becomes dead code.
+- `Sparkles` needs to be added for Fix 1's banner icon.
+- `Zap` is referenced in the original Task 4d spec but was never actually imported or used.
+
+**Implementation steps:**
+- [ ] Update L2 imports in `MuscleMapPage.jsx`:
+  ```js
+  // Before:
+  import { Shield, Trophy, Crown, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
+  // After:
+  import { Shield, Trophy, Sparkles, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
+  ```
+  (Remove `Crown`, add `Sparkles`)
+
+**Files to touch:** `src/components/pages/MuscleMapPage.jsx` (L2)
+
+---
+
+### Phase 3.1 Bug Fix Checklist
+
+**Original fixes (corrected):**
+- [x] **Fix 1** — Banner: rename to "IRON LEAGUE STANDING", hero `top X%` text, Sparkles icon (replaces Trophy in banner), move above tabs
+- [x] **Fix 2** — Podium: rank number in circle (not initials), Trophy above #1 (replaces Crown), bronze `#CD7F32` for #3
+- [x] **Fix 3a** — Table column headers: "RANK & ATHLETE" / "TOTAL XP" (use plain `&` in JSX, not `&amp;`)
+- [x] **Fix 3b** — Avatar visibility: `AvatarInitials.jsx` border full opacity + bg `25` opacity; use `player.color` in ranked rows
+- [x] **Fix 4** — Date-parse fix in `muscleData.js` L141 + L294 (`+T00:00:00`); same fix in `MuscleMapPage.jsx` L136; add dev warning; investigate exercise mapping
+- [x] **Fix 5** — Exercise filter dropdown: pill trigger + custom glass menu + `filteredLeaderboard` by muscle XP
+
+**New bugs (from gap analysis):**
+- [x] **Fix 6** — Modal progress bar: multiply `progress` by 100 for CSS width (L168, L171, L214 of PlayerDetailModal.jsx)
+- [x] **Fix 7** — Modal light theme: replace `rgba(53,52,55,0.2)` with `var(--surface-container-highest)` (L188 of PlayerDetailModal.jsx)
+- [x] **Fix 8** — Import cleanup: remove `Crown`, add `Sparkles` in MuscleMapPage.jsx L2

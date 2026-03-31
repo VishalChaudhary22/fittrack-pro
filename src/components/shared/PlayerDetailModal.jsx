@@ -165,10 +165,10 @@ export default function PlayerDetailModal({ player, realMuscleXP, realUserName, 
             </div>
             {/* Progress bar */}
             <div style={{ height: 6, width: '100%', background: 'var(--surface-container-highest)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${overall.progress}%`, background: `linear-gradient(90deg, ${overall.color}, #FFF)`, borderRadius: 3, opacity: 0.8 }} />
+              <div style={{ height: '100%', width: `${overall.progress * 100}%`, background: `linear-gradient(90deg, ${overall.color}, #FFF)`, borderRadius: 3, opacity: 0.8 }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--on-surface-variant)', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
-              <span>{overall.progress}%</span>
+              <span>{Math.round(overall.progress * 100)}%</span>
               <span>{overall.nextXP ? `${overall.nextXP.toLocaleString()} XP to Next` : 'Max Rank'}</span>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function PlayerDetailModal({ player, realMuscleXP, realUserName, 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {sortedMuscles.map(m => (
               <div key={m.key} style={{
-                background: 'rgba(53,52,55,0.2)', // Very subtle glass
+                background: 'var(--surface-container-highest)', // Use theme token instead of hardcoded RGBA
                 borderRadius: 12, padding: '12px 16px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between'
               }}>
@@ -211,7 +211,7 @@ export default function PlayerDetailModal({ player, realMuscleXP, realUserName, 
                     height: 2, width: 40, background: 'var(--surface-container-highest)', 
                     borderRadius: 1, marginTop: 4, overflow: 'hidden' 
                   }}>
-                    <div style={{ height: '100%', width: `${m.rankInfo.progress}%`, background: m.rankInfo.color }} />
+                    <div style={{ height: '100%', width: `${m.rankInfo.progress * 100}%`, background: m.rankInfo.color }} />
                   </div>
                 </div>
               </div>

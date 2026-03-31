@@ -138,8 +138,12 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
   
   const userLogs = workoutLogs.filter(l => 
     (l.userId === userId || l.userId === 'vishal') && 
-    new Date(l.date) >= startOfMonth
+    new Date(l.date + 'T00:00:00') >= startOfMonth
   );
+
+  if (userLogs.length === 0 && workoutLogs.length > 0) {
+    console.warn('calcAllMuscleXP: no logs found for user', userId, 'this month. Total logs:', workoutLogs.length);
+  }
 
   // Process workout logs
   userLogs.forEach(log => {
@@ -291,7 +295,7 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
 
   const userLogs = workoutLogs.filter(l =>
     (l.userId === userId || l.userId === 'vishal') &&
-    new Date(l.date) >= startOfWeek
+    new Date(l.date + 'T00:00:00') >= startOfWeek
   );
 
   userLogs.forEach(log => {

@@ -285,17 +285,20 @@ export default function WorkoutPage() {
           {showFAB && (
             <button 
               onClick={finish}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', cursor: 'pointer' }}>
-              <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Finish Workout</span>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', cursor: 'pointer', width: 130 }}>
+              <div style={{ display: 'flex', width: 8, height: 8, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Check size={10} color="var(--primary)" strokeWidth={3} />
+              </div>
+              <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9, whiteSpace: 'nowrap' }}>Finish Workout</span>
             </button>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)' }}>
-            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', width: 130 }}>
+            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8, flexShrink: 0 }}>
               <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
               <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
             </span>
-            <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9 }}>Live tracking</span>
+            <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9, whiteSpace: 'nowrap' }}>Live tracking</span>
           </div>
         </div>
       </Portal>

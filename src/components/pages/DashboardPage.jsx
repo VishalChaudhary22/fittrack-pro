@@ -155,13 +155,13 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>PERFORMANCE TREND</div>
                 <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 2, lineHeight: 1.1 }}>WEIGHT<br/>ANALYSIS</div>
               </div>
-              <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700, position: 'relative', zIndex: 1 }}>
-                {monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'lbs' : 'kg'} THIS MONTH
+              <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 14, padding: '6px 12px', fontSize: 10, fontWeight: 700, position: 'relative', zIndex: 1, textAlign: 'center', lineHeight: 1.2 }}>
+                {monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'LBS' : 'KG'} THIS<br/>MONTH
               </span>
             </div>
             
-            <svg viewBox="0 0 300 80" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 10, left: 0, width: '100%', height: 60, opacity: 0.3, pointerEvents: 'none', zIndex: 0 }}>
-              <path d="M 0 50 Q 80 10, 150 30 T 300 10" fill="none" stroke="var(--primary-container)" strokeWidth="3" />
+            <svg viewBox="0 0 300 80" preserveAspectRatio="none" style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: 75, opacity: 0.35, pointerEvents: 'none', zIndex: 0 }}>
+              <path d="M 0 75 Q 120 75, 180 40 T 300 20" fill="none" stroke="var(--primary-container)" strokeWidth="3" />
             </svg>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 16, position: 'relative', zIndex: 1 }}>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
               </div>
 
               {allUserLogs.length >= 2 && (
-                <div>
+                <div style={{ marginLeft: 16 }}>
                   <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>PREVIOUS</div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, color: 'var(--on-surface-variant)', opacity: 0.55, lineHeight: 1 }}>

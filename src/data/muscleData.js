@@ -126,6 +126,14 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
           if (ex.primaryMuscle) exPrimaryMap[ex.name] = ex.primaryMuscle;
           if (ex.secondaryMuscles) exSecondaryMap[ex.name] = ex.secondaryMuscles;
           if (ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+          // Also register variant names so logged variant exercises map correctly
+          if (ex.variants) {
+            ex.variants.forEach(v => {
+              if (ex.primaryMuscle) exPrimaryMap[v] = ex.primaryMuscle;
+              if (ex.secondaryMuscles) exSecondaryMap[v] = ex.secondaryMuscles;
+              if (ex.muscle) exMuscleMap[v] = ex.muscle;
+            });
+          }
         }
       });
     });
@@ -288,6 +296,13 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
           if (ex.primaryMuscle) exPrimaryMap[ex.name] = ex.primaryMuscle;
           if (ex.secondaryMuscles) exSecondaryMap[ex.name] = ex.secondaryMuscles;
           if (ex.muscle) exMuscleMap[ex.name] = ex.muscle;
+          if (ex.variants) {
+            ex.variants.forEach(v => {
+              if (ex.primaryMuscle) exPrimaryMap[v] = ex.primaryMuscle;
+              if (ex.secondaryMuscles) exSecondaryMap[v] = ex.secondaryMuscles;
+              if (ex.muscle) exMuscleMap[v] = ex.muscle;
+            });
+          }
         }
       });
     });

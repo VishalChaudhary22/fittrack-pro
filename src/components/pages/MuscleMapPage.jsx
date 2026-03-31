@@ -216,7 +216,7 @@ export default function MuscleMapPage() {
                 fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 28,
                 color: 'var(--on-surface)', lineHeight: 1.2, marginBottom: 6,
               }}>
-                {myRank === 1 ? 'You are #1!' : `You are in the top ${topPercent}%`}
+                {myRank === 1 ? 'You are #1!' : topPercent <= 50 ? `You are in the top ${topPercent}%` : `You are rank #${myRank}`}
               </div>
               <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
                 {overall.progress < 1
@@ -257,7 +257,7 @@ export default function MuscleMapPage() {
       {activeTab === 'leaderboard' && (<>
 
         {/* PODIUM — Top 3 Players */}
-        <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 28, padding: '0 8px' }}>
+        <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 36, paddingTop: 40, padding: '40px 8px 0' }}>
           {/* Visual order: [2nd, 1st, 3rd] left-to-right. Slot index 1 is center (elevated). */}
           {[podium[1], podium[0], podium[2]].filter(Boolean).map((player, slotIndex) => {
             const isCenter = slotIndex === 1;  // center slot is rank 1

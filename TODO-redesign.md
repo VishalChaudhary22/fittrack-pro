@@ -1405,5 +1405,22 @@ During implementation, use `generate_image` tool for each of the 12 character po
 8. **9.6** Personal Details card restyle
 9. **9.7** Settings & Actions card restyle
 10. **9.3** Avatar Picker Modal (+ canvas-compress upload handler)
-11. **9.9** Verify final section order + marginBottom consistency
 12. **9.12** Anti-pattern sweep (expanded 13-point checklist)
+
+---
+
+## Phase 9 — Bug Fixes (Post-Implementation)
+
+> These issues were identified after the initial Phase 9 implementation and must be resolved before the profile page is considered production-ready.
+
+### Bug Fix Priority Order
+
+- [x] **Bug 9.1: Avatar Level Badge Clipping**
+  - **Issue:** The `LVL X` badge on the bottom right of the profile picture is cut out and not fully visible.
+  - **Cause:** The outer container of the avatar hero section (`<div style={{ position: 'relative', width: 128... }}`) has `overflow: 'hidden'`, clipping the absolute-positioned badge mounted at `bottom: -8, right: -8`.
+  - **Fix:** Remove `overflow: 'hidden'` from the outer container. The inner container wrapping the image already has `overflow: 'hidden'` to restrict the image bounds, allowing the outer container to freely overflow the badge.
+
+- [x] **Bug 9.2: Avatar Selection Modal Positioning**
+  - **Issue:** The profile picture selection pop-up appears at the bottom of the screen after scrolling down, instead of appearing centered where the user is looking.
+  - **Cause:** The `AvatarPickerModal` wrapper uses `alignItems: 'flex-end'`, anchoring the modal to the bottom of the viewport.
+  - **Fix:** Update the modal overlay's fixed container to use `alignItems: 'center'` and `justifyContent: 'center'` so the pop-up is perfectly centered in the screen regardless of scroll position.

@@ -68,8 +68,8 @@ function AvatarPickerModal({ open, onClose }) {
   const filtered = PRESETS.filter(p => p.universe === tab);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(24px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'flex-end' }} onClick={onClose}>
-      <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto', background: 'var(--surface-container-low)', borderRadius: '24px 24px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(24px)', zIndex: 'var(--z-modal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ width: '100%', maxWidth: '500px', margin: '0 20px', background: 'var(--surface-container-low)', borderRadius: '24px', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', paddingBottom: 4 }}>
           {tabs.map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ padding: '8px 16px', borderRadius: '12px', border: 'none', background: tab === t ? 'var(--primary)' : 'var(--surface-container-highest)', color: tab === t ? 'var(--on-primary)' : 'var(--on-surface)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '12px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t}</button>
@@ -178,7 +178,7 @@ export default function ProfilePage() {
       {/* Avatar Hero (9.2) */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32, position: 'relative' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 250, height: 250, background: 'radial-gradient(circle, rgba(255,181,155,0.15) 0%, transparent 70%)', zIndex: -1 }} />
-        <div style={{ position: 'relative', width: 128, height: 128, borderRadius: 24, padding: 4, border: '2px solid rgba(255,181,155,0.20)', boxShadow: 'var(--glow-primary)', background: 'var(--surface-container)', cursor: 'pointer', overflow: 'hidden' }} onClick={() => setShowAvatarPicker(true)}>
+        <div style={{ position: 'relative', width: 128, height: 128, borderRadius: 24, padding: 4, border: '2px solid rgba(255,181,155,0.20)', boxShadow: 'var(--glow-primary)', background: 'var(--surface-container)', cursor: 'pointer' }} onClick={() => setShowAvatarPicker(true)}>
           <div style={{ width: '100%', height: '100%', borderRadius: 18, overflow: 'hidden', position: 'relative', background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {user.avatarUrl ? <img src={user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 700, color: 'var(--on-surface-variant)' }}>{user.avatar}</div>}
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity=1} onMouseLeave={e => e.currentTarget.style.opacity=0}><Camera size={32} color="#fff" /></div>

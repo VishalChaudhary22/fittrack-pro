@@ -1424,3 +1424,707 @@ During implementation, use `generate_image` tool for each of the 12 character po
   - **Issue:** The profile picture selection pop-up appears at the bottom of the screen after scrolling down, instead of appearing centered where the user is looking.
   - **Cause:** The `AvatarPickerModal` wrapper uses `alignItems: 'flex-end'`, anchoring the modal to the bottom of the viewport.
   - **Fix:** Update the modal overlay's fixed container to use `alignItems: 'center'` and `justifyContent: 'center'` so the pop-up is perfectly centered in the screen regardless of scroll position.
+
+---
+
+## Phase 10 — Dashboard (Home) Page Redesign (Kinetic Elite)
+
+**Status:** Planned (Reviewed)
+**Goal:** Rebuild `DashboardPage.jsx` to match the Kinetic Elite / Stitch design aesthetic, incorporating all Stitch-provided elements while selectively preserving existing functional content and removing what doesn't fit.
+
+---
+
+### Review Notes (11 gaps patched)
+
+| # | Gap | Resolution |
+|---|-----|------------|
+| R1 | **12-col CSS grid won't collapse on mobile** — The app uses `.g2` class which forces `grid-template-columns:1fr!important` at `<768px`. A 12-col `repeat(12,1fr)` grid would need a new media query or custom class. | Use a simpler `gridTemplateColumns` approach with fractional columns (e.g., `'2fr 1fr'`) and apply `.g2` class for mobile collapse, matching all other pages. |
+| R2 | **Delta badge needs unit awareness** — Plan says `+/- X.X KG THIS MONTH` but ignores the `unitWeight` toggle (kg vs lbs). | Delta badge must check `isImpWeight` and display lbs if active. |
+| R3 | **Weight Trend chart Y-axis doesn't convert to lbs** — Current chart always shows kg on Y-axis regardless of user preference. | Pass converted data to chart when `isImpWeight` is true. |
+| R4 | **Missing import cleanup** — Plan removes `StatCard`, `Ruler`, `BarChart2`, `Scale` but doesn't list them as imports to remove. Unused imports cause lint warnings. | Add explicit import cleanup step. |
+| R5 | **Log Weight button placement unclear** — Plan says "moves here as a small pill button" but doesn't specify exact DOM position. | Place it `position: absolute; top: 0; right: 0` inside the welcome header `<header>` block. |
+| R6 | **Date subtitle dropped** — Current header shows `new Date().toLocaleDateString(...)` as a subtitle. Plan doesn't mention keeping or removing it. | Keep the date subtitle below the welcome name, styled as `fontSize: 12, color: var(--on-surface-variant)`. |
+| R7 | **Skeleton loader not updated** — Current loading state renders 5 `SkeletonCard` in a stats grid. New layout has no stats grid. | Update skeleton to render 2 placeholder glass-cards matching the bento aspect ratio. |
+| R8 | **Modals inside `.pg-in` transform context** — Same bug as Profile Page (Phase 9 Bug 9.2). `position: fixed` modals inside a CSS-animated container won't position to viewport on mobile. | Wrap return in `<>` Fragment, render `<Portal>`-wrapped modals outside `.pg-in`. (Already using `<Portal>` — verify it renders to `document.body`.) |
+| R9 | **`text-gradient-primary` class already exists** — Plan says to use `background-clip: text` inline for the gradient name, but the existing `.text-gradient-primary` utility already does this. | Use the existing `className="text-gradient-primary"` instead of inline styles. Simpler, consistent. |
+| R10 | **`.ember-glow` class verified** — Plan mentions ember-glow inline `boxShadow` but the class already exists in `index.css`. | Use `className="ember-glow"` on the Metabolic Index ring instead of inline shadow. |
+| R11 | **`ProgressOrb` import at risk** — Removing `StatCard` from import might accidentally remove `ProgressOrb` or `ScrollPicker` if bulk-deleted. | Explicitly list the retained imports from `SharedComponents`. |
+
+---
+
+### Design System Reference (from Stitch HTML)
+
+The Stitch design provides these key visual tokens to carry over into our CSS variable system:
+- **backgrounds**: `#131315` (bg), `#201f21` (surface-container), `#353437` (surface-container-highest)
+- **primary accent**: `#F85F1B` (primary-container / action orange)
+- **muted accent**: `#FFB59B` (primary / warm peach)
+- **glass effect**: `background: rgba(53, 52, 55, 0.6); backdrop-filter: blur(20px)` → use existing `.glass-card` class
+- **ember glow**: `box-shadow: 0 0 20px rgba(248, 95, 27, 0.2)` → use existing `.ember-glow` class
+- **fonts**: `Space Grotesk` (headline, bold, uppercase, tight tracking) + `Be Vietnam Pro` (body, label) → already in CSS
+
+---
+
+### Layout Architecture (Bento Grid)
+
+The page will use a **bento grid** layout with fractional columns and the `.g2` class for mobile collapse.
+
+```
+[  Weight Trend (2fr)  ] [ Metabolic Index (1fr) ]   ← className="g2"
+[ Sessions/Streak (1fr)] [ Weight Goal (1fr)     ]   ← className="g2"
+[  Live Suggestion / Active Split CTA (full)     ]
+[  Recent Sessions (full)                        ]
+[  Muscle Activity Widget (full)                 ]
+```
+
+---
+
+### Section Inventory
+
+#### ✅ Elements to KEEP from current Dashboard
+
+| Element | Notes |
+|---|---|
+| Sessions/Week stat | Keep, restyle into bento cell |
+| All Time Sessions stat | Keep, restyle into bento cell |
+| Current Streak / Best Streak card | Keep, restyle into horizontal bento cell |
+| Weight Goal card (with `ProgressOrb`, set-goal modal) | Keep in full, restyle to match Kinetic Elite dark glass style |
+| Weight Trend area chart | Keep, elevate to hero-sized chart card (2fr column) |
+| Log Weight button & modal | Keep, position inside welcome header |
+| Set Goal modal | Keep as is |
+| Active Split card | Keep with Stitch image-banner style |
+| Recent Sessions | Keep, relocate below goal area |
+| Muscle Activity widget | Keep, relocate to bottom |
+| BMI categories grid on Metabolic Index card | Keep (per requirement 5), highlight active category |
+| Date subtitle | Keep below welcome name |
+
+#### ❌ Elements to REMOVE
+
+| Element | Reason |
+|---|---|
+| Height stat card (`Ruler`) | Explicitly requested to be removed |
+| Current Weight stat card (`Scale`) | Replaced by the hero area chart header block |
+| BMI standalone stat card (`BarChart2`) | Replaced by the enhanced Metabolic Index card |
+| Plain `PageHeader` title | Replaced by Stitch "Welcome Back, NAME" hero header |
+| `StatCard` import | No longer needed — all stats rendered inline |
+
+#### ✨ NEW Elements from Stitch
+
+| Element | Notes |
+|---|---|
+| Hero welcome header | `"WELCOME BACK, [FIRST NAME]"` with `className="text-gradient-primary"` for the name |
+| Glass-card weight chart (2fr) | Hero card with current weight, unit-aware delta badge, and area chart |
+| Metabolic Index card (1fr) | Concentric circle dial (`className="ember-glow"`) + BMI category highlight grid |
+| Live Suggestion Banner (full) | Full-width image banner with dark gym background, active split context, and START WORKOUT CTA |
+| Sessions/Streak bento cells (1fr+1fr) | Styled as glass metric cells with icons |
+
+---
+
+### Detailed Section Specs
+
+#### 10.1 — Welcome Header
+- Remove `<PageHeader>` component.
+- Replace with a styled `<header style={{ position: 'relative', marginBottom: 32 }}>` block:
+  - Subtitle: `"SESSION ACTIVE"` — `fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontFamily: "'Space Grotesk'"`.
+  - Title: `"WELCOME BACK,"` line break + `<span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span>` — `fontFamily: "'Space Grotesk'", fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1`.
+  - Date subtitle: `new Date().toLocaleDateString(...)` in `fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8`.
+  - Decorative watermark: `<Dumbbell size={120} style={{ position: 'absolute', top: -16, right: -16, opacity: 0.06, color: 'var(--on-surface)' }} />`.
+  - Log Weight button: `<button className="btn-p" style={{ position: 'absolute', top: 0, right: 0, padding: '10px 18px', fontSize: 13 }}>+ Log Weight</button>` — triggers `setShowLog(true)`.
+
+#### 10.2 — Bento Grid Container
+- Use `style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}` with `className="g2"` for mobile collapse.
+- Each subsequent row uses its own grid wrapper with `.g2`.
+
+#### 10.3 — Weight Trend Card (hero, 2fr column)
+- Apply `className="glass-card"`, `style={{ padding: 24, borderRadius: 16 }}`.
+- Header row: `flex` with `justifyContent: space-between`.
+  - Left: label `"PERFORMANCE TREND"` (uppercase, `fontSize: 10, letterSpacing: '0.15em'`) + title `"WEIGHT ANALYSIS"` (`headline-md`).
+  - Right: delta badge `<span>` — pill with `background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700`. Value = difference between first and last health log of the current month. **Must respect `isImpWeight`** to show lbs.
+- Below header: Current weight large display — `display-lg` class, `fontSize: '3.5rem'`.
+  - Append `trending_down`/`trending_up` icon (use `TrendingDown`/`TrendingUp` from Lucide — **add to imports**).
+  - Previous weight: `opacity: 0.4, fontSize: '1.5rem'`.
+  - **Both must respect `isImpWeight`** unit conversion.
+- Chart: Reuse existing `<AreaChart>` + `<Area>` with `type="monotone"`. Height `180`.
+  - If `isImpWeight`, map `chartData` to convert weight values to lbs.
+  - Retain `<ReferenceLine>` for goal weight (also convert if lbs mode).
+
+#### 10.4 — Metabolic Index Card (1fr column)
+- Apply `className="glass-card"`, style: `padding: 24, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center'`.
+- Decorative watermark: `<Activity size={28} style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15 }} />`.
+- Label: `"METABOLIC INDEX"` (uppercase small tracking).
+- Concentric ring container: `width: 140, height: 140, position: 'relative'`.
+  - Outer ring: `borderRadius: '50%', border: '4px solid var(--surface-container-lowest)'`.
+  - Inner half-ring: `className="ember-glow"`, `border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)'`.
+  - Center content: BMI value (`headline-lg, fontSize: 2.5rem`) + category label (`var(--primary-container)`).
+- **Below the dial**: 2×2 grid of BMI categories — `Under (<18.5)`, `Normal (18.5–25)`, `Over (25–30)`, `Obese (>30)`.
+  - Active category gets `background: var(--surface-container-highest), color: var(--primary)`.
+  - Inactive: `background: var(--surface-container-lowest), color: var(--on-surface-variant)`.
+
+#### 10.5 — Sessions + Streak Row (1fr + 1fr)
+- Wrapper: `display: grid, gridTemplateColumns: '1fr 1fr', gap: 16`, `className="g2"`.
+- **Left cell** (`glass-card`): Two stat groups stacked vertically.
+  - "Sessions / Week" — `thisWk` large number + `<Flame>` icon.
+  - "All Time Sessions" — `userWo.length` + `<Trophy>` icon.
+  - Each stat: label `fontSize: 10, uppercase`, value `headline-lg, color: var(--primary)`.
+- **Right cell** (`glass-card`): Current Streak + Best Streak.
+  - Same layout as current streak card but inside glass-card.
+  - Retain `<Flame>` icon with `var(--glow-primary)` background circle.
+  - Retain `{streak.current >= 3 && <span className="tag"><Zap size={10} /> On Fire!</span>}`.
+
+#### 10.6 — Weight Goal Card (full width)
+- Full-width `className="glass-card"`, `style={{ padding: 20, borderRadius: 16, cursor: 'pointer' }}`.
+- Restyle from `.card.stripe` → remove both classes, use pure `glass-card`.
+- Retain all existing internal content: header row with `<Target>` icon, Target/Remaining/Weeks Left grid, `<ProgressOrb>`, start/goal weights.
+- `onClick={() => setShowGoal(true)}` preserved.
+- **Weight values must respect `isImpWeight`** — already handled in existing code.
+
+#### 10.7 — Live Suggestion Banner (full width)
+- Full-width card: `borderRadius: 16, overflow: hidden, position: relative, minHeight: 180`.
+- Background: `<img src="[gym image URL]" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, filter: 'grayscale(100%)' }} />`.
+- Gradient overlay: `<div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background) 15%, transparent 100%)' }} />`.
+- Content: `position: relative, zIndex: 1, padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%', minHeight: 180`.
+  - `<PulseIndicator />` + `"LIVE SUGGESTION"` label.
+  - If `activeSplit`: split name as `headline-md uppercase` + schedule description.
+  - If no split: `"Set up a split to get personalized recommendations"`.
+- CTA: `<button>` positioned `absolute, bottom: 24, right: 24` with `background: var(--signature-gradient)`, navigates to `/workout`.
+
+#### 10.8 — Recent Sessions (full width)
+- Wrap in `glass-card, borderRadius: 16, padding: 20`.
+- Title: `"RECENT SESSIONS"` uppercase label.
+- Keep existing session `recent.map(w => ...)` rendering.
+- Restyle each row: remove hard `.tonal-break` class, use `background: var(--surface-container-lowest), borderRadius: 12, marginBottom: 8`.
+- Retain `<Check>` icon on right.
+
+#### 10.9 — Muscle Activity Widget (full width)
+- Keep as is — already Kinetic-Elite styled. No changes needed.
+
+#### 10.10 — Import Cleanup
+- **Remove**: `Scale`, `BarChart2`, `Ruler`, `StatCard`, `PageHeader` from imports.
+- **Add**: `TrendingDown`, `TrendingUp` to Lucide imports.
+- **Retain**: `AreaChart`, `Area`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip`, `ResponsiveContainer`, `ReferenceLine` (Recharts); `Flame`, `Trophy`, `Target`, `ChevronDown`, `ChevronRight`, `Check`, `X`, `Zap`, `Dumbbell`, `Activity`, `Shield` (Lucide); `ProgressOrb`, `ScrollPicker`, `SkeletonCard`, `Portal`, `GlassTooltip`, `PulseIndicator`, `ConfirmDialog`, `ThemeTogglePill` (SharedComponents); `MiniBodyMap` (BodyMapSVG).
+
+#### 10.11 — Modal Render Context
+- Wrap the return in `<>` React Fragment.
+- Render the Log Weight and Set Goal `<Portal>` modals **outside** the `.pg-in` div (same fix as Profile Page Bug 9.2).
+
+#### 10.12 — Skeleton Loader Update
+- Replace the current `SkeletonCard` × 5 grid with 2 placeholder `glass-card` divs:
+  - One spanning `2fr` (chart placeholder) and one spanning `1fr` (metabolic placeholder).
+  - Each with `height: 200, borderRadius: 16, background: var(--surface-container-high), animation: pulse 1.5s infinite`.
+
+---
+
+### Files to Modify
+
+| File | Change |
+|---|---|
+| `src/components/pages/DashboardPage.jsx` | Full layout rebuild |
+
+> **Note:** No CSS changes needed. `.glass-card`, `.ember-glow`, `.text-gradient-primary`, and `.g2` already exist in `index.css`.
+
+---
+
+### Anti-pattern Checklist (Phase 10)
+
+- [ ] No `border` on any card element (use `border: 'none'` explicitly).
+- [ ] No `shadow-md` — use `.ember-glow` or `var(--glow-primary)` only.
+- [ ] No emoji icons — Lucide components only (`Flame`, `Trophy`, etc.).
+- [ ] No `<hr>` tags — use `height: 1px; background: var(--surface-container-highest)`.
+- [ ] All gradients use `var(--signature-gradient)` or `.text-gradient-primary` class.
+- [ ] Welcome name uses `className="text-gradient-primary"`, not inline gradient styles.
+- [ ] Height stat card is removed.
+- [ ] No `.card` class used — `glass-card` only throughout.
+- [ ] No hardcoded `linear-gradient(...)` inline strings — use CSS variables.
+- [ ] All weight/height values respect `isImpWeight` / `isImpHeight` user preferences.
+- [ ] Modals rendered outside `.pg-in` container via `<Portal>`.
+
+---
+
+### Priority Order (Phase 10)
+
+1. **10.10** Import cleanup (remove unused, add new)
+2. **10.1** Welcome Header (hero replacement for PageHeader)
+3. **10.3** Weight Trend card as 2fr hero + unit-aware delta badge
+4. **10.4** Metabolic Index concentric ring card + BMI category grid
+5. **10.5** Sessions + Streak row (1fr+1fr bento)
+6. **10.6** Weight Goal card (full-width, glass restyle)
+7. **10.7** Live Suggestion Banner (Active Split CTA card)
+8. **10.8** Recent Sessions restyle
+9. **10.9** Verify Muscle Activity Widget (no change needed)
+10. **10.11** Modal render context fix (Fragment wrapper)
+11. **10.12** Skeleton loader update
+12. **10.13** Anti-pattern sweep
+
+---
+
+## Phase 10 — Post-Implementation Refinements
+
+**Status:** Planned (Reviewed)
+**Goal:** Apply 6 targeted improvements to `DashboardPage.jsx` following user review of the newly redesigned dashboard.
+
+---
+
+### Review Notes (8 gaps patched)
+
+| # | Gap | Resolution |
+|---|-----|------------|
+| V1 | **Lucide icon availability unverified** — Plan says to check `Footprints` and `Droplets` at runtime. | ✅ Verified: both `Footprints` and `Droplets` exist in `lucide-react@0.577.0`. No fallback needed. |
+| V2 | **R1 footer date needs `fmt()` function** — "Latest Log" date display needs the existing `fmt` helper, already imported. | Use `fmt(allUserLogs[allUserLogs.length - 1].date)` — no new import needed. |
+| V3 | **R1 Weight Snapshot trend icon logic** — Plan uses `delta ≤ 0` threshold but the existing `trend` variable compares last-two-logs, not the monthly delta. Inconsistent. | Use `monthDelta` for the icon direction, not the `trend` variable. The trend icon is associated with "THIS MONTH", so `monthDelta ≤ 0` → `TrendingDown` (green/primary), `monthDelta > 0` → `TrendingUp` (red/error). |
+| V4 | **R5 dual `className` on glass-card + ember-glow** — Plan puts `className="ember-glow"` on the same `div` as the icon pill. This mixes box-shadow with the pill's background. | Apply `ember-glow` to the inner icon pill `div` only (not the card wrapper). The card wrapper uses plain `glass-card`. Already correct in the plan template — just confirming. |
+| V5 | **R6 no-split CTA navigates to `/splits`** — This route may not exist as a standalone page. | Verified: the app uses `/splits` as part of the workout flow. Route exists via `SplitsPage`. ✓ Safe. |
+| V6 | **R4 insight text inside 140px ring is cramped** — Plan says "between bmiCat.label and the 2×2 grid" but the ring is only 140px tall. Placing multi-line text inside it will overflow. | Place the insight text **below the ring container** (after `marginBottom: 16` of the ring div), not inside it. Before the 2×2 grid. |
+| V7 | **R1 previous weight needs < 2 logs guard** — Footer shows "Previous: weight" but crashes if only 1 log exists. | Guard with `allUserLogs.length >= 2 ? ... : '—'`. |
+| V8 | **R3 removing `Check` import safe** — Verified `Check` is only used in Recent Sessions. After deletion, it's unused. | ✓ Safe to remove. |
+
+---
+
+### Change Inventory
+
+| # | Change | Type |
+|---|--------|------|
+| R1 | Weight Analysis card → match Stitch static weight snapshot; Weight Trend becomes a separate full-width card | Redesign |
+| R2 | Rename "Muscle Activity" card → "Iron League" + swap to `Shield` icon | Rename |
+| R3 | Remove "Recent Sessions" card entirely | Delete |
+| R4 | Metabolic Index card — add per-BMI-range insight text below ring | Enhancement |
+| R5 | Add 3 placeholder activity cards: Daily Steps, Calories Burned, Water Intake (3-col row) | New |
+| R6 | Live Suggestion banner — fix full image layout, show schedule pills, fix no-split CTA | Bug fix |
+
+---
+
+### Detailed Specs
+
+#### R1 — Weight Analysis Card Split (Stitch Layout)
+
+**Current:** A single combined `glass-card` holds the static weight display (number + delta badge) AND the area chart together (lines 139–176).
+
+**Target:** Split into **two separate cards**:
+
+**Card A — Weight Snapshot** (`1fr` in the first row, beside Metabolic Index):
+- `glass-card`, `padding: 24`, `borderRadius: 16`, `border: 'none'`
+- Label block (top-left): `"WEIGHT ANALYSIS"` uppercase `fontSize: 10`, `letterSpacing: '0.15em'` + sub-line `"PERFORMANCE TREND"` `fontSize: 9`, `color: var(--on-surface-dim)`
+- Delta badge (top-right): pill `background: 'var(--primary-container)'`, `color: 'var(--on-primary)'`, `borderRadius: 999`, `padding: '4px 12px'`, `fontSize: 11`, `fontWeight: 700` — shows `{monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'lbs' : 'kg'} THIS MONTH`
+- Central weight block: `fontFamily: "'Space Grotesk'"`, `fontSize: 'clamp(2.5rem, 6vw, 3.5rem)'`, `fontWeight: 700`, `color: 'var(--on-surface)'` displaying `{isImpWeight ? kgToLbs(latestWeight) : latestWeight}`. Beside it: unit label `fontSize: 14`, `color: 'var(--on-surface-variant)'`, `marginLeft: 4` showing `{isImpWeight ? 'lbs' : 'kg'}`
+- Trend icon: directly below the weight number. Use `monthDelta` (not `trend`):
+  - `monthDelta <= 0` → `<TrendingDown size={20} color="var(--primary)" />`
+  - `monthDelta > 0` → `<TrendingUp size={20} color="var(--error)" />`
+- Footer row: `display: flex`, `gap: 16`, `marginTop: 16`, `paddingTop: 12`, top border via `borderTop: '1px solid var(--surface-container-highest)'`
+  - Left: `"Latest Log"` label (`fontSize: 10`, `textTransform: 'uppercase'`, `color: var(--on-surface-dim)`) + date value `fmt(allUserLogs[allUserLogs.length - 1]?.date || '') ` (`fontSize: 12`, `color: var(--on-surface-variant)`)
+  - Right: `"Previous"` label + `{allUserLogs.length >= 2 ? (isImpWeight ? kgToLbs(allUserLogs[allUserLogs.length - 2].weight) : allUserLogs[allUserLogs.length - 2].weight) + ' ' + (isImpWeight ? 'lbs' : 'kg') : '—'}`
+
+**Card B — Weight Trend Chart** (full-width standalone, placed **after** 3 placeholder activity cards, **before** Weight Goal card):
+- `glass-card`, `padding: 24`, `borderRadius: 16`, `border: 'none'`, `marginBottom: 16`
+- Label: `"WEIGHT TREND"` uppercase `fontSize: 10`, `letterSpacing: '0.15em'`, `color: var(--on-surface-variant)`, `marginBottom: 16`
+- Chart: existing `<AreaChart>` + `<Area>` with `type="monotone"`, gradient fill `url(#wg)`, `height: 200`
+- `<CartesianGrid>`, `<XAxis>`, `<YAxis>` with `axisLine={false}`, `tickLine={false}`
+- `<ReferenceLine>` for goal weight (convert to lbs if `isImpWeight`)
+- Keep `<defs>` gradient block and `<GlassTooltip />`
+
+**Updated layout after all refinements:**
+```
+Row 1: [Weight Snapshot (1fr)] [Metabolic Index (1fr)]   ← g2
+Row 2: [Sessions (1fr)] [Streak (1fr)]                   ← g2
+Row 3: [Steps (1fr)] [Calories (1fr)] [Water (1fr)]      ← g3
+Row 4: [Weight Trend Chart (full)]
+Row 5: [Weight Goal (full)]
+Row 6: [Live Suggestion Banner (full)]
+Row 7: [Iron League (full)]
+```
+
+---
+
+#### R2 — Rename "Muscle Activity" → "Iron League"
+
+- Change the label text from `Muscle Activity` → `IRON LEAGUE` (line ~327).
+- Change the icon from `<Activity size={13} color="var(--primary)" />` → `<Shield size={13} color="var(--primary)" />`.
+- No layout changes. All data (`MiniBodyMap`, `overallRank`, `weeklyMuscles`) identical.
+- Note: keep the `Activity` import — it's still used in the Metabolic Index card watermark.
+
+---
+
+#### R3 — Remove "Recent Sessions" Card
+
+- Delete the entire `{/* Recent Sessions */}` JSX block (lines 307–320).
+- Remove the `recent` variable declaration (line ~64): `const recent = [...userWo].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);`
+- Remove `Check` from Lucide imports (verified: not used elsewhere after this deletion).
+
+---
+
+#### R4 — Metabolic Index: Per-Category Insight Text
+
+Add a `getBMIInsight(bmi)` pure function **after imports, before the component** (between line 10 and `export default function DashboardPage()`):
+
+```js
+const getBMIInsight = (bmi) => {
+  if (!bmi) return '';
+  if (bmi < 16)   return "Severely underweight. Consult a nutritionist and increase caloric intake immediately.";
+  if (bmi < 18.5) return "You're underweight. A caloric surplus with protein focus will help build lean mass.";
+  if (bmi < 25)   return "You're within the healthy range. Maintain current caloric deficit to hit peak definition.";
+  if (bmi < 30)   return "Slightly above the healthy range. A moderate deficit and strength training will get you there.";
+  if (bmi < 35)   return "Obese range detected. Focus on a sustainable caloric deficit and daily movement.";
+  return "High obesity range. Prioritise medical guidance alongside your fitness plan.";
+};
+```
+
+**Placement in JSX:** **Below** the concentric ring container (after the `div` with `marginBottom: 16` wrapping the ring), and **above** the 2×2 category grid.
+
+```jsx
+{/* Insight text — below ring, above category grid */}
+<div style={{ fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center', padding: '0 8px', lineHeight: 1.4, marginBottom: 12 }}>
+  {getBMIInsight(bmi)}
+</div>
+```
+
+---
+
+#### R5 — 3 Placeholder Activity Cards
+
+**Placement:** New row inserted **after** Sessions/Streak row, **before** Weight Trend Chart.
+
+**Wrapper:** `<div className="g3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>`
+
+**CSS:** `.g3` already exists in `index.css` (mobile collapse to `1fr`). ✓ No CSS change.
+
+**Lucide icons:** `Footprints` and `Droplets` both verified available in `lucide-react@0.577.0`. `Zap` already imported.
+
+**Each card structure** (`glass-card`, `padding: 20`, `borderRadius: 16`, `border: 'none'`):
+```jsx
+<div className="glass-card" style={{ padding: 20, borderRadius: 16, border: 'none' }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+    <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>{LABEL}</div>
+    <div className="ember-glow" style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <ICON size={18} color="var(--primary)" />
+    </div>
+  </div>
+  <div className="headline-lg" style={{ color: 'var(--primary)', marginBottom: 4 }}>—</div>
+  <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{UNIT}</div>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <PulseIndicator />
+    <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Coming Soon</span>
+  </div>
+</div>
+```
+
+**Card values:**
+
+| Slot | `LABEL` | `ICON` | `UNIT` |
+|------|---------|--------|--------|
+| 1 | `DAILY ACTIVITY` | `Footprints` | `steps today` |
+| 2 | `CALORIES BURNED` | `Zap` | `kcal today` |
+| 3 | `WATER INTAKE` | `Droplets` | `ml today` |
+
+---
+
+#### R6 — Live Suggestion Banner Fixes
+
+**Issues to fix:**
+1. **Image crop** — no `objectPosition`; gym image can look misaligned.
+2. **Schedule pills missing** — only `name` + `description` shown; need `D1: Push` schedule tags.
+3. **No-split CTA misleading** — "START WORKOUT" shown even when no split is set.
+
+**Image fix (line ~286):**
+```jsx
+<img src="[gym URL]" alt="Gym" style={{
+  position: 'absolute', inset: 0,
+  width: '100%', height: '100%',
+  objectFit: 'cover', objectPosition: 'center 30%',
+  opacity: 0.45, filter: 'grayscale(50%)'
+}} />
+```
+
+**When `activeSplit` exists:** Add schedule pills below description:
+```jsx
+<>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+    <PulseIndicator />
+    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface)' }}>LIVE SUGGESTION</span>
+  </div>
+  <div className="headline-md" style={{ color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>{activeSplit.name}</div>
+  <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 10, maxWidth: '75%' }}>{activeSplit.description}</div>
+  {/* Schedule pills — up to 4 */}
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+    {activeSplit.schedule.slice(0, 4).map((d, i) => (
+      <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.07)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>
+        D{i + 1}: {d}
+      </div>
+    ))}
+    {activeSplit.schedule.length > 4 && (
+      <div style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, color: 'var(--on-surface-dim)', background: 'rgba(255,255,255,0.05)' }}>
+        +{activeSplit.schedule.length - 4} more
+      </div>
+    )}
+  </div>
+</>
+```
+
+**CTA button:** Conditional label and route:
+- If `activeSplit`: `"START WORKOUT"` → `navigate('/workout')`
+- If no split: `"SET UP A SPLIT"` → `navigate('/splits')`
+
+**No-split fallback:**
+```jsx
+<>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+    <PulseIndicator color="var(--on-surface-dim)" />
+    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>NO ACTIVE SPLIT</span>
+  </div>
+  <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', maxWidth: '75%' }}>
+    Set up a training split to get personalised workout recommendations.
+  </div>
+</>
+```
+
+---
+
+### Files to Modify
+
+| File | Change |
+|---|---|
+| `src/components/pages/DashboardPage.jsx` | All 6 refinements |
+
+> **Note:** No CSS changes needed. `.g3` already exists in `index.css`.
+
+---
+
+### Import Changes
+
+- **Add**: `Footprints`, `Droplets` to Lucide imports
+- **Remove**: `Check` from Lucide imports (unused after R3)
+- **Keep**: `Activity` (still used in Metabolic Index watermark)
+
+---
+
+### Priority Order (Phase 10 Refinements)
+
+1. **R3** Remove Recent Sessions card + `recent` variable + `Check` import
+2. **R1** Split Weight Analysis into snapshot card + standalone trend chart
+3. **R4** Add `getBMIInsight()` function + insight text below Metabolic Index ring
+4. **R2** Rename "Muscle Activity" → "Iron League" + swap icon to `Shield`
+5. **R6** Fix Live Suggestion banner image + schedule pills + conditional CTA
+6. **R5** Add 3 placeholder activity cards (Steps / Calories / Water)
+7. **Cleanup** Add `Footprints`, `Droplets` imports; remove `Check` import
+
+
+---
+
+### Change Inventory
+
+| # | Change | Type |
+|---|--------|------|
+| R1 | Weight Analysis card → match Stitch static weight snapshot; Weight Trend becomes a separate full-width card | Redesign |
+| R2 | Rename "Muscle Activity" card → "Iron League" + swap to `Shield` icon | Rename |
+| R3 | Remove "Recent Sessions" card entirely | Delete |
+| R4 | Metabolic Index card — add per-BMI-range insight text below dial | Enhancement |
+| R5 | Add 3 placeholder activity cards: Daily Steps, Calories Burned, Water Intake (3-col row) | New |
+| R6 | Live Suggestion banner — fix full image layout, show schedule pills, fix no-split CTA | Bug fix |
+
+---
+
+### Detailed Specs
+
+#### R1 — Weight Analysis Card Split (Stitch Layout)
+
+**Current:** A single combined `glass-card` holds the static weight display (number + delta badge) AND the area chart together.
+
+**Target:** Split into **two separate cards**:
+
+**Card A — Weight Snapshot** (`1fr` in the first row, beside Metabolic Index):
+- Label block (top-left): `"WEIGHT ANALYSIS"` uppercase `fontSize: 10` + sub `"PERFORMANCE TREND"` `fontSize: 9` below it
+- Delta badge (top-right): pill `background: var(--primary-container)`, `color: var(--on-primary)`, `borderRadius: 999`, `padding: '4px 12px'`, `fontSize: 11`, `fontWeight: 700` — shows `+/-X.X kg/lbs THIS MONTH`
+- Central weight: `fontFamily: "'Space Grotesk'"`, `fontSize: 'clamp(2.5rem, 6vw, 3.5rem)'`, `fontWeight: 700`, `color: var(--on-surface)` + unit label `fontSize: 14`, `color: var(--on-surface-variant)` beside it
+- Trend icon below weight: `TrendingDown` (delta ≤ 0, `color: var(--primary)`) or `TrendingUp` (delta > 0, `color: var(--error)`)
+- Footer row: `Latest Log: [date]` and `Previous: [weight] [unit]` — `fontSize: 11`, `color: var(--on-surface-variant)`, separated by a `1px solid var(--surface-container-highest)` vertical divider
+
+**Card B — Weight Trend Chart** (full-width standalone, placed after Sessions + Streak row):
+- `glass-card`, `padding: 24`, `borderRadius: 16`, `border: none`, `marginBottom: 16`
+- Label: `"WEIGHT TREND"` uppercase `fontSize: 10`
+- Chart: existing Recharts `AreaChart` (`type="monotone"`, gradient fill, `ReferenceLine` for goal), `height: 200`
+- Unit-aware (`isImpWeight`): convert Y-axis data and ReferenceLine value
+- **Full width** — no column splitting on this row
+
+**Layout after change:**
+```
+Row 1: [Weight Snapshot (1fr)] [Metabolic Index (1fr)]   ← g2
+Row 2: [Sessions (1fr)] [Streak (1fr)]                   ← g2
+Row 3: [Steps (1fr)] [Calories (1fr)] [Water (1fr)]      ← g3  (NEW)
+Row 4: [Weight Goal (full)]
+Row 5: [Weight Trend Chart (full)]                        ← MOVED here
+Row 6: [Live Suggestion Banner (full)]
+Row 7: [Iron League (full)]
+```
+
+---
+
+#### R2 — Rename "Muscle Activity" → "Iron League"
+
+- Change the section label text from `"Muscle Activity"` → `"IRON LEAGUE"`.
+- Change the icon in the label from `<Activity size={13} color="var(--primary)" />` → `<Shield size={13} color="var(--primary)" />`.
+- The card already uses  `glass-card` — no layout change needed.
+- All data (`MiniBodyMap`, `overallRank`, `weeklyMuscles`) stays identical.
+
+---
+
+#### R3 — Remove "Recent Sessions" Card
+
+- Delete the `{/* Recent Sessions */}` JSX block (the full `<div className="glass-card"...>` containing `recent.map(...)`).
+- Remove the `recent` variable declaration on line ~64: `const recent = [...userWo].sort(...).slice(0, 3);`
+- Remove `Check` from Lucide imports (no longer used after this deletion).
+
+---
+
+#### R4 — Metabolic Index: Per-Category Insight Text
+
+Add a `getBMIInsight(bmi)` pure function near the top of the file (after imports, before the component):
+
+```js
+const getBMIInsight = (bmi) => {
+  if (!bmi) return '';
+  if (bmi < 16)   return "Severely underweight. Consult a nutritionist and increase caloric intake immediately.";
+  if (bmi < 18.5) return "You're underweight. A caloric surplus with protein focus will help build lean mass.";
+  if (bmi < 25)   return "You're within the healthy range. Maintain current caloric deficit to hit peak definition.";
+  if (bmi < 30)   return "Slightly above the healthy range. A moderate deficit and strength training will get you there.";
+  if (bmi < 35)   return "Obese range detected. Focus on a sustainable caloric deficit and daily movement.";
+  return "High obesity range. Prioritise medical guidance alongside your fitness plan.";
+};
+```
+
+**Placement in JSX:** Between the `bmiCat.label` span and the 2×2 category grid, inside the Metabolic Index card. Style:
+```
+fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center',
+padding: '0 8px', lineHeight: 1.4, marginTop: 12, marginBottom: 12
+```
+
+---
+
+#### R5 — 3 Placeholder Activity Cards
+
+**Placement:** New row inserted between Sessions/Streak row and Weight Goal card.
+
+**Wrapper:** `<div className="g3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>`
+
+**CSS check:** Verify `.g3` in `index.css` — it already exists (`.g3{grid-template-columns:1fr!important}` in the `@media(max-width:768px)` block). ✓ No CSS change needed.
+
+**Each card is a `glass-card`:**
+```jsx
+<div className="glass-card" style={{ padding: 20, borderRadius: 16, border: 'none' }}>
+  {/* Top row: label + icon pill */}
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+    <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>{LABEL}</div>
+    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="ember-glow">
+      <ICON size={18} color="var(--primary)" />
+    </div>
+  </div>
+  {/* Value */}
+  <div className="headline-lg" style={{ color: 'var(--primary)', marginBottom: 4 }}>—</div>
+  <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{UNIT}</div>
+  {/* Coming soon tag */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <PulseIndicator />
+    <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Coming Soon</span>
+  </div>
+</div>
+```
+
+**Card values:**
+
+| Slot | `LABEL` | `ICON` | `UNIT` |
+|------|---------|--------|--------|
+| 1 | `DAILY ACTIVITY` | `Footprints` | `steps today` |
+| 2 | `CALORIES BURNED` | `Zap` | `kcal today` |
+| 3 | `WATER INTAKE` | `Droplets` | `ml today` |
+
+**Import note:** Add `Footprints` and `Droplets` to Lucide imports. If `Footprints` is unavailable in the installed lucide-react version, use `MapPin` as fallback (check available version first with `npm list lucide-react`).
+
+---
+
+#### R6 — Live Suggestion Banner Fixes
+
+**Issues to fix:**
+1. **Image misalignment** — `objectPosition` not set; gym image sometimes shows wrong crop.
+2. **Schedule pills missing** — only name + description shown; should also show `D1: Push` etc.
+3. **No-split state has wrong CTA** — "START WORKOUT" when no split exists is confusing.
+
+**Implementation:**
+
+Image element:
+```jsx
+<img
+  src="[gym URL]"
+  alt="Gym"
+  style={{
+    position: 'absolute', inset: 0,
+    width: '100%', height: '100%',
+    objectFit: 'cover', objectPosition: 'center 30%',
+    opacity: 0.45, filter: 'grayscale(50%)'
+  }}
+/>
+```
+
+When `activeSplit` exists — content block:
+```jsx
+<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+  <PulseIndicator />
+  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface)' }}>LIVE SUGGESTION</span>
+</div>
+<div className="headline-md" style={{ color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>
+  {activeSplit.name}
+</div>
+<div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 10, maxWidth: '75%' }}>
+  {activeSplit.description}
+</div>
+{/* Schedule pills — up to 4 */}
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+  {activeSplit.schedule.slice(0, 4).map((d, i) => (
+    <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.07)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>
+      D{i + 1}: {d}
+    </div>
+  ))}
+  {activeSplit.schedule.length > 4 && (
+    <div style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, color: 'var(--on-surface-dim)', background: 'rgba(255,255,255,0.05)' }}>
+      +{activeSplit.schedule.length - 4} more
+    </div>
+  )}
+</div>
+```
+
+CTA button (always `position: absolute`, `bottom: 24`, `right: 24`):
+- If `activeSplit`: label `"START WORKOUT"` → `navigate('/workout')`
+- If no split: label `"SET UP A SPLIT"` → `navigate('/splits')`
+
+No-split fallback content (when `activeSplit` is null):
+```jsx
+<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+  <PulseIndicator color="var(--on-surface-dim)" />
+  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>NO ACTIVE SPLIT</span>
+</div>
+<div style={{ fontSize: 13, color: 'var(--on-surface-variant)', maxWidth: '75%' }}>
+  Set up a training split to get personalised workout recommendations.
+</div>
+```
+
+---
+
+### Files to Modify
+
+| File | Change |
+|---|---|
+| `src/components/pages/DashboardPage.jsx` | All 6 refinements |
+| `src/index.css` | Verified `.g3` exists — no change needed |
+
+---
+
+### New Imports Needed
+
+- **Add**: `Footprints`, `Droplets` (Lucide) — verify availability with `npm list lucide-react` before adding
+- **Remove**: `Check` (unused after R3 Recent Sessions removal)
+
+---
+
+### Priority Order (Phase 10 Refinements)
+
+1. **R3** Remove Recent Sessions card
+2. **R1** Split Weight Analysis into snapshot card + standalone trend chart
+3. **R4** Add `getBMIInsight()` to Metabolic Index card
+4. **R2** Rename to "Iron League" + swap icon
+5. **R6** Fix Live Suggestion banner image + schedule pills + CTA
+6. **R5** Add 3 placeholder activity cards
+7. **Cleanup** Import additions/removals

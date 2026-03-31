@@ -1,32 +1,41 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Scale, BarChart2, Ruler, Flame, Trophy, Target, ChevronDown, ChevronRight, Check, X, Zap, Repeat, Dumbbell, Home, Award, Activity, Shield } from 'lucide-react';
+import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, Shield, TrendingDown, TrendingUp, Footprints, Droplets } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { StatCard, PageHeader, ScrollPicker, SkeletonCard, Portal, GlassTooltip, PulseIndicator, ProgressOrb } from '../shared/SharedComponents';
+import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb } from '../shared/SharedComponents';
 import { MiniBodyMap } from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
-import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, displayWeight, displayHeight, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
+import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP, getWeeklyMuscles, getOverallRank, MUSCLE_GROUPS } from '../../data/muscleData';
-import { useState as useStateR, useEffect } from 'react';
+
+const getBMIInsight = (bmi) => {
+  if (!bmi) return '';
+  if (bmi < 16)   return "Severely underweight. Consult a nutritionist and increase caloric intake immediately.";
+  if (bmi < 18.5) return "You're underweight. A caloric surplus with protein focus will help build lean mass.";
+  if (bmi < 25)   return "You're within the healthy range. Maintain current caloric deficit to hit peak definition.";
+  if (bmi < 30)   return "Slightly above the healthy range. A moderate deficit and strength training will get you there.";
+  if (bmi < 35)   return "Obese range detected. Focus on a sustainable caloric deficit and daily movement.";
+  return "High obesity range. Prioritise medical guidance alongside your fitness plan.";
+};
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak } = useApp();
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
-  const unitHeight = user.unitHeight || 'cm';
-  const isImpHeight = unitHeight === 'ft';
+  
   const weeklyMuscles = useMemo(() => getWeeklyMuscles(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   const overallRank = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
+  
   const [showLog, setShowLog] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
   const [logWeight, setLogWeight] = useState(user.weight);
   const [logNote, setLogNote] = useState('');
   const [goalTarget, setGoalTarget] = useState(user.weightGoal || user.weight - 5);
   const [goalWeeks, setGoalWeeks] = useState(user.goalWeeks || 12);
-  const [loaded, setLoaded] = useStateR(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 300); return () => clearTimeout(t); }, []);
 
@@ -34,7 +43,24 @@ export default function DashboardPage() {
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;
   const bmi = calcBMI(latestWeight, user.height);
   const bmiCat = getBMICat(bmi);
-  const chartData = useMemo(() => allUserLogs.map(l => ({ date: fmt(l.date), weight: l.weight, raw: new Date(l.date).getTime() })), [allUserLogs]);
+  const chartData = useMemo(() => allUserLogs.map(l => ({ date: fmt(l.date), weight: isImpWeight ? kgToLbs(l.weight) : l.weight, raw: new Date(l.date).getTime() })), [allUserLogs, isImpWeight]);
+
+  const monthFirstWeight = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const thisMonthLogs = allUserLogs.filter(l => {
+      const d = new Date(l.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+    if (thisMonthLogs.length === 0) return null;
+    return thisMonthLogs[0].weight;
+  }, [allUserLogs]);
+
+  const monthDelta = useMemo(() => {
+    if (monthFirstWeight === null) return 0;
+    const diff = latestWeight - monthFirstWeight;
+    return isImpWeight ? +(diff * 2.20462).toFixed(1) : +diff.toFixed(1);
+  }, [latestWeight, monthFirstWeight, isImpWeight]);
 
   const trend = useMemo(() => {
     if (allUserLogs.length < 2) return undefined;
@@ -45,7 +71,6 @@ export default function DashboardPage() {
 
   const activeSplit = splits.find(s => s.id === user.activeSplitId);
   const userWo = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal');
-  const recent = [...userWo].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
   const thisWk = userWo.filter(l => (new Date() - new Date(l.date)) / 86400000 <= 7).length;
   const streak = getStreak();
 
@@ -86,195 +111,298 @@ export default function DashboardPage() {
 
   if (!loaded) return (
     <div className="pg-in">
-      <PageHeader title="Loading..." />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))', gap: 10 }}>
-        {[1, 2, 3, 4, 5].map(i => <SkeletonCard key={i} />)}
+      <header style={{ position: 'relative', marginBottom: 32 }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontFamily: "'Space Grotesk'" }}>Loading</div>
+        <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 4 }}>DASHBOARD</div>
+      </header>
+      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+        <div className="glass-card" style={{ height: 200, borderRadius: 16, background: 'var(--surface-container-high)', animation: 'pulse 1.5s infinite', border: 'none' }} />
+        <div className="glass-card" style={{ height: 200, borderRadius: 16, background: 'var(--surface-container-high)', animation: 'pulse 1.5s infinite', border: 'none' }} />
       </div>
     </div>
   );
 
   return (
-    <div className="pg-in">
-      <PageHeader title={<>WELCOME BACK,<br/><span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span></>} sub={new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-        action={<button className="btn-p" style={{ padding: '10px 18px', fontSize: 13 }} onClick={() => setShowLog(true)}>+ Log Weight</button>} />
-
-      {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))', gap: 10, marginBottom: 14 }}>
-        <StatCard label="Current Weight" value={isImpWeight ? kgToLbs(latestWeight) : latestWeight} unit={isImpWeight ? 'lbs' : 'kg'} Icon={Scale} trend={trend ? (isImpWeight ? +(trend * 2.20462).toFixed(1) : trend) : undefined} />
-        <StatCard label="BMI" value={bmi || '—'} unit="" Icon={BarChart2} sub={bmiCat.label} />
-        <StatCard label="Height" value={displayHeight(user.height, unitHeight).replace(/ cm$/, '')} unit={isImpHeight ? '' : 'cm'} Icon={Ruler} />
-        <StatCard label="Sessions / Week" value={thisWk} unit="" Icon={Flame} sub="this week" />
-        <StatCard label="All Time" value={userWo.length} unit="" Icon={Trophy} sub="sessions" />
-      </div>
-
-      {/* Streak Card */}
-      <div className="card stripe" style={{ padding: '14px 16px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Flame size={20} color="var(--primary)" /></div>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
-            <div>
-              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
-              <div className="headline-lg" style={{ color: 'var(--primary)' }}>{streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
-              <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
-            </div>
+    <>
+      <div className="pg-in">
+        {/* Welcome Header */}
+        <header style={{ position: 'relative', marginBottom: 32 }}>
+          <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontFamily: "'Space Grotesk'" }}>
+            SESSION ACTIVE
           </div>
-        </div>
-        {streak.current >= 3 && <span className="tag" style={{ fontSize: 9 }}><Zap size={10} /> On Fire!</span>}
-      </div>
-
-      {/* Goal Progress Card */}
-      <div className="card stripe" style={{ padding: '18px 20px', marginBottom: 14, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setShowGoal(true)}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Target size={16} color="var(--primary)" /></div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>Weight Goal</div>
-              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>Tap to update your target</div>
-            </div>
+          <div style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
+            WELCOME BACK,<br/>
+            <span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span>
           </div>
-          <ChevronDown size={14} color="var(--on-surface-dim)" />
-        </div>
-        {user.weightGoal ? (<>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 14 }}>
-            {[{ l: 'Target', v: isImpWeight ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImpWeight ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
-              <div key={s.l} style={{ background: 'var(--surface-container-highest)', borderRadius: 10, padding: '10px 12px', border: 'none' }}>
-                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
-                <div className="headline-md" style={{ color: 'var(--primary)' }}>{s.v}</div>
+          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8 }}>
+            {new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </div>
+          <Dumbbell size={120} style={{ position: 'absolute', top: -16, right: -16, opacity: 0.06, color: 'var(--on-surface)' }} />
+          <button className="btn-p" style={{ position: 'absolute', top: 0, right: 0, padding: '10px 18px', fontSize: 13 }} onClick={() => setShowLog(true)}>
+            + Log Weight
+          </button>
+        </header>
+
+        {/* Row 1: Weight Snapshot + BMI  (1fr / 1fr) */}
+        <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          {/* Weight Snapshot */}
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>WEIGHT ANALYSIS</div>
+                <div style={{ fontSize: 9, color: 'var(--on-surface-dim)' }}>PERFORMANCE TREND</div>
               </div>
-            ))}
+              <span style={{ background: 'var(--primary-container)', color: 'var(--on-primary)', borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700 }}>
+                {monthDelta > 0 ? '+' : ''}{monthDelta} {isImpWeight ? 'lbs' : 'kg'} THIS MONTH
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 700, color: 'var(--on-surface)' }}>
+                {isImpWeight ? kgToLbs(latestWeight) : latestWeight}
+              </span>
+              <span style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginLeft: 4 }}>
+                {isImpWeight ? 'lbs' : 'kg'}
+              </span>
+            </div>
+            {monthDelta <= 0 
+              ? <TrendingDown size={20} color="var(--primary)" /> 
+              : <TrendingUp size={20} color="var(--error)" />
+            }
+            <div style={{ display: 'flex', gap: 16, marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--surface-container-highest)' }}>
+              <div>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>Latest Log</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{fmt(allUserLogs[allUserLogs.length - 1]?.date || '')}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>Previous</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>
+                  {allUserLogs.length >= 2 ? (isImpWeight ? kgToLbs(allUserLogs[allUserLogs.length - 2].weight) : allUserLogs[allUserLogs.length - 2].weight) + ' ' + (isImpWeight ? 'lbs' : 'kg') : '—'}
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <ProgressOrb progress={goalPct} size={80} label={`${goalPct}%`} subLabel="Done" />
+
+          {/* Metabolic Index */}
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', border: 'none' }}>
+            <Activity size={28} style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15, color: 'var(--on-surface)' }} />
+            <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 16 }}>METABOLIC INDEX</div>
+            
+            <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+              <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi || '—'}</span>
+                <span style={{ fontSize: 10, color: 'var(--primary-container)', marginTop: 4, fontWeight: 700 }}>{bmiCat.label}</span>
+              </div>
+            </div>
+            
+            <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center', padding: '0 8px', lineHeight: 1.4, marginTop: 12, marginBottom: 12 }}>
+              {getBMIInsight(bmi)}
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
+              {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
+                const isActive = bmiCat.label.startsWith(s.l);
+                return (
+                  <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
+                    <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Sessions + Streak Row (1fr 1fr) */}
+        <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          {/* Sessions */}
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div>
+                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>Sessions / Week</div>
+                 <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
+               </div>
+               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Flame size={20} color="var(--primary)" /></div>
+             </div>
+             
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <div>
+                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>All Time Sessions</div>
+                 <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
+               </div>
+               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trophy size={20} color="var(--on-surface)" /></div>
+             </div>
+          </div>
+
+          {/* Streak */}
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 14, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Flame size={24} color="var(--primary)" /></div>
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 600 }}>
-                <span>{isImpWeight ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImpWeight ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
+              <div style={{ display: 'flex', gap: 20, alignItems: 'baseline', marginBottom: 6 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
+                  <div className="headline-lg" style={{ color: 'var(--primary)' }}>{streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
+                  <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
+                </div>
               </div>
+              {streak.current >= 3 && <span className="tag" style={{ fontSize: 10, margin: 0 }}><Zap size={10} /> On Fire!</span>}
             </div>
           </div>
-        </>) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none' }}>
-            <Target size={14} color="var(--on-surface-dim)" />
-            <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Set your target weight & timeline</span>
-            <ChevronRight size={13} color="var(--on-surface-dim)" style={{ marginLeft: 'auto' }} />
-          </div>
-        )}
-      </div>
+        </div>
 
-      {/* Chart + BMI */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 12, marginBottom: 12 }} className="g2">
-        <div className="card glass-card" style={{ padding: 18 }}>
-          <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 12 }}>Weight Trend</div>
-          <ResponsiveContainer width="100%" height={170}>
+        {/* Placeholder Activity Cards (1fr 1fr 1fr) */}
+        <div className="g3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+          {[
+            { label: 'DAILY ACTIVITY', icon: Footprints, unit: 'steps today' },
+            { label: 'CALORIES BURNED', icon: Zap, unit: 'kcal today' },
+            { label: 'WATER INTAKE', icon: Droplets, unit: 'ml today' }
+          ].map(c => (
+            <div key={c.label} className="glass-card" style={{ padding: 20, borderRadius: 16, border: 'none' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>{c.label}</div>
+                <div className="ember-glow" style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <c.icon size={18} color="var(--primary)" />
+                </div>
+              </div>
+              <div className="headline-lg" style={{ color: 'var(--primary)', marginBottom: 4 }}>—</div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{c.unit}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <PulseIndicator />
+                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Coming Soon</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Goal Progress Card */}
+        <div className="glass-card" style={{ padding: 20, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setShowGoal(true)}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Target size={16} color="var(--primary)" /></div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Weight Goal</div>
+                <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>Tap to update your target</div>
+              </div>
+            </div>
+            <ChevronDown size={14} color="var(--on-surface-dim)" />
+          </div>
+          {user.weightGoal ? (<>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 14 }}>
+              {[{ l: 'Target', v: isImpWeight ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImpWeight ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
+                <div key={s.l} style={{ background: 'var(--surface-container-highest)', borderRadius: 10, padding: '10px 12px', border: 'none' }}>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
+                  <div className="headline-md" style={{ color: 'var(--primary)' }}>{s.v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <ProgressOrb progress={goalPct} size={80} label={`${goalPct}%`} subLabel="Done" />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 600 }}>
+                  <span>{isImpWeight ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImpWeight ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
+                </div>
+              </div>
+            </div>
+          </>) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none' }}>
+              <Target size={14} color="var(--on-surface-dim)" />
+              <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Set your target weight & timeline</span>
+              <ChevronRight size={13} color="var(--on-surface-dim)" style={{ marginLeft: 'auto' }} />
+            </div>
+          )}
+        </div>
+
+        {/* Weight Trend Chart */}
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16 }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 16 }}>WEIGHT TREND</div>
+          <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData}>
               <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--outline-variant)" />
-              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" />
-              <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
+              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
+              <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} axisLine={false} tickLine={false} />
               <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />
               <Area type="monotone" dataKey="weight" stroke="#F85F1B" strokeWidth={2} fill="url(#wg)" dot={{ fill: '#F85F1B', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Weight" />
-              {user.weightGoal && <ReferenceLine y={user.weightGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />}
+              {user.weightGoal && <ReferenceLine y={isImpWeight ? kgToLbs(user.weightGoal) : user.weightGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />}
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="card glass-card" style={{ padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, overflow: 'hidden', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15 }}><Activity size={28} color="var(--on-surface)" /></div>
-          <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 16 }}>Metabolic Index</div>
-          
-          <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, marginTop: 8 }}>
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
-            <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span className="headline-lg" style={{ color: 'var(--on-surface)', fontSize: '2.5rem' }}>{bmi || '—'}</span>
-              <span className="label-md" style={{ color: 'var(--primary-container)', fontSize: '10px', marginTop: 4 }}>{bmiCat.label}</span>
-            </div>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%', marginTop: 8 }}>
-            {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => (
-              <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: bmiCat.label.startsWith(s.l) ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', border: `none` }}>
-                <div style={{ fontSize: 10, color: bmiCat.label.startsWith(s.l) ? 'var(--primary)' : 'var(--on-surface-variant)', fontWeight: 700 }}>{s.l}</div>
-                <div style={{ fontSize: 9, color: 'var(--on-surface-dim)' }}>{s.r}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Active Split + Recent */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 12 }} className="g2">
-        <div className="card glass-card group" style={{ position: 'relative', overflow: 'hidden', minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 18 }}>
-          {activeSplit ? <>
-            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5YpbGNIoffyZlhuSOD4j3ahpYBQQfFB1zqtCjL7_BUk6tA9p0a2lG1HEdiThIXTYVvnA-b2UjzmbZYd6rat_MwXd9ODZuWMaRe032I3mzdPojqaOMzCMuRODYzlRH9HlY4iTumjwp8hBdSRz10dmucVjk_M38BsbuYmWp1pWbWzth6YNIBRy9LJp_cEya6moQ0MDMrpczz829a-mzevNqgxlRdofFwnDBCoEoiIqa-dekVLFyHK3u02-qrQe5iqKtus-ZsA1--JiE" alt="Split Imagery" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, filter: 'grayscale(100%)', mixBlendMode: 'overlay', zIndex: 0 }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background) 15%, transparent 100%)', zIndex: 0 }}></div>
-            
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <PulseIndicator color="var(--primary-container)" />
-                <span className="label-md" style={{ color: 'var(--primary-container)', opacity: 1, letterSpacing: '0.1em' }}>Target Split</span>
-              </div>
-              
-              <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase' }}>
-                {activeSplit.name}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{activeSplit.description}</div>
-              
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {activeSplit.schedule.map((d, i) => (
-                  <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.05)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>D{i + 1}: {d}</div>
-                ))}
-              </div>
-            </div>
-          </> : <>
-            <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
-               <div className="label-md" style={{ color: 'var(--on-surface-variant)', opacity: 0.7, marginBottom: 12 }}>Active Split</div>
-               <div style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>No split active — set one up to track routine!</div>
-            </div>
-          </>}
-        </div>
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 12 }}>Recent Sessions</div>
-          {recent.length === 0 ? <div style={{ color: 'var(--on-surface-dim)', fontSize: 13 }}>No sessions yet — go crush it!</div> :
-            recent.map(w => (
-              <div key={w.id} className="tonal-break" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--surface-container-lowest)', borderRadius: 12 }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{w.dayName}</div>
-                  <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>{fmt(w.date)} · {w.exercises?.length || 0} exercises</div>
+        {/* Live Suggestion Banner */}
+        <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 180, marginBottom: 16 }}>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5YpbGNIoffyZlhuSOD4j3ahpYBQQfFB1zqtCjL7_BUk6tA9p0a2lG1HEdiThIXTYVvnA-b2UjzmbZYd6rat_MwXd9ODZuWMaRe032I3mzdPojqaOMzCMuRODYzlRH9HlY4iTumjwp8hBdSRz10dmucVjk_M38BsbuYmWp1pWbWzth6YNIBRy9LJp_cEya6moQ0MDMrpczz829a-mzevNqgxlRdofFwnDBCoEoiIqa-dekVLFyHK3u02-qrQe5iqKtus-ZsA1--JiE" alt="Gym" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', opacity: 0.45, filter: 'grayscale(50%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background) 15%, transparent 100%)' }}></div>
+          <div style={{ position: 'relative', zIndex: 1, padding: 24, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%', minHeight: 180 }}>
+            {activeSplit ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <PulseIndicator />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface)' }}>LIVE SUGGESTION</span>
                 </div>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--surface-container-high)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={12} color="var(--primary)" /></div>
-              </div>
-            ))}
+                <div className="headline-md" style={{ color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>{activeSplit.name}</div>
+                <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 10, maxWidth: '75%' }}>{activeSplit.description}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {activeSplit.schedule.slice(0, 4).map((d, i) => (
+                    <div key={i} style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, fontWeight: 700, background: d === 'Rest' ? 'rgba(255,255,255,0.07)' : 'var(--primary-container)', color: d === 'Rest' ? 'var(--on-surface-dim)' : 'var(--on-primary)', backdropFilter: 'blur(10px)' }}>
+                      D{i + 1}: {d}
+                    </div>
+                  ))}
+                  {activeSplit.schedule.length > 4 && (
+                    <div style={{ padding: '4px 8px', borderRadius: 8, fontSize: 10, color: 'var(--on-surface-dim)', background: 'rgba(255,255,255,0.05)' }}>
+                      +{activeSplit.schedule.length - 4} more
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <PulseIndicator color="var(--on-surface-dim)" />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>NO ACTIVE SPLIT</span>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', maxWidth: '75%' }}>
+                  Set up a training split to get personalised workout recommendations.
+                </div>
+              </>
+            )}
+            <button className="btn-p" style={{ position: 'absolute', bottom: 24, right: 24, background: 'var(--signature-gradient)', borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, border: 'none', padding: '10px 18px' }} onClick={() => navigate(activeSplit ? '/workout' : '/splits')}>
+              {activeSplit ? "START WORKOUT" : "SET UP A SPLIT"}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Muscle Activity Widget */}
-      <div className="card" style={{ padding: 18, cursor: 'pointer', marginTop: 12 }} onClick={() => navigate('/muscle-map')}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Activity size={13} color="var(--primary)" /> Muscle Activity
-          </div>
-          <ChevronRight size={14} color="var(--on-surface-dim)" />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Shield size={14} color={overallRank.color} />
-              <span className="headline-md" style={{ color: overallRank.color }}>{overallRank.name}</span>
+        {/* Iron League Widget */}
+        <div className="glass-card" style={{ padding: 18, cursor: 'pointer', border: 'none' }} onClick={() => navigate('/muscle-map')}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Shield size={13} color="var(--primary)" /> IRON LEAGUE
             </div>
-            <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
-            <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-              {weeklyMuscles.slice(0, 6).map(m => (
-                <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
-              ))}
-              {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--on-surface-dim)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
+            <ChevronRight size={14} color="var(--on-surface-dim)" />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <Shield size={14} color={overallRank.color} />
+                <span className="headline-md" style={{ color: overallRank.color }}>{overallRank.name}</span>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                {weeklyMuscles.slice(0, 6).map(m => (
+                  <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
+                ))}
+                {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--on-surface-dim)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
+              </div>
             </div>
           </div>
         </div>
+
       </div>
 
       {/* Log Weight Modal */}
@@ -328,6 +456,6 @@ export default function DashboardPage() {
         </div>
         </Portal>
       )}
-    </div>
+    </>
   );
 }

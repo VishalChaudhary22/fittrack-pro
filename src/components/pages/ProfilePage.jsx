@@ -172,6 +172,7 @@ export default function ProfilePage() {
   }, [streak, workoutLogs, user]);
 
   return (
+    <>
     <div className="pg-in" style={{ paddingBottom: 60 }}>
       <PageHeader title="My Profile" />
 
@@ -315,10 +316,10 @@ export default function ProfilePage() {
         
         <button style={{ width: '100%', background: 'rgba(255,107,107,0.08)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14 }} onClick={() => setConfirm(true)}><LogOut size={16} /> Logout</button>
       </div>
-
-      <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
-      
-      <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
     </div>
+
+    <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
+    <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
+    </>
   );
 }

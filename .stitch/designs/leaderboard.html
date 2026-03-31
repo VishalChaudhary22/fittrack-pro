@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kinetic Elite Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "tertiary-fixed-dim": "#ffb59e",
+                "on-tertiary-fixed-variant": "#7f2a0d",
+                "primary-fixed-dim": "#ffb59b",
+                "on-error": "#690005",
+                "on-surface-variant": "#e3bfb3",
+                "surface-container": "#1f1f21",
+                "on-background": "#e5e1e4",
+                "surface": "#131315",
+                "outline": "#aa8a7f",
+                "surface-container-lowest": "#0e0e10",
+                "on-tertiary-container": "#521300",
+                "error": "#ffb4ab",
+                "surface-container-high": "#2a2a2c",
+                "inverse-primary": "#a93800",
+                "on-primary-fixed-variant": "#812900",
+                "on-secondary-fixed-variant": "#6c3926",
+                "on-error-container": "#ffdad6",
+                "primary-container": "#f85f1b",
+                "on-tertiary": "#5e1700",
+                "on-tertiary-fixed": "#3a0b00",
+                "on-secondary-fixed": "#360f02",
+                "surface-tint": "#ffb59b",
+                "inverse-on-surface": "#303032",
+                "error-container": "#93000a",
+                "on-primary-container": "#501600",
+                "background": "#131315",
+                "secondary-container": "#6f3b28",
+                "secondary": "#ffb59b",
+                "surface-dim": "#131315",
+                "tertiary-fixed": "#ffdbd0",
+                "on-secondary-container": "#efa78e",
+                "secondary-fixed": "#ffdbcf",
+                "surface-container-low": "#1b1b1d",
+                "surface-bright": "#39393b",
+                "secondary-fixed-dim": "#ffb59b",
+                "inverse-surface": "#e5e1e4",
+                "tertiary-container": "#df714e",
+                "surface-container-highest": "#353437",
+                "primary-fixed": "#ffdbcf",
+                "on-surface": "#e5e1e4",
+                "on-primary": "#5b1a00",
+                "outline-variant": "#5a4138",
+                "tertiary": "#ffb59e",
+                "surface-variant": "#353437",
+                "on-secondary": "#512312",
+                "on-primary-fixed": "#380d00",
+                "primary": "#ffb59b"
+              },
+              fontFamily: {
+                "headline": ["Space Grotesk"],
+                "body": ["Be Vietnam Pro"],
+                "label": ["Be Vietnam Pro"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(53, 52, 55, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .ember-glow {
+            box-shadow: 0 0 20px 2px rgba(248, 95, 27, 0.25);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(248, 95, 27, 0.5);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-6 py-4 bg-surface/80 dark:bg-[#131315]/80 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(248,95,27,0.06)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a determined athletic woman with subtle sweat on her brow in dramatic cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRTCE55g35SQ3l-53pK5jbtQW3R-4y3RCRMvjeh4N1dQ5YfaL39q5tib0RHj654vVNDxWrNuNn4-_Yqb9d332pFtmw__XhlvSbHWOgqtLC4l_RLzR4xtKNRa5kREZw3UkuTO63eVpPTQ_iElHwqxJHz6NIWdsmNEZoupWqKzN2S3Etn9hlDOo5kI1aTo7Bp7NUxjWo3P8t5a_RWCkXkHRRRt8hfTVbS4EALteloKN_qCeW7mQJLPXDzeJ0Nlgmefm2cRVA5XIJUYU"/>
+</div>
+<h1 class="font-headline uppercase tracking-widest text-[#F85F1B] font-black text-2xl">KINETIC ELITE</h1>
+</div>
+<button class="text-[#E5E1E4] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-5 max-w-md mx-auto min-h-screen">
+<!-- Achievement Banner -->
+<section class="relative overflow-hidden mb-8 rounded-lg bg-surface-container-low p-6 shadow-xl">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary-container/10 rounded-full blur-[60px]"></div>
+<div class="flex items-center gap-5">
+<div class="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-primary-container to-tertiary-container flex items-center justify-center ember-glow">
+<span class="material-symbols-outlined text-on-primary text-3xl" data-icon="trophy" style="font-variation-settings: 'FILL' 1;">trophy</span>
+</div>
+<div class="flex-grow">
+<h2 class="font-headline font-bold text-xl leading-tight text-on-surface">You are in the top 5%</h2>
+<p class="text-on-surface-variant text-sm mt-1">450 XP to reach <span class="text-primary-container font-bold">LEGEND</span> tier</p>
+</div>
+</div>
+</section>
+<!-- Tab Switcher -->
+<nav class="flex p-1.5 bg-surface-container-highest/30 backdrop-blur-md rounded-full mb-8">
+<button class="flex-1 py-2.5 rounded-full text-sm font-bold tracking-wider uppercase bg-primary-container text-on-primary-container shadow-lg transition-all">
+                Global
+            </button>
+<button class="flex-1 py-2.5 rounded-full text-sm font-bold tracking-wider uppercase text-on-surface/60 hover:text-on-surface transition-colors">
+                Friends
+            </button>
+</nav>
+<!-- Podium Section -->
+<section class="flex items-end justify-between px-2 mb-10 gap-2">
+<!-- 2nd Place -->
+<div class="flex flex-col items-center flex-1">
+<div class="relative mb-3">
+<div class="w-16 h-16 rounded-full border-2 border-outline-variant overflow-hidden">
+<img alt="Rank 2 Athlete" class="w-full h-full object-cover" data-alt="Portrait of a young male athlete with intense gaze and short hair in moody studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8U2w1C9Of8ayhZsdO4BWD5VDcf4CcL36_nt8tOy2Vbt-tmSUkpkM7WF_dpgrL3LuepngDFux3hjc3TTMAVOFAcTQ9BloGPvZXsdAtYtIzLyjSi9yXl0GUr0CY93Edmts2yruU3J89dqmXAZ_x8RTHxQASMogA4gq3zbZq5PItMifDvSYPxAuFhdkXUrfwyB2RPpbRQz17hpfiI1RcOGwGAwYGSc9eNGQlZd1_Z3hd_zzlFcuggUEfqUXjOy4hXasfEs0_bpo6AOg"/>
+</div>
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-surface-container-high px-3 py-0.5 rounded-full text-[10px] font-black border border-outline-variant text-on-surface">2nd</div>
+</div>
+<p class="font-headline text-xs font-bold uppercase truncate w-full text-center">Marcus.V</p>
+<p class="font-headline text-sm text-primary font-medium">18.4K XP</p>
+</div>
+<!-- 1st Place -->
+<div class="flex flex-col items-center flex-1 -mt-4 transform scale-110">
+<div class="relative mb-4">
+<span class="material-symbols-outlined text-primary-container absolute -top-7 left-1/2 -translate-x-1/2 text-2xl" data-icon="workspace_premium" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<div class="w-20 h-20 rounded-full border-4 border-primary-container overflow-hidden ember-glow">
+<img alt="Rank 1 Athlete" class="w-full h-full object-cover" data-alt="High contrast portrait of a professional female crossfit athlete focused and breathing heavily" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmw1qfvgmSSn7rdsoDY0tIQ9aZ1X0w7ON3bq-1B3Ovq1g0ZbTOhgcGDKt7JRcjHWm8jI2AtaJzewLFpKj9wA6eWOXIotmaekbGqcFdkuEeWZvaikas41tIa-r7OAa_2VQFsurxiH_3t8ngw7zU5sxwD2g4rZDuXG-ArtQ-5nA7xkwTBNtiJaml3dt9xo8kgzzUUok4tvh8w-cMWRjbyDsaHCkCadQiRvl59QNrmOcSe4mA_cokPK-9MSkUzPA5ObdmKg3HQltd1Lg"/>
+</div>
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-container to-tertiary-container px-4 py-1 rounded-full text-[10px] font-black text-[#5B1A00] shadow-lg">1st</div>
+</div>
+<p class="font-headline text-sm font-bold uppercase truncate w-full text-center tracking-tight">Elena_Storm</p>
+<p class="font-headline text-lg text-primary-container font-black text-glow">24.2K XP</p>
+</div>
+<!-- 3rd Place -->
+<div class="flex flex-col items-center flex-1">
+<div class="relative mb-3">
+<div class="w-16 h-16 rounded-full border-2 border-[#7F2A0D]/50 overflow-hidden">
+<img alt="Rank 3 Athlete" class="w-full h-full object-cover" data-alt="Portrait of a bearded male athlete looking sideways with cinematic orange backlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs_tegHO05qF1nwVlZt3ofv8F3Vxod7gazPgxkJuTFmRT9bEMOZHZGwmM5v5zp7p4m9l6BiB9meNr6KEysW9l26ibtYEbbg3AQKEiyUpEG1XohUNkzspQ6ptV7Yh_QXkGg61w_tg6lk6laaKeBTj12rnYiwRUEAjG3MQ9jOgvnn9tZOUER5JgwB59nAudRS1Dm5SPxVyIQ6UjSrFgns8mjusfQDMmRQHlG7Bjn9PhuX3NWeu222VP1Db8Uzo1f0cCIuGOcIn11OeY"/>
+</div>
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-surface-container-high px-3 py-0.5 rounded-full text-[10px] font-black border border-outline-variant text-on-surface">3rd</div>
+</div>
+<p class="font-headline text-xs font-bold uppercase truncate w-full text-center">Jax.Power</p>
+<p class="font-headline text-sm text-primary font-medium">16.9K XP</p>
+</div>
+</section>
+<!-- List Header -->
+<div class="flex justify-between px-4 mb-4 text-[10px] font-black uppercase tracking-widest text-on-surface-variant/60">
+<span>Rank &amp; Athlete</span>
+<span>Intensity Score</span>
+</div>
+<!-- Ranked List -->
+<div class="space-y-3">
+<!-- Rank 4 -->
+<div class="glass-card rounded-md p-4 flex items-center justify-between group hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">4</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant/20 overflow-hidden">
+<img alt="Athlete 4" class="w-full h-full object-cover" data-alt="Woman athlete in dark fitness studio with dramatic shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdXQOdfe_VaAcg_smRguHS8CUu8p_IjWpVNF5gxrXOkDiKxzmYbkESqmV0Ud6Ubtkwsot0xBUsQKzn05lFyxjsPny8P6szZDsI7Aw23zKs_tHiQtcDjoRgIMgyYmsA-8x-pnRrXjJQJItGwtY0MIrl0-wwxwCPOb42SH0JRC_4cNz12hIi27rjusfBvSJqw-gsElOpci2amZqc9mtJq9VfSO-RYFfKUJJPtAChWf9ruqGEsGfHP5Szh0ROMELJ74kjJAwyNFVAED8"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">VALKYRIE_01</p>
+<p class="text-[10px] text-primary/70 font-black uppercase tracking-tighter">ELITE TIER</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">15,402</p>
+<p class="text-[9px] font-black text-on-surface-variant/50 uppercase">XP</p>
+</div>
+</div>
+<!-- Rank 5 (Current User) -->
+<div class="relative bg-surface-container-high/60 rounded-md p-4 flex items-center justify-between border-l-4 border-primary-container ember-glow">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-primary-container w-4">5</span>
+<div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img alt="Current User" class="w-full h-full object-cover" data-alt="Female athlete focused profile view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgMn7RLD5DLfCuq8G99yLzjGse6FTJkFmLS-NOh8lxyYWnJfu3XydDnry7TNy652uomVz2San8jiULG_yZ6BUc8-sk7YxfQRZD_qopNvi4AHoUdyMct8uRimU-W3JAJF1M5KVjYZo5R7r8g2PC0THWAR18Bm91nt4oWF5eA37N_9AsciYeEleNQ5_VtAwESwGHD3Xk0lKxykkpHJ8tWDRaE1LTsNWb7JAL5I83FSzzKFpUfgk8PoFMwhV1uwzk08044JxjcGCqO-g"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<p class="font-headline font-bold text-sm text-on-surface">YOU (KEIRA)</p>
+<span class="bg-primary-container text-[8px] px-1.5 py-0.5 rounded text-on-primary font-black uppercase tracking-tighter">MVP</span>
+</div>
+<p class="text-[10px] text-primary/70 font-black uppercase tracking-tighter">PRO TIER</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary-container text-lg leading-none">14,882</p>
+<p class="text-[9px] font-black text-on-surface-variant/50 uppercase">XP</p>
+</div>
+</div>
+<!-- Rank 6 -->
+<div class="glass-card rounded-md p-4 flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">6</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant/20 overflow-hidden">
+<img alt="Athlete 6" class="w-full h-full object-cover" data-alt="Close up of a muscular man training in low light environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhL8Sa1AxncofMFR71MLeZKYHcZUDloTCL4cwWVoIlgYx0sgnKad53OtHwYehOG-FrOx9v0P471AwKZhBOARm0MgY3sEjtOXvCKhS8CeyCE9hO4Cijx-57tOJrn2nLO45_JiQ3hkNsp-tQ3RhWZgWLsWwUIXDxQ3dBfQ9Y41KOnlin7112LZaQfJflR3IhEdig1BLoxegjLo-NCWX2Ckk2VpnPI-2mJ2j29csQpk5_7Xf0-0rqquJCsxrxcwJF6inIToQn3RxKCWQ"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">IRON_WILL</p>
+<p class="text-[10px] text-on-surface-variant/40 font-black uppercase tracking-tighter">PRO TIER</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">13,210</p>
+<p class="text-[9px] font-black text-on-surface-variant/50 uppercase">XP</p>
+</div>
+</div>
+<!-- Rank 7 -->
+<div class="glass-card rounded-md p-4 flex items-center justify-between group">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">7</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant/20 overflow-hidden">
+<img alt="Athlete 7" class="w-full h-full object-cover" data-alt="Male runner in silhouette against urban night background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeWed_PAAVBylWTndUQkkA-brwaOhCGUoHedxMrgvwdn0yGVl6hEEu7qTU1zyVld2AUfUKIoDwFOKz4D_nngZ8maYD2u5Y54fc0TNCOLKXZuDBtPjB09Ie7_89SQmTSYvX_XOUDwmpDYyEGyVJKFOZ-wI31-nmP6b1y2Gehhtc9NgKMO_5jawmHfvJ0hKCAVzl7GbYdq1nG8VJFCqfyMx69Kj9WglTI9h_rzbhy7L6A0eshLHiLj3uxTmhsuabNS3DJd4l-bNaCx0"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">SHADOW_RUN</p>
+<p class="text-[10px] text-on-surface-variant/40 font-black uppercase tracking-tighter">PRO TIER</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">12,944</p>
+<p class="text-[9px] font-black text-on-surface-variant/50 uppercase">XP</p>
+</div>
+</div>
+<!-- Rank 8 -->
+<div class="glass-card rounded-md p-4 flex items-center justify-between group opacity-60">
+<div class="flex items-center gap-4">
+<span class="font-headline font-bold text-on-surface-variant w-4">8</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest border border-outline-variant/20 overflow-hidden">
+<img alt="Athlete 8" class="w-full h-full object-cover" data-alt="Portrait of a focused athlete in a dark room with side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyqF7vFJ1Nbwjbsrvi4e0ZKgbJhw65fJ4JmohQerH5WoJCg6MxQdlj8qiLW6ioUtGc9BWb2fzSyfIYqK4-HKxrjeZsHW6CS5QdNjeUmBPXezzMbImyW3xxo9_XkFWpxgZaY63KYFmfdLylUvES7uDjBVgJrwmHzq7LqI-bPEI7OQpEn2Of3oaH9HBt5faeEirkIKauSGlkkNyn72zy3IMAeSkCTxKX_7PKcn3mrp3TmCqcz8d-PkKrCm9HjQFgNOxJOenPaamENcU"/>
+</div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface">ZEPHYR</p>
+<p class="text-[10px] text-on-surface-variant/40 font-black uppercase tracking-tighter">CONTENDER</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">11,500</p>
+<p class="text-[9px] font-black text-on-surface-variant/50 uppercase">XP</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-4 py-2 max-w-md mx-auto bg-[#1B1B1D]/90 dark:bg-[#1B1B1D]/90 backdrop-blur-2xl w-[90%] rounded-full shadow-[0_-4px_40px_0_rgba(248,95,27,0.1)]">
+<a class="text-[#E5E1E4]/60 p-3 hover:text-[#F85F1B] transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</a>
+<a class="text-[#E5E1E4]/60 p-3 hover:text-[#F85F1B] transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</a>
+<a class="bg-gradient-to-br from-[#F85F1B] to-[#FFB59B] text-[#5B1A00] rounded-full p-3 shadow-[0_0_15px_rgba(248,95,27,0.4)] active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+</a>
+<a class="text-[#E5E1E4]/60 p-3 hover:text-[#F85F1B] transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</a>
+</nav>
+</body></html>

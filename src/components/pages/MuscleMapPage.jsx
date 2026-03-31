@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Shield, Trophy, ChevronRight, TrendingUp, TrendingDown, Minus, AlertTriangle, Award, Calendar, Zap } from 'lucide-react';
+import { Shield, Trophy, Crown, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader } from '../shared/SharedComponents';
+import { PageHeader, EmptyState } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
-import {
-  MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank
-} from '../../data/muscleData';
+import AvatarInitials from '../shared/AvatarInitials';
+import PlayerDetailModal from '../shared/PlayerDetailModal';
+import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank } from '../../data/muscleData';
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
+import { MOCK_LEADERBOARD } from '../../data/leaderboardData';
 
 // ─── RANK BADGE ──────────────────────────────────────────────────────────────
 const RankBadge = ({ rank, size = 'md' }) => {
@@ -75,8 +76,9 @@ const MuscleCard = ({ muscle, xp }) => {
 // ─── MUSCLE MAP PAGE ─────────────────────────────────────────────────────────
 export default function MuscleMapPage() {
   const { workoutLogs, splits, user, monthlyRankHistory } = useApp();
+  const [activeTab, setActiveTab] = useState('leaderboard'); // 'leaderboard' | 'friends' | 'mystats'
+  const [selectedPlayer, setSelectedPlayer] = useState(null); // player object or null
   const [filter, setFilter] = useState('all');
-  const [activeTab, setActiveTab] = useState('muscles');
 
   const muscleXP = useMemo(
     () => calcAllMuscleXP(workoutLogs, splits, user?.id),
@@ -84,6 +86,26 @@ export default function MuscleMapPage() {
   );
 
   const overall = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
+
+  // Build and sort the full leaderboard including the real user
+  const fullLeaderboard = useMemo(() => {
+    const meEntry = {
+      id: user?.id || 'vishal',
+      name: 'You',
+      isMe: true,
+      totalXP: overall.totalXP,
+      tier: overall.name,
+      initials: (user?.name || 'VC').slice(0, 2).toUpperCase(),
+      color: '#FFB59B',  // primary color
+      muscleXP: muscleXP,
+    };
+    return [...MOCK_LEADERBOARD, meEntry]
+      .sort((a, b) => b.totalXP - a.totalXP)
+      .map((p, i) => ({ ...p, rank: i + 1 }));
+  }, [overall.totalXP, overall.name, muscleXP, user]);
+
+  const podium = fullLeaderboard.slice(0, 3);
+  const myRank = fullLeaderboard.find(p => p.isMe)?.rank;
 
   const filtered = useMemo(() => {
     if (filter === 'all') return MUSCLE_GROUPS;
@@ -139,8 +161,9 @@ export default function MuscleMapPage() {
 
   // ─── TAB PILLS ─────────────────────────────────────────────────────────
   const tabs = [
-    { key: 'muscles', label: 'My Muscles' },
-    { key: 'league', label: 'League Standings' },
+    { key: 'leaderboard', label: 'Global' },
+    { key: 'friends', label: 'Friends' },
+    { key: 'mystats', label: 'My Stats' },
   ];
 
   return (
@@ -148,24 +171,207 @@ export default function MuscleMapPage() {
       <PageHeader title="Iron League" sub="Your monthly strength league — climb the ranks" />
 
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--surface-container-highest)', borderRadius: 14, padding: 4, border: 'none' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4, border: 'none' }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
-            flex: 1, padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+            flex: 1, padding: '10px 16px', borderRadius: 16, border: 'none', cursor: 'pointer',
             fontSize: 13, fontWeight: 700, transition: 'all .2s var(--ease-smooth)',
-            background: activeTab === t.key ? 'var(--primary)' : 'transparent',
-            color: activeTab === t.key ? 'var(--on-primary)' : 'var(--on-surface-variant)',
-            boxShadow: activeTab === t.key ? 'var(--shadow-md)' : 'none',
+            background: activeTab === t.key ? 'linear-gradient(135deg, #FFB59B, #F85F1B)' : 'transparent',
+            color: activeTab === t.key ? '#fff' : 'var(--on-surface-variant)',
+            boxShadow: activeTab === t.key ? '0 4px 12px rgba(248,95,27,0.3)' : 'none',
           }}>
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TAB 1: MY MUSCLES (existing view) */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {activeTab === 'muscles' && (<>
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* TAB 1: LEADERBOARD                                 */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {activeTab === 'leaderboard' && (<>
+        
+        {/* ACHIEVEMENT BANNER */}
+        <div className="glass-card" style={{
+          padding: '20px', borderRadius: 20, marginBottom: 24,
+          display: 'flex', alignItems: 'center', gap: 16,
+          position: 'relative', overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute', top: -30, right: -30, width: 150, height: 150,
+            background: 'radial-gradient(circle, rgba(248,95,27,0.15) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
+          <div style={{
+            width: 48, height: 48, borderRadius: 14,
+            background: 'linear-gradient(135deg, #FFB59B, #F85F1B)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 16px rgba(248,95,27,0.4)', flexShrink: 0,
+          }}>
+            <Trophy size={24} color="#fff" />
+          </div>
+          <div>
+            <div style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 700,
+              color: 'var(--on-surface)', marginBottom: 4, lineHeight: 1.2
+            }}>
+              You are rank #{myRank}
+            </div>
+            <div style={{
+              fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 12, fontWeight: 600,
+              color: 'var(--primary)',
+            }}>
+              {overall.progress < 1 ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to Next Tier` : 'Max Tier Reached!'}
+            </div>
+          </div>
+        </div>
+
+        {/* PODIUM — Top 3 Players */}
+        <section style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16, marginBottom: 28, padding: '0 8px' }}>
+          {/* Visual order: [2nd, 1st, 3rd] left-to-right. Slot index 1 is center (elevated). */}
+          {[podium[1], podium[0], podium[2]].filter(Boolean).map((player, slotIndex) => {
+            const isCenter = slotIndex === 1;  // center slot is rank 1
+            // Medal color by actual rank, not by slot index
+            const medalColor = player.rank === 1 ? 'var(--primary)'
+              : player.rank === 2 ? '#C0C0C0'
+              : 'var(--outline-variant)';
+            const rankLabel = player.rank === 1 ? '1st' : player.rank === 2 ? '2nd' : '3rd';
+
+            return (
+              <div key={player.id} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                flex: 1, paddingBottom: isCenter ? 16 : 0, cursor: 'pointer',
+              }} onClick={() => setSelectedPlayer(player)}>
+                <div style={{ position: 'relative', marginBottom: isCenter ? 16 : 12 }}>
+                  {isCenter && (
+                    <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)' }}>
+                      <Crown size={22} color="var(--primary)" fill="rgba(255,181,155,0.3)" />
+                    </div>
+                  )}
+                  <AvatarInitials
+                    initials={player.initials}
+                    color={medalColor}
+                    size={isCenter ? 72 : 56}
+                    borderWidth={isCenter ? 4 : 2}
+                  />
+                  <div style={{
+                    position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)',
+                    padding: '2px 10px', borderRadius: 20, fontSize: 10, fontWeight: 800,
+                    fontFamily: "'Space Grotesk', sans-serif", textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    background: isCenter ? 'linear-gradient(135deg, #FFB59B, #F85F1B)' : `${medalColor}22`,
+                    color: isCenter ? '#fff' : medalColor,
+                    boxShadow: isCenter ? '0 4px 12px rgba(248,95,27,0.3)' : 'none',
+                  }}>
+                    {rankLabel}
+                  </div>
+                </div>
+                <div style={{
+                  fontFamily: "'Be Vietnam Pro', sans-serif",
+                  fontWeight: 700, fontSize: 12, color: 'var(--on-surface)', marginTop: 6,
+                  maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {player.name}
+                </div>
+                <div style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                  fontSize: isCenter ? 13 : 11, color: medalColor, marginTop: 2,
+                }}>
+                  {player.totalXP >= 1000 ? `${(player.totalXP / 1000).toFixed(1)}K` : player.totalXP} XP
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* SCROLLABLE RANKED LIST (all ranks — podium users also appear here) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {fullLeaderboard.map(player => (
+            <div key={player.id}
+              onClick={() => setSelectedPlayer(player)}
+              className="glass-card"
+              style={{
+                padding: '12px 16px', borderRadius: 16,
+                display: 'flex', alignItems: 'center', gap: 16,
+                cursor: 'pointer', position: 'relative', overflow: 'hidden',
+              }}
+            >
+              {/* "You" Indicator Border */}
+              {player.isMe && (
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--primary)' }} />
+              )}
+              {player.isMe && (
+                <div style={{ position: 'absolute', right: -20, top: -20, width: 100, height: 100, background: 'var(--primary)', filter: 'blur(40px)', opacity: 0.1, pointerEvents: 'none' }} />
+              )}
+
+              <div style={{
+                width: 24, textAlign: 'center',
+                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)'
+              }}>
+                {player.rank}
+              </div>
+
+              <AvatarInitials
+                initials={player.initials}
+                color={player.isMe ? 'var(--primary)' : 'var(--outline-variant)'}
+                size={40} borderWidth={1}
+              />
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 600,
+                    fontSize: 14, color: 'var(--on-surface)',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                  }}>
+                    {player.name}
+                  </div>
+                  {player.isMe && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 700, color: 'var(--on-primary)',
+                      backgroundColor: 'var(--primary)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase'
+                    }}>MVP</span>
+                  )}
+                </div>
+                <div style={{
+                  fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 11,
+                  color: 'var(--on-surface-variant)', marginTop: 2
+                }}>
+                  {player.tier}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                  fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface)'
+                }}>
+                  {player.totalXP >= 1000 ? `${(player.totalXP / 1000).toFixed(1)}K` : player.totalXP}
+                </div>
+                <div style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)', letterSpacing: '.08em' }}>
+                  XP
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>)}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* TAB 2: FRIENDS                                     */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {activeTab === 'friends' && (
+        <EmptyState
+          Icon={Users}
+          title="Friends Coming Soon"
+          message="Connect with training partners and compete on a shared leaderboard"
+        />
+      )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* TAB 3: MY STATS                                    */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {activeTab === 'mystats' && (<>
         {/* Overall Rank Card */}
         <div className="card" style={{
           padding: '24px 20px', marginBottom: 16, textAlign: 'center',
@@ -221,7 +427,6 @@ export default function MuscleMapPage() {
               fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
               background: filter === f.key ? 'rgba(232,84,13,.15)' : 'var(--surface-container-lowest)',
               color: filter === f.key ? 'var(--primary)' : 'var(--on-surface-variant)',
-              border: `none`,
               transition: 'all .15s',
             }}>
               {f.label}
@@ -238,14 +443,10 @@ export default function MuscleMapPage() {
             ))
           }
         </div>
-      </>)}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TAB 2: LEAGUE STANDINGS */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {activeTab === 'league' && (<>
-
-        {/* SECTION 1 — Overall Monthly Rank Hero */}
+      <br />
+      <hr style={{ border: 'none', borderBottom: '1px solid var(--outline-variant)' }} />
+      <br />
         <div className="card" style={{
           padding: '32px 20px', marginBottom: 16, textAlign: 'center',
           background: 'var(--surface-container-lowest)',
@@ -467,6 +668,16 @@ export default function MuscleMapPage() {
           </div>
         )}
       </>)}
+
+      {selectedPlayer && (
+        <PlayerDetailModal
+          player={selectedPlayer.isMe ? null : selectedPlayer}
+          realMuscleXP={muscleXP}
+          realUserName={user?.name || 'You'}
+          gender={user?.gender}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </div>
   );
 }

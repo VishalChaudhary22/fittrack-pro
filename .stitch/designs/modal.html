@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;family=Be_Vietnam_Pro:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#f1ccc0",
+                        "on-tertiary": "#664c42",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-dim": "#e3bfb3",
+                        "surface-container": "#19191c",
+                        "tertiary-container": "#f1ccc0",
+                        "outline": "#767577",
+                        "on-tertiary-fixed": "#483128",
+                        "on-error-container": "#ffa8a3",
+                        "on-primary-fixed": "#000000",
+                        "inverse-primary": "#aa3900",
+                        "secondary-fixed": "#ffc4b0",
+                        "on-secondary": "#643220",
+                        "error-dim": "#d7383b",
+                        "on-primary-container": "#441200",
+                        "surface": "#0e0e10",
+                        "on-secondary-fixed": "#552715",
+                        "primary-container": "#ff7944",
+                        "secondary-dim": "#f0a88e",
+                        "error-container": "#9f0519",
+                        "on-tertiary-container": "#5d433a",
+                        "surface-bright": "#2c2c2f",
+                        "on-primary": "#581900",
+                        "on-background": "#f6f3f5",
+                        "surface-variant": "#252528",
+                        "tertiary-fixed-dim": "#e3bfb3",
+                        "outline-variant": "#48474a",
+                        "surface-dim": "#0e0e10",
+                        "inverse-on-surface": "#555557",
+                        "secondary-container": "#6c3926",
+                        "on-tertiary-fixed-variant": "#674c43",
+                        "on-primary-fixed-variant": "#541800",
+                        "on-secondary-fixed-variant": "#78422f",
+                        "surface-tint": "#ff9066",
+                        "surface-container-highest": "#252528",
+                        "background": "#0e0e10",
+                        "tertiary": "#ffdbcf",
+                        "surface-container-high": "#1f1f22",
+                        "inverse-surface": "#fcf8fb",
+                        "secondary-fixed-dim": "#fcb298",
+                        "on-error": "#490006",
+                        "on-surface": "#f6f3f5",
+                        "primary": "#ff9066",
+                        "error": "#ff716c",
+                        "primary-dim": "#ff743c",
+                        "on-secondary-container": "#ffc3ae",
+                        "primary-fixed": "#ff7944",
+                        "secondary": "#ffb59b",
+                        "on-surface-variant": "#acaaad",
+                        "primary-fixed-dim": "#fb611e",
+                        "surface-container-low": "#131315"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #48474a;
+            border-radius: 10px;
+        }
+        .glass-card {
+            background: rgba(37, 37, 40, 0.4);
+            backdrop-filter: blur(20px);
+        }
+        .peach-glow {
+            box-shadow: 0 0 40px rgba(248, 95, 27, 0.1);
+        }
+        .ember-gradient {
+            background: linear-gradient(90deg, #ff9066 0%, #ff7944 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-dim font-body text-on-surface antialiased overflow-hidden">
+<!-- DASHBOARD BACKDROP (SIMULATED BACKGROUND) -->
+<main class="fixed inset-0 w-full h-full flex flex-col p-6 pointer-events-none opacity-40">
+<header class="flex justify-between items-center mb-8">
+<div class="h-10 w-32 bg-surface-container-high rounded-lg"></div>
+<div class="h-10 w-10 bg-surface-container-high rounded-full"></div>
+</header>
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="h-32 bg-surface-container-low rounded-2xl"></div>
+<div class="h-32 bg-surface-container-low rounded-2xl"></div>
+</div>
+<div class="h-64 w-full bg-surface-container-low rounded-2xl mb-8"></div>
+<div class="space-y-4">
+<div class="h-16 w-full bg-surface-container-low rounded-xl"></div>
+<div class="h-16 w-full bg-surface-container-low rounded-xl"></div>
+</div>
+</main>
+<!-- MODAL OVERLAY -->
+<div class="fixed inset-0 bg-black/70 backdrop-blur-md z-40"></div>
+<!-- BOTTOM SHEET CONTAINER -->
+<section class="fixed bottom-0 inset-x-0 w-full max-h-[813px] bg-[#1A1A1D] rounded-t-2xl z-50 flex flex-col overflow-hidden peach-glow shadow-2xl">
+<!-- DRAG HANDLE -->
+<div class="w-full flex justify-center py-4">
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full"></div>
+</div>
+<!-- TOP APP BAR (MODAL CONTEXT) -->
+<header class="flex justify-between items-center px-6 pb-4">
+<div class="flex items-center gap-4">
+<!-- AVATAR -->
+<div class="w-12 h-12 rounded-full ember-gradient flex items-center justify-center border-2 border-primary/20 shadow-lg shadow-primary/10">
+<span class="font-headline text-on-primary-fixed text-lg font-bold">K</span>
+</div>
+<div>
+<h1 class="font-headline text-2xl font-bold tracking-tight uppercase leading-tight text-on-surface">KEIRA</h1>
+<span class="inline-block px-2 py-0.5 bg-secondary-dim/10 text-secondary text-[10px] font-bold tracking-widest uppercase rounded-full border border-secondary/20">ELITE TIER</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-on-surface">close</span>
+</button>
+</header>
+<!-- SCROLLABLE CONTENT AREA -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-6 pb-24">
+<!-- ANATOMY VISUALIZATION AREA -->
+<div class="relative w-full h-[320px] flex items-center justify-center my-4 overflow-hidden">
+<!-- GLOW BACKGROUND -->
+<div class="absolute w-48 h-48 bg-primary/20 blur-[80px] rounded-full"></div>
+<!-- ATHLETE SILHOUETTE IMAGE -->
+<img alt="Sleek glowing orange wireframe muscle map silhouette on dark background" class="h-full object-contain mix-blend-screen opacity-90 drop-shadow-[0_0_15px_rgba(255,144,102,0.6)]" data-alt="digital 3D muscle anatomy silhouette glowing with neon orange wireframe lines against a deep black void background with soft kinetic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2Oo9sXYSuRSEGfmfJQLHhKAL2D_Edjvfc5FM_G7e1qFBFyxwfJYOirQqXuoZ59YCM_51RLU4FDBhOs_QzOismvha9TeJyavAP28y8UFdjQktw6h4kWxeT7IaJvYAG67tSKJBtyIu-0du8pcDhRO15A0ZMjYgRoivT83MgWqsWh2lWjvCvbvKj3jz42AigR6vwMpT6IPByXJFCCreuCbAewmIfYQyl1QkqjiGIqpadLamxVAxwuzUV9GIeAVPXiTxmjL7IrcrEuQA"/>
+<!-- DATA FLOATS -->
+<div class="absolute top-10 left-4 glass-card p-3 rounded-xl border-l-2 border-primary">
+<p class="text-[10px] font-bold text-tertiary-dim uppercase tracking-widest">Upper Body</p>
+<p class="font-headline text-lg text-primary">88% POWER</p>
+</div>
+<div class="absolute bottom-12 right-4 glass-card p-3 rounded-xl border-r-2 border-secondary">
+<p class="text-[10px] font-bold text-tertiary-dim uppercase tracking-widest">Lower Body</p>
+<p class="font-headline text-lg text-secondary">92% STAMINA</p>
+</div>
+</div>
+<!-- OVERALL RANK BLOCK -->
+<div class="glass-card rounded-2xl p-6 mb-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16"></div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<div>
+<p class="text-xs font-bold text-tertiary-dim uppercase tracking-widest">Overall Rank</p>
+<p class="font-headline text-xl text-on-surface">GOLD II</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-tertiary-dim uppercase tracking-widest">Global XP</p>
+<p class="font-headline text-xl text-primary">14,882</p>
+</div>
+</div>
+<!-- PROGRESS BAR -->
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full w-[72%] ember-gradient rounded-full shadow-[0_0_12px_rgba(248,95,27,0.4)]"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] font-bold text-outline-variant tracking-widest">LEVEL 24</span>
+<span class="text-[10px] font-bold text-outline-variant tracking-widest">LEVEL 25</span>
+</div>
+</div>
+<!-- PER-MUSCLE BREAKDOWN -->
+<div class="space-y-4">
+<h3 class="font-headline text-sm font-bold text-on-surface tracking-widest uppercase mb-4 px-1">Performance Breakdown</h3>
+<!-- LIST ROWS -->
+<div class="space-y-3">
+<!-- ROW 1 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-sm font-bold text-on-surface uppercase tracking-tight">Chest</span>
+<span class="text-[10px] font-bold text-primary tracking-widest">2.4K XP</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-4/5 bg-primary/60 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="ml-6 flex flex-col items-end">
+<span class="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black uppercase rounded border border-primary/20">RANK S</span>
+</div>
+</div>
+<!-- ROW 2 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-sm font-bold text-on-surface uppercase tracking-tight">Biceps</span>
+<span class="text-[10px] font-bold text-primary tracking-widest">1.8K XP</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[55%] bg-primary/60 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="ml-6 flex flex-col items-end">
+<span class="inline-block px-2 py-0.5 bg-secondary/10 text-secondary text-[8px] font-black uppercase rounded border border-secondary/20">RANK A</span>
+</div>
+</div>
+<!-- ROW 3 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-sm font-bold text-on-surface uppercase tracking-tight">Quads</span>
+<span class="text-[10px] font-bold text-primary tracking-widest">4.1K XP</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[92%] bg-primary/60 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="ml-6 flex flex-col items-end">
+<span class="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black uppercase rounded border border-primary/20">RANK S+</span>
+</div>
+</div>
+<!-- ROW 4 -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between group transition-all hover:bg-surface-container-high">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">back_hand</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-sm font-bold text-on-surface uppercase tracking-tight">Back</span>
+<span class="text-[10px] font-bold text-primary tracking-widest">3.2K XP</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[68%] bg-primary/60 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="ml-6 flex flex-col items-end">
+<span class="inline-block px-2 py-0.5 bg-secondary/10 text-secondary text-[8px] font-black uppercase rounded border border-secondary/20">RANK A</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FOOTER / CLOSE BUTTON -->
+<div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#1A1A1D] via-[#1A1A1D]/90 to-transparent pt-10">
+<button class="w-full py-4 glass-card rounded-xl border border-outline-variant/20 hover:bg-surface-container-highest transition-colors flex items-center justify-center group active:scale-95 duration-200">
+<span class="font-headline text-on-surface font-bold tracking-[0.2em] uppercase text-sm group-hover:text-primary transition-colors">Close Profile</span>
+</button>
+</div>
+</section>
+</body></html>

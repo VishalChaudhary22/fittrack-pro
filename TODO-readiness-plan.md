@@ -1272,29 +1272,29 @@ Check-in CTA becomes a standalone button BELOW the top row and ABOVE the chips:
 
 ### DashboardPage.jsx — Widget JSX Only
 
-- [ ] Card wrapper: background var(--surface-container-lowest), no border, no boxShadow, minHeight 500
-- [ ] Body map: full-bleed position absolute inset 0, with maskImage/WebkitMaskImage fade
-- [ ] Body map filter: grayscale(100%) brightness(1.8) contrast(1.3) + mixBlendMode screen
-- [ ] Remove maxWidth 260 / margin auto constraint from body map
-- [ ] Remove opacity 0.65 from body map wrapper
-- [ ] Content layer: single div, position relative, zIndex 10, padding 24, flex 1, justifyContent space-between, minHeight 500
-- [ ] Score badge: rgba(53,52,55,0.4) bg, score shows {activeScore}%, label "Overall Readiness"
-- [ ] Tier label (activeTier.label) REMOVED from next to score number
-- [ ] Legend: dot LEFT of text, each item glass chip, wording RECOVERED/FATIGUED/CRITICAL
-- [ ] "Recovery Status" header removed
-- [ ] Factor Pills (Layer 3) deleted entirely
-- [ ] Check-in CTA moved outside badge — standalone button below TOP ROW
-- [ ] Chips: rgba(19,19,21,0.80) bg, 4px borderLeft, 8px radius, no outer border
-- [ ] Chip value: fontSize 14, fontWeight 700, fontFamily Space Grotesk
-- [ ] Chips row: gap 12, marginTop auto
-- [ ] Tune brightness (1.6 to 2.2) until wireframe glow looks correct
-- [ ] If dual-panel bad: implement Option D (200% width crop to front only)
+- [x] Card wrapper: background var(--surface-container-lowest), no border, no boxShadow, minHeight 500
+- [x] Body map: full-bleed position absolute inset 0, with maskImage/WebkitMaskImage fade
+- [x] Body map filter: grayscale(100%) brightness(0.6) + mixBlendMode screen (uses direct `<img>` tag, not BodyMapSVG canvas)
+- [x] Remove maxWidth 260 / margin auto constraint from body map
+- [x] Remove opacity 0.65 from body map wrapper
+- [x] Content layer: single div, position relative, zIndex 10, padding 24, flex 1, justifyContent space-between, minHeight 500
+- [x] Score badge: rgba(53,52,55,0.4) bg, score shows {activeScore}%, label "Overall Readiness"
+- [x] Tier label (activeTier.label) REMOVED from next to score number
+- [x] Legend: dot LEFT of text, each item glass chip, wording RECOVERED/FATIGUED/CRITICAL
+- [x] "Recovery Status" header removed
+- [x] Factor Pills (Layer 3) deleted entirely
+- [x] Check-in CTA moved outside badge — standalone button below TOP ROW
+- [x] Chips: rgba(19,19,21,0.80) bg, 4px borderLeft, 8px radius, no outer border
+- [x] Chip value: fontSize 14, fontWeight 700, fontFamily Space Grotesk
+- [x] Chips row: gap 12, marginTop auto
+- [x] Tune brightness (0.6) — uses raw PNG with mix-blend-mode:screen for wireframe glow
+- [x] Body map uses direct `<img src="front-base.png">` instead of BodyMapSVG canvas (canvas stripBackground broke blend-mode)
 
 ### No changes to
-- [ ] readinessUtils.js
-- [ ] ReadinessCheckIn.jsx
-- [ ] AppContext.jsx
-- [ ] BodyMapSVG.jsx
+- [x] readinessUtils.js
+- [x] ReadinessCheckIn.jsx
+- [x] AppContext.jsx
+- [x] BodyMapSVG.jsx (unused import also removed from DashboardPage)
 
 ### QA
 - [x] Body map fills card edge to edge (no gaps visible)

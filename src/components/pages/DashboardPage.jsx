@@ -4,7 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
-import BodyMapSVG from '../shared/BodyMapSVG';
+
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
@@ -455,34 +455,25 @@ export default function DashboardPage() {
         }}>
 
           {/* ── Body Map & Silhouette Background ── */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 0, // P2-G6: fills card
-            overflow: 'hidden', // P2-G6: bounds the canvas
-            WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
-            maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
-            pointerEvents: 'none',
-          }}>
-            <div style={{ position: 'absolute', inset: 0, background: '#0E0E10', zIndex: 0 }} />
-            <div 
-              style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                filter: 'grayscale(80%) brightness(1.8) contrast(1.3)',
-                mixBlendMode: 'screen',
-              }}
-              className="widget-body-map-wrapper"
-            >
-              {/* P2-G5: Hide the "Front/Back" labels properly without hiding the map */}
-              <style>{`.widget-body-map-wrapper > div > div > div > div:first-child { opacity: 0; }`}</style>
-              <div style={{ width: '100%', maxWidth: 320, marginTop: 30 }}>
-                <BodyMapSVG
-                  muscleXP={muscleXP}
-                  gender={user?.gender}
-                  mini={false}
-                />
-              </div>
-            </div>
-          </div>
+          <img
+            src={user?.gender === 'female' ? '/muscles/female/female-front-base.png' : '/muscles/front-base.png'}
+            alt=""
+            style={{
+              position: 'absolute',
+              top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '55%',
+              maxWidth: 400,
+              height: 'auto',
+              objectFit: 'contain',
+              zIndex: 0,
+              pointerEvents: 'none',
+              filter: 'grayscale(100%) brightness(0.6)',
+              mixBlendMode: 'screen',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 95%)',
+              maskImage: 'linear-gradient(to bottom, black 55%, transparent 95%)',
+            }}
+          />
 
           {/* ── Content Layer ── */}
           <div style={{

@@ -529,7 +529,7 @@ export default function DashboardPage() {
             style={{
               position: 'absolute',
               top: '95%', left: '50%',
-              transform: 'translate(-50%, -50%) scaleY(-1) rotateY(180deg)',
+              transform: 'perspective(1000px) translate(-50%, -50%) scaleY(-1) rotateY(30deg)',
               width: '135%',
               maxWidth: 800,
               height: 'auto',
@@ -550,7 +550,7 @@ export default function DashboardPage() {
             style={{
               position: 'absolute',
               top: '45%', left: '50%',
-              transform: 'translate(-50%, -50%) rotateY(180deg)',
+              transform: 'perspective(1000px) translate(-50%, -50%) rotateY(30deg)',
               width: '135%',
               maxWidth: 800,
               height: 'auto',

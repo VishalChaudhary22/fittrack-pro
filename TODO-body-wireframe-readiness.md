@@ -131,7 +131,12 @@ The attached reference image (`image.png`) shows a **Daily Readiness** card with
 ### Priority 5: Polish
 - [x] Ensure gradient fade properly hides baked-in elements (if using wireframe PNG with baked UI)
 - [x] Fine-tune chip positioning for tighter 2-column layout at bottom
-- [x] Verify light/dark mode compatibility (card is always dark regardless of theme)
+### Priority 6: 3D Y-Axis Rotation
+- [x] Explicitly configure a true 3D perspective rotation so the figure turns 30 degrees to the right:
+      → Use `transform: perspective(1000px) translate(-50%, -50%) rotateY(30deg)` on the main body
+      → Use `transform: perspective(1000px) translate(-50%, -50%) scaleY(-1) rotateY(30deg)` on the reflective floor
+      → This ensures the image actually achieves a 3D depth-rotation rather than just squashing horizontally (which happens when `rotateY` is used without `perspective`).
+
 
 ---
 

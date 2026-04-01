@@ -16,6 +16,7 @@ export function AppProvider({ children }) {
   const [splits, setSplits] = useLocalStorage('fittrack_splits', INIT_SPLITS);
   const [healthLogs, setHealthLogs] = useLocalStorage('fittrack_healthLogs', SAMPLE.hl);
   const [workoutLogs, setWorkoutLogs] = useLocalStorage('fittrack_workoutLogs', SAMPLE.wl);
+  const [readinessLog, setReadinessLog] = useLocalStorage('fittrack_readinessLog', []);
   const [measurements, setMeasurements] = useLocalStorage('fittrack_measurements', []);
   const [caloriesLog, setCaloriesLog] = useLocalStorage('fittrack_caloriesLog', []);
   const [monthlyRankHistory, setMonthlyRankHistory] = useLocalStorage('fittrack_monthlyRankHistory', [
@@ -37,6 +38,17 @@ export function AppProvider({ children }) {
   const setActiveSplitId = useCallback((id) => {
     setUsers(p => p.map(u => u.id === uid ? { ...u, activeSplitId: id } : u));
   }, [uid, setUsers]);
+
+  // Upserts — one entry per user per date
+  // ⚠️ GAP-G9 FIX: wrap in useCallback
+  const logReadiness = useCallback((entry) => {
+    setReadinessLog(prev => {
+      const filtered = prev.filter(
+        r => !(r.userId === entry.userId && r.date === entry.date)
+      );
+      return [...filtered, { ...entry, id: entry.id || `${entry.userId}_${entry.date}` }];
+    });
+  }, [setReadinessLog]);
 
   // Streak calculation
   const getStreak = useCallback(() => {
@@ -96,6 +108,7 @@ export function AppProvider({ children }) {
     // Logs
     healthLogs, setHealthLogs,
     workoutLogs, setWorkoutLogs,
+    readinessLog, setReadinessLog, logReadiness,
     // Measurements & Calories
     measurements, setMeasurements,
     caloriesLog, setCaloriesLog,

@@ -113,7 +113,13 @@ export default function WorkoutPage() {
     const log = {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
       durationMinutes: session.startTime ? Math.round((endTimestamp - session.startTime) / 60000) : null,
-      exercises: session.exs.map(ex => ({ name: ex.sv || ex.name, sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 })) })).filter(ex => ex.sets.length > 0),
+      exercises: session.exs.map(ex => ({
+        name: ex.sv || ex.name,
+        muscle: ex.muscle || null,
+        primaryMuscle: ex.primaryMuscle || null,
+        secondaryMuscles: ex.secondaryMuscles || [],
+        sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 }))
+      })).filter(ex => ex.sets.length > 0),
     };
     setWorkoutLogs(p => [...p, log]); setDone(log); setTimer(null);
     addToast('Workout saved!', 'success');

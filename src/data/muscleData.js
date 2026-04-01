@@ -159,21 +159,31 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
     const trainedInSession = new Set();
     
     log.exercises?.forEach(ex => {
+      // Priority 1: Split-based lookup by exercise name
       let primary = exPrimaryMap[ex.name];
       let secondary = exSecondaryMap[ex.name] || [];
-      const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
       
-      if (!primary && fallbackMuscle) {
-        const fallback = muscleIdFromDisplayName(fallbackMuscle);
-        if (fallback.primary) {
-          primary = fallback.primary;
-          secondary = fallback.secondary;
-        } else {
-          // Fallback to the old MAP array
-          const mapped = getMusclesForExercise(fallbackMuscle);
-          if (mapped.length > 0) {
-            primary = mapped[0];
-            secondary = mapped.slice(1);
+      // Priority 2: Direct muscle data from the log exercise itself
+      if (!primary && ex.primaryMuscle) {
+        primary = ex.primaryMuscle;
+        secondary = ex.secondaryMuscles || [];
+      }
+      
+      // Priority 3: Fallback via muscle display name parsing
+      if (!primary) {
+        const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
+        if (fallbackMuscle) {
+          const fallback = muscleIdFromDisplayName(fallbackMuscle);
+          if (fallback.primary) {
+            primary = fallback.primary;
+            secondary = fallback.secondary;
+          } else {
+            // Fallback to the old MAP array
+            const mapped = getMusclesForExercise(fallbackMuscle);
+            if (mapped.length > 0) {
+              primary = mapped[0];
+              secondary = mapped.slice(1);
+            }
           }
         }
       }
@@ -317,16 +327,25 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
     log.exercises?.forEach(ex => {
       let primary = exPrimaryMap[ex.name];
       let secondary = exSecondaryMap[ex.name] || [];
-      const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
 
-      if (!primary && fallbackMuscle) {
-        const fallback = muscleIdFromDisplayName(fallbackMuscle);
-        if (fallback.primary) {
-          primary = fallback.primary;
-          secondary = fallback.secondary;
-        } else {
-          const mapped = getMusclesForExercise(fallbackMuscle);
-          if (mapped.length > 0) { primary = mapped[0]; secondary = mapped.slice(1); }
+      // Priority 2: Direct muscle data from the log exercise itself
+      if (!primary && ex.primaryMuscle) {
+        primary = ex.primaryMuscle;
+        secondary = ex.secondaryMuscles || [];
+      }
+
+      // Priority 3: Fallback via muscle display name parsing
+      if (!primary) {
+        const fallbackMuscle = exMuscleMap[ex.name] || ex.muscle;
+        if (fallbackMuscle) {
+          const fallback = muscleIdFromDisplayName(fallbackMuscle);
+          if (fallback.primary) {
+            primary = fallback.primary;
+            secondary = fallback.secondary;
+          } else {
+            const mapped = getMusclesForExercise(fallbackMuscle);
+            if (mapped.length > 0) { primary = mapped[0]; secondary = mapped.slice(1); }
+          }
         }
       }
 

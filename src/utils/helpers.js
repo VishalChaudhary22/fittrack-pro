@@ -1,7 +1,10 @@
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 export const O = 'var(--o)';
 export const gId = () => Math.random().toString(36).slice(2, 9);
-export const tod = () => new Date().toISOString().split('T')[0];
+export const tod = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 export const fmt = d => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 export const wkLbl = d => {
   const dt = new Date(d);

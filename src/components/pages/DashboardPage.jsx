@@ -1,13 +1,22 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, Shield, TrendingDown, TrendingUp, Footprints, Droplets } from 'lucide-react';
+import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw, Moon } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
-import { MiniBodyMap } from '../shared/BodyMapSVG';
+import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcBMI, getBMICat } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
-import { calcAllMuscleXP, getWeeklyMuscles, getOverallRank, MUSCLE_GROUPS } from '../../data/muscleData';
+import { calcAllMuscleXP } from '../../data/muscleData';
+import {
+  calcObjectiveReadiness,
+  getMuscleRecoveryStatuses,
+  getTier,
+  getSpotlightMuscles,
+  STATUS_COLORS,
+  MUSCLE_LABELS,
+} from '../../utils/readinessUtils';
+import ReadinessCheckIn from '../shared/ReadinessCheckIn';
 
 const getBMIInsight = (bmi) => {
   if (!bmi) return '';
@@ -21,13 +30,25 @@ const getBMIInsight = (bmi) => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak } = useApp();
+  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog } = useApp();
+  const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
   
-  const weeklyMuscles = useMemo(() => getWeeklyMuscles(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
-  const overallRank = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
+  
+  const objectiveScoreObj = useMemo(() => calcObjectiveReadiness(workoutLogs, user?.id), [workoutLogs, user?.id]);
+  const objectiveScore = objectiveScoreObj.score;
+  const loadRatio = objectiveScoreObj.loadRatio;
+
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayReadiness = useMemo(() => readinessLog.find(r => r.userId === user?.id && r.date === todayStr), [readinessLog, user?.id, todayStr]);
+
+  const activeScore = todayReadiness?.checkInComplete ? todayReadiness.score : objectiveScore;
+  const activeTier = getTier(activeScore);
+
+  const muscleStatuses = useMemo(() => getMuscleRecoveryStatuses(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
+  const spotlightMuscles = useMemo(() => getSpotlightMuscles(muscleStatuses), [muscleStatuses]);
   
   const [showLog, setShowLog] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
@@ -38,6 +59,15 @@ export default function DashboardPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 300); return () => clearTimeout(t); }, []);
+
+  // Auto-open check-in once per day on first dashboard load (if not done)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!todayReadiness && user?.id) {
+      const timer = setTimeout(() => setShowCheckIn(true), 1400);
+      return () => clearTimeout(timer);
+    }
+  }, [todayReadiness, user?.id]); // intentional — todayReadiness is stable per-render
 
   const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id || l.userId === 'vishal').sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;
@@ -413,35 +443,185 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Iron League Widget */}
-        <div className="glass-card" style={{ padding: 18, cursor: 'pointer', border: 'none' }} onClick={() => navigate('/muscle-map')}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Shield size={13} color="var(--primary)" /> IRON LEAGUE
+        {/* ════════════════════════════════════════════════════════ */}
+        {/* NEW DAILY READINESS WIDGET                               */}
+        {/* ════════════════════════════════════════════════════════ */}
+        <div style={{
+          position: 'relative',
+          borderRadius: 24, padding: 24,
+          background: 'var(--surface-container-low)',
+          border: '1px solid var(--surface-container-highest)',
+          overflow: 'hidden', minHeight: 380,
+          display: 'flex', flexDirection: 'column',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }}>
+
+          {/* ── Layer 1: Body Silhouette Background ── */}
+          <div style={{
+            position: 'absolute', top: 30, right: 0, bottom: 0, left: 0, // centered
+            opacity: 0.65, zIndex: 0, pointerEvents: 'none',
+          }}>
+
+            {/* Body map — darkened via CSS filter on the wrapper */}
+            {/* ⚠️ GAP-G1 resolved: Option C — full BodyMapSVG (front+back) constrained + darkened */}
+            {/* muscleXP reused from L29 (GAP-G4) — no redeclaration needed */}
+            <div style={{
+              filter: 'grayscale(45%) brightness(0.42) contrast(1.15)',
+              maxWidth: 260, margin: '0 auto',
+              // Constrains the dual-panel canvas to a centered column
+              // The gradient overlay below visually unifies the two panels
+            }}>
+              <BodyMapSVG
+                muscleXP={muscleXP}    // ← reuses existing muscleXP from DashboardPage L29
+                gender={user?.gender}
+                mini={false}
+              />
             </div>
-            <ChevronRight size={14} color="var(--on-surface-dim)" />
+
+            {/* Bottom fade overlay (creates ground depth + text legibility) */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
+              background: 'linear-gradient(to top, var(--surface-container-low) 10%, rgba(20,20,22,0.85) 45%, transparent 100%)',
+            }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <MiniBodyMap weeklyMuscles={weeklyMuscles} gender={user?.gender} />
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <Shield size={14} color={overallRank.color} />
-                <span className="headline-md" style={{ color: overallRank.color }}>{overallRank.name}</span>
+
+          {/* ── Layer 2: Top Header & Badges ── */}
+          <div style={{
+            position: 'relative', zIndex: 1,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+            marginBottom: 'auto', // pushes everything else down
+          }}>
+            {/* Score Badge (Glassmorphic) */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: 20, padding: '16px 20px',
+              display: 'flex', flexDirection: 'column', gap: 4,
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>
+                Daily Score
               </div>
-              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 8 }}>{Math.round(overallRank.totalXP).toLocaleString()} Total XP</div>
-              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>This week: {weeklyMuscles.length}/{MUSCLE_GROUPS.length} muscle groups trained</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                {weeklyMuscles.slice(0, 6).map(m => (
-                  <span key={m} style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 8, fontWeight: 700, textTransform: 'uppercase' }}>{m}</span>
-                ))}
-                {weeklyMuscles.length > 6 && <span style={{ fontSize: 8, color: 'var(--on-surface-dim)', padding: '2px 4px' }}>+{weeklyMuscles.length - 6}</span>}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: '3rem',
+                  fontWeight: 800, lineHeight: 1, color: activeTier.color,
+                }}>
+                  {activeScore}
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>
+                  {activeTier.label}
+                </span>
               </div>
+
+              {/* Check-in CTA or Status */}
+              <button
+                onClick={() => setShowCheckIn(true)}
+                style={{
+                  marginTop: 6, display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                  fontSize: 11, fontWeight: 600, color: 'var(--primary)',
+                }}
+              >
+                {!todayReadiness?.checkInComplete ? (
+                  <>Complete Check-In <ChevronRight size={12} /></>
+                ) : (
+                  <><RefreshCw size={11} /> Update Check-In</>
+                )}
+              </button>
+            </div>
+
+            {/* Muscle Recovery Status Legend */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 2 }}>
+                Recovery Status
+              </div>
+              {/* Legend Items */}
+              {[
+                { label: 'Optimal',  color: STATUS_COLORS.optimal },
+                { label: 'Fatigued', color: STATUS_COLORS.fatigued },
+                { label: 'Critical', color: STATUS_COLORS.critical },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{item.label}</span>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: item.color, boxShadow: `0 0 6px ${item.color}80` }} />
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* ── Layer 3: Factor Pills (Training Load summary) ── */}
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: 8, marginTop: '15%' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(8px)',
+              padding: '6px 12px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6,
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <Activity size={12} color="var(--primary)" />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface)' }}>
+                {loadRatio > 1.2 ? 'High Load' : loadRatio > 0.8 ? 'Opt. Load' : 'Low Load'}
+              </span>
+            </div>
+            {todayReadiness?.checkInComplete && (
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(8px)',
+                padding: '6px 12px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6,
+                border: '1px solid rgba(255, 255, 255, 0.05)'
+              }}>
+                <Moon size={12} color="var(--primary)" />
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface)' }}>
+                  {todayReadiness.sleepHours}h Sleep
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* ── Layer 4: Muscle Recovery Chips (bottom overlay) ── */}
+          {/* ⚠️ GAP-G6 FIX: Use var(--surface-container) instead of rgba for light theme compatibility */}
+          {/* ⚠️ GAP-G12: Guard with spotlightMuscles.length check — during first render before useMemo */}
+          {/*             resolves, array may be empty. The guard prevents rendering an empty chip row. */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 5,
+            padding: '56px 16px 20px', // top padding = fade space
+            display: 'flex', flexWrap: 'wrap', gap: 8,
+          }}>
+            {spotlightMuscles.length === 0 ? null : spotlightMuscles.map(m => (
+              <div key={m.key} style={{
+                // ⚠️ GAP-G6 FIX: was rgba(14,14,16,0.82) — breaks light mode. Use CSS var instead:
+                background: 'var(--surface-container)',
+                border: '1px solid var(--outline-variant)', // definition on light backgrounds
+                backdropFilter: 'blur(14px)',
+                borderRadius: 12, padding: '9px 14px',
+                borderLeft: `3px solid ${STATUS_COLORS[m.status]}`,
+                minWidth: 100,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--on-surface)' }}>
+                    {MUSCLE_LABELS[m.key] || m.key}
+                  </span>
+                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: STATUS_COLORS[m.status] }} />
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--on-surface-dim)' }}>
+                  {m.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
 
       </div>
+
+      {/* ── Check-in Modal ── */}
+      {/* ⚠️ GAP-G8 FIX: Wrap in Portal to guarantee z-index layering above all Dashboard modals */}
+      {showCheckIn && (
+        <Portal>
+          <ReadinessCheckIn
+            objectiveScore={objectiveScore}
+            onClose={() => setShowCheckIn(false)}
+          />
+        </Portal>
+      )}
 
       {/* Log Weight Modal */}
       {showLog && (

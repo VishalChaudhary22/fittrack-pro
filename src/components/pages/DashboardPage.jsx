@@ -528,10 +528,10 @@ export default function DashboardPage() {
             alt=""
             style={{
               position: 'absolute',
-              top: '90%', left: '50%',
-              transform: 'translate(-50%, -50%) scaleY(-1)',
-              width: '85%',
-              maxWidth: 550,
+              top: '95%', left: '50%',
+              transform: 'translate(-50%, -50%) scaleY(-1) rotate(6deg)',
+              width: '135%',
+              maxWidth: 800,
               height: 'auto',
               objectFit: 'contain',
               zIndex: 1,
@@ -549,10 +549,10 @@ export default function DashboardPage() {
             alt=""
             style={{
               position: 'absolute',
-              top: '40%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '85%',
-              maxWidth: 550,
+              top: '45%', left: '50%',
+              transform: 'translate(-50%, -50%) rotate(6deg)',
+              width: '135%',
+              maxWidth: 800,
               height: 'auto',
               objectFit: 'contain',
               zIndex: 1,

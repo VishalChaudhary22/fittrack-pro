@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
@@ -26,6 +26,71 @@ const getBMIInsight = (bmi) => {
   if (bmi < 30)   return "Slightly above the healthy range. A moderate deficit and strength training will get you there.";
   if (bmi < 35)   return "Obese range detected. Focus on a sustainable caloric deficit and daily movement.";
   return "High obesity range. Prioritise medical guidance alongside your fitness plan.";
+};
+
+const ParticlesBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let width, height;
+
+    const resize = () => {
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const numParticles = 35;
+    const particles = Array.from({ length: numParticles }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2 + 0.5,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(200, 240, 255, 0.4)';
+      ctx.strokeStyle = 'rgba(200, 240, 255, 0.08)';
+      
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+      animationFrameId = requestAnimationFrame(render);
+    };
+    render();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />;
 };
 
 export default function DashboardPage() {
@@ -454,26 +519,59 @@ export default function DashboardPage() {
           display: 'flex', flexDirection: 'column',
         }}>
 
-          {/* ── Body Map & Silhouette Background ── */}
+          {/* ── Background Atmosphere (Particles/Nodes) ── */}
+          <ParticlesBackground />
+
+          {/* ── Reflective Floor ── */}
           <img
-            src={user?.gender === 'female' ? '/muscles/female/female-front-base.png' : '/muscles/front-base.png'}
+            src={user?.gender === 'female' ? '/muscles/female/female-body-wireframe.png' : '/muscles/body-wireframe.png'}
             alt=""
             style={{
               position: 'absolute',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '55%',
-              maxWidth: 400,
+              top: '90%', left: '50%',
+              transform: 'translate(-50%, -50%) scaleY(-1)',
+              width: '85%',
+              maxWidth: 550,
               height: 'auto',
               objectFit: 'contain',
-              zIndex: 0,
+              zIndex: 1,
               pointerEvents: 'none',
-              filter: 'grayscale(100%) brightness(0.6)',
+              opacity: 0.15,
               mixBlendMode: 'screen',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 95%)',
-              maskImage: 'linear-gradient(to bottom, black 55%, transparent 95%)',
+              WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 40%)',
+              maskImage: 'linear-gradient(to top, black 0%, transparent 40%)',
             }}
           />
+
+          {/* ── Body Map & Silhouette Background ── */}
+          <img
+            src={user?.gender === 'female' ? '/muscles/female/female-body-wireframe.png' : '/muscles/body-wireframe.png'}
+            alt=""
+            style={{
+              position: 'absolute',
+              top: '40%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '85%',
+              maxWidth: 550,
+              height: 'auto',
+              objectFit: 'contain',
+              zIndex: 1,
+              pointerEvents: 'none',
+              mixBlendMode: 'screen',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 88%)',
+              maskImage: 'linear-gradient(to bottom, black 65%, transparent 88%)',
+            }}
+          />
+
+          {/* ── Bottom Gradient Overlay ── */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0,
+            height: '45%',
+            background: 'linear-gradient(to bottom, transparent, #0E0E10 80%)',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }} />
 
           {/* ── Content Layer ── */}
           <div style={{
@@ -570,14 +668,15 @@ export default function DashboardPage() {
             )}
 
             {/* BOTTOM ROW: Muscle Chips */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 'auto' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 'auto', rowGap: 8 }}>
               {spotlightMuscles.length === 0 ? null : spotlightMuscles.map(m => (
                 <div key={m.key} style={{
                   background: 'rgba(19, 19, 21, 0.80)',
                   backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
                   padding: '8px 12px', borderRadius: 8,
-                  borderLeft: `4px solid ${STATUS_COLORS[m.status]}`,
-                  minWidth: 90,
+                  borderLeft: `3px solid ${STATUS_COLORS[m.status]}`,
+                  minWidth: 'calc(50% - 4px)', // Force 2 columns if space allows
+                  flex: '1 1 calc(50% - 4px)',
                 }}>
                   <div style={{
                     fontSize: 10, fontWeight: 600, textTransform: 'uppercase',

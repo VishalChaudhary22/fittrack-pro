@@ -136,9 +136,28 @@ The attached reference image (`image.png`) shows a **Daily Readiness** card with
       → Use `transform: perspective(1000px) translate(-50%, -50%) rotateY(30deg)` on the main body
       → Use `transform: perspective(1000px) translate(-50%, -50%) scaleY(-1) rotateY(30deg)` on the reflective floor
       → This ensures the image actually achieves a 3D depth-rotation rather than just squashing horizontally (which happens when `rotateY` is used without `perspective`).
+### Priority 7: Correct 3/4 View — Regenerate Asset (NOT CSS transform)
+
+**Root Cause:** CSS `rotateY()` on a flat 2D PNG does NOT create a true 3D rotation. It merely squashes/compresses the image horizontally like a horizontal skew. The reference shows a **3D mesh model rendered from a 3/4 right-back angle** — this is baked into the image itself.
+
+**What the reference image shows:**
+- The body is NOT facing straight forward
+- The figure is rotated ~30-45° so you see the RIGHT side of the body (chest-right, left shoulder blade partially visible)
+- The left arm hangs further back in perspective, the right arm is closer to the viewer
+- This is a genuine 3D perspective render, not a CSS 2D transform
+
+**Correct Solution:**
+- [x] **Remove** all `rotateY` and `perspective` CSS transforms from the wireframe `<img>` elements in `DashboardPage.jsx` — revert to simple `translate(-50%, -50%)`
+- [x] **Regenerate** `public/muscles/body-wireframe.png` using AI image generation with the correct camera angle prompt:
+      → Prompt: *"3D polygon-mesh wireframe of an athletic male human figure, 3/4 view from front-right, rotated about 30-40 degrees so right side of chest faces the viewer, pure black background, bright glowing teal-grey wireframe lines, futuristic medical scan style, transparent-looking mesh"*
+- [x] **Regenerate** `public/muscles/female/female-body-wireframe.png` with matching prompt but female anatomy
+- [x] The correct `transform` for the main image after new asset: `translate(-50%, -50%)` (no rotation needed — angle is baked in)
+- [x] The correct `transform` for the reflection: `translate(-50%, -50%) scaleY(-1)` (no rotation needed)
+
+**Why this approach is correct:**
+The `mix-blend-mode: screen` trick relies on the asset having a pure black background so dark areas become transparent. As long as we generate the new asset on a pure black background, the screen blend will still work perfectly after the swap.
 
 
----
 
 ## 🔑 The `mixBlendMode: 'screen'` Key
 

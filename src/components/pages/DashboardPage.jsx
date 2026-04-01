@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw, Moon } from 'lucide-react';
+import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
@@ -39,7 +39,7 @@ export default function DashboardPage() {
   
   const objectiveScoreObj = useMemo(() => calcObjectiveReadiness(workoutLogs, user?.id), [workoutLogs, user?.id]);
   const objectiveScore = objectiveScoreObj.score;
-  const loadRatio = objectiveScoreObj.loadRatio;
+
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const todayReadiness = useMemo(() => readinessLog.find(r => r.userId === user?.id && r.date === todayStr), [readinessLog, user?.id, todayStr]);
@@ -448,166 +448,163 @@ export default function DashboardPage() {
         {/* ════════════════════════════════════════════════════════ */}
         <div style={{
           position: 'relative',
-          borderRadius: 24, padding: 24,
-          background: 'var(--surface-container-low)',
-          border: '1px solid var(--surface-container-highest)',
-          overflow: 'hidden', minHeight: 380,
+          borderRadius: 24,
+          background: '#0E0E10', // P2-G1: hardcoded near-black for mix-blend-screen
+          overflow: 'hidden', minHeight: 500,
           display: 'flex', flexDirection: 'column',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
         }}>
 
-          {/* ── Layer 1: Body Silhouette Background ── */}
+          {/* ── Body Map & Silhouette Background ── */}
           <div style={{
-            position: 'absolute', top: 30, right: 0, bottom: 0, left: 0, // centered
-            opacity: 0.65, zIndex: 0, pointerEvents: 'none',
+            position: 'absolute', inset: 0, zIndex: 0, // P2-G6: fills card
+            overflow: 'hidden', // P2-G6: bounds the canvas
+            WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
+            pointerEvents: 'none',
           }}>
-
-            {/* Body map — darkened via CSS filter on the wrapper */}
-            {/* ⚠️ GAP-G1 resolved: Option C — full BodyMapSVG (front+back) constrained + darkened */}
-            {/* muscleXP reused from L29 (GAP-G4) — no redeclaration needed */}
-            <div style={{
-              filter: 'grayscale(45%) brightness(0.42) contrast(1.15)',
-              maxWidth: 260, margin: '0 auto',
-              // Constrains the dual-panel canvas to a centered column
-              // The gradient overlay below visually unifies the two panels
-            }}>
-              <BodyMapSVG
-                muscleXP={muscleXP}    // ← reuses existing muscleXP from DashboardPage L29
-                gender={user?.gender}
-                mini={false}
-              />
+            <div style={{ position: 'absolute', inset: 0, background: '#0E0E10', zIndex: 0 }} />
+            <div 
+              style={{
+                position: 'absolute', inset: 0, zIndex: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                filter: 'grayscale(80%) brightness(1.8) contrast(1.3)',
+                mixBlendMode: 'screen',
+              }}
+              className="widget-body-map-wrapper"
+            >
+              {/* P2-G5: Hide the "Front/Back" labels properly without hiding the map */}
+              <style>{`.widget-body-map-wrapper > div > div > div > div:first-child { opacity: 0; }`}</style>
+              <div style={{ width: '100%', maxWidth: 320, marginTop: 30 }}>
+                <BodyMapSVG
+                  muscleXP={muscleXP}
+                  gender={user?.gender}
+                  mini={false}
+                />
+              </div>
             </div>
-
-            {/* Bottom fade overlay (creates ground depth + text legibility) */}
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
-              background: 'linear-gradient(to top, var(--surface-container-low) 10%, rgba(20,20,22,0.85) 45%, transparent 100%)',
-            }} />
           </div>
 
-          {/* ── Layer 2: Top Header & Badges ── */}
+          {/* ── Content Layer ── */}
           <div style={{
-            position: 'relative', zIndex: 1,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-            marginBottom: 'auto', // pushes everything else down
+            position: 'relative', zIndex: 10,
+            padding: 24, flex: 1,
+            display: 'flex', flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: 500,
           }}>
-            {/* Score Badge (Glassmorphic) */}
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: 20, padding: '16px 20px',
-              display: 'flex', flexDirection: 'column', gap: 4,
-            }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>
-                Daily Score
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+
+            {/* TOP ROW: Badge and Legend */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              
+              {/* Score Badge */}
+              <div style={{
+                background: 'rgba(53, 52, 55, 0.4)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                borderRadius: 12, padding: '10px 16px',
+                border: '1px solid rgba(90, 65, 56, 0.15)',
+                display: 'inline-flex', flexDirection: 'column', gap: 2,
+              }}>
                 <span style={{
-                  fontFamily: "'Space Grotesk', sans-serif", fontSize: '3rem',
-                  fontWeight: 800, lineHeight: 1, color: activeTier.color,
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: '2.4rem', fontWeight: 700, lineHeight: 1,
+                  color: activeTier.color,
                 }}>
-                  {activeScore}
+                  {activeScore}%
                 </span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>
-                  {activeTier.label}
+                <span style={{
+                  fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+                  letterSpacing: '-0.01em', color: 'var(--on-surface-variant)',
+                }}>
+                  Overall Readiness
                 </span>
               </div>
 
-              {/* Check-in CTA or Status */}
+              {/* Legend */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {[
+                  { label: 'Recovered', color: STATUS_COLORS.optimal },
+                  { label: 'Fatigued', color: STATUS_COLORS.fatigued },
+                  { label: 'Critical', color: STATUS_COLORS.critical },
+                ].map(item => (
+                  <div key={item.label} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(53, 52, 55, 0.4)',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                    padding: '5px 10px', borderRadius: 8,
+                    border: '1px solid rgba(90, 65, 56, 0.15)',
+                  }}>
+                    <div style={{
+                      width: 8, height: 8, borderRadius: '50%',
+                      background: item.color,
+                      boxShadow: `0 0 8px ${item.color}99`,
+                      flexShrink: 0,
+                    }} />
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                      letterSpacing: '0.08em', color: 'rgba(255, 255, 255, 0.9)', // force light color due to dark bg 
+                    }}>
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Check-in CTA */}
+            {!todayReadiness?.checkInComplete ? (
               <button
                 onClick={() => setShowCheckIn(true)}
                 style={{
-                  marginTop: 6, display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                  fontSize: 11, fontWeight: 600, color: 'var(--primary)',
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer',
+                  fontSize: 11, fontWeight: 700, color: 'var(--primary)',
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                  alignSelf: 'flex-start', marginTop: 12,
                 }}
               >
-                {!todayReadiness?.checkInComplete ? (
-                  <>Complete Check-In <ChevronRight size={12} /></>
-                ) : (
-                  <><RefreshCw size={11} /> Update Check-In</>
-                )}
+                ✦ Complete Check-In <ChevronRight size={12} />
               </button>
-            </div>
+            ) : (
+              <button
+                onClick={() => setShowCheckIn(true)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer',
+                  fontSize: 11, fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)',
+                  alignSelf: 'flex-start', marginTop: 12,
+                }}
+              >
+                <RefreshCw size={11} /> Update Check-In
+              </button>
+            )}
 
-            {/* Muscle Recovery Status Legend */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 2 }}>
-                Recovery Status
-              </div>
-              {/* Legend Items */}
-              {[
-                { label: 'Optimal',  color: STATUS_COLORS.optimal },
-                { label: 'Fatigued', color: STATUS_COLORS.fatigued },
-                { label: 'Critical', color: STATUS_COLORS.critical },
-              ].map(item => (
-                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{item.label}</span>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: item.color, boxShadow: `0 0 6px ${item.color}80` }} />
+            {/* BOTTOM ROW: Muscle Chips */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 'auto' }}>
+              {spotlightMuscles.length === 0 ? null : spotlightMuscles.map(m => (
+                <div key={m.key} style={{
+                  background: 'rgba(19, 19, 21, 0.80)',
+                  backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                  padding: '8px 12px', borderRadius: 8,
+                  borderLeft: `4px solid ${STATUS_COLORS[m.status]}`,
+                  minWidth: 90,
+                }}>
+                  <div style={{
+                    fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+                    color: 'rgba(255, 255, 255, 0.6)', marginBottom: 2, letterSpacing: '0.04em',
+                  }}>
+                    {MUSCLE_LABELS[m.key] || m.key}
+                  </div>
+                  <div style={{
+                    fontSize: 14, fontWeight: 700, color: '#fff',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                  }}>
+                    {m.label}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* ── Layer 3: Factor Pills (Training Load summary) ── */}
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: 8, marginTop: '15%' }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(8px)',
-              padding: '6px 12px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6,
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <Activity size={12} color="var(--primary)" />
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface)' }}>
-                {loadRatio > 1.2 ? 'High Load' : loadRatio > 0.8 ? 'Opt. Load' : 'Low Load'}
-              </span>
-            </div>
-            {todayReadiness?.checkInComplete && (
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(8px)',
-                padding: '6px 12px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6,
-                border: '1px solid rgba(255, 255, 255, 0.05)'
-              }}>
-                <Moon size={12} color="var(--primary)" />
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface)' }}>
-                  {todayReadiness.sleepHours}h Sleep
-                </span>
-              </div>
-            )}
           </div>
-
-          {/* ── Layer 4: Muscle Recovery Chips (bottom overlay) ── */}
-          {/* ⚠️ GAP-G6 FIX: Use var(--surface-container) instead of rgba for light theme compatibility */}
-          {/* ⚠️ GAP-G12: Guard with spotlightMuscles.length check — during first render before useMemo */}
-          {/*             resolves, array may be empty. The guard prevents rendering an empty chip row. */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 5,
-            padding: '56px 16px 20px', // top padding = fade space
-            display: 'flex', flexWrap: 'wrap', gap: 8,
-          }}>
-            {spotlightMuscles.length === 0 ? null : spotlightMuscles.map(m => (
-              <div key={m.key} style={{
-                // ⚠️ GAP-G6 FIX: was rgba(14,14,16,0.82) — breaks light mode. Use CSS var instead:
-                background: 'var(--surface-container)',
-                border: '1px solid var(--outline-variant)', // definition on light backgrounds
-                backdropFilter: 'blur(14px)',
-                borderRadius: 12, padding: '9px 14px',
-                borderLeft: `3px solid ${STATUS_COLORS[m.status]}`,
-                minWidth: 100,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--on-surface)' }}>
-                    {MUSCLE_LABELS[m.key] || m.key}
-                  </span>
-                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: STATUS_COLORS[m.status] }} />
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--on-surface-dim)' }}>
-                  {m.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
         </div>
 
       </div>

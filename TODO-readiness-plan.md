@@ -1100,3 +1100,250 @@ adds subtle warm tones to the silhouette exactly like the Stitch glow effect.
 **`MiniBodyMap` removal note.** Removing `MiniBodyMap` from Dashboard imports may
 generate an ESLint "unused import" warning during the build if other cleanup doesn't
 catch it. Verify `MiniBodyMap` is not used anywhere else on DashboardPage before removing.
+---
+
+# PHASE 2 — READINESS WIDGET UI OVERHAUL (Stitch Fidelity)
+
+> **Status:** PLANNED — Not yet implemented
+> **Created:** 2026-04-01
+> **Priority:** High — Backend logic is solid; UI must match Stitch reference
+> **Effort:** Medium — JSX-only changes to DashboardPage.jsx; no logic changes
+> **Files affected:** src/components/pages/DashboardPage.jsx only (widget JSX block)
+
+---
+
+## Phase 2 Goal
+
+The Phase 1 implementation correctly wired up all the score logic, state, and the check-in modal.
+The widget JSX must now be rebuilt to exactly match the Stitch "Visual Recovery Dashboard" reference.
+
+### Visual Gaps vs Stitch Design
+
+| Issue | Current | Stitch Target |
+|---|---|---|
+| Body map coverage | Two canvases, maxWidth 260 centered | Full-bleed silhouette covering entire card |
+| Body map blend mode | brightness(0.42) — just darkens | grayscale(100%) + mix-blend-screen → glowing wireframe |
+| Card height | minHeight: 380 | minHeight: 500 |
+| Score suffix | No % | Shows 84% with percent sign |
+| Score label | "Daily Score" | "OVERALL READINESS" below the number |
+| Tier label | Shown beside number (e.g. Optimal) | REMOVED from badge entirely |
+| Legend order | label → dot | dot → label (● RECOVERED) |
+| Legend wording | Optimal / Fatigued / Critical | RECOVERED / FATIGUED / CRITICAL |
+| Legend styling | No glass chip per item | Each item is its own glass pill |
+| Legend header | "Recovery Status" header | No header |
+| Factor pills | High Load / Sleep pills mid-card | Not in Stitch — REMOVE |
+| Check-in CTA | Inside the score badge | Standalone button below the top row |
+| Chip background | var(--surface-container) | rgba(19,19,21,0.80) — Stitch bg-surface/80 |
+| Chip border left | 3px | 4px (Stitch border-l-4) |
+| Chip radius | 12px | 8px (Stitch rounded-lg) |
+| Chip outer border | 1px solid var(--outline-variant) | None |
+| Chip value font | default | Space Grotesk, 14px, 700 |
+| Chips gap | 8px | 12px (Stitch gap-3) |
+| Card background | var(--surface-container-low) | var(--surface-container-lowest) — near-black for blend |
+| Card border | 1px solid | No border |
+
+---
+
+## Stitch Layout Structure
+
+```
++-----------------------------------------------------+
+|  [84%          ]              [● RECOVERED         ] |
+|  [OVERALL      ]              [● FATIGUED          ] |
+|  [READINESS    ]              [● CRITICAL          ] |
+|  * Complete Check-In ->                              |
+|                                                      |
+|          BODY SILHOUETTE (full bleed)                |
+|                                                      |
+|  [QUADS   ] [LOWER BACK] [DELTOIDS  ]               |
+|   Optimal     92h Rest    Prime                      |
++-----------------------------------------------------+
+```
+
+---
+
+## Change 1 — Body Map: Full-Bleed + Mix-Blend-Screen
+
+WHY: The BodyMapSVG canvas renders teal-blue pixels on black. After grayscale(100%)
+and brightness(1.8), those become bright grey/white glows. mix-blend-screen on a
+near-black parent makes the dark areas transparent and only bright pixels show through —
+identical visual to the Stitch 3D wireframe render.
+
+```jsx
+{/* REPLACE the current body map wrapper with this: */}
+<div style={{
+  position: 'absolute', inset: 0, zIndex: 0,
+  WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
+  maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)',
+  pointerEvents: 'none',
+}}>
+  {/* Black base required for mix-blend-screen to work */}
+  <div style={{ position: 'absolute', inset: 0, background: 'var(--surface-container-lowest)', zIndex: 0 }} />
+  {/* Canvas with screen blend creates glowing wireframe effect */}
+  <div style={{
+    position: 'absolute', inset: 0, zIndex: 1,
+    filter: 'grayscale(100%) brightness(1.8) contrast(1.3)',
+    mixBlendMode: 'screen',
+    display: 'flex', alignItems: 'stretch',
+  }}>
+    <div style={{ width: '100%', height: '100%' }}>
+      <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} mini={false} />
+    </div>
+  </div>
+</div>
+```
+
+Option D (if two-panel looks odd): wrap BodyMapSVG in width: '200%' + overflow hidden to crop to front panel only.
+
+---
+
+## Change 2 — Card Wrapper
+
+```
+BEFORE: background: var(--surface-container-low), border, boxShadow, minHeight: 380, padding: 24
+AFTER:  background: var(--surface-container-lowest), no border, no boxShadow, minHeight: 500, no padding on wrapper
+```
+
+---
+
+## Change 3 — Content Layer (single wrapper div for all content)
+
+Replace scattered Layer 2/3/4 comment structure with one content layer:
+```
+position: relative, zIndex: 10, padding: 24, flex: 1
+display: flex, flexDirection: column, justifyContent: space-between, minHeight: 500
+```
+Inner structure: TOP ROW div + CTA button + BOTTOM chips div (mt-auto)
+
+---
+
+## Change 4 — Score Badge
+
+```
+REMOVE: tier label beside number (e.g. "Optimal")
+REMOVE: "Daily Score" header text
+REMOVE: Check-in CTA button from inside badge
+ADD: % suffix to score number (84%)
+CHANGE label to: "Overall Readiness"
+CHANGE background to: rgba(53, 52, 55, 0.4) with border rgba(90,65,56,0.15)
+```
+
+Score number style: fontFamily Space Grotesk, fontSize 2.4rem, fontWeight 700, color activeTier.color
+
+---
+
+## Change 5 — Legend Column
+
+```
+REMOVE: "Recovery Status" header
+CHANGE: dot moves LEFT of text (was right)
+CHANGE: labels to RECOVERED / FATIGUED / CRITICAL
+ADD: each item gets its own glass chip (bg rgba(53,52,55,0.4), blur 12px, border rgba(90,65,56,0.15), borderRadius 8)
+DOT style: width 8, height 8, borderRadius 50%, boxShadow 0 0 8px colorWithAlpha
+TEXT style: fontSize 10, fontWeight 700, uppercase, letterSpacing 0.08em, color var(--on-surface)
+```
+
+---
+
+## Change 6 — Muscle Status Chips
+
+```
+CHANGE background: rgba(19, 19, 21, 0.80)  (was var(--surface-container))
+CHANGE borderLeft: 4px solid  (was 3px)
+CHANGE borderRadius: 8  (was 12)
+REMOVE outer border (was 1px solid var(--outline-variant))
+CHANGE chip value font: fontFamily Space Grotesk, fontSize 14, fontWeight 700
+Chips row gap: 12  (was 8)
+```
+
+---
+
+## Change 7 — Remove Factor Pills, Relocate CTA
+
+DELETE the entire "Layer 3: Factor Pills" block (High Load / Sleep pills).
+
+Check-in CTA becomes a standalone button BELOW the top row and ABOVE the chips:
+- When not done: "* Complete Check-In ->" in var(--primary) color
+- When done: "<RefreshCw /> Update Check-In" in var(--on-surface-dim)
+
+---
+
+## Phase 2 Implementation Checklist
+
+### DashboardPage.jsx — Widget JSX Only
+
+- [ ] Card wrapper: background var(--surface-container-lowest), no border, no boxShadow, minHeight 500
+- [ ] Body map: full-bleed position absolute inset 0, with maskImage/WebkitMaskImage fade
+- [ ] Body map filter: grayscale(100%) brightness(1.8) contrast(1.3) + mixBlendMode screen
+- [ ] Remove maxWidth 260 / margin auto constraint from body map
+- [ ] Remove opacity 0.65 from body map wrapper
+- [ ] Content layer: single div, position relative, zIndex 10, padding 24, flex 1, justifyContent space-between, minHeight 500
+- [ ] Score badge: rgba(53,52,55,0.4) bg, score shows {activeScore}%, label "Overall Readiness"
+- [ ] Tier label (activeTier.label) REMOVED from next to score number
+- [ ] Legend: dot LEFT of text, each item glass chip, wording RECOVERED/FATIGUED/CRITICAL
+- [ ] "Recovery Status" header removed
+- [ ] Factor Pills (Layer 3) deleted entirely
+- [ ] Check-in CTA moved outside badge — standalone button below TOP ROW
+- [ ] Chips: rgba(19,19,21,0.80) bg, 4px borderLeft, 8px radius, no outer border
+- [ ] Chip value: fontSize 14, fontWeight 700, fontFamily Space Grotesk
+- [ ] Chips row: gap 12, marginTop auto
+- [ ] Tune brightness (1.6 to 2.2) until wireframe glow looks correct
+- [ ] If dual-panel bad: implement Option D (200% width crop to front only)
+
+### No changes to
+- [ ] readinessUtils.js
+- [ ] ReadinessCheckIn.jsx
+- [ ] AppContext.jsx
+- [ ] BodyMapSVG.jsx
+
+### QA
+- [x] Body map fills card edge to edge (no gaps visible)
+- [x] Glowing wireframe effect: muscles glow on near-black bg
+- [x] maskImage fade: body fades at bottom 35%, chips readable on top
+- [x] Score shows 84% format
+- [x] Score label reads OVERALL READINESS (not "Daily Score")
+- [x] Tier label not shown beside score number
+- [x] Legend: dot LEFT, text RIGHT, each in glass chip
+- [x] No "Recovery Status" heading above legend
+- [x] Chips: muscle name uppercase muted on top, status bolded on bottom
+- [x] No Factor Pills mid-card
+- [x] Check-in CTA below badge row, not inside it
+- [x] Card height ~500px min
+- [x] Light theme: rgba chips look readable
+- [x] Mobile 375px: chips wrap without overflow
+
+*End of Phase 2 Plan*
+
+---
+
+## ⚠️ Phase 2 Gap Analysis (Verified Against Codebase — 2026-04-01)
+
+The following gaps were identified by cross-referencing the Phase 2 plan against
+the actual source files (`DashboardPage.jsx`, `BodyMapSVG.jsx`, `index.css`).
+Each gap must be addressed during implementation.
+
+| # | Gap | Severity | Detail |
+|---|-----|----------|--------|
+| P2-G1 | **Light theme breaks `mix-blend-screen`** — `--surface-container-lowest` is `#EDE7E0` (light beige) in light mode. Using it as the card bg turns `mix-blend-screen` into a blown-out white mess. | 🔴 Critical | Card must use a hardcoded near-black bg (`#0E0E10`) instead of a CSS var, OR conditionally only apply blend-mode in dark theme, OR wrap the body layer in an isolated `#0E0E10` div regardless of theme. |
+| P2-G2 | **`loadRatio` (L42) becomes dead code** — It's only used in the Factor Pills (L562). Deleting pills → unused variable → lint error. | 🟠 High | Delete `const loadRatio = objectiveScoreObj.loadRatio;` at L42. Keep `objectiveScoreObj.loadRatio` available if needed later. |
+| P2-G3 | **`Moon` import becomes dead code** — `Moon` is only used in the Factor Pills sleep display (L571). After deletion → unused import → lint error. `Activity` at L560 is also in pills BUT survives because it's used elsewhere (L252 activity card). | 🟠 High | Remove `Moon` from the lucide-react import on L4. Keep `Activity`. |
+| P2-G4 | **Chip inner dot not documented for removal** — Current chip has a colored dot (L602, `width: 4, height: 4`) inside a `space-between` row. Stitch has NO dot inside the muscle chip — dots are in the legend only. Change 6 updates bg/border/radius but never says to remove the dot. | 🟡 Medium | Remove the `<div style={{ width: 4, height: 4, borderRadius: '50%', ... }} />` from inside each chip. Also remove the `justifyContent: 'space-between'` flex row wrapper — replace with simple vertical stack (label above, value below). |
+| P2-G5 | **BodyMapSVG renders "Front" / "Back" labels** — When `mini={false}`, component passes `label="Front"` (L290) and `label="Back"` (L298). These render as 9px uppercase text above each canvas. Under `mix-blend-screen` + `brightness(1.8)` they'll appear as bright white text floating on the card. | 🟡 Medium | Either: (a) hide them with CSS on the widget's body-map wrapper using `fontSize: 0` or `color: transparent`, or (b) pass a new prop to suppress labels (but this violates "zero changes to BodyMapSVG"). Best option: use the CSS approach — add `color: transparent` or `visibility: hidden` scoped via a wrapper class/style targeting `div > div` text nodes. Simplest: add `opacity: 0` to only the label divs by targeting via `> div > div:first-child` in the filter wrapper. |
+| P2-G6 | **Canvas overflow — 1:2 aspect ratio exceeds card height** — Each canvas is 640×1280 (1:2 ratio). Two side-by-side panels at ~42% width each will attempt ~500px+ height. The `position: absolute, inset: 0` wrapper won't constrain `height: auto` canvases. Body map will bleed out of the card. | �� High | Add `overflow: 'hidden'` to the body map background layer div (`position: absolute, inset: 0`). This is already partially implied by the card's `overflow: 'hidden'`, but the inner wrapper's `display: flex, alignItems: stretch` combined with `height: '100%'` may not clip properly. Test and confirm. |
+| P2-G7 | **Old gradient overlay div (L482-485) not flagged for deletion** — The Phase 1 code has a separate `<div>` with `linear-gradient(to top, var(--surface-container-low) 10%, ...)` as a ground-depth fade. Phase 2 replaces this with `maskImage` on the parent. But the old overlay div is NOT mentioned for deletion in the checklist. | �� Medium | Explicitly delete the `<div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(...)' }} />` at L482-485. The `maskImage` approach handles the fade instead. |
+| P2-G8 | **Chip absolute positioning lost** — Current chips (L583-608) use `position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 5`. Phase 2 Content Layer uses `marginTop: 'auto'` on a flex child instead. This is correct (Stitch uses `mt-auto`), but the plan must explicitly note that the absolute positioning and `padding: '56px 16px 20px'` on the chip row are removed — otherwise the implementer might accidentally keep both. | 🟢 Low | Confirm: chips row changes from `position: absolute, bottom: 0` to `marginTop: auto` inside the flex content layer. Remove `zIndex: 5`. Remove `padding: '56px 16px 20px'` (the 56px fade space is no longer needed since maskImage handles it). |
+
+---
+
+### Phase 2 Additional Checklist Items (from Gap Analysis)
+
+Add these to the Phase 2 Implementation Checklist:
+
+- [x] **P2-G1:** Card wrapper uses hardcoded `#0E0E10` bg instead of `var(--surface-container-lowest)` — OR — wrap body map layer in an opaque `#0E0E10` isolation div so blend-mode works regardless of theme
+- [x] **P2-G2:** Delete `const loadRatio = objectiveScoreObj.loadRatio;` at L42 (dead code after pills removed)
+- [x] **P2-G3:** Remove `Moon` from lucide-react import on L4 (dead after pills removal). Keep `Activity`.
+- [x] **P2-G4:** Inside each chip: remove the 4×4 colored dot div and the `justifyContent: 'space-between'` row wrapper. Simple vertical stack: label → value.
+- [x] **P2-G5:** Suppress "Front" / "Back" labels on BodyMapSVG — use CSS `color: transparent` on the body-map wrapper's nested text divs. Zero changes to BodyMapSVG.jsx.
+- [x] **P2-G6:** Add `overflow: 'hidden'` to the body map background layer wrapper. Verify canvas doesn't bleed below card.
+- [x] **P2-G7:** Delete the old gradient overlay div at L482-485 (`<div style={{ position: 'absolute', bottom: 0, ... linear-gradient ... }} />`). maskImage replaces it.
+- [x] **P2-G8:** Chips row: remove `position: absolute, bottom: 0, zIndex: 5, padding: '56px 16px 20px'`. Use `marginTop: 'auto'` in flex content layer instead.

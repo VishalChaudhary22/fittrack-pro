@@ -518,7 +518,7 @@ export default function DietPage() {
       {/* SEARCH / LOG MODAL (BottomSheet) */}
       {/* ──────────────────────────────────────────────────────────── */}
       {showSearch && (
-        <div className="mo" style={{ alignItems: 'flex-end', padding: 0 }}>
+        <div className="mo" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 0, overflowY: 'hidden' }}>
           <div className="md cascade-item" style={{ maxWidth: '100%', margin: 0, borderRadius: '24px 24px 0 0', height: '90vh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)' }}>
             
             {/* DETAIL / CUSTOM PANE */}

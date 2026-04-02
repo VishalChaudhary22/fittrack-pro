@@ -154,6 +154,17 @@ export default function DietPage() {
     addToast('Copied yesterday\'s log!', 'success');
   };
 
+  // Lock body scroll and scroll to top when search modal opens (Bug F3)
+  React.useEffect(() => {
+    if (showSearch) {
+      document.body.style.overflow = 'hidden';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showSearch]);
+
   const handleOpenSearch = (slot) => {
     setSearchMealSlot(slot);
     setShowSearch(true);
@@ -246,7 +257,7 @@ export default function DietPage() {
       {/* ──────────────────────────────────────────────────────────── */}
       <section style={{ marginBottom: 40 }}>
         {/* STATS ROW */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
           {[{ l: 'Weight', v: isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`, i: Scale },
             { l: 'Height', v: isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`, i: Ruler },
             { l: 'BMI Score', v: bmi, i: Calculator },
@@ -254,10 +265,11 @@ export default function DietPage() {
             { l: 'Activity', v: (user.activityLevel || 'moderate').charAt(0).toUpperCase() + (user.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
             const Icon = s.i;
             return (
-              <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface-container-low)', padding: '6px 12px', borderRadius: 20, border: '1px solid var(--surface-container-highest)' }}>
-                <Icon size={14} color="var(--outline)" />
-                <span style={{ fontSize: 11, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{s.l}</span>
-                <span style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 800 }}>{s.v}</span>
+              <div key={s.l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: 'var(--surface-container-low)', padding: '8px 16px', borderRadius: 20, border: '1px solid var(--surface-container-highest)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 500 }}>
+                  <Icon size={12} color="var(--on-surface-variant)" /> {s.l}
+                </span>
+                <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 800 }}>{s.v}</span>
               </div>
             );
           })}
@@ -272,6 +284,16 @@ export default function DietPage() {
                 GOAL: {goal === 'loss' ? 'CUT' : goal === 'gain' ? 'BULK' : 'MAINTAIN'}
               </h2>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap', background: 'var(--surface-container-highest)', padding: '8px 16px', borderRadius: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🔥 </span>{goalKcal} kcal</div>
+            <span style={{ color: 'var(--outline)' }}>·</span>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>💪 </span>{protTarget}g P</div>
+            <span style={{ color: 'var(--outline)' }}>·</span>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🌾 </span>{carbsTarget}g C</div>
+            <span style={{ color: 'var(--outline)' }}>·</span>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🧈 </span>{fatTarget}g F</div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 24, justifyContent: 'center' }}>
@@ -414,28 +436,7 @@ export default function DietPage() {
               </div>
             </div>
 
-            {/* Today's Tracker Progress Card */}
-            <div style={{ background: 'var(--surface-container-low)', padding: 24, borderRadius: 16, marginBottom: 24, borderLeft: '4px solid var(--primary-container)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '1px' }}>Consumed Intake</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--primary)' }}>{Math.round(todayTotals.calories)} / {goalKcal} kcal</span>
-              </div>
-              <div className="pbar" style={{ height: 10, borderRadius: 6, marginBottom: 24, background: 'var(--surface-container-highest)' }}>
-                <div className="pbar-fill" style={{ width: `${Math.min((todayTotals.calories/goalKcal)*100, 100)}%`, background: todayTotals.calories > goalKcal ? 'var(--danger)' : 'var(--primary-container)' }}/>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-                {[{ l: 'Protein', c: todayTotals.protein, t: protTarget, col: 'var(--primary)' },
-                  { l: 'Carbs', c: todayTotals.carbs, t: carbsTarget, col: 'var(--tertiary-container)' },
-                  { l: 'Fats', c: todayTotals.fat, t: fatTarget, col: 'var(--outline)' }].map(m => (
-                  <div key={m.l}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1px' }}>
-                      <span>{m.l}</span><span style={{ color: 'var(--on-surface)' }}>{Math.round(m.c)} / {m.t}g</span>
-                    </div>
-                    <div className="pbar" style={{ height: 6 }}><div className="pbar-fill" style={{ width: `${Math.min((m.c/(m.t||1))*100, 100)}%`, background: m.col }}/></div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Removed Redundant Today's Tracker Progress Card */}
 
             {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
                <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24 }}>
@@ -460,7 +461,7 @@ export default function DietPage() {
                         </div>
                         <div>
                           <h4 className="headline-md" style={{ fontSize: 18, margin: 0 }}>{slot.id}</h4>
-                          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 600, marginTop: 4 }}>Suggested: {slotCals} Kcal • {slot.targetPct * 100}%</p>
+                          <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 4 }}>🔥 ~ {slotCals} Kcal • {Math.round(slot.targetPct * 100)}%</p>
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>

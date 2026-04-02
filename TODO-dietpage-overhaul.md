@@ -4,6 +4,74 @@
 
 ---
 
+## 🐛 Phase F — UX Polish Round 2 (Follow-up Feedback)
+
+> [!IMPORTANT]
+> These are UX issues identified after Phase E was deployed. Plan — do NOT implement yet.
+
+---
+
+### Bug F1: Goal Card — Daily Macro Targets Not Visible on Rings
+
+**Problem:** The macro rings (Kcal, Protein, Carbs, Fat) show consumed/remaining values but the user has no clear reference for what the **total daily goal** is. They have to mentally calculate or go to the Meal Guide to see it.
+
+**Planned Fix:**
+- [x] **F1a.** Above or below each macro ring, display both consumed **and** the target. Format: `consumed / target` (e.g. `"1200 / 2100 kcal"`). Use small text: `font-size: 10px`, `color: var(--on-surface-dim)` for the `/ target` part and primary weight for consumed.
+- [x] **F1b.** Alternatively, add a compact summary row **above the 4 rings** showing the key daily numbers as a horizontal stat strip:
+  - `🔥 2100 kcal` | `💪 160g P` | `🌾 210g C` | `🧈 58g F`
+  - Style: `font-size: 11px`, `font-weight: 800`, `color: var(--primary)` for values, `color: var(--on-surface-dim)` for labels. Single row, divided by `·` separators.
+- [x] **F1c.** Decide and implement one of the two approaches above (F1a or F1b). Recommendation: **F1b (summary row above rings)** — less cluttered, quick scanability.
+
+---
+
+### Bug F2: Remove Redundant "Consumed Intake" Section
+
+**Problem:** The "Consumed Intake" card/section is now redundant since the Goal card's macro rings already reflect what has been logged today. Showing it a second time creates visual duplication and clutters the tracker tab.
+
+**Planned Fix:**
+- [x] **F2a.** Locate and **remove the "Consumed Intake" section** from the Daily Tracker tab entirely.
+- [x] **F2b.** Ensure the macro rings in the Goal card are the **single source of truth** for today's consumed vs. target display. The rings already pull from `todayTotals` — confirm this is wired correctly.
+- [x] **F2c.** After removal, verify the remaining Tracker tab layout flows well: Goal Card → Tab Switcher → Meal Slot Cards → FAB. Adjust spacing/margin if needed.
+
+---
+
+### Bug F3: Food Search Modal — Always Anchor to Top of Screen
+
+**Problem:** When the user taps `+` on a meal slot that is low on the page (e.g. Dinner, which requires scrolling down), the Food Search modal/bottom-sheet opens at the **scroll position of that card**, not at the top of the viewport. This means the user may need to scroll back up to see the modal header and search bar.
+
+**Planned Fix:**
+- [x] **F3a.** When the modal opens, scroll the page to `window.scrollTo({ top: 0, behavior: 'smooth' })` **before** the modal becomes visible, or lock the modal to viewport-top using `position: fixed` with `top: 0`.
+- [x] **F3b.** Ensure the modal container uses `position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000` so it always overlays the entire screen, regardless of scroll position. This is likely already attempted, but verify no `position: absolute` is leaking from a parent container.
+- [x] **F3c.** Add `document.body.style.overflow = 'hidden'` when the modal opens and restore on close — this prevents the background from scrolling while the modal is active, which is a common cause of the "modal at wrong position" bug.
+- [x] **F3d.** Test: open modal from Breakfast (top) and from Before Bed (bottom). Both should render the search bar and modal header visible without scrolling.
+
+---
+
+### Bug F4: Meal Slot Cards — Suggested Kcal Text Too Faint
+
+**Problem:** The "~ 400–600 kcal suggested" hint text below each meal slot name is barely readable. The color is too close to the background, making it inaccessible and unhelpful.
+
+**Planned Fix:**
+- [x] **F4a.** Increase the contrast on the suggested kcal hint text. Change from `color: var(--on-surface-dim)` or similar low-contrast token to `color: var(--on-surface-variant)` — still subtle, but readable.
+- [x] **F4b.** Increase `font-size` from `10px` to `11px` for slightly better legibility without breaking the layout.
+- [x] **F4c.** Optionally, prefix the text with a `🔥` emoji or a small `~` tilde to signal it is an estimate, making it visually distinct from logged data.
+
+---
+
+### Bug F5: Stats Chip Strip — Alignment and Color Refinement
+
+**Problem:** The 5 body-stat chips (Weight, Height, BMI, TDEE, Activity) at the top of the Diet Page have two issues:
+1. They feel right-aligned / unbalanced within the chip — the text label and value don't look centred inside the pill.
+2. The label text (e.g. "Weight", "Height") and value text (e.g. "72 kg", "5'9"") are the same colour, making it hard to tell which is the semantic label vs the data value.
+
+**Planned Fix:**
+- [x] **F5a.** Label text (e.g. "Weight", "Height", "BMI"): `color: var(--on-surface-variant)`, `font-size: 10px`, `font-weight: 500`. This makes labels recede visually.
+- [x] **F5b.** Value text (e.g. "72 kg", "5'9"", "22.3"): `color: var(--primary)`, `font-size: 13px`, `font-weight: 800`. This makes values pop with the signature Kinetic Elite orange/ember accent.
+- [x] **F5c.** Set `text-align: center` and `align-items: center` on the chip's inner flex column so the label + value pair are centred both horizontally and vertically within each pill.
+- [x] **F5d.** Ensure the chip strip itself uses `justify-content: center` (or `flex-start` with even gap) so the 5 chips sit balanced across the width, not pushed to one edge.
+
+---
+
 ## 🐛 Phase E — Production Bug Fixes (from Screenshot Review)
 
 > [!IMPORTANT]

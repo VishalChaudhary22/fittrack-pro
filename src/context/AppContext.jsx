@@ -19,6 +19,8 @@ export function AppProvider({ children }) {
   const [readinessLog, setReadinessLog] = useLocalStorage('fittrack_readinessLog', []);
   const [measurements, setMeasurements] = useLocalStorage('fittrack_measurements', []);
   const [caloriesLog, setCaloriesLog] = useLocalStorage('fittrack_caloriesLog', []);
+  const [foodLog, setFoodLog] = useLocalStorage('fittrack_foodLog', []);
+  const [favoriteIds, setFavoriteIds] = useLocalStorage('fittrack_favoriteFoods', []);
   const [monthlyRankHistory, setMonthlyRankHistory] = useLocalStorage('fittrack_monthlyRankHistory', [
     { id: '2026-02', label: 'Feb 2026', xp: 175000 },
     { id: '2026-01', label: 'Jan 2026', xp: 130000 },
@@ -112,6 +114,8 @@ export function AppProvider({ children }) {
     // Measurements & Calories
     measurements, setMeasurements,
     caloriesLog, setCaloriesLog,
+    foodLog, setFoodLog,
+    favoriteIds, setFavoriteIds,
     monthlyRankHistory, setMonthlyRankHistory,
     // Theme
     theme, toggleTheme,

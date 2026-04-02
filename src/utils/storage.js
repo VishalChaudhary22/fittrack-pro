@@ -7,6 +7,8 @@ const STORAGE_KEYS = [
   'fittrack_theme',
   'fittrack_measurements',
   'fittrack_caloriesLog',
+  'fittrack_foodLog',
+  'fittrack_favoriteFoods',
 ];
 
 export const exportData = () => {

@@ -1,0 +1,21 @@
+export const servingTypes = [
+  { id: 'roti', label: '1 roti/chapati', defaultGrams: 35, usedFor: 'Roti, chapati, phulka' },
+  { id: 'paratha', label: '1 paratha', defaultGrams: 60, usedFor: 'Aloo/gobi/plain paratha' },
+  { id: 'katori', label: '1 katori', defaultGrams: 150, usedFor: 'Dal, sabzi, curry (homestyle)' },
+  { id: 'bowl', label: '1 bowl', defaultGrams: 200, usedFor: 'Rice, khichdi, soup (homestyle)' },
+  { id: 'plate', label: '1 plate', defaultGrams: 300, usedFor: 'Biryani, thali portion (homestyle)' },
+  { id: 'piece', label: '1 piece', defaultGrams: 40, usedFor: 'Samosa (~80g), ladoo (~40g)' },
+  { id: 'glass', label: '1 glass', defaultGrams: 200, usedFor: 'Milk, lassi, juice' },
+  { id: 'cup', label: '1 cup', defaultGrams: 150, usedFor: 'Tea, coffee' },
+  { id: 'tbsp', label: '1 tablespoon', defaultGrams: 15, usedFor: 'Ghee, oil, honey, sugar' },
+  { id: 'scoop', label: '1 scoop', defaultGrams: 30, usedFor: 'Whey protein, mass gainer' },
+  { id: 'slice', label: '1 slice', defaultGrams: 30, usedFor: 'Bread, pizza, cake' },
+  { id: 'g100', label: '100g', defaultGrams: 100, usedFor: 'Universal reference' },
+  { id: 'custom', label: 'Custom (g)', defaultGrams: 1, usedFor: 'Any food' },
+  { id: 'handful', label: '1 handful', defaultGrams: 30, usedFor: 'roasted chana, makhana, nuts, dry fruits' },
+  { id: 'medium', label: '1 medium', defaultGrams: 120, usedFor: 'banana (~120g), apple (~150g), mango (~200g)' },
+  { id: 'egg', label: '1 egg', defaultGrams: 50, usedFor: 'whole egg unit' },
+  { id: 'takeaway-container', label: '1 takeaway container', defaultGrams: 480, usedFor: 'standard Swiggy/Zomato gravy container (dal, sabzi, curry)' },
+  { id: 'restaurant-portion', label: '1 restaurant portion', defaultGrams: 600, usedFor: 'single restaurant biryani order, dhaba main dish' },
+  { id: 'thali', label: '1 full thali', defaultGrams: 900, usedFor: 'complete restaurant/dhaba thali with multiple components' }
+];

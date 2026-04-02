@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { TrendingUp, Salad, Flame, Activity, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
 import { DIET_TYPES } from '../../data/diets';
@@ -43,11 +43,11 @@ const CONSTANTS = {
   ],
   MEAL_SLOTS: [
     { id: 'Breakfast', icon: TrendingUp, targetPct: 0.25 },
-    { id: 'Mid-Morning', icon: Activity, targetPct: 0.05 },
+    { id: 'Mid-Morning', icon: ActivityIcon, targetPct: 0.05 },
     { id: 'Lunch', icon: Salad, targetPct: 0.35 },
     { id: 'Pre-Workout', icon: Flame, targetPct: 0.05 },
     { id: 'Post-Workout Dinner', icon: Salad, targetPct: 0.25 },
-    { id: 'Before Bed', icon: Activity, targetPct: 0.05 },
+    { id: 'Before Bed', icon: ActivityIcon, targetPct: 0.05 },
   ]
 };
 
@@ -56,6 +56,7 @@ export default function DietPage() {
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
+  const [activeTab, setActiveTab] = useState('tracker');
 
   // Search State
   const [showSearch, setShowSearch] = useState(false);
@@ -245,33 +246,31 @@ export default function DietPage() {
       {/* ──────────────────────────────────────────────────────────── */}
       <section style={{ marginBottom: 40 }}>
         {/* STATS ROW */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-          {[{ l: 'Weight', v: isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`, i: 'monitor_weight' },
-            { l: 'Height', v: isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`, i: 'straighten' },
-            { l: 'BMI Score', v: bmi, i: 'calculate' },
-            { l: 'TDEE', v: `${tdee} kcal`, i: 'bolt' },
-            { l: 'Activity', v: (user.activityLevel || 'moderate').charAt(0).toUpperCase() + (user.activityLevel || 'moderate').slice(1), i: 'directions_run' }].map(s => (
-            <div key={s.l} style={{ background: 'var(--surface-container-low)', padding: 14, borderRadius: 12, borderLeft: '2px solid rgba(255,181,155,0.2)', position: 'relative', overflow: 'hidden' }} className="group">
-              <div style={{ position: 'absolute', top: 0, right: 0, padding: 8, opacity: 0.1 }} className="group-hover:opacity-30 transition-opacity">
-                <span className="material-symbols-outlined" style={{ fontSize: 32 }}>{s.i}</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+          {[{ l: 'Weight', v: isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`, i: Scale },
+            { l: 'Height', v: isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`, i: Ruler },
+            { l: 'BMI Score', v: bmi, i: Calculator },
+            { l: 'TDEE', v: `${tdee} kcal`, i: Zap },
+            { l: 'Activity', v: (user.activityLevel || 'moderate').charAt(0).toUpperCase() + (user.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
+            const Icon = s.i;
+            return (
+              <div key={s.l} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface-container-low)', padding: '6px 12px', borderRadius: 20, border: '1px solid var(--surface-container-highest)' }}>
+                <Icon size={14} color="var(--outline)" />
+                <span style={{ fontSize: 11, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{s.l}</span>
+                <span style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 800 }}>{s.v}</span>
               </div>
-              <p style={{ color: 'var(--outline)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, marginBottom: 4 }}>{s.l}</p>
-              <h3 className="headline-md" style={{ fontSize: 24, fontWeight: 900, color: 'var(--on-surface)' }}>{s.v}</h3>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* GOAL SECTION WRAPPER */}
         <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)', boxShadow: 'var(--glow-primary)', marginBottom: 24, position: 'relative' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 32 }}>
-            <div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: 16, marginBottom: 32 }}>
+            <div style={{ textAlign: 'center' }}>
               <span style={{ color: 'var(--primary-container)', fontSize: 9, letterSpacing: '3px', fontWeight: 900, textTransform: 'uppercase' }}>Phase Status</span>
               <h2 className="headline-lg" style={{ fontSize: 36, fontWeight: 900, fontStyle: 'italic', marginTop: 4, textTransform: 'uppercase', color: 'var(--on-surface)' }}>
                 GOAL: {goal === 'loss' ? 'CUT' : goal === 'gain' ? 'BULK' : 'MAINTAIN'}
               </h2>
-            </div>
-            <div style={{ background: 'var(--surface-container-highest)', display: 'flex', padding: 4, borderRadius: 8 }}>
-              <button className="btn-g" style={{ padding: '6px 16px', fontSize: 11, background: 'transparent', border: 'none' }} onClick={scrollToLog}>Log Food →</button>
             </div>
           </div>
 
@@ -284,33 +283,64 @@ export default function DietPage() {
           <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 16, textAlign: 'center' }}>
             ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal weight' : 'current weight'} ({isImpWeight ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
           </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <button onClick={() => setActiveTab('tracker')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface-container-highest)', border: 'none', borderRadius: 20, padding: '6px 16px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--on-surface)', cursor: 'pointer' }}>
+              TRACK TODAY <ArrowDown size={14} color="var(--primary)" />
+            </button>
+          </div>
         </div>
 
-        {/* DIET TYPE & WHEY CARD */}
-        <div style={{ background: 'var(--surface-container-low)', padding: 16, borderRadius: 16, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ flex: 1, minWidth: 280 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}>
-                <Activity size={20} color="var(--primary)" />
+        {/* TAB SWITCHER */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <div style={{ display: 'flex', background: 'var(--surface-container-highest)', borderRadius: 24, padding: 4 }}>
+            <button onClick={() => setActiveTab('tracker')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'tracker' ? 'var(--primary)' : 'transparent', color: activeTab === 'tracker' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
+              🍽 Daily Tracker
+            </button>
+            <button onClick={() => setActiveTab('guide')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'guide' ? 'var(--primary)' : 'transparent', color: activeTab === 'guide' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
+              📋 Meal Guide
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'guide' && (
+          <div>
+            {/* BLUEPRINT HEADER CARD */}
+            <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, borderLeft: '4px solid var(--primary)', marginBottom: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span className="headline-md" style={{ fontSize: 20, color: 'var(--on-surface)' }}>📋 Your Personalised Meal Blueprint</span>
               </div>
-              <div>
-                <div className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Whey Protein — {wheyScoops} scoop{wheyScoops > 1 ? 's' : ''}/day ({wheyProt}g)</div>
-                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>{foodProt}g from food + {wheyProt}g from whey = {protTarget}g target.</div>
+              <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>These are AI-curated meal suggestions based on your {goal === 'loss' ? 'cut' : goal === 'gain' ? 'bulk' : 'maintenance'} goal and {DIET_TYPES[diet].label} diet. Use these as a daily reference — log your actual intake in the Daily Tracker.</p>
+            </div>
+
+            {/* DIET TYPE & WHEY CARD */}
+            <div style={{ background: 'var(--surface-container-low)', padding: 16, borderRadius: 16, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}>
+                    <ActivityIcon size={20} color="var(--primary)" />
+                  </div>
+                  <div>
+                    <div className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Whey Protein — {wheyScoops} scoop{wheyScoops > 1 ? 's' : ''}/day ({wheyProt}g)</div>
+                    <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>{foodProt}g from food + {wheyProt}g from whey = {protTarget}g target.</div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
+                {Object.values(DIET_TYPES).map(d => (
+                  <button key={d.id} onClick={() => setDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
+                    {d.icon} {d.label}
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
-            {Object.values(DIET_TYPES).map(d => (
-              <button key={d.id} onClick={() => setDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
-                {d.icon} {d.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* MEAL PLANS (DIET GUIDE) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 16 }}>
-          {dt.meals.map((meal, i) => {
+            {/* MEAL PLANS (DIET GUIDE) */}
+            <div style={{ fontSize: 9, letterSpacing: '3px', color: 'var(--outline)', textTransform: 'uppercase', fontWeight: 800, marginBottom: 12 }}>
+              Blueprint
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 16 }}>
+              {dt.meals.map((meal, i) => {
             const items = meal.items[gKey] || meal.items.maintain || [];
             const wheyLines = [];
             if (meal.label === 'Breakfast') wheyLines.push(`+ 1 scoop ${diet === 'vegan' ? 'plant protein (pea+rice)' : 'whey'} — complete protein`);
@@ -361,6 +391,8 @@ export default function DietPage() {
         <div style={{ marginTop: 12, padding: '14px 18px', background: 'var(--surface-container-highest)', borderRadius: 12, fontSize: 12, color: 'var(--on-surface-variant)' }}>
           <strong style={{ color: 'var(--primary)' }}>Complete Protein Tip:</strong> Combine legumes + grains per meal (dal+rice, chana+roti) to cover all 9 essential amino acids. Whey protein already contains all 9 EAAs in every scoop.
         </div>
+      </div>
+      )}
       </section>
 
 
@@ -368,103 +400,117 @@ export default function DietPage() {
       {/* SECTION 2: FOOD LOG */}
       {/* ──────────────────────────────────────────────────────────── */}
       <section id="foodLogSection">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h4 className="headline-md" style={{ fontSize: 24, textTransform: 'uppercase', letterSpacing: '-1px' }}>Daily Tracker</h4>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button className="btn-g" onClick={handleCopyYesterday} style={{ padding: '8px 16px', fontSize: 12 }}><Copy size={14} style={{ display: 'inline', marginRight: 6 }}/>Copy Y'day</button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4 }}>
-              <button onClick={() => changeDate(-1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronLeft size={16}/></button>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)', minWidth: 80, textAlign: 'center' }}>{dateStr === tod() ? 'Today' : dateStr}</span>
-              <button onClick={() => changeDate(1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronRight size={16}/></button>
-            </div>
-          </div>
-        </div>
-
-        {/* Today's Tracker Progress Card */}
-        <div style={{ background: 'var(--surface-container-low)', padding: 24, borderRadius: 16, marginBottom: 24, borderLeft: '4px solid var(--primary-container)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '1px' }}>Consumed Intake</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--primary)' }}>{Math.round(todayTotals.calories)} / {goalKcal} kcal</span>
-          </div>
-          <div className="pbar" style={{ height: 10, borderRadius: 6, marginBottom: 24, background: 'var(--surface-container-highest)' }}>
-            <div className="pbar-fill" style={{ width: `${Math.min((todayTotals.calories/goalKcal)*100, 100)}%`, background: todayTotals.calories > goalKcal ? 'var(--danger)' : 'var(--primary-container)' }}/>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            {[{ l: 'Protein', c: todayTotals.protein, t: protTarget, col: 'var(--primary)' },
-              { l: 'Carbs', c: todayTotals.carbs, t: carbsTarget, col: 'var(--tertiary-container)' },
-              { l: 'Fats', c: todayTotals.fat, t: fatTarget, col: 'var(--outline)' }].map(m => (
-              <div key={m.l}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1px' }}>
-                  <span>{m.l}</span><span style={{ color: 'var(--on-surface)' }}>{Math.round(m.c)} / {m.t}g</span>
+        {activeTab === 'tracker' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h4 className="headline-md" style={{ fontSize: 24, textTransform: 'uppercase', letterSpacing: '-1px' }}>Daily Tracker</h4>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button className="btn-g" onClick={handleCopyYesterday} style={{ padding: '8px 16px', fontSize: 12 }}><Copy size={14} style={{ display: 'inline', marginRight: 6 }}/>Copy Y'day</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4 }}>
+                  <button onClick={() => changeDate(-1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronLeft size={16}/></button>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)', minWidth: 80, textAlign: 'center' }}>{dateStr === tod() ? 'Today' : dateStr}</span>
+                  <button onClick={() => changeDate(1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronRight size={16}/></button>
                 </div>
-                <div className="pbar" style={{ height: 6 }}><div className="pbar-fill" style={{ width: `${Math.min((m.c/(m.t||1))*100, 100)}%`, background: m.col }}/></div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
-           <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24 }}>
-             <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>💡 Protein Nudge</span> 
-             <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You need {Math.round(protTarget - todayTotals.protein)}g more protein today to hit your target. Consider 1 scoop whey or 100g paneer to finish strong.</p>
-           </div>
-        )}
+            {/* Today's Tracker Progress Card */}
+            <div style={{ background: 'var(--surface-container-low)', padding: 24, borderRadius: 16, marginBottom: 24, borderLeft: '4px solid var(--primary-container)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '1px' }}>Consumed Intake</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--primary)' }}>{Math.round(todayTotals.calories)} / {goalKcal} kcal</span>
+              </div>
+              <div className="pbar" style={{ height: 10, borderRadius: 6, marginBottom: 24, background: 'var(--surface-container-highest)' }}>
+                <div className="pbar-fill" style={{ width: `${Math.min((todayTotals.calories/goalKcal)*100, 100)}%`, background: todayTotals.calories > goalKcal ? 'var(--danger)' : 'var(--primary-container)' }}/>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                {[{ l: 'Protein', c: todayTotals.protein, t: protTarget, col: 'var(--primary)' },
+                  { l: 'Carbs', c: todayTotals.carbs, t: carbsTarget, col: 'var(--tertiary-container)' },
+                  { l: 'Fats', c: todayTotals.fat, t: fatTarget, col: 'var(--outline)' }].map(m => (
+                  <div key={m.l}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1px' }}>
+                      <span>{m.l}</span><span style={{ color: 'var(--on-surface)' }}>{Math.round(m.c)} / {m.t}g</span>
+                    </div>
+                    <div className="pbar" style={{ height: 6 }}><div className="pbar-fill" style={{ width: `${Math.min((m.c/(m.t||1))*100, 100)}%`, background: m.col }}/></div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        {/* MEAL SLOTS */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {CONSTANTS.MEAL_SLOTS.map(slot => {
-            const SIcon = slot.icon;
-            const slotCals = Math.round(goalKcal * slot.targetPct);
-            const items = dailyLog.filter(l => l.slot === slot.id);
-            const slotTotal = Math.round(items.reduce((s,i) => s + (i.macros?.calories||0), 0));
-            return (
-              <div key={slot.id} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', borderRadius: 16, padding: 16, border: '1px solid transparent', cursor: 'pointer', transition: 'border-color 0.2s' }} className="group hover:border-primary">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} onClick={() => handleOpenSearch(slot.id)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-                      <SIcon size={24} />
-                    </div>
-                    <div>
-                      <h4 className="headline-md" style={{ fontSize: 18, margin: 0 }}>{slot.id}</h4>
-                      <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 600, marginTop: 4 }}>Suggested: {slotCals} Kcal • {slot.targetPct * 100}%</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span className="headline-md" style={{ fontSize: 20, color: slotTotal > 0 ? 'var(--primary)' : 'var(--outline)' }}>{slotTotal}</span>
-                      <span style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 700 }}>Kcal</span>
-                    </div>
-                    <button style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--outline-variant)', background: 'transparent', color: 'var(--primary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-                {/* Expand logged items */}
-                {items.length > 0 && (
-                  <div style={{ marginTop: 16, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {items.map(i => (
-                      <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: 8, borderRadius: 8, background: 'var(--surface-container-low)' }}>
-                        <div>
-                          <p style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 600 }}>{i.name}</p>
-                          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 4, display: 'flex', gap: 10 }}>
-                            <span style={{ color: 'var(--primary)', fontWeight: 600 }}>P: {Math.round(i.macros?.protein||0)}g</span>
-                            <span style={{ color: 'var(--tertiary-container)', fontWeight: 600 }}>C: {Math.round(i.macros?.carbs||0)}g</span>
-                            <span style={{ color: 'var(--outline)', fontWeight: 600 }}>F: {Math.round(i.macros?.fat||0)}g</span>
-                          </div>
+            {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
+               <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24 }}>
+                 <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>💡 Protein Nudge</span> 
+                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You need {Math.round(protTarget - todayTotals.protein)}g more protein today to hit your target. Consider 1 scoop whey or 100g paneer to finish strong.</p>
+               </div>
+            )}
+
+            {/* MEAL SLOTS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {CONSTANTS.MEAL_SLOTS.map(slot => {
+                const SIcon = slot.icon;
+                const slotCals = Math.round(goalKcal * slot.targetPct);
+                const items = dailyLog.filter(l => l.slot === slot.id);
+                const slotTotal = Math.round(items.reduce((s,i) => s + (i.macros?.calories||0), 0));
+                return (
+                  <div key={slot.id} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', borderRadius: 16, padding: 16, border: '1px solid transparent', cursor: 'pointer', transition: 'border-color 0.2s' }} className="group hover:border-primary">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} onClick={() => handleOpenSearch(slot.id)}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                          <SIcon size={24} />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--on-surface)' }}>{Math.round(i.macros?.calories||0)}</span>
-                          {i.food && <button onClick={(e) => { e.stopPropagation(); editEntry(i); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Edit2 size={14}/></button>}
-                          <button onClick={(e) => { e.stopPropagation(); removeEntry(i.id); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><X size={14}/></button>
+                        <div>
+                          <h4 className="headline-md" style={{ fontSize: 18, margin: 0 }}>{slot.id}</h4>
+                          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 600, marginTop: 4 }}>Suggested: {slotCals} Kcal • {slot.targetPct * 100}%</p>
                         </div>
                       </div>
-                    ))}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <span className="headline-md" style={{ fontSize: 20, color: slotTotal > 0 ? 'var(--primary)' : 'var(--outline)' }}>{slotTotal}</span>
+                          <span style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 700 }}>Kcal</span>
+                        </div>
+                        <button style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--outline-variant)', background: 'transparent', color: 'var(--primary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                          <Plus size={20} />
+                        </button>
+                      </div>
+                    </div>
+                    {/* Expand logged items */}
+                    {items.length > 0 && (
+                      <div style={{ marginTop: 16, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {items.map(i => (
+                          <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: 8, borderRadius: 8, background: 'var(--surface-container-low)' }}>
+                            <div>
+                              <p style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 600 }}>{i.name}</p>
+                              <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 4, display: 'flex', gap: 10 }}>
+                                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>P: {Math.round(i.macros?.protein||0)}g</span>
+                                <span style={{ color: 'var(--tertiary-container)', fontWeight: 600 }}>C: {Math.round(i.macros?.carbs||0)}g</span>
+                                <span style={{ color: 'var(--outline)', fontWeight: 600 }}>F: {Math.round(i.macros?.fat||0)}g</span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                              <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--on-surface)' }}>{Math.round(i.macros?.calories||0)}</span>
+                              {i.food && <button onClick={(e) => { e.stopPropagation(); editEntry(i); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Edit2 size={14}/></button>}
+                              <button onClick={(e) => { e.stopPropagation(); removeEntry(i.id); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><X size={14}/></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+            
+            {/* FAB: + Log Food */}
+            <div style={{ position: 'sticky', bottom: 24, display: 'flex', justifyContent: 'flex-end', marginTop: 24, zIndex: 5, pointerEvents: 'none' }}>
+              <button 
+                onClick={() => handleOpenSearch('Snack/General')}
+                style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 8px 24px rgba(255,181,155,0.4)', cursor: 'pointer', pointerEvents: 'auto' }}
+              >
+                <Plus size={28} />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ──────────────────────────────────────────────────────────── */}

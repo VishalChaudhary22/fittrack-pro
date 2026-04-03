@@ -4,6 +4,116 @@
 
 ---
 
+## 🐛 Phase G — Food Log Modal Bugs (Round 3 Feedback)
+
+> [!IMPORTANT]
+> These bugs were observed on mobile. Studied against `DietPage.jsx` (lines 517–738) and `foodUtils.js` before planning.
+
+---
+
+### Bug G1: Scroll Locked on Search Results List (Mobile) ✦ Root Cause Identified
+
+**Problem:** On mobile, after the food search modal opens, the results list is not scrollable by touch. It only becomes scrollable after switching a filter tab (e.g. tapping "Veg"). This is a classic iOS/Android touch event capture bug.
+
+**Root Cause:** The outer `.mo` overlay now has `overflowY: 'hidden'` (added to fix modal position). On mobile, `overflow: hidden` on a parent `position: fixed` element causes touch scroll events on children to be silently swallowed by the OS. The inner scroll div (`{ overflowY: 'auto', flex: 1 }` on line 687) never receives the touch events.
+
+**Planned Fix:**
+- [x] **G1a.** On the Results List `<div>` (line 687: `style={{ overflowY: 'auto', flex: 1 }}`), add `-webkit-overflow-scrolling: 'touch'` to unlock momentum scrolling on iOS.
+- [x] **G1b.** Add `overscrollBehavior: 'contain'` so touch events don't bubble up to the frozen outer `.mo` overlay.
+- [x] **G1c.** Also apply the same fix to the inner Detail Pane scroll div (line 526: `style={{ flex: 1, overflowY: 'auto', ... }}`).
+
+---
+
+### Bug G2: Modal Page Itself Scrolls Instead of Inner Content (Mobile) ✦ Root Cause Identified
+
+**Problem:** The `90vh` modal panel can be dragged/scrolled as a whole, rather than only the inner content area scrolling. The user can swipe the entire panel up.
+
+**Root Cause:** The `.md` container (line 522) does not prevent its own scroll — it relies on children having `overflowY: 'auto'`, but on mobile the touch target is ambiguous. The panel's `display: flex; flexDirection: column; height: 90vh` is correct, but `overflow: hidden` is not set on the panel itself.
+
+**Planned Fix:**
+- [x] **G2a.** Add `overflow: 'hidden'` to the `.md` modal panel div (line 522) so the panel cannot be scrolled — only its scrollable children can be.
+- [x] **G2b.** Ensure the sticky header area (`padding: 24; paddingBottom: 16` on line 656) has `flexShrink: 0` so it never compresses when the inner list overflows.
+
+---
+
+### Bug G3: Festival/Fasting Filter Has No Active State Indicator ✦ Root Cause Identified
+
+**Problem:** The "All", "Veg", "Vegan", "Egg", "Non-Veg", "Jain" buttons show a highlighted active state (primary background). But the "Fasting/Vrat?" dropdown (`<select>`) has no visible active/selected indicator — when a fasting type is chosen, the user cannot easily see it is active without inspecting the dropdown value.
+
+**Root Cause:** The `<select>` element at line 673 uses a CSS background change (`searchFasting ? 'var(--primary-container)' : 'var(--surface-container-low)'`) but this relies on the browser's native select rendering, which ignores CSS `background` on mobile browsers. Native `<select>` elements on iOS/Android are rendered by the OS and ignore most CSS styling.
+
+**Planned Fix:**
+- [x] **G3a.** Replace the native `<select>` with a **custom styled button row** matching the Diet Type filter chips. Display all fasting options as individual pill buttons: `None · Navratri · Ekadashi · Ramzan · Jain Paryushana · Maha Shivratri`.
+- [x] **G3b.** Active fasting chip styling: `background: var(--primary); color: var(--on-primary)`. Inactive: `background: var(--surface-container-low); color: var(--on-surface-variant)`. Match the exact same pill style as the Diet filter row above it.
+- [x] **G3c.** Keep them in the same horizontally scrollable `<div>` row as the other filter chips (line 668), separated by a `|` divider from the diet chips — or split into a second scroll row labelled "Festival/Vrat".
+- [x] **G3d.** "None" chip when selected should display text like "Vrat: Off" making the inactive state explicit.
+
+---
+
+### Bug G4: Custom Grams Input Does Not Update Macro Preview ✦ Root Cause Identified
+
+**Problem:** When a user types a custom gram amount (e.g. 120g) in the "Or enter exact grams" input, the Kcal / Pro / Carb / Fat preview at the bottom does NOT update. Only selecting a serving chip OR adjusting the multiplier refreshes the preview.
+
+**Root Cause (confirmed in `foodUtils.js` line 21):**
+```js
+if (servingId === 'custom' && customGrams) {
+  servingGrams = customGrams;
+}
+```
+`calcMacros` only uses `customGrams` when `servingId === 'custom'`. But in `DietPage.jsx` line 562, the input handler sets `servingId('')` (empty string), not `'custom'`:
+```js
+onChange={e => { setCustomGrams(e.target.value); setServingId(''); }}
+```
+So `calcMacros(food, '', qty, consistency, parseFloat(customGrams))` is called with `servingId = ''`, which never hits the `servingId === 'custom'` branch. `customGrams` is passed as the 5th argument but only used when `servingId === 'custom'`.
+
+**Planned Fix:**
+- [x] **G4a.** In `DietPage.jsx` line 562, change the input handler so that setting a custom gram value also sets `servingId` to `'custom'`:
+  ```js
+  onChange={e => { setCustomGrams(e.target.value); setServingId('custom'); }}
+  ```
+- [x] **G4b.** Confirm that `calcMacros` in `foodUtils.js` (line 21) correctly triggers: `if (servingId === 'custom' && customGrams)` — this is already correct, just the caller was wrong.
+- [x] **G4c.** Also confirm `previewMacros` useMemo (line 129–138) re-runs when `customGrams` changes — it already lists `customGrams` in its dependencies, so this will work automatically once G4a is fixed.
+
+---
+
+### Bug G5: Category Pills ("All", "Grains & Cereals", etc.) Show No Results ✦ Root Cause CONFIRMED
+
+**Problem:** Tapping any category pill (including "All") in the food search modal shows an empty results list.
+
+**Root Cause (CONFIRMED via code audit):**
+The food data in `indianFoods.js` uses the property name **`category`** (e.g. `category: 'roti-bread'`). But `DietPage.jsx` references **`f.categoryId`** in 3 places:
+- Line 123: `res.filter(f => f.categoryId === searchCat)` — **filter check fails**, returns empty
+- Line 548: `foodCategories.find(c => c.id === selectedFood.categoryId)` — shows "Food" fallback
+- Line 709: `f.categoryId === 'dish'` — dish badge never shows
+
+The property names don't match. `categoryId` does not exist on any food item.
+
+**Planned Fix:**
+- [x] **G5a.** Change all 3 references from `f.categoryId` → `f.category` in `DietPage.jsx`:
+  - Line 123: `f.category === searchCat`
+  - Line 548: `selectedFood.category`
+  - Line 709: `f.category === 'dish'`
+- [x] **G5b.** Verify the `id` values in `foodCategories.js` exactly match the `category` values in `indianFoods.js`. Confirmed match: `roti-bread`, `millet`, `rice-dish`, `dal-legume`, `sabzi-veg`, `non-veg`, `egg`, `dairy`, `breakfast`, `snack-street`, `oil-fat`, `sprout-soy` — all match.
+
+---
+
+### Bug G6: Serving Field Mismatch — `desc` vs `label` ✦ Root Cause CONFIRMED
+
+**Problem:** When viewing a food item in the search results or detail pane, the serving description text does not display (shows blank or undefined).
+
+**Root Cause (CONFIRMED via code audit):**
+The food data in `indianFoods.js` uses `label` in servings (e.g. `{ id: 'roti', label: '1 roti', grams: 35 }`). But `DietPage.jsx` references `s.desc` in 2 places:
+- Line 556: `{s.desc} ({s.grams}g)` — serving chip text in detail pane
+- Line 707: `{f.servings[0].desc}` — serving description in search results list
+
+Also: `DietPage.jsx` line 177 references `s.isDefault` which does not exist in the food data. The fallback `food.servings[0].id` saves this, but it's a silent gap.
+
+**Planned Fix:**
+- [x] **G6a.** Change `s.desc` → `s.label` on lines 556 and 707 of `DietPage.jsx`.
+- [x] **G6b.** Remove or refactor the `s.isDefault` reference on line 177 — since it always falls through to `food.servings[0].id`, it's harmless but misleading. Clean it up to: `const defServing = food.servings?.[0]?.id || '';`
+
+---
+
 ## 🐛 Phase F — UX Polish Round 2 (Follow-up Feedback)
 
 > [!IMPORTANT]

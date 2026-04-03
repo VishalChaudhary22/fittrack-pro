@@ -120,7 +120,7 @@ export default function DietPage() {
 
   const searchResults = useMemo(() => {
     let res = searchLocalFoods(indianFoods, searchQuery, { dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : '', fastingType: searchFasting });
-    if (searchCat !== 'All') res = res.filter(f => f.categoryId === searchCat);
+    if (searchCat !== 'All') res = res.filter(f => f.category === searchCat);
     return res;
   }, [searchQuery, searchDiet, searchFasting, searchCat]);
 
@@ -174,7 +174,7 @@ export default function DietPage() {
 
   const handleSelectFood = (food) => {
     setSelectedFood(food);
-    const defServing = food.servings ? food.servings.find(s => s.isDefault)?.id || food.servings[0].id : '';
+    const defServing = food.servings?.[0]?.id || '';
     setServingId(defServing);
     setQty(1);
     setCustomGrams('');
@@ -519,11 +519,11 @@ export default function DietPage() {
       {/* ──────────────────────────────────────────────────────────── */}
       {showSearch && (
         <div className="mo" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 0, overflowY: 'hidden' }}>
-          <div className="md cascade-item" style={{ maxWidth: '100%', margin: 0, borderRadius: '0 0 24px 24px', height: '90vh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)' }}>
+          <div className="md cascade-item" style={{ maxWidth: '100%', margin: 0, borderRadius: '0 0 24px 24px', height: '90vh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)', overflow: 'hidden' }}>
             
             {/* DETAIL / CUSTOM PANE */}
             {selectedFood || showCustom ? (
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 24, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => { setSelectedFood(null); setShowCustom(false); }}><ChevronLeft size={20}/></button>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
@@ -545,7 +545,7 @@ export default function DietPage() {
                   </div>
                 ) : (
                   <div style={{ flex: 1, paddingBottom: 100 }}>
-                    <span className="tag" style={{ marginBottom: 12 }}>{foodCategories.find(c => c.id === selectedFood.categoryId)?.label || 'Food'}</span>
+                    <span className="tag" style={{ marginBottom: 12 }}>{foodCategories.find(c => c.id === selectedFood.category)?.label || 'Food'}</span>
                     <h3 className="headline-md" style={{ fontSize: 28, marginBottom: 24, color: 'var(--on-surface)' }}>{selectedFood.name}</h3>
                     
                     <div style={{ background: 'var(--surface-container-lowest)', padding: 20, borderRadius: 16 }}>
@@ -553,13 +553,13 @@ export default function DietPage() {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
                         {selectedFood.servings?.map(s => (
                           <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }}>
-                            {s.isDeliveryPortion && '📦 '} {s.desc} ({s.grams}g)
+                            {s.isDeliveryPortion && '📦 '} {s.label} ({s.grams}g)
                           </button>
                         ))}
                       </div>
                       
                       <label>Or enter exact grams</label>
-                      <input type="number" placeholder="e.g. 150" value={customGrams} onChange={e => {setCustomGrams(e.target.value); setServingId('');}} style={{ marginBottom: 20, background: 'var(--surface-container-high)', borderRadius: 12 }} />
+                      <input type="number" placeholder="e.g. 150" value={customGrams} onChange={e => {setCustomGrams(e.target.value); setServingId('custom');}} style={{ marginBottom: 20, background: 'var(--surface-container-high)', borderRadius: 12 }} />
 
                       {!customGrams && (
                         <>
@@ -653,7 +653,7 @@ export default function DietPage() {
             ) : (
               // SEARCH PANE (List)
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ padding: 24, paddingBottom: 16, background: 'var(--surface-container-lowest)' }}>
+                <div style={{ padding: 24, paddingBottom: 16, background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <h3 className="headline-md" style={{ margin: 0, fontSize: 24 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
                     <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
@@ -665,26 +665,28 @@ export default function DietPage() {
                 </div>
                 
                 {/* Horizontal Filter Scroll */}
-                <div style={{ display: 'flex', gap: 8, padding: '12px 24px', overflowX: 'auto', minHeight: 60, alignItems: 'center', background: 'var(--surface-container-lowest)' }} className="hide-scrollbar">
+                <div style={{ display: 'flex', gap: 8, padding: '12px 24px', overflowX: 'auto', minHeight: 60, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
                   {['All', 'Veg', 'Vegan', 'Egg', 'Non-Veg', 'Jain'].map(d => (
                     <button key={d} onClick={() => setSearchDiet(d)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchDiet === d ? 'var(--primary)' : 'var(--surface-container-low)', color: searchDiet === d ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{d}</button>
                   ))}
-                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px' }} />
-                  <select value={searchFasting} onChange={e=>setSearchFasting(e.target.value)} style={{ padding: '8px 16px', fontSize: 12, borderRadius: 20, background: searchFasting ? 'var(--primary-container)' : 'var(--surface-container-low)', color: searchFasting ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', outline: 'none', margin: 0 }}>
-                    <option value="">Fasting/Vrat?</option>
-                    {CONSTANTS.FASTING_TYPES.filter(t=>t.id).map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                  </select>
+                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
+                  {[{ id: '', label: 'Fasting: Off' }, ...CONSTANTS.FASTING_TYPES].filter(t=>t.label).map(t => {
+                    const sel = searchFasting === t.id;
+                    return (
+                      <button key={t.id || 'none'} onClick={() => setSearchFasting(t.id)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: sel ? (t.id ? 'var(--primary)' : 'var(--surface-container-low)') : 'var(--surface-container-low)', color: sel ? (t.id ? 'var(--on-primary)' : 'var(--on-surface)') : 'var(--on-surface-variant)', cursor: 'pointer' }}>{t.label}</button>
+                    );
+                  })}
                 </div>
 
                 {/* Category Pills */}
-                <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', background: 'var(--surface)' }} className="hide-scrollbar">
+                <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', background: 'var(--surface)', flexShrink: 0 }} className="hide-scrollbar">
                   {[{ id: 'All', label: 'All' }, ...foodCategories].map(c => (
                     <button key={c.id} onClick={() => setSearchCat(c.id)} style={{ whiteSpace: 'nowrap', padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 600, border: 'none', background: searchCat === c.id ? 'var(--surface-container-highest)' : 'transparent', color: searchCat === c.id ? 'var(--primary)' : 'var(--on-surface-dim)', cursor: 'pointer' }}>{c.label}</button>
                   ))}
                 </div>
 
                 {/* Results List */}
-                <div style={{ overflowY: 'auto', flex: 1, padding: 24, paddingBottom: 40 }}>
+                <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 24, paddingBottom: 40 }}>
                   {!searchQuery && recentFoods.length > 0 && (
                     <div style={{ marginBottom: 32 }}>
                       <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Recent (Quick Add)</p>
@@ -704,9 +706,9 @@ export default function DietPage() {
                         <div style={{ flex: 1 }}>
                           <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && ' 🕉️'}</p>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings[0].desc}</span>
+                            <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings[0].label}</span>
                             {f.hasBeverageModifiers && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--tertiary-container)', background: 'rgba(231, 108, 55, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Build Drink</span>}
-                            {f.categoryId === 'dish' && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)', background: 'rgba(255, 181, 155, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Dish</span>}
+                            {f.category === 'dish' && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)', background: 'rgba(255, 181, 155, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Dish</span>}
                           </div>
                         </div>
                         <ChevronRight size={20} color="var(--outline-variant)" className="group-hover:text-primary transition-colors" />

@@ -4,6 +4,83 @@
 
 ---
 
+## 🐛 Phase H — Modal Keyboard & Scroll Architecture Overhaul (Round 4 Feedback)
+
+> [!IMPORTANT]
+> These are recurring, deeply-rooted mobile UX issues. The root cause is architectural — the modal uses `height: 90vh` which does NOT shrink when the virtual keyboard opens on iOS/Android. This causes the entire panel to sit behind the keyboard, making scrolling broken and content invisible. All 4 bugs below share this same root cause.
+
+> [!CAUTION]
+> The "fixed bottom" save bar on line 626 uses `position: fixed` INSIDE a `overflow: hidden` panel. On mobile, `position: fixed` inside a transformed/overflowed container is clipped and misplaced — this is the #1 cause of the scroll-gets-stuck bug after keyboard dismissal.
+
+---
+
+### Bug H1: Keyboard Opens → Pop-up Scrolls Down & Gets Stuck ✦ Root Cause CONFIRMED
+
+**Problem:**
+- When the keyboard opens after tapping the food search input, the virtual keyboard reduces the visible viewport.
+- The modal panel is `height: 90vh` (line 522), but `vh` units do NOT change when the keyboard opens on iOS — the panel extends behind the keyboard.
+- The user can then touch-drag the page behind the modal (iOS scroll passthrough), which scrolls the background page, not the modal.
+- When the keyboard closes, the page scroll position has changed — so the modal appears to be "stuck below" the visible area.
+
+**Root Cause (line 521):** The `.mo` overlay uses `position: fixed` with `overflowY: hidden`. On iOS, when the keyboard opens, `window.visualViewport` shrinks but `fixed` elements don't reflow. The panel stays at the original `90vh` and the keyboard covers the bottom portion.
+
+**Planned Fix:**
+- [x] **H1a.** Switch the modal height from `height: 90vh` → `height: 90dvh` (`dvh` = dynamic viewport height, automatically accounts for keyboard on modern iOS/Android). ✅
+- [x] **H1b.** Add `document.body.style.overflow = 'hidden'` on modal open and restore on close via a `useEffect` tied to `showSearch` state, to prevent background page scrolling entirely. ✅ Enhanced with `position: fixed` + scroll position save/restore
+- [x] **H1c.** The `.mo` overlay should also use `height: 100dvh` instead of `top:0; bottom:0` to ensure it fills only the visible viewport. ✅
+- [x] **H1d.** Add a `visualViewport` resize listener — replaced with `position: fixed` body lock + `dvh` which handles this natively. ✅
+
+---
+
+### Bug H2: Results List Scroll Locked on Initial Open ✦ FIXED ✅
+
+**Problem:** When the search modal opens, the food results list is not scrollable. The user must tap a filter chip (e.g. "Veg") to trigger a re-render before scrolling works.
+
+**Root Cause:** The root cause is that on initial render, the `autoFocus` on the search input (line 663) immediately triggers the keyboard, resizing the viewport. This resize event fires before React has finished painting the scroll container, so the browser's scroll heuristic locks onto the nearest scrollable container (the background page). The `-webkit-overflow-scrolling: touch` + `overscrollBehavior: contain` we added in Phase G is correct but fires too late.
+
+**Planned Fix:**
+- [x] **H2a.** Remove `autoFocus` from the search input. Instead, use a `useEffect` with a 350ms delay to focus programmatically: `setTimeout(() => inputRef.current?.focus(), 350)`. ✅
+- [x] **H2b.** The `autoFocus` triggers keyboard open immediately, which resizes viewport before the modal DOM is stable. The 350ms delay decouples these two events. ✅
+- [x] **H2c.** Additionally, add `touch-action: pan-y` CSS to the results list `<div>` to explicitly tell the browser that this element handles vertical pan gestures. ✅
+
+---
+
+### Bug H3: Detail Pane — Content Hidden Behind Keyboard, Serving Cards Not Side-By-Side ✦ FIXED ✅
+
+**Problem:**
+1. When viewing a selected food's detail (serving selection, gram input, macros), the content is pushed behind the keyboard.
+2. The macro preview bar at the bottom (lines 626–648) uses `position: fixed; bottom: 0` — when the keyboard opens, this bar is hidden behind the keyboard.
+3. The serving size buttons (line 553–558) use `flexWrap: wrap` but each button is large (`padding: 10px 16px`, `fontSize: 13`), so they stack vertically instead of sitting side by side.
+
+**Root Cause:**
+- `position: fixed; bottom: 0` on line 626 does NOT respect the virtual keyboard inset on iOS. It anchors to the bottom of the layout viewport (full screen height), not the visual viewport (above keyboard). So the save bar and macro preview disappear behind the keyboard.
+- The serving buttons have no `maxWidth` constraint and the button text is long (e.g. "1 takeaway container ( 480g)"), causing them to be wider than half the screen.
+
+**Planned Fix:**
+- [x] **H3a.** Replace `position: fixed; bottom: 0` on the macro bar with `position: sticky; bottom: 0` inside the scrollable flex container. ✅
+- [x] **H3b.** The detail pane scroll container already has `overflowY: auto` — the sticky bar anchors correctly. ✅
+- [x] **H3c.** Serving selection buttons: reduced `padding` → `8px 12px`, `fontSize` → `12`, added `flexShrink: 0` and `whiteSpace: nowrap`. Changed to `overflowX: auto` for horizontal scroll. ✅
+- [x] **H3d.** Compressed detail pane spacing: padding `24→16`, food name `fontSize 28→22`, `marginBottom 24→12`, container padding `20→16`, multiplier gaps/padding reduced. ✅
+
+---
+
+### Bug H4: Scrolling "Half-Baked" — Can't Scroll Down, Can't Get Back Up ✦ FIXED ✅
+
+**Problem:** The overall modal scroll behaviour is unreliable — sometimes won't scroll down, other times won't bounce back up. This affects both the search results pane and the detail pane.
+
+**Root Cause (multi-factor):**
+1. **`overscrollBehavior: contain` without `touch-action: pan-y`**: The browser needs an explicit `touch-action` declaration to delegate pan gestures to the child scroll container rather than the page.
+2. **`position: fixed; bottom: 0` save bar inside `overflow: hidden` container (line 626)**: This creates a "scroll trap" — the fixed element prevents the scroll container from calculating its correct `scrollHeight`, causing the browser to think there is nothing left to scroll to, so bounce-back overshoot causes the content to snap back up.
+3. **`height: 90vh` not accounting for keyboard**: After the keyboard appears and disappears, the panel's scroll position can be corrupted because the underlying viewport height changed mid-scroll.
+
+**Planned Fix:**
+- [x] **H4a.** Added `touch-action: pan-y; -webkit-overflow-scrolling: touch` to both scroll containers — results list and detail pane. ✅
+- [x] **H4b.** Replaced `position: fixed` on save bar with `position: sticky; bottom: 0; z-index: 10`. ✅
+- [x] **H4c.** Detail pane content now uses `paddingBottom: 16` with sticky bar handling the rest. ✅
+- [x] **H4d.** Used `height: 90dvh` (not `vh`) for the panel. ✅
+
+---
+
 ## 🐛 Phase G — Food Log Modal Bugs (Round 3 Feedback)
 
 > [!IMPORTANT]

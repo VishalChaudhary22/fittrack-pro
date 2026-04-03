@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
@@ -154,16 +154,48 @@ export default function DietPage() {
     addToast('Copied yesterday\'s log!', 'success');
   };
 
-  // Lock body scroll and scroll to top when search modal opens (Bug F3)
-  React.useEffect(() => {
+  // Ref for delayed search input focus (H2a)
+  const searchInputRef = useRef(null);
+
+  // Lock body+html scroll when modal opens, and handle visualViewport (H1b, H1c, H1d)
+  useEffect(() => {
     if (showSearch) {
+      // Lock BOTH html and body to prevent any background scrolling on iOS
       document.body.style.overflow = 'hidden';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+      document.documentElement.style.overflow = 'hidden';
     } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top;
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.documentElement.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.documentElement.style.overflow = '';
+    };
   }, [showSearch]);
+
+  // Delayed focus for search input — decouple from modal mount to let scroll containers register first (H2a, H2b)
+  useEffect(() => {
+    if (showSearch && !selectedFood && !showCustom) {
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [showSearch, selectedFood, showCustom]);
 
   const handleOpenSearch = (slot) => {
     setSearchMealSlot(slot);
@@ -518,12 +550,12 @@ export default function DietPage() {
       {/* SEARCH / LOG MODAL (BottomSheet) */}
       {/* ──────────────────────────────────────────────────────────── */}
       {showSearch && (
-        <div className="mo" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 0, overflowY: 'hidden' }}>
-          <div className="md cascade-item" style={{ maxWidth: '100%', margin: 0, borderRadius: '0 0 24px 24px', height: '90vh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)', overflow: 'hidden' }}>
+        <div className="mo" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '100dvh', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 0, overflow: 'hidden', touchAction: 'none' }}>
+          <div className="md cascade-item" style={{ maxWidth: '100%', width: '100%', margin: 0, borderRadius: '0 0 24px 24px', height: '90dvh', maxHeight: '90dvh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)', overflow: 'hidden' }}>
             
             {/* DETAIL / CUSTOM PANE */}
             {selectedFood || showCustom ? (
-              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 24, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: 16, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => { setSelectedFood(null); setShowCustom(false); }}><ChevronLeft size={20}/></button>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
@@ -544,30 +576,30 @@ export default function DietPage() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ flex: 1, paddingBottom: 100 }}>
-                    <span className="tag" style={{ marginBottom: 12 }}>{foodCategories.find(c => c.id === selectedFood.category)?.label || 'Food'}</span>
-                    <h3 className="headline-md" style={{ fontSize: 28, marginBottom: 24, color: 'var(--on-surface)' }}>{selectedFood.name}</h3>
+                  <div style={{ flex: 1, paddingBottom: 16 }}>
+                    <span className="tag" style={{ marginBottom: 8 }}>{foodCategories.find(c => c.id === selectedFood.category)?.label || 'Food'}</span>
+                    <h3 className="headline-md" style={{ fontSize: 22, marginBottom: 12, color: 'var(--on-surface)' }}>{selectedFood.name}</h3>
                     
-                    <div style={{ background: 'var(--surface-container-lowest)', padding: 20, borderRadius: 16 }}>
+                    <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16 }}>
                       <label>Serving Selection</label>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
                         {selectedFood.servings?.map(s => (
-                          <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }}>
+                          <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                             {s.isDeliveryPortion && '📦 '} {s.label} ({s.grams}g)
                           </button>
                         ))}
                       </div>
                       
                       <label>Or enter exact grams</label>
-                      <input type="number" placeholder="e.g. 150" value={customGrams} onChange={e => {setCustomGrams(e.target.value); setServingId('custom');}} style={{ marginBottom: 20, background: 'var(--surface-container-high)', borderRadius: 12 }} />
+                      <input type="number" placeholder="e.g. 150" value={customGrams} onChange={e => {setCustomGrams(e.target.value); setServingId('custom');}} style={{ marginBottom: 16, background: 'var(--surface-container-high)', borderRadius: 12 }} />
 
                       {!customGrams && (
                         <>
                           <label>Multiplier (Qty)</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20, background: 'var(--surface-container-high)', width: 'max-content', padding: 8, borderRadius: 12 }}>
-                            <button className="btn-g" onClick={() => setQty(Math.max(0.25, qty - 0.25))} style={{ padding: '12px 16px', background: 'var(--surface-container-highest)' }}>-</button>
-                            <span style={{ fontSize: 20, fontWeight: 800, width: 40, textAlign: 'center' }}>{qty}</span>
-                            <button className="btn-g" onClick={() => setQty(qty + 0.25)} style={{ padding: '12px 16px', background: 'var(--surface-container-highest)' }}>+</button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, background: 'var(--surface-container-high)', width: 'max-content', padding: 6, borderRadius: 10 }}>
+                            <button className="btn-g" onClick={() => setQty(Math.max(0.25, qty - 0.25))} style={{ padding: '10px 14px', background: 'var(--surface-container-highest)' }}>-</button>
+                            <span style={{ fontSize: 18, fontWeight: 800, width: 36, textAlign: 'center' }}>{qty}</span>
+                            <button className="btn-g" onClick={() => setQty(qty + 0.25)} style={{ padding: '10px 14px', background: 'var(--surface-container-highest)' }}>+</button>
                           </div>
                         </>
                       )}
@@ -622,27 +654,27 @@ export default function DietPage() {
                       )}
                     </div>
 
-                    {/* Fixed Bottom Save Action */}
-                    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--surface-container-lowest)', padding: '16px 24px', boxShadow: '0 -4px 20px rgba(0,0,0,0.4)', zIndex: 10 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                    {/* Sticky Bottom Save Action (H3a — position:sticky, not fixed) */}
+                    <div style={{ position: 'sticky', bottom: 0, left: 0, right: 0, background: 'var(--surface-container-lowest)', padding: '12px 16px', boxShadow: '0 -4px 20px rgba(0,0,0,0.4)', zIndex: 10, flexShrink: 0, borderTop: '1px solid var(--surface-container-highest)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 10 }}>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kcal</div>
-                          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--primary-container)' }}>{Math.round(previewMacros?.calories || 0)}</div>
+                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kcal</div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary-container)' }}>{Math.round(previewMacros?.calories || 0)}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Pro</div>
-                          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--primary)' }}>{Math.round(previewMacros?.protein || 0)}g</div>
+                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Pro</div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)' }}>{Math.round(previewMacros?.protein || 0)}g</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Carb</div>
-                          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--tertiary-container)' }}>{Math.round(previewMacros?.carbs || 0)}g</div>
+                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Carb</div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--tertiary-container)' }}>{Math.round(previewMacros?.carbs || 0)}g</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Fat</div>
-                          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--outline)' }}>{Math.round(previewMacros?.fat || 0)}g</div>
+                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Fat</div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--outline)' }}>{Math.round(previewMacros?.fat || 0)}g</div>
                         </div>
                       </div>
-                      <button className="btn-p" style={{ width: '100%', height: 56, fontSize: 16 }} onClick={() => addFoodToLog(previewMacros)}>
+                      <button className="btn-p" style={{ width: '100%', height: 48, fontSize: 14 }} onClick={() => addFoodToLog(previewMacros)}>
                         Log in {searchMealSlot}
                       </button>
                     </div>
@@ -653,19 +685,19 @@ export default function DietPage() {
             ) : (
               // SEARCH PANE (List)
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ padding: 24, paddingBottom: 16, background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <h3 className="headline-md" style={{ margin: 0, fontSize: 24 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
+                <div style={{ padding: '16px 24px 12px', background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h3 className="headline-md" style={{ margin: 0, fontSize: 20 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
                     <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
                   </div>
                   <div style={{ position: 'relative' }}>
-                    <Search style={{ position: 'absolute', top: 18, left: 16, color: 'var(--on-surface-dim)' }} size={20} />
-                    <input autoFocus placeholder="Search dal, paneer, roti..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ paddingLeft: 46, borderRadius: 16, fontSize: 16, background: 'var(--surface-container-high)', border: 'none', height: 56 }} />
+                    <Search style={{ position: 'absolute', top: 14, left: 16, color: 'var(--on-surface-dim)' }} size={18} />
+                    <input ref={searchInputRef} placeholder="Search dal, paneer, roti..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ paddingLeft: 44, borderRadius: 14, fontSize: 15, background: 'var(--surface-container-high)', border: 'none', height: 48 }} />
                   </div>
                 </div>
                 
                 {/* Horizontal Filter Scroll */}
-                <div style={{ display: 'flex', gap: 8, padding: '12px 24px', overflowX: 'auto', minHeight: 60, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
+                <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', minHeight: 44, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
                   {['All', 'Veg', 'Vegan', 'Egg', 'Non-Veg', 'Jain'].map(d => (
                     <button key={d} onClick={() => setSearchDiet(d)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchDiet === d ? 'var(--primary)' : 'var(--surface-container-low)', color: searchDiet === d ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{d}</button>
                   ))}
@@ -686,7 +718,7 @@ export default function DietPage() {
                 </div>
 
                 {/* Results List */}
-                <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: 24, paddingBottom: 40 }}>
+                <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: '16px 24px', paddingBottom: 40 }}>
                   {!searchQuery && recentFoods.length > 0 && (
                     <div style={{ marginBottom: 32 }}>
                       <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Recent (Quick Add)</p>

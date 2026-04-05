@@ -95,7 +95,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog } = useApp();
+  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog, foodLog } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
@@ -207,6 +207,33 @@ export default function DashboardPage() {
         : { up: false, color: 'var(--error)' };
     }
   }, [trend, isLoss, user.weightGoal]);
+
+  // Phase 3: Dashboard Macro Widget Data
+  const todayLog = useMemo(() => foodLog.filter(l => l.userId === user.id && l.date === todayStr), [foodLog, user.id, todayStr]);
+  const todayTotals = useMemo(() => {
+    return todayLog.reduce((acc, item) => ({
+      calories: acc.calories + (item.macros?.calories || 0),
+      protein: acc.protein + (item.macros?.protein || 0),
+      carbs: acc.carbs + (item.macros?.carbs || 0),
+      fat: acc.fat + (item.macros?.fat || 0)
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  }, [todayLog]);
+
+  const { goalKcal, protTarget, carbTarget, fatTarget } = useMemo(() => {
+    let k = 2200;
+    if (user.weightGoal && latestWeight) {
+      if (latestWeight > user.weightGoal) k = 1800;
+      else if (latestWeight < user.weightGoal) k = 2700;
+    }
+    return {
+      goalKcal: k,
+      protTarget: Math.round((k * 0.3) / 4),
+      carbTarget: Math.round((k * 0.5) / 4),
+      fatTarget: Math.round((k * 0.2) / 9),
+    };
+  }, [user, latestWeight]);
+
+  const calPct = clamp(Math.round((todayTotals.calories / goalKcal) * 100) || 0, 0, 100);
 
   const saveLog = () => {
     const w = parseFloat(logWeight);
@@ -384,28 +411,43 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Placeholder Activity Cards (1fr 1fr 1fr) */}
-        <div className="g3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
-          {[
-            { label: 'DAILY ACTIVITY', icon: Footprints, unit: 'steps today' },
-            { label: 'CALORIES BURNED', icon: Zap, unit: 'kcal today' },
-            { label: 'WATER INTAKE', icon: Droplets, unit: 'ml today' }
-          ].map(c => (
-            <div key={c.label} className="glass-card" style={{ padding: 20, borderRadius: 16, border: 'none' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)' }}>{c.label}</div>
-                <div className="ember-glow" style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <c.icon size={18} color="var(--primary)" />
-                </div>
-              </div>
-              <div className="headline-lg" style={{ color: 'var(--primary)', marginBottom: 4 }}>—</div>
-              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 12 }}>{c.unit}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <PulseIndicator />
-                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Coming Soon</span>
-              </div>
+        {/* Today's Nutrition (Phase 3 Macro Widget) */}
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/diet')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>TODAY'S NUTRITION</div>
+              <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>{Math.round(todayTotals.calories)} / {goalKcal} <span style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>Kcal</span></div>
             </div>
-          ))}
+            <ChevronRight size={16} color="var(--on-surface-dim)" />
+          </div>
+          
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div style={{ flexShrink: 0 }}>
+               <ProgressOrb progress={calPct} size={90} label={`${calPct}%`} subLabel="Cal" color={calPct >= 100 ? 'var(--primary)' : 'var(--primary)'} />
+            </div>
+            
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Protein', val: todayTotals.protein, target: protTarget, color: '#3b82f6' },
+                { label: 'Carbs', val: todayTotals.carbs, target: carbTarget, color: '#10b981' },
+                { label: 'Fats', val: todayTotals.fat, target: fatTarget, color: '#f59e0b' }
+              ].map(m => {
+                const pct = clamp(Math.round((m.val / m.target) * 100) || 0, 0, 100);
+                const over = m.val > m.target;
+                return (
+                  <div key={m.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                      <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{m.label}</span>
+                      <span style={{ color: 'var(--on-surface-variant)' }}>{Math.round(m.val)} / {m.target}g</span>
+                    </div>
+                    <div style={{ height: 6, background: 'var(--surface-container-highest)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: over ? 'var(--error)' : m.color, borderRadius: 4, transition: 'width 0.5s ease-out' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Goal Progress Card */}

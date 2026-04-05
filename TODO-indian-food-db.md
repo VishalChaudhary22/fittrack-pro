@@ -678,31 +678,31 @@ Foods offered with delivery servings should also retain `katori`/`bowl` as alter
 - [x] Add validation script: unique IDs, valid category, macros in sane ranges, at least 1 serving, `containsRootVeg` set for all sabzi/dal/snack entries
 
 ### Phase 2 — FoodLogPage MVP
-- [ ] Create `FoodLogPage.jsx` with:
-  - [ ] Search bar with fuzzy matching on `name` + `nameAlt` + `searchTerms`
-  - [ ] Category filter pills (20 categories + "All")
-  - [ ] Diet type filter (All / Veg / Vegan / **Jain** / Egg / Non-Veg) — Jain filter auto-hides `containsRootVeg: true` foods permanently when user `dietType === 'jain'`
-  - [ ] **Fasting filter toggle** — shows only `isFastingFood: true` items (with fasting type selector: Navratri / Ekadashi / Ramzan / Jain Paryushana)
-  - [ ] Meal slot selector (8 slots: Breakfast / Mid-Morning / Lunch / Evening Snack·Chai / Pre-Workout / Post-Workout / Dinner / Before Bed)
-  - [ ] Serving picker + custom grams input — **delivery servings** (`takeaway-container`, `restaurant-portion`, `thali`) show info chip: "📦 Delivery estimate"
-  - [ ] Quantity selector (0.5, 1, 1.5, 2, 2.5, 3)
-  - [ ] Macro preview before adding (Cal / P / C / F)
-  - [ ] **Beverage Builder** — fires for any food with `hasBeverageModifiers: true` (chai, coffee, haldi-doodh): milk modifier radio (none / toned / full-fat / skim / condensed) + sweetener chips (none / sugar / jaggery / stevia); previews real-time calorie total before confirming
-  - [ ] **"+ Add oil used in cooking" quick chip** on dish-type entries (ghee/oil tempering tracker)
-  - [ ] Daily food log with edit and delete, grouped by meal slot
-  - [ ] "Custom Food" quick-add form (name + cal + macros manually)
-- [ ] Add `foodLog` state to `AppContext.jsx`
-- [ ] Add route `/food-log` and nav item
-- [ ] Search must handle common spelling variants: "gobhi" → cauliflower, "aloo" → potato, "dahi" → curd, "chai" → tea entries
+- [x] Create `FoodLogPage.jsx` with:
+  - [x] Search bar with fuzzy matching on `name` + `nameAlt` + `searchTerms`
+  - [x] Category filter pills (20 categories + "All")
+  - [x] Diet type filter (All / Veg / Vegan / **Jain** / Egg / Non-Veg) — Jain filter auto-hides `containsRootVeg: true` foods permanently when user `dietType === 'jain'`
+  - [x] **Fasting filter toggle** — shows only `isFastingFood: true` items (with fasting type selector: Navratri / Ekadashi / Ramzan / Jain Paryushana)
+  - [x] Meal slot selector (8 slots: Breakfast / Mid-Morning / Lunch / Evening Snack·Chai / Pre-Workout / Post-Workout / Dinner / Before Bed)
+  - [x] Serving picker + custom grams input — **delivery servings** (`takeaway-container`, `restaurant-portion`, `thali`) show info chip: "📦 Delivery estimate"
+  - [x] Quantity selector (0.5, 1, 1.5, 2, 2.5, 3)
+  - [x] Macro preview before adding (Cal / P / C / F)
+  - [x] **Beverage Builder** — fires for any food with `hasBeverageModifiers: true` (chai, coffee, haldi-doodh): milk modifier radio (none / toned / full-fat / skim / condensed) + sweetener chips (none / sugar / jaggery / stevia); previews real-time calorie total before confirming
+  - [x] **"+ Add oil used in cooking" quick chip** on dish-type entries (ghee/oil tempering tracker)
+  - [x] Daily food log with edit and delete, grouped by meal slot
+  - [x] "Custom Food" quick-add form (name + cal + macros manually)
+- [x] Add `foodLog` state to `AppContext.jsx`
+- [x] Add route `/food-log` and nav item
+- [x] Search must handle common spelling variants: "gobhi" → cauliflower, "aloo" → potato, "dahi" → curd, "chai" → tea entries
 
 ### Phase 3 — Integration & Retention
-- [ ] Dashboard: Add macro ring/bar widget showing today's Cal / P / C / F progress vs. goal
-- [ ] DietPage: Add "Log Food →" CTA button that links to FoodLogPage
-- [ ] DietPage: Show today's food log entries inline (recent 5, grouped by meal)
-- [ ] Add "Recent Foods" section (last 10 unique foods logged, quick re-add)
-- [ ] Add "Quick Add" — re-log yesterday's meals in one tap
-- [ ] Add date navigation (prev/next day) on FoodLogPage
-- [ ] **Protein tracking alert** — if user is >20g short of their protein target by 6pm, show a nudge: "You're 24g short on protein — quick options: 2 eggs, 100g paneer, or 1 scoop whey"
+- [x] Dashboard: Add macro ring/bar widget showing today's Cal / P / C / F progress vs. goal
+- [x] DietPage: Add "Log Food →" CTA button that links to FoodLogPage (Merged into DietPage)
+- [x] DietPage: Show today's food log entries inline (recent 5, grouped by meal)
+- [x] Add "Recent Foods" section (last 10 unique foods logged, quick re-add)
+- [x] Add "Quick Add" — re-log yesterday's meals in one tap
+- [x] Add date navigation (prev/next day) on FoodLogPage
+- [x] **Protein tracking alert** — if user is >20g short of their protein target by 6pm, show a nudge: "You're 24g short on protein — quick options: 2 eggs, 100g paneer, or 1 scoop whey"
 
 ### Phase 4 — Smart Nutrition Layer (post-MVP)
 - [ ] Weekly macro adherence chart (actual vs. target per macro, per day)

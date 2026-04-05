@@ -708,10 +708,10 @@ Foods offered with delivery servings should also retain `katori`/`bowl` as alter
 - [x] Weekly macro adherence chart (actual vs. target per macro, per day)
 - [x] Goal-aware suggestions: "You're 40g short on protein — try: Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey"
 - [ ] Recipe builder for homemade dishes (combine 2–8 base foods with proportions → curated composite entry)
-- [ ] Favorites system (star foods, quick-access from top of search)
-- [ ] Streak tracking for food logging consistency (7-day log streak badge)
-- [ ] **GI-aware carb guidance** — for weight-loss goal users, flag high-GI carbs (white rice >70 GI) and suggest lower-GI alternatives (brown rice, jowar roti)
-- [ ] **Gravy Consistency Toggle** — for `dish` items with `supportedConsistencyTypes.length > 0`, show a 3-option toggle after serving selection:
+- [x] Favorites system (star foods, quick-access from top of search)
+- [x] Streak tracking for food logging consistency (7-day log streak badge)
+- [x] **GI-aware carb guidance** — for weight-loss goal users, flag high-GI carbs (white rice >70 GI) and suggest lower-GI alternatives (brown rice, jowar roti)
+- [x] **Gravy Consistency Toggle** — for `dish` items with `supportedConsistencyTypes.length > 0`, show a 3-option toggle after serving selection:
   ```
   How was it? [💧 Watery/Thin]  [🥣 Normal]  [🍲 Thick/Restaurant-style]
   ```

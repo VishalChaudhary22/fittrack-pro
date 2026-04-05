@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
@@ -53,7 +53,7 @@ const CONSTANTS = {
 };
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak } = useApp();
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
@@ -570,7 +570,15 @@ export default function DietPage() {
         {activeTab === 'tracker' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h4 className="headline-md" style={{ fontSize: 24, textTransform: 'uppercase', letterSpacing: '-1px' }}>Daily Tracker</h4>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h4 className="headline-md" style={{ fontSize: 24, textTransform: 'uppercase', letterSpacing: '-1px' }}>Daily Tracker</h4>
+                {getFoodStreak().current >= 3 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface-container-highest)', border: '1px solid rgba(245,158,11,0.2)', padding: '4px 10px', borderRadius: 20 }}>
+                     <Flame size={14} color="#f59e0b" />
+                     <span style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>{getFoodStreak().current} Day Streak</span>
+                  </div>
+                )}
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <button className="btn-g" onClick={handleCopyYesterday} style={{ padding: '8px 16px', fontSize: 12 }}><Copy size={14} style={{ display: 'inline', marginRight: 6 }}/>Copy Y'day</button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4 }}>
@@ -720,6 +728,33 @@ export default function DietPage() {
                         </>
                       )}
 
+                      {/* Gravy Consistency Toggle */}
+                      {selectedFood.supportedConsistencyTypes && selectedFood.supportedConsistencyTypes.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                          <label>Consistency / Thickness</label>
+                          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
+                            <button onClick={() => setConsistency('standard')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'standard' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'standard' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🥣 Normal</button>
+                            {selectedFood.supportedConsistencyTypes.includes('thin') && (
+                              <button onClick={() => setConsistency('thin')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thin' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thin' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>💧 Watery (Thin)</button>
+                            )}
+                            {selectedFood.supportedConsistencyTypes.includes('thick') && (
+                              <button onClick={() => setConsistency('thick')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thick' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thick' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🍲 Restaurant (Thick)</button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* GI-Aware Nudge */}
+                      {user.weightGoal && user.weightGoal < user.weight && selectedFood.gi && selectedFood.gi > 70 && (
+                        <div style={{ padding: 12, borderRadius: 12, background: 'rgba(232,84,13,0.1)', border: '1px solid var(--primary-container)', marginBottom: 16 }}>
+                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                             <AlertTriangle size={14} color="var(--primary)" />
+                             <span style={{ fontSize: 11, color: 'var(--primary-container)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>High Glycemic Index ({selectedFood.gi})</span> 
+                           </div>
+                           <p style={{ fontSize: 12, color: 'var(--on-surface)' }}>This food may rapidly spike blood sugar. For your fat-loss goal, consider smaller portions or alternatives like Jowar, Bajra, or Brown Rice.</p>
+                        </div>
+                      )}
+
                       {/* Beverage Builder */}
                       {selectedFood.hasBeverageModifiers && (
                         <div style={{ marginTop: 24, paddingTop: 24 }}>
@@ -847,6 +882,23 @@ export default function DietPage() {
                     </div>
                   )}
 
+                  {/* FAVORITES */}
+                  {!searchQuery && favoriteIds.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>⭐️ Favorites</p>
+                      {favoriteIds.map(fId => {
+                         const food = indianFoods.find(f => f.id === fId);
+                         if (!food) return null;
+                         return (
+                          <div key={food.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(food); }} className="tag-d group hover:bg-surface-container-highest transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 8px 8px 0', padding: '10px 16px', borderRadius: 24, cursor: 'pointer', background: 'var(--surface-container-low)' }}>
+                            <Star size={14} color="var(--primary)" fill="var(--primary)" />
+                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)' }}>{food.name}</span>
+                          </div>
+                         );
+                      })}
+                    </div>
+                  )}
+
                   <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Results</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {searchResults.map(f => (
@@ -859,7 +911,12 @@ export default function DietPage() {
                             {f.category === 'dish' && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)', background: 'rgba(255, 181, 155, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Dish</span>}
                           </div>
                         </div>
-                        <ChevronRight size={20} color="var(--outline-variant)" className="group-hover:text-primary transition-colors" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <button onClick={(e) => { e.stopPropagation(); toggleFavoriteFood(f.id); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
+                            <Star size={20} color={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "var(--outline-variant)"} fill={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "transparent"} className="transition-colors" />
+                          </button>
+                          <ChevronRight size={20} color="var(--outline-variant)" className="group-hover:text-primary transition-colors" />
+                        </div>
                       </div>
                     ))}
                   </div>

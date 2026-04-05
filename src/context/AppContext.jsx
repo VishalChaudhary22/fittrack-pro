@@ -102,6 +102,58 @@ export function AppProvider({ children }) {
     return { current, longest: Math.max(longest, current) };
   }, [user, workoutLogs]);
 
+  // Streak calculation for food logging
+  const getFoodStreak = useCallback(() => {
+    if (!user) return { current: 0, longest: 0 };
+    const userLogs = foodLog.filter(l => l.userId === user.id);
+    const dates = [...new Set(userLogs.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
+    if (dates.length === 0) return { current: 0, longest: 0 };
+
+    let current = 0;
+    let longest = 0;
+    let streak = 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const latest = new Date(dates[0]);
+    latest.setHours(0, 0, 0, 0);
+    const diffFromToday = Math.floor((today - latest) / 86400000);
+
+    if (diffFromToday > 1) {
+      current = 0;
+    } else {
+      current = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const d1 = new Date(dates[i - 1]);
+        const d2 = new Date(dates[i]);
+        d1.setHours(0, 0, 0, 0);
+        d2.setHours(0, 0, 0, 0);
+        if (Math.floor((d1 - d2) / 86400000) === 1) {
+          current++;
+        } else break;
+      }
+    }
+
+    streak = 1;
+    longest = 1;
+    for (let i = 1; i < dates.length; i++) {
+      const d1 = new Date(dates[i - 1]);
+      const d2 = new Date(dates[i]);
+      d1.setHours(0, 0, 0, 0);
+      d2.setHours(0, 0, 0, 0);
+      if (Math.floor((d1 - d2) / 86400000) === 1) {
+        streak++;
+        longest = Math.max(longest, streak);
+      } else {
+        streak = 1;
+      }
+    }
+    return { current, longest: Math.max(longest, current) };
+  }, [user, foodLog]);
+
+  const toggleFavoriteFood = useCallback((foodId) => {
+    setFavoriteIds(prev => prev.includes(foodId) ? prev.filter(id => id !== foodId) : [...prev, foodId]);
+  }, [setFavoriteIds]);
+
   const value = {
     // Auth
     users, setUsers, user, uid, login, logout,
@@ -122,7 +174,9 @@ export function AppProvider({ children }) {
     // Toast
     toasts, addToast, removeToast,
     // Streak
-    getStreak,
+    getStreak, getFoodStreak,
+    // Favorites
+    toggleFavoriteFood
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

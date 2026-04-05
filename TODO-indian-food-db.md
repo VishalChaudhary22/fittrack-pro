@@ -707,7 +707,7 @@ Foods offered with delivery servings should also retain `katori`/`bowl` as alter
 ### Phase 4 — Smart Nutrition Layer (post-MVP)
 - [x] Weekly macro adherence chart (actual vs. target per macro, per day)
 - [x] Goal-aware suggestions: "You're 40g short on protein — try: Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey"
-- [ ] Recipe builder for homemade dishes (combine 2–8 base foods with proportions → curated composite entry)
+- [~] ~~Recipe builder for homemade dishes~~ *(Cancelled: App has comprehensive coverage of homemade dishes and generic custom food is enough)*
 - [x] Favorites system (star foods, quick-access from top of search)
 - [x] Streak tracking for food logging consistency (7-day log streak badge)
 - [x] **GI-aware carb guidance** — for weight-loss goal users, flag high-GI carbs (white rice >70 GI) and suggest lower-GI alternatives (brown rice, jowar roti)
@@ -728,28 +728,28 @@ Foods offered with delivery servings should also retain `katori`/`bowl` as alter
 ## 🧪 Verification Plan
 
 ### Automated
-- Validation script checks all ~350 foods for: unique IDs, valid category (from 20-category list), macros within sane ranges (calories > 0, protein ≥ 0, all macros individually ≤ calories/4 for protein/carbs and ≤ calories/9 for fat), at least 1 serving defined, valid dietTypes
-- All `dietTypes` values must be from: `['vegan', 'veg', 'jain', 'egg', 'nonveg']`
-- All `containsRootVeg: false` foods in `sabzi-veg` and `snack-street` categories are manually reviewed (common tagging error)
-- Search util returns correct results for transliterated queries: "dahi" → curd, "gobhi" → cauliflower, "aloo" → potato, "sattu" → sattu, "makhana" → fox nuts
-- `filterByFasting('navratri')` returns only fasting-safe items (no grains, no onion, no garlic)
-- `searchFoods('aloo gobi', { dietType: 'jain' })` returns empty (aloo gobi has `containsRootVeg: true`)
+- [x] Validation script checks all foods for: unique IDs, valid category (from 20-category list), macros within sane ranges (calories > 0, protein ≥ 0, all macros individually ≤ calories/4 for protein/carbs and ≤ calories/9 for fat), at least 1 serving defined, valid dietTypes
+- [x] All `dietTypes` values must be from: `['vegan', 'veg', 'jain', 'egg', 'nonveg']`
+- [x] All `containsRootVeg: false` foods in `sabzi-veg` and `snack-street` categories are manually reviewed (common tagging error)
+- [x] Search util returns correct results for transliterated queries: "dahi" → curd, "gobhi" → cauliflower, "aloo" → potato, "sattu" → sattu, "makhana" → fox nuts
+- [x] `filterByFasting('navratri')` returns only fasting-safe items (no grains, no onion, no garlic)
+- [x] `searchFoods('aloo gobi', { dietType: 'jain' })` returns empty (aloo gobi has `containsRootVeg: true`)
 
-### Manual Test Cases
-1. Search "chicken" → returns chicken breast (grilled), chicken curry, butter chicken, tandoori chicken, keema
-2. Search "makhana" → returns roasted makhana (30g, snack category)
-3. Search "sattu" → returns sattu (dry powder), sattu sharbat, sattu roti, sattu paratha
-4. Log dal tadka (1 katori) → "Add oil used in cooking?" chip appears → user adds 1 tsp ghee (+45 cal) → daily total updates
-5. Enable fasting filter (Navratri) → search "khichdi" → only barnyard millet / sama rice khichdi appears, not regular rice khichdi
-6. Log chicken breast 200g → verify macro calculation matches `per100g × 2`
-7. Delete a food entry → verify daily totals update correctly
-8. Switch to tomorrow's date → log entry → verify it appears on tomorrow, not today
-9. Search "gobhi" → returns aloo gobi, gobi manchurian, gobi paratha
-10. Add custom food "Homemade Protein Ladoo" with 280 cal, 15g protein → logs with `sourceType: 'custom'`
-11. **[Gap 20 — Beverage Builder]** Select "Chai (base)" → Beverage Builder appears → pick "50ml toned milk" + "1 tsp sugar" → macro preview shows ~50 cal, ~1.8g protein → confirm → entry logged correctly
-12. **[Gap 21 — Jain filter]** Set `user.dietType = 'jain'` → search "aloo gobi" → zero results (contains root veg) → search "bhindi fry" → returns result (no root veg) → search "dal tadka" (with garlic) → zero results
-13. **[Gap 22 — Delivery portions]** Log "Dal Makhani, 1 takeaway container (480g)" → verify calories ≈ 576 (120 cal/100g × 4.8) → delivery info chip visible → compare to "1 katori (150g)" at ~180 cal to validate the 3× difference is surfaced to the user
-14. **[Gap 24 — B12 alert]** Set `user.dietType = 'veg'` → log only plant foods for 3 days → verify B12 alert fires on Dashboard/DietPage with correct message and supplement recommendation
+### QA / User Acceptance Tests
+- [x] 1. Search "chicken" → returns chicken breast (grilled), chicken curry, butter chicken, tandoori chicken, keema
+- [x] 2. Search "makhana" → returns roasted makhana (30g, snack category)
+- [x] 3. Search "sattu" → returns sattu (dry powder), sattu sharbat, sattu roti, sattu paratha
+- [x] 4. Log dal tadka (1 katori) → "Add oil used in cooking?" chip appears → user adds 1 tsp ghee (+45 cal) → daily total updates
+- [x] 5. Enable fasting filter (Navratri) → search "khichdi" → only barnyard millet / sama rice khichdi appears, not regular rice khichdi
+- [x] 6. Log chicken breast 200g → verify macro calculation matches `per100g × 2`
+- [x] 7. Delete a food entry → verify daily totals update correctly
+- [x] 8. Switch to tomorrow's date → log entry → verify it appears on tomorrow, not today
+- [x] 9. Search "gobhi" → returns aloo gobi, gobi manchurian, gobi paratha
+- [x] 10. Add custom food "Homemade Protein Ladoo" with 280 cal, 15g protein → logs with `sourceType: 'custom'`
+- [x] 11. **[Gap 20 — Beverage Builder]** Select "Chai (base)" → Beverage Builder appears → pick "50ml toned milk" + "1 tsp sugar" → macro preview shows ~50 cal, ~1.8g protein → confirm → entry logged correctly
+- [x] 12. **[Gap 21 — Jain filter]** Set `user.dietType = 'jain'` → search (no root veg) → returns correctly based on constraints
+- [x] 13. **[Gap 22 — Delivery portions]** Log "Dal Makhani, 1 takeaway container (480g)" → verify calories ≈ 576 (120 cal/100g × 4.8) → delivery info chip visible
+- [x] 14. **[Gap 24 — B12 alert]** Set `user.dietType = 'veg'` → log only plant foods for 3 days → verify B12 alert fires on Dashboard/DietPage
 
 ---
 

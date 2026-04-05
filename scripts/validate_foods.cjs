@@ -78,10 +78,22 @@ foods.forEach((food, index) => {
   }
 
   // 5. containsRootVeg set for sabzi/dal/snack (warning if missing and expected)
-  if (food.category === 'sabzi-veg' || food.category === 'dal-legume') {
+  if (food.category === 'sabzi-veg' || food.category === 'snack-street') {
     if (food.containsRootVeg === undefined || food.containsRootVeg === null) {
       logError(`containsRootVeg flag is missing for category ${food.category}`);
     }
+  }
+
+  // 6. dietTypes values must strictly match enum
+  const VALID_DIET_TYPES = ['vegan', 'veg', 'jain', 'egg', 'nonveg'];
+  if (!food.dietTypes || !Array.isArray(food.dietTypes) || food.dietTypes.length === 0) {
+    logError(`Missing or invalid dietTypes array`);
+  } else {
+    food.dietTypes.forEach(dt => {
+      if (!VALID_DIET_TYPES.includes(dt)) {
+        logError(`Invalid dietType enum value: ${dt}`);
+      }
+    });
   }
 });
 

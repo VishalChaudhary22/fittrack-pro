@@ -379,7 +379,7 @@ export default function DietPage() {
             <MacroRing label="Daily Energy" value={todayTotals.calories} max={goalKcal} unit="Kcal" color="var(--primary-container)" />
             <MacroRing label="Protein" value={todayTotals.protein} max={protTarget} unit="Grams" color="var(--primary)" />
             <MacroRing label="Carbs" value={todayTotals.carbs} max={carbsTarget} unit="Grams" color="var(--tertiary-container)" />
-            <MacroRing label="Fats" value={todayTotals.fat} max={fatTarget} unit="Grams" color="var(--outline)" />
+            <MacroRing label="Fats" value={todayTotals.fat} max={fatTarget} unit="Grams" color="#FACC15" />
           </div>
           <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 16, textAlign: 'center' }}>
             ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal weight' : 'current weight'} ({isImpWeight ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
@@ -547,13 +547,13 @@ export default function DietPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weeklyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" vertical={false} />
-                  <XAxis dataKey="dayName" stroke="var(--outline)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--outline)" fontSize={11} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="dayName" stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
                   <RechartsTooltip cursor={{ fill: 'var(--surface-container-highest)' }} contentStyle={{ background: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', borderRadius: 8, fontSize: 12, color: 'var(--on-surface)' }} itemStyle={{ fontSize: 13, fontWeight: 700 }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 16 }} />
                   <Bar dataKey="protein" stackId="a" fill="var(--primary)" name="Protein (g)" radius={[0, 0, 4, 4]} />
                   <Bar dataKey="carbs" stackId="a" fill="var(--tertiary-container)" name="Carbs (g)" />
-                  <Bar dataKey="fat" stackId="a" fill="var(--outline)" name="Fat (g)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="fat" stackId="a" fill="#FACC15" name="Fat (g)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -5,7 +5,7 @@ import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Act
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
-import { calcBMI, getBMICat } from '../../utils/calculations';
+import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import {
@@ -220,16 +220,20 @@ export default function DashboardPage() {
   }, [todayLog]);
 
   const { goalKcal, protTarget, carbTarget, fatTarget } = useMemo(() => {
-    let k = 2200;
-    if (user.weightGoal && latestWeight) {
-      if (latestWeight > user.weightGoal) k = 1800;
-      else if (latestWeight < user.weightGoal) k = 2700;
-    }
+    const bmr = calcBMR(latestWeight, user.height, user.age, user.gender);
+    const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
+    const deficitInfo = calcDeficit(latestWeight, user.weightGoal, user.goalWeeks);
+    const goal = deficitInfo.goal;
+    const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
+    const k = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+
+    const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < latestWeight) ? user.weightGoal : latestWeight;
+    
     return {
-      goalKcal: k,
-      protTarget: Math.round((k * 0.3) / 4),
-      carbTarget: Math.round((k * 0.5) / 4),
-      fatTarget: Math.round((k * 0.2) / 9),
+      goalKcal: Math.round(k),
+      protTarget: goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(latestWeight * 2.0) : Math.round(latestWeight * 1.8),
+      carbTarget: Math.round((k * (goal === 'loss' ? .38 : .44)) / 4),
+      fatTarget: Math.round((k * .26) / 9),
     };
   }, [user, latestWeight]);
 
@@ -442,6 +446,43 @@ export default function DashboardPage() {
                     </div>
                     <div style={{ height: 6, background: 'var(--surface-container-highest)', borderRadius: 4, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, background: over ? 'var(--error)' : m.color, borderRadius: 4, transition: 'width 0.5s ease-out' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Daily Activity (Similar to Today's Nutrition) */}
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>DAILY ACTIVITY</div>
+              <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>0 / 10K <span style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>Steps</span></div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div style={{ flexShrink: 0 }}>
+               <ProgressOrb progress={0} size={90} label={`0%`} subLabel="Steps" color="var(--primary)" />
+            </div>
+            
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Steps', val: 0, target: 10000, color: 'var(--primary)' },
+                { label: 'Cals Burned', val: 0, target: 500, color: '#F85F1B' },
+                { label: 'Water', val: 0, target: 3000, color: '#3b82f6', unit: 'ml' }
+              ].map(m => {
+                const pct = clamp(Math.round((m.val / m.target) * 100) || 0, 0, 100);
+                return (
+                  <div key={m.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                      <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{m.label}</span>
+                      <span style={{ color: 'var(--on-surface-variant)' }}>{Math.round(m.val)} / {m.target}{m.unit || ''}</span>
+                    </div>
+                    <div style={{ height: 6, background: 'var(--surface-container-highest)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: m.color, borderRadius: 4, transition: 'width 0.5s ease-out' }} />
                     </div>
                   </div>
                 );

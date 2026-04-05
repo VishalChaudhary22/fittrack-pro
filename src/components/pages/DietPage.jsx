@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
 import { DIET_TYPES } from '../../data/diets';
@@ -114,9 +115,55 @@ export default function DietPage() {
       calories: acc.calories + (curr.macros?.calories || 0),
       protein: acc.protein + (curr.macros?.protein || 0),
       carbs: acc.carbs + (curr.macros?.carbs || 0),
-      fat: acc.fat + (curr.macros?.fat || 0)
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      fat: acc.fat + (curr.macros?.fat || 0),
+      iron: acc.iron + (curr.macros?.iron || 0),
+      vitaminB12: acc.vitaminB12 + (curr.macros?.vitaminB12 || 0),
+      vitaminD: acc.vitaminD + (curr.macros?.vitaminD || 0)
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0, iron: 0, vitaminB12: 0, vitaminD: 0 });
   }, [dailyLog]);
+
+  // Phase 4 - Weekly Analysis Logic
+  const last7Days = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(tod()); 
+      d.setDate(d.getDate() - 6 + i);
+      return d.toISOString().split('T')[0];
+    });
+  }, []);
+
+  const weeklyData = useMemo(() => {
+    return last7Days.map(d => {
+      const dayLogs = foodLog.filter(l => l.date === d && l.userId === user.id);
+      const t = dayLogs.reduce((acc, curr) => ({
+        calories: acc.calories + (curr.macros?.calories || 0),
+        protein: acc.protein + (curr.macros?.protein || 0),
+        carbs: acc.carbs + (curr.macros?.carbs || 0),
+        fat: acc.fat + (curr.macros?.fat || 0),
+        iron: acc.iron + (curr.macros?.iron || 0),
+        vitaminB12: acc.vitaminB12 + (curr.macros?.vitaminB12 || 0),
+        vitaminD: acc.vitaminD + (curr.macros?.vitaminD || 0)
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0, iron: 0, vitaminB12: 0, vitaminD: 0 });
+      return { 
+        date: d, 
+        dayName: new Date(d).toLocaleDateString('en-US', { weekday: 'short' }),
+        calories: Math.round(t.calories),
+        protein: Math.round(t.protein), 
+        carbs: Math.round(t.carbs), 
+        fat: Math.round(t.fat),
+        iron: t.iron,
+        vitaminB12: t.vitaminB12,
+        vitaminD: t.vitaminD
+      };
+    });
+  }, [last7Days, foodLog, user.id]);
+
+  const weeklyMicros = useMemo(() => {
+    return weeklyData.reduce((acc, curr) => ({
+      iron: acc.iron + curr.iron,
+      vitaminB12: acc.vitaminB12 + curr.vitaminB12,
+      vitaminD: acc.vitaminD + curr.vitaminD
+    }), { iron: 0, vitaminB12: 0, vitaminD: 0 });
+  }, [weeklyData]);
 
   const searchResults = useMemo(() => {
     let res = searchLocalFoods(indianFoods, searchQuery, { dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : '', fastingType: searchFasting });
@@ -354,6 +401,9 @@ export default function DietPage() {
             <button onClick={() => setActiveTab('guide')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'guide' ? 'var(--primary)' : 'transparent', color: activeTab === 'guide' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
               📋 Meal Guide
             </button>
+            <button onClick={() => setActiveTab('analysis')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'analysis' ? 'var(--primary)' : 'transparent', color: activeTab === 'analysis' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
+              📊 Analysis
+            </button>
           </div>
         </div>
 
@@ -447,6 +497,69 @@ export default function DietPage() {
         </div>
       </div>
       )}
+
+      {/* ──────────────────────────────────────────────────────────── */}
+      {/* SECTION: ANALYSIS TAB */}
+      {/* ──────────────────────────────────────────────────────────── */}
+      {activeTab === 'analysis' && (
+        <div style={{ marginBottom: 24 }}>
+          {/* VITAMIN ALERTS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+            {(diet === 'veg' || diet === 'vegan' || diet === 'jain') && weeklyMicros.vitaminB12 < 1.5 && (
+              <div style={{ padding: 16, borderRadius: 12, background: 'rgba(232,84,13,0.1)', border: '1px solid var(--primary-container)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <AlertTriangle size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--primary)', marginBottom: 4 }}>Low B12 Logged This Week</h5>
+                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Vegetarians can't get sufficient B12 from plants alone. Consider fortified milk, or discuss a B12 supplement with a professional.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {weeklyMicros.vitaminD < 200 * 7 && (
+              <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-container-highest)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <Zap size={18} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--on-surface)', marginBottom: 4 }}>Low Vitamin D3 Detected</h5>
+                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Top food sources are egg yolk, fatty fish, and fortified milk. A D3 supplement is recommended for most Indians.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {user.gender === 'female' && weeklyMicros.iron < 18 * 7 && (
+              <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-container-highest)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <ActivityIcon size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--on-surface)', marginBottom: 4 }}>Low Iron Intake</h5>
+                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Your iron intake looks low this week. Top sources: palak, rajma, chana, ragi, dates, and non-veg options.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* MACRO CHART */}
+          <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)' }}>
+            <h4 className="headline-md" style={{ fontSize: 18, marginBottom: 24, textTransform: 'uppercase', letterSpacing: '-0.5px' }}>Weekly Macro Adherence</h4>
+            <div style={{ width: '100%', height: 350 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" vertical={false} />
+                  <XAxis dataKey="dayName" stroke="var(--outline)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--outline)" fontSize={11} tickLine={false} axisLine={false} />
+                  <RechartsTooltip cursor={{ fill: 'var(--surface-container-highest)' }} contentStyle={{ background: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', borderRadius: 8, fontSize: 12, color: 'var(--on-surface)' }} itemStyle={{ fontSize: 13, fontWeight: 700 }} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 16 }} />
+                  <Bar dataKey="protein" stackId="a" fill="var(--primary)" name="Protein (g)" radius={[0, 0, 4, 4]} />
+                  <Bar dataKey="carbs" stackId="a" fill="var(--tertiary-container)" name="Carbs (g)" />
+                  <Bar dataKey="fat" stackId="a" fill="var(--outline)" name="Fat (g)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
       </section>
 
 
@@ -471,9 +584,12 @@ export default function DietPage() {
             {/* Removed Redundant Today's Tracker Progress Card */}
 
             {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
-               <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24 }}>
-                 <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>💡 Protein Nudge</span> 
-                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You need {Math.round(protTarget - todayTotals.protein)}g more protein today to hit your target. Consider 1 scoop whey or 100g paneer to finish strong.</p>
+               <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24, border: '1px solid var(--primary-container)' }}>
+                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                   <Zap size={16} color="var(--primary)" />
+                   <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>High-Impact Nudge</span> 
+                 </div>
+                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You're <strong>{Math.round(protTarget - todayTotals.protein)}g</strong> short on protein today — try: <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey.</span></p>
                </div>
             )}
 

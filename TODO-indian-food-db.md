@@ -705,23 +705,22 @@ Foods offered with delivery servings should also retain `katori`/`bowl` as alter
 - [x] **Protein tracking alert** — if user is >20g short of their protein target by 6pm, show a nudge: "You're 24g short on protein — quick options: 2 eggs, 100g paneer, or 1 scoop whey"
 
 ### Phase 4 — Smart Nutrition Layer (post-MVP)
-- [ ] Weekly macro adherence chart (actual vs. target per macro, per day)
-- [ ] Goal-aware suggestions: "You're 40g short on protein — try: Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g"
+- [x] Weekly macro adherence chart (actual vs. target per macro, per day)
+- [x] Goal-aware suggestions: "You're 40g short on protein — try: Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey"
 - [ ] Recipe builder for homemade dishes (combine 2–8 base foods with proportions → curated composite entry)
 - [ ] Favorites system (star foods, quick-access from top of search)
 - [ ] Streak tracking for food logging consistency (7-day log streak badge)
-- [ ] **Sattu spotlight** — when a user logs <80g protein by evening, proactively suggest "Sattu Sharbat — 20g protein, 10 min to prepare"
 - [ ] **GI-aware carb guidance** — for weight-loss goal users, flag high-GI carbs (white rice >70 GI) and suggest lower-GI alternatives (brown rice, jowar roti)
 - [ ] **Gravy Consistency Toggle** — for `dish` items with `supportedConsistencyTypes.length > 0`, show a 3-option toggle after serving selection:
   ```
   How was it? [💧 Watery/Thin]  [🥣 Normal]  [🍲 Thick/Restaurant-style]
   ```
   Applies `consistencyMultipliers[choice]` to per100g before computing totals. Rollout: dal, rajma, chole, sambar, palak sabzis, curry gravies (~30 dishes).
-- [ ] **Vitamin B12 alert** (fires for `dietType: 'veg'` or `'vegan'` users when weekly logged B12 < 1.5 mcg):
+- [x] **Vitamin B12 alert** (fires for `dietType: 'veg'` or `'vegan'` users when weekly logged B12 < 1.5 mcg):
   > "🔬 Very little B12 logged this week. Vegetarians can't get B12 from plants alone — consider fortified milk, or a B12 supplement."
-- [ ] **Vitamin D3 alert** (fires for all users when daily logged D3 < 200 IU for 7+ consecutive days):
+- [x] **Vitamin D3 alert** (fires for all users when daily logged D3 < 200 IU for 7+ consecutive days):
   > "☀️ Low Vitamin D3 in your diet this week. Top food sources: egg yolk, fatty fish, fortified milk. A D3 supplement is recommended for most Indians."
-- [ ] **Iron alert** (fires for `user.gender === 'female'` when weekly logged iron < 18mg/day average):
+- [x] **Iron alert** (fires for `user.gender === 'female'` when weekly logged iron < 18mg/day average):
   > "🩸 Your iron intake looks low this week. Top sources: palak, rajma, chana, ragi, dates, non-veg options."
 
 ---

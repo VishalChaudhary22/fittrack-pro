@@ -219,23 +219,24 @@ export default function DashboardPage() {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   }, [todayLog]);
 
+  // Use user.weight (profile weight) for macro calculations — must match DietPage exactly
   const { goalKcal, protTarget, carbTarget, fatTarget } = useMemo(() => {
-    const bmr = calcBMR(latestWeight, user.height, user.age, user.gender);
+    const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
     const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
-    const deficitInfo = calcDeficit(latestWeight, user.weightGoal, user.goalWeeks);
+    const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
     const goal = deficitInfo.goal;
     const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
     const k = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
 
-    const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < latestWeight) ? user.weightGoal : latestWeight;
+    const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
     
     return {
       goalKcal: Math.round(k),
-      protTarget: goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(latestWeight * 2.0) : Math.round(latestWeight * 1.8),
+      protTarget: goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8),
       carbTarget: Math.round((k * (goal === 'loss' ? .38 : .44)) / 4),
       fatTarget: Math.round((k * .26) / 9),
     };
-  }, [user, latestWeight]);
+  }, [user]);
 
   const calPct = clamp(Math.round((todayTotals.calories / goalKcal) * 100) || 0, 0, 100);
 

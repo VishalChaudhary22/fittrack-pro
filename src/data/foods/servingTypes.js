@@ -17,5 +17,9 @@ export const servingTypes = [
   { id: 'egg', label: '1 egg', defaultGrams: 50, usedFor: 'whole egg unit' },
   { id: 'takeaway-container', label: '1 takeaway container', defaultGrams: 480, usedFor: 'standard Swiggy/Zomato gravy container (dal, sabzi, curry)' },
   { id: 'restaurant-portion', label: '1 restaurant portion', defaultGrams: 600, usedFor: 'single restaurant biryani order, dhaba main dish' },
-  { id: 'thali', label: '1 full thali', defaultGrams: 900, usedFor: 'complete restaurant/dhaba thali with multiple components' }
+  { id: 'thali', label: '1 full thali', defaultGrams: 900, usedFor: 'complete restaurant/dhaba thali with multiple components' },
+  { id: 'packet', label: '1 packet', defaultGrams: 70, usedFor: 'maggi, noodles, small snacks' },
+  { id: 'packet-lg', label: '1 large packet', defaultGrams: 100, usedFor: 'large snacks' },
+  { id: 'packet-sm', label: '1 small packet', defaultGrams: 30, usedFor: 'small snacks' },
+  { id: 'sachet', label: '1 sachet', defaultGrams: 15, usedFor: 'ketchup, sauces' }
 ];

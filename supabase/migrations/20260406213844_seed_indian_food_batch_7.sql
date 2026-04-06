@@ -45,6 +45,10 @@ INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('takeaway-container', '1 takeaway container', 480, 'standard Swiggy/Zomato gravy container (dal, sabzi, curry)') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('restaurant-portion', '1 restaurant portion', 600, 'single restaurant biryani order, dhaba main dish') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('thali', '1 full thali', 900, 'complete restaurant/dhaba thali with multiple components') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('packet', '1 packet', 70, 'maggi, noodles, small snacks') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('packet-lg', '1 large packet', 100, 'large snacks') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('packet-sm', '1 small packet', 30, 'small snacks') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('sachet', '1 sachet', 15, 'ketchup, sauces') ON CONFLICT (id) DO NOTHING;
 
 -- =================== CORE FOOD DATA ===================
 
@@ -1734,7 +1738,7 @@ INSERT INTO public.foods (
   ARRAY['greek yogurt', 'epigamia', 'yogurt', 'curd']::TEXT[], 
   'dairy', 
   'curd', 
-  'packaged'::public.item_type_enum, 
+  'packaged-food'::public.item_type_enum, 
   'raw'::public.food_state_enum, 
   'pan-indian'::public.region_enum, 
   100,
@@ -8181,7 +8185,7 @@ INSERT INTO public.foods (
   NULL, 
   NULL, 
   0, 
-  ' USDA'::public.source_enum, 
+  'USDA'::public.source_enum, 
   'medium'::public.confidence_enum, 
   'Almost 0 calories, pure amino acids.'
 ) ON CONFLICT (id) DO UPDATE SET
@@ -9935,7 +9939,7 @@ INSERT INTO public.foods (
   'साबूदाना खिचड़ी', 
   ARRAY['sago khichdi', 'sabu dana']::TEXT[], 
   ARRAY['sabudana', 'khichdi', 'vrat', 'fasting', 'sago']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'dish', 
   'dish'::public.item_type_enum, 
   'cooked'::public.food_state_enum, 
@@ -9945,7 +9949,7 @@ INSERT INTO public.foods (
   300, NULL, NULL, 1, 15,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'high-carb', 'high-carb']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -9996,7 +10000,7 @@ INSERT INTO public.foods (
   'साबूदाना वडा', 
   ARRAY['sago vada', 'vrat vada']::TEXT[], 
   ARRAY['sabudana', 'vada', 'vrat', 'fried']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'snack', 
   'dish'::public.item_type_enum, 
   'fried'::public.food_state_enum, 
@@ -10006,7 +10010,7 @@ INSERT INTO public.foods (
   400, NULL, NULL, 1.2, 20,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'high-fat', 'fried']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -10057,7 +10061,7 @@ INSERT INTO public.foods (
   'कुट्टू की पूरी', 
   ARRAY['kuttu poori']::TEXT[], 
   ARRAY['kuttu', 'puri', 'poori', 'vrat', 'buckwheat']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'bread', 
   'dish'::public.item_type_enum, 
   'fried'::public.food_state_enum, 
@@ -10067,7 +10071,7 @@ INSERT INTO public.foods (
   200, NULL, NULL, 2.5, 30,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'fried']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -10118,7 +10122,7 @@ INSERT INTO public.foods (
   'सिंघाड़े की पूरी', 
   ARRAY['singara puri']::TEXT[], 
   ARRAY['singhare', 'puri', 'poori', 'vrat', 'water chestnut']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'bread', 
   'dish'::public.item_type_enum, 
   'fried'::public.food_state_enum, 
@@ -10128,7 +10132,7 @@ INSERT INTO public.foods (
   200, NULL, NULL, 1.5, 20,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'fried']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -10179,7 +10183,7 @@ INSERT INTO public.foods (
   'समा के चावल', 
   ARRAY['samak chawal', 'bhagar', 'millet']::TEXT[], 
   ARRAY['sama', 'samak', 'bhagar', 'barnyard millet', 'vrat rice']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'dish', 
   'dish'::public.item_type_enum, 
   'cooked'::public.food_state_enum, 
@@ -10189,7 +10193,7 @@ INSERT INTO public.foods (
   10, NULL, NULL, 1.2, 10,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'low-GI', 'healthy']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, false, false,
@@ -10240,7 +10244,7 @@ INSERT INTO public.foods (
   'व्रत वाले आलू', 
   ARRAY['jeera aloo vrat', 'falahari aloo']::TEXT[], 
   ARRAY['aloo', 'vrat', 'falahari', 'jeera aloo']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'dish', 
   'dish'::public.item_type_enum, 
   'cooked'::public.food_state_enum, 
@@ -10250,7 +10254,7 @@ INSERT INTO public.foods (
   250, NULL, NULL, 0.8, 15,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -10301,7 +10305,7 @@ INSERT INTO public.foods (
   'मखाना खीर', 
   ARRAY['phool makhana kheer']::TEXT[], 
   ARRAY['makhana', 'kheer', 'vrat', 'sweet']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'sweet', 
   'dish'::public.item_type_enum, 
   'cooked'::public.food_state_enum, 
@@ -10311,7 +10315,7 @@ INSERT INTO public.foods (
   40, 0.2, NULL, 1, 110,
   '{"veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'high-sugar']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, false, false,
@@ -10362,7 +10366,7 @@ INSERT INTO public.foods (
   'राजगिरा पराठा', 
   ARRAY['amaranth paratha']::TEXT[], 
   ARRAY['rajgira', 'paratha', 'vrat', 'amaranth']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'bread', 
   'dish'::public.item_type_enum, 
   'cooked'::public.food_state_enum, 
@@ -10372,7 +10376,7 @@ INSERT INTO public.foods (
   150, NULL, NULL, 3.5, 90,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'high-fiber']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   false, true, true, false, true, false,
@@ -10433,7 +10437,7 @@ INSERT INTO public.foods (
   350, NULL, NULL, 1, 15,
   '{"vegan","veg","jain","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'snack', 'high-fat']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   true, true, true, false, false, false,
@@ -10484,7 +10488,7 @@ INSERT INTO public.foods (
   'फराली चिवड़ा', 
   ARRAY['falahari chivda', 'vrat namkeen']::TEXT[], 
   ARRAY['farali', 'chivda', 'vrat namkeen', 'potato chewda']::TEXT[], 
-  'fasting', 
+  'fasting-food', 
   'snack', 
   'snack'::public.item_type_enum, 
   'fried'::public.food_state_enum, 
@@ -10494,7 +10498,7 @@ INSERT INTO public.foods (
   400, NULL, NULL, 1.5, 30,
   '{"vegan","veg","nonveg"}'::public.diet_type_enum[], 
   ARRAY['vrat', 'snack', 'high-fat', 'sweet-salty']::TEXT[], 
-  '{"navratri","ekadashi","maha-shivratri"}'::public.fasting_type_enum[], 
+  '{"navratri","ekadashi","navratri"}'::public.fasting_type_enum[], 
   '{}', 
   '{}'::jsonb,
   true, true, true, false, true, false,
@@ -10529,4 +10533,2236 @@ INSERT INTO public.foods (
   DELETE FROM public.food_servings WHERE food_id = 'farali-chivda';
   INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('farali-chivda', 'katori', '1 small katori (~30g)', 30);
   INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('farali-chivda', 'g100', '100g', 100);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-biozyme-whey', 
+  'MuscleBlaze Biozyme Whey Protein', 
+  'मसलब्लेज़ बायोज़ाइम व्हे', 
+  ARRAY['mb biozyme', 'muscleblaze whey']::TEXT[], 
+  ARRAY['mb', 'biozyme', 'muscleblaze', 'whey']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  364, 75.8, 7.6, 3.6, 0,
+  300, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-biozyme-whey
+  DELETE FROM public.food_servings WHERE food_id = 'mb-biozyme-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-whey', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-biozyme-performance-whey', 
+  'MuscleBlaze Biozyme Performance Whey', 
+  'मसलब्लेज़ परफॉरमेंस व्हे', 
+  ARRAY['mb performance whey']::TEXT[], 
+  ARRAY['mb', 'biozyme performance', 'muscleblaze']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  36,
+  391, 69.4, 16.1, 5.3, 0,
+  360, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-biozyme-performance-whey
+  DELETE FROM public.food_servings WHERE food_id = 'mb-biozyme-performance-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-performance-whey', 'scoop', '1 scoop (36g)', 36);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-performance-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-performance-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-raw-whey-concentrate', 
+  'MuscleBlaze Raw Whey Protein Concentrate (80%)', 
+  'मसलब्लेज़ रॉ व्हे', 
+  ARRAY['mb raw whey']::TEXT[], 
+  ARRAY['mb', 'raw', 'muscleblaze raw', 'unflavoured']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  394, 72.7, 12.1, 4.5, 0,
+  242, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-raw-whey-concentrate
+  DELETE FROM public.food_servings WHERE food_id = 'mb-raw-whey-concentrate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-raw-whey-concentrate', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-raw-whey-concentrate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-raw-whey-concentrate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'asitis-atom-whey', 
+  'AS-IT-IS Nutrition ATOM Whey Protein', 
+  'एज़ इट इज़ एटम व्हे', 
+  ARRAY['atom whey', 'asitis whey']::TEXT[], 
+  ARRAY['asitis', 'atom', 'as-it-is']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  385, 81.8, 6.1, 1.5, 0,
+  272, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for asitis-atom-whey
+  DELETE FROM public.food_servings WHERE food_id = 'asitis-atom-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-whey', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'asitis-raw-whey-concentrate', 
+  'AS-IT-IS Raw Whey Protein Concentrate', 
+  'एज़ इट इज़ रॉ व्हे', 
+  ARRAY['asitis raw whey']::TEXT[], 
+  ARRAY['asitis', 'raw whey', 'as-it-israw']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  391, 78.8, 9.1, 4.5, 0,
+  257, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for asitis-raw-whey-concentrate
+  DELETE FROM public.food_servings WHERE food_id = 'asitis-raw-whey-concentrate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-raw-whey-concentrate', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-raw-whey-concentrate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-raw-whey-concentrate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'twt-whey-concentrate-unflavored', 
+  'The Whole Truth Whey Protein Concentrate', 
+  'दी होल ट्रुथ व्हे', 
+  ARRAY['twt whey', 'whole truth whey']::TEXT[], 
+  ARRAY['twt', 'whole truth', 'unflavored']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  413, 86.7, 6.7, 5, 0,
+  233, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for twt-whey-concentrate-unflavored
+  DELETE FROM public.food_servings WHERE food_id = 'twt-whey-concentrate-unflavored';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-concentrate-unflavored', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-concentrate-unflavored', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-concentrate-unflavored', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'twt-whey-isolate-unflavored', 
+  'The Whole Truth Whey Protein Isolate', 
+  'दी होल ट्रुथ व्हे आइसोलेट', 
+  ARRAY['twt isolate', 'whole truth isolate']::TEXT[], 
+  ARRAY['twt', 'whole truth', 'isolate']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  394, 90.9, 3, 1.5, 0,
+  197, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for twt-whey-isolate-unflavored
+  DELETE FROM public.food_servings WHERE food_id = 'twt-whey-isolate-unflavored';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-isolate-unflavored', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-isolate-unflavored', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('twt-whey-isolate-unflavored', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'nakpro-impact-whey', 
+  'NAKPRO Impact Whey Protein', 
+  'नैकप्रो इम्पैक्ट व्हे', 
+  ARRAY['nakpro whey']::TEXT[], 
+  ARRAY['nakpro', 'impact']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  376, 72.7, 9.1, 4.5, 0,
+  303, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for nakpro-impact-whey
+  DELETE FROM public.food_servings WHERE food_id = 'nakpro-impact-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nakpro-impact-whey', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nakpro-impact-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nakpro-impact-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'avvatar-absolute-whey', 
+  'AVVATAR Absolute 100% Whey Protein', 
+  'अवतार एब्सोल्यूट व्हे', 
+  ARRAY['avvatar whey']::TEXT[], 
+  ARRAY['avvatar', 'absolute']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  36,
+  403, 69.4, 15.3, 5.6, 0,
+  333, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for avvatar-absolute-whey
+  DELETE FROM public.food_servings WHERE food_id = 'avvatar-absolute-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('avvatar-absolute-whey', 'scoop', '1 scoop (36g)', 36);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('avvatar-absolute-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('avvatar-absolute-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'truebasics-clean-whey-isolate', 
+  'TrueBasics Clean Whey Isolate', 
+  'ट्रूबेसिक्स क्लीन व्हे आइसोलेट', 
+  ARRAY['truebasics whey isolate']::TEXT[], 
+  ARRAY['truebasics', 'clean whey']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  33,
+  364, 90.9, 3, 1.5, 0,
+  242, NULL, NULL, NULL, 300,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'high-protein']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for truebasics-clean-whey-isolate
+  DELETE FROM public.food_servings WHERE food_id = 'truebasics-clean-whey-isolate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('truebasics-clean-whey-isolate', 'scoop', '1 scoop (33g)', 33);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('truebasics-clean-whey-isolate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('truebasics-clean-whey-isolate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'on-gold-standard-whey', 
+  'Optimum Nutrition Gold Standard 100% Whey', 
+  NULL, 
+  ARRAY['on gold']::TEXT[], 
+  ARRAY['optimum nutrition', 'on gold', 'whey', 'protein', 'Optimum Nutrition']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  400, 80, 10, 3.3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for on-gold-standard-whey
+  DELETE FROM public.food_servings WHERE food_id = 'on-gold-standard-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'on-gold-standard-whey-isolate', 
+  'Optimum Nutrition Gold Standard 100% Whey Isolate', 
+  NULL, 
+  ARRAY['on gold isolate']::TEXT[], 
+  ARRAY['optimum nutrition', 'on gold isolate', 'whey', 'protein', 'Optimum Nutrition']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  31,
+  355, 80.6, 3.2, 1.6, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for on-gold-standard-whey-isolate
+  DELETE FROM public.food_servings WHERE food_id = 'on-gold-standard-whey-isolate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey-isolate', 'scoop', '1 scoop (31g)', 31);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey-isolate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-gold-standard-whey-isolate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'myprotein-impact-whey-concentrate', 
+  'MyProtein Impact Whey Protein', 
+  NULL, 
+  ARRAY['myprotein whey']::TEXT[], 
+  ARRAY['myprotein', 'myprotein whey', 'whey', 'protein', 'MyProtein']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  25,
+  412, 80, 12, 7.6, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for myprotein-impact-whey-concentrate
+  DELETE FROM public.food_servings WHERE food_id = 'myprotein-impact-whey-concentrate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-concentrate', 'scoop', '1 scoop (25g)', 25);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-concentrate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-concentrate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'myprotein-impact-whey-isolate', 
+  'MyProtein Impact Whey Isolate', 
+  NULL, 
+  ARRAY['myprotein isolate']::TEXT[], 
+  ARRAY['myprotein', 'myprotein isolate', 'whey', 'protein', 'MyProtein']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  25,
+  372, 88, 4, 2, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for myprotein-impact-whey-isolate
+  DELETE FROM public.food_servings WHERE food_id = 'myprotein-impact-whey-isolate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-isolate', 'scoop', '1 scoop (25g)', 25);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-isolate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('myprotein-impact-whey-isolate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'dymatize-iso100', 
+  'Dymatize ISO 100', 
+  NULL, 
+  ARRAY['iso 100']::TEXT[], 
+  ARRAY['dymatize', 'iso 100', 'whey', 'protein', 'Dymatize']::TEXT[], 
+  'supplement', 
+  'whey-hydrolysate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  31,
+  355, 80.6, 3.2, 1.6, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for dymatize-iso100
+  DELETE FROM public.food_servings WHERE food_id = 'dymatize-iso100';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('dymatize-iso100', 'scoop', '1 scoop (31g)', 31);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('dymatize-iso100', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('dymatize-iso100', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'bigmuscles-premium-gold-whey', 
+  'Bigmuscles Nutrition Premium Gold Whey', 
+  NULL, 
+  ARRAY['bigmuscles whey']::TEXT[], 
+  ARRAY['bigmuscles nutrition', 'bigmuscles whey', 'whey', 'protein', 'Bigmuscles Nutrition']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  36,
+  403, 69.4, 19.4, 5.6, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for bigmuscles-premium-gold-whey
+  DELETE FROM public.food_servings WHERE food_id = 'bigmuscles-premium-gold-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bigmuscles-premium-gold-whey', 'scoop', '1 scoop (36g)', 36);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bigmuscles-premium-gold-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bigmuscles-premium-gold-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'gnc-pro-performance-whey', 
+  'GNC Pro Performance Whey Protein', 
+  NULL, 
+  ARRAY['gnc whey']::TEXT[], 
+  ARRAY['gnc', 'gnc whey', 'whey', 'protein', 'GNC']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  34,
+  382, 70.6, 14.7, 4.4, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for gnc-pro-performance-whey
+  DELETE FROM public.food_servings WHERE food_id = 'gnc-pro-performance-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-whey', 'scoop', '1 scoop (34g)', 34);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'tata-1mg-whey', 
+  'Tata 1mg Ultra Clean Whey Protein', 
+  NULL, 
+  ARRAY['tata whey']::TEXT[], 
+  ARRAY['tata 1mg', 'tata whey', 'whey', 'protein', 'Tata 1mg']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  36,
+  375, 69.4, 11.1, 4.2, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for tata-1mg-whey
+  DELETE FROM public.food_servings WHERE food_id = 'tata-1mg-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('tata-1mg-whey', 'scoop', '1 scoop (36g)', 36);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('tata-1mg-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('tata-1mg-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-biozyme-iso-zero', 
+  'MuscleBlaze Biozyme Iso-Zero', 
+  NULL, 
+  ARRAY['mb iso zero']::TEXT[], 
+  ARRAY['muscleblaze', 'mb iso zero', 'whey', 'protein', 'MuscleBlaze']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  34,
+  368, 79.4, 4.4, 2.9, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-biozyme-iso-zero
+  DELETE FROM public.food_servings WHERE food_id = 'mb-biozyme-iso-zero';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-iso-zero', 'scoop', '1 scoop (34g)', 34);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-iso-zero', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-biozyme-iso-zero', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'nutrabay-pure-whey-concentrate', 
+  'Nutrabay Pure 100% Whey Protein Concentrate', 
+  NULL, 
+  ARRAY['nutrabay wpc']::TEXT[], 
+  ARRAY['nutrabay', 'nutrabay wpc', 'whey', 'protein', 'Nutrabay']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  410, 78, 7.7, 7.3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for nutrabay-pure-whey-concentrate
+  DELETE FROM public.food_servings WHERE food_id = 'nutrabay-pure-whey-concentrate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-concentrate', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-concentrate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-concentrate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'nutrabay-pure-whey-isolate', 
+  'Nutrabay Pure Whey Protein Isolate', 
+  NULL, 
+  ARRAY['nutrabay wpi']::TEXT[], 
+  ARRAY['nutrabay', 'nutrabay wpi', 'whey', 'protein', 'Nutrabay']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  373, 88.3, 3.3, 1.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for nutrabay-pure-whey-isolate
+  DELETE FROM public.food_servings WHERE food_id = 'nutrabay-pure-whey-isolate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-isolate', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-isolate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('nutrabay-pure-whey-isolate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'amul-whey-protein', 
+  'Amul Whey Protein', 
+  NULL, 
+  ARRAY['amul whey']::TEXT[], 
+  ARRAY['amul', 'amul whey', 'whey', 'protein', 'Amul']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  32,
+  369, 78.1, 6.3, 4.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for amul-whey-protein
+  DELETE FROM public.food_servings WHERE food_id = 'amul-whey-protein';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('amul-whey-protein', 'scoop', '1 scoop (32g)', 32);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('amul-whey-protein', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('amul-whey-protein', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'naturaltein-whey-concentrate', 
+  'Naturaltein Whey Protein Concentrate', 
+  NULL, 
+  ARRAY['naturaltein whey']::TEXT[], 
+  ARRAY['naturaltein', 'naturaltein whey', 'whey', 'protein', 'Naturaltein']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  367, 72, 8.3, 5.3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for naturaltein-whey-concentrate
+  DELETE FROM public.food_servings WHERE food_id = 'naturaltein-whey-concentrate';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('naturaltein-whey-concentrate', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('naturaltein-whey-concentrate', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('naturaltein-whey-concentrate', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'muscletech-nitrotech-whey', 
+  'MuscleTech NitroTech Whey Protein', 
+  NULL, 
+  ARRAY['nitrotech']::TEXT[], 
+  ARRAY['muscletech', 'nitrotech', 'whey', 'protein', 'MuscleTech']::TEXT[], 
+  'supplement', 
+  'whey-isolate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  46,
+  348, 65.2, 8.7, 5.4, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for muscletech-nitrotech-whey
+  DELETE FROM public.food_servings WHERE food_id = 'muscletech-nitrotech-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-nitrotech-whey', 'scoop', '1 scoop (46g)', 46);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-nitrotech-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-nitrotech-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'protyze-clear-whey', 
+  'Protyze Anytime Clear Whey Protein', 
+  NULL, 
+  ARRAY['protyze clear']::TEXT[], 
+  ARRAY['protyze', 'protyze clear', 'whey', 'protein', 'Protyze']::TEXT[], 
+  'supplement', 
+  'clear-whey', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  343, 80, 5, 0, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for protyze-clear-whey
+  DELETE FROM public.food_servings WHERE food_id = 'protyze-clear-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('protyze-clear-whey', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('protyze-clear-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('protyze-clear-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'kevin-levrone-gold-whey', 
+  'Kevin Levrone Gold Whey', 
+  NULL, 
+  ARRAY['levrone gold whey']::TEXT[], 
+  ARRAY['kevin levrone', 'levrone gold whey', 'whey', 'protein', 'Kevin Levrone']::TEXT[], 
+  'supplement', 
+  'whey-concentrate', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  30,
+  397, 73.3, 10, 6.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for kevin-levrone-gold-whey
+  DELETE FROM public.food_servings WHERE food_id = 'kevin-levrone-gold-whey';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('kevin-levrone-gold-whey', 'scoop', '1 scoop (30g)', 30);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('kevin-levrone-gold-whey', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('kevin-levrone-gold-whey', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-mass-gainer-xxl', 
+  'MuscleBlaze Mass Gainer XXL', 
+  NULL, 
+  ARRAY['mb mass gainer']::TEXT[], 
+  ARRAY['muscleblaze', 'mb mass gainer', 'whey', 'protein', 'MuscleBlaze']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  150,
+  374, 15, 74.7, 2, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-mass-gainer-xxl
+  DELETE FROM public.food_servings WHERE food_id = 'mb-mass-gainer-xxl';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-mass-gainer-xxl', 'scoop', '1 scoop (150g)', 150);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-mass-gainer-xxl', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-mass-gainer-xxl', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-super-gainer-xxl', 
+  'MuscleBlaze Super Gainer XXL', 
+  NULL, 
+  ARRAY['mb super gainer']::TEXT[], 
+  ARRAY['muscleblaze', 'mb super gainer', 'whey', 'protein', 'MuscleBlaze']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  75,
+  373, 20, 70.7, 2.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-super-gainer-xxl
+  DELETE FROM public.food_servings WHERE food_id = 'mb-super-gainer-xxl';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-super-gainer-xxl', 'scoop', '1 scoop (75g)', 75);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-super-gainer-xxl', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-super-gainer-xxl', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'mb-lean-mass-gainer', 
+  'MuscleBlaze High Protein Lean Mass Gainer', 
+  NULL, 
+  ARRAY['mb lean mass']::TEXT[], 
+  ARRAY['muscleblaze', 'mb lean mass', 'whey', 'protein', 'MuscleBlaze']::TEXT[], 
+  'supplement', 
+  'lean-mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  75,
+  393, 40, 62.7, 2.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for mb-lean-mass-gainer
+  DELETE FROM public.food_servings WHERE food_id = 'mb-lean-mass-gainer';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-lean-mass-gainer', 'scoop', '1 scoop (75g)', 75);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-lean-mass-gainer', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('mb-lean-mass-gainer', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'asitis-atom-mass-gainer', 
+  'AS-IT-IS ATOM Mass Gainer', 
+  NULL, 
+  ARRAY['asitis mass gainer']::TEXT[], 
+  ARRAY['as-it-is', 'asitis mass gainer', 'whey', 'protein', 'AS-IT-IS']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  100,
+  384, 25, 63, 4, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for asitis-atom-mass-gainer
+  DELETE FROM public.food_servings WHERE food_id = 'asitis-atom-mass-gainer';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-mass-gainer', 'scoop', '1 scoop (100g)', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-mass-gainer', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('asitis-atom-mass-gainer', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'on-serious-mass', 
+  'Optimum Nutrition Serious Mass', 
+  NULL, 
+  ARRAY['on serious mass']::TEXT[], 
+  ARRAY['optimum nutrition', 'on serious mass', 'whey', 'protein', 'Optimum Nutrition']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  334,
+  377, 15, 75.7, 1.3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for on-serious-mass
+  DELETE FROM public.food_servings WHERE food_id = 'on-serious-mass';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass', 'scoop', '1 scoop (334g)', 334);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'on-serious-mass-half', 
+  'Optimum Nutrition Serious Mass (Half Serving)', 
+  NULL, 
+  ARRAY['on serious mass half']::TEXT[], 
+  ARRAY['optimum nutrition', 'on serious mass half', 'whey', 'protein', 'Optimum Nutrition']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  167,
+  377, 15, 75.7, 1.3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for on-serious-mass-half
+  DELETE FROM public.food_servings WHERE food_id = 'on-serious-mass-half';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass-half', 'scoop', '1 scoop (167g)', 167);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass-half', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('on-serious-mass-half', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'labrada-muscle-mass-gainer', 
+  'Labrada Muscle Mass Gainer', 
+  NULL, 
+  ARRAY['labrada mass gainer']::TEXT[], 
+  ARRAY['labrada', 'labrada mass gainer', 'whey', 'protein', 'Labrada']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  336,
+  370, 15.5, 74.7, 2.4, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for labrada-muscle-mass-gainer
+  DELETE FROM public.food_servings WHERE food_id = 'labrada-muscle-mass-gainer';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('labrada-muscle-mass-gainer', 'scoop', '1 scoop (336g)', 336);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('labrada-muscle-mass-gainer', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('labrada-muscle-mass-gainer', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'muscletech-mass-tech-extreme', 
+  'MuscleTech Mass Tech Extreme 2000', 
+  NULL, 
+  ARRAY['masstech extreme']::TEXT[], 
+  ARRAY['muscletech', 'masstech extreme', 'whey', 'protein', 'MuscleTech']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  334,
+  599, 24, 119.8, 3, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie', 'extreme-calories', 'advanced-only']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for muscletech-mass-tech-extreme
+  DELETE FROM public.food_servings WHERE food_id = 'muscletech-mass-tech-extreme';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-mass-tech-extreme', 'scoop', '1 scoop (334g)', 334);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-mass-tech-extreme', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('muscletech-mass-tech-extreme', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'gnc-pro-performance-weight-gainer', 
+  'GNC Pro Performance Weight Gainer', 
+  NULL, 
+  ARRAY['gnc mass gainer']::TEXT[], 
+  ARRAY['gnc', 'gnc mass gainer', 'whey', 'protein', 'GNC']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  315,
+  508, 16.8, 120.6, 4.8, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie', 'extreme-calories', 'advanced-only']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for gnc-pro-performance-weight-gainer
+  DELETE FROM public.food_servings WHERE food_id = 'gnc-pro-performance-weight-gainer';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-weight-gainer', 'scoop', '1 scoop (315g)', 315);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-weight-gainer', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('gnc-pro-performance-weight-gainer', 'custom', 'Custom (g)', 1);
+
+
+INSERT INTO public.foods (
+  id, name, hindi_name, name_alt, search_terms, category_id, subcategory, 
+  item_type, state, region, default_serving_grams,
+  cal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g,
+  sodium_per_100g, vitamin_b12_per_100g, vitamin_d_per_100g, iron_per_100g, calcium_per_100g,
+  diet_types, tags, fasting_types, supported_consistency_types, consistency_multipliers,
+  is_processed, is_fasting_food, is_gluten_free, is_recipe, contains_root_veg, has_beverage_modifiers,
+  gi, cooking_oil_note, estimated_oil_g, source, confidence, notes
+) VALUES (
+  'bsn-true-mass-1200', 
+  'BSN True Mass 1200', 
+  NULL, 
+  ARRAY['bsn true mass']::TEXT[], 
+  ARRAY['bsn', 'bsn true mass', 'whey', 'protein', 'BSN']::TEXT[], 
+  'supplement', 
+  'mass-gainer', 
+  'supplement'::public.item_type_enum, 
+  'raw'::public.food_state_enum, 
+  'pan-indian'::public.region_enum, 
+  254,
+  476, 19.7, 84.6, 6.7, 0,
+  150, NULL, NULL, NULL, 200,
+  '{"veg","nonveg"}'::public.diet_type_enum[], 
+  ARRAY['muscle-building', 'bulking', 'high-calorie']::TEXT[], 
+  '{}'::public.fasting_type_enum[], 
+  '{}', 
+  '{}'::jsonb,
+  true, false, true, false, false, false,
+  15, 
+  NULL, 
+  0, 
+  'FSSAI-label'::public.source_enum, 
+  'high'::public.confidence_enum, 
+  NULL
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  hindi_name = EXCLUDED.hindi_name,
+  name_alt = EXCLUDED.name_alt,
+  search_terms = EXCLUDED.search_terms,
+  category_id = EXCLUDED.category_id,
+  subcategory = EXCLUDED.subcategory,
+  item_type = EXCLUDED.item_type,
+  state = EXCLUDED.state,
+  region = EXCLUDED.region,
+  default_serving_grams = EXCLUDED.default_serving_grams,
+  cal_per_100g = EXCLUDED.cal_per_100g,
+  protein_per_100g = EXCLUDED.protein_per_100g,
+  carbs_per_100g = EXCLUDED.carbs_per_100g,
+  fat_per_100g = EXCLUDED.fat_per_100g,
+  fiber_per_100g = EXCLUDED.fiber_per_100g,
+  diet_types = EXCLUDED.diet_types,
+  tags = EXCLUDED.tags,
+  is_processed = EXCLUDED.is_processed,
+  contains_root_veg = EXCLUDED.contains_root_veg;
+
+  -- Servings for bsn-true-mass-1200
+  DELETE FROM public.food_servings WHERE food_id = 'bsn-true-mass-1200';
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bsn-true-mass-1200', 'scoop', '1 scoop (254g)', 254);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bsn-true-mass-1200', 'g100', '100g', 100);
+  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES ('bsn-true-mass-1200', 'custom', 'Custom (g)', 1);
 

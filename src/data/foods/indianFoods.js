@@ -1652,7 +1652,7 @@ export const indianFoods = [
       ],
       category: "dairy",
       subcategory: "curd",
-      itemType: "packaged",
+      itemType: "packaged-food",
       state: "raw",
       region: "pan-indian",
       defaultServingGrams: 100,
@@ -9256,7 +9256,7 @@ export const indianFoods = [
     gi: 0,
     cookingOilNote: null,
     estimatedOilG: 0,
-    source: " USDA",
+    source: "USDA",
     confidence: "medium",
     notes: "Almost 0 calories, pure amino acids."
 }  ,
@@ -11242,7 +11242,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11316,7 +11316,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11388,7 +11388,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11460,7 +11460,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11535,7 +11535,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11606,7 +11606,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11676,7 +11676,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11747,7 +11747,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11820,7 +11820,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,
@@ -11894,7 +11894,7 @@ export const indianFoods = [
     fastingTypes: [
         "navratri",
         "ekadashi",
-        "maha-shivratri"
+        "navratri"
     ],
     isGlutenFree: true,
     isRecipe: false,

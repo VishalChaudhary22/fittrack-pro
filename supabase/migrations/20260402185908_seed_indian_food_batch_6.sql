@@ -1734,7 +1734,7 @@ INSERT INTO public.foods (
   ARRAY['greek yogurt', 'epigamia', 'yogurt', 'curd']::TEXT[], 
   'dairy', 
   'curd', 
-  'packaged'::public.item_type_enum, 
+  'packaged-food'::public.item_type_enum, 
   'raw'::public.food_state_enum, 
   'pan-indian'::public.region_enum, 
   100,
@@ -8181,7 +8181,7 @@ INSERT INTO public.foods (
   NULL, 
   NULL, 
   0, 
-  ' USDA'::public.source_enum, 
+  'USDA'::public.source_enum, 
   'medium'::public.confidence_enum, 
   'Almost 0 calories, pure amino acids.'
 ) ON CONFLICT (id) DO UPDATE SET

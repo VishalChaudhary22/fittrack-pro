@@ -1734,7 +1734,7 @@ INSERT INTO public.foods (
   ARRAY['greek yogurt', 'epigamia', 'yogurt', 'curd']::TEXT[], 
   'dairy', 
   'curd', 
-  'packaged'::public.item_type_enum, 
+  'packaged-food'::public.item_type_enum, 
   'raw'::public.food_state_enum, 
   'pan-indian'::public.region_enum, 
   100,

@@ -6,9 +6,8 @@ import { PageHeader } from '../shared/SharedComponents';
 import { DIET_TYPES } from '../../data/diets';
 import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
-import { indianFoods } from '../../data/foods/indianFoods';
 import { foodCategories } from '../../data/foods/foodCategories';
-import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
+import { calcMacros, calcBeverageMacros, searchRemoteFoods, getRecentFoods } from '../../utils/foodUtils';
 
 function MacroRing({ label, value, max, unit, color, size = 112, strokeWidth = 6 }) {
   const radius = (size - strokeWidth) / 2;
@@ -66,6 +65,8 @@ export default function DietPage() {
   const [searchCat, setSearchCat] = useState('All');
   const [searchDiet, setSearchDiet] = useState('All');
   const [searchFasting, setSearchFasting] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Detail Pane
   const [selectedFood, setSelectedFood] = useState(null);
@@ -165,11 +166,24 @@ export default function DietPage() {
     }), { iron: 0, vitaminB12: 0, vitaminD: 0 });
   }, [weeklyData]);
 
-  const searchResults = useMemo(() => {
-    let res = searchLocalFoods(indianFoods, searchQuery, { dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : '', fastingType: searchFasting });
-    if (searchCat !== 'All') res = res.filter(f => f.category === searchCat);
-    return res;
+  // Remote Search Effect
+  useEffect(() => {
+    // Quick debounce for search input
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      const res = await searchRemoteFoods(searchQuery, { 
+        dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : '', 
+        fastingType: searchFasting 
+      });
+      // apply manual category filter if needed, though usually handled by tags, 
+      // but since 'category' maps to 'category_id', we can filter locally or pass to dbQuery:
+      const finalRes = searchCat !== 'All' ? res.filter(f => f.category === searchCat) : res;
+      setSearchResults(finalRes);
+      setIsSearching(false);
+    }, 300); // 300ms debounce
+    return () => clearTimeout(timer);
   }, [searchQuery, searchDiet, searchFasting, searchCat]);
+
 
   const recentFoods = useMemo(() => getRecentFoods(foodLog), [foodLog]);
 
@@ -900,8 +914,16 @@ export default function DietPage() {
                   )}
 
                   <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Results</p>
+
+                  {isSearching && (
+                    <div style={{ padding: 40, textAlign: 'center', color: 'var(--on-surface-variant)' }}>
+                      <ActivityIcon size={32} color="var(--primary)" style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+                      <p style={{ fontSize: 14, fontWeight: 600 }}>Searching database...</p>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {searchResults.map(f => (
+                    {!isSearching && searchResults.map(f => (
                       <div key={f.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(f); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'var(--surface-container-low)', borderRadius: 16, cursor: 'pointer' }} className="group hover:bg-surface-container-high transition-colors">
                         <div style={{ flex: 1 }}>
                           <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && ' 🕉️'}</p>
@@ -921,14 +943,14 @@ export default function DietPage() {
                     ))}
                   </div>
                   
-                  {searchResults.length === 0 && (
+                  {(!isSearching && searchResults.length === 0) && (
                     <div style={{ textAlign: 'center', padding: 60, color: 'var(--on-surface-variant)' }}>
                       <Search size={48} color="var(--surface-container-highest)" style={{ margin: '0 auto 16px' }} />
                       <p style={{ fontSize: 16, fontWeight: 500 }}>No results found.</p>
                       <button className="btn-d" style={{ marginTop: 24, fontSize: 14, padding: '10px 20px' }} onClick={() => setShowCustom(true)}>+ Add Custom Food</button>
                     </div>
                   )}
-                  {searchResults.length > 0 && (
+                  {(!isSearching && searchResults.length > 0) && (
                     <div style={{ textAlign: 'center', marginTop: 32 }}>
                       <button className="btn-g" onClick={() => setShowCustom(true)}>Can't find it? Add Custom Info</button>
                     </div>

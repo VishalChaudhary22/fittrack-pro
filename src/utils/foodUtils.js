@@ -2,6 +2,8 @@
  * Food Database Utility Functions
  * Used to calculate macros, search foods, and apply modifiers.
  */
+import { supabase } from '../lib/supabaseClient';
+
 
 /**
  * Calculates macros for a given food based on serving type and quantity.
@@ -145,6 +147,97 @@ export const searchLocalFoods = (foodsList, query, filters = {}) => {
 
   return results;
 };
+
+/**
+ * Remote search function for fetching foods dynamically from Supabase.
+ * Connects to the 'foods' and nested 'food_servings' tables.
+ */
+export const searchRemoteFoods = async (query, filters = {}) => {
+  const { dietType, fastingType } = filters;
+  
+  let dbQuery = supabase.from('foods').select(`
+    *,
+    servings:food_servings(
+      id:serving_id,
+      label,
+      grams
+    )
+  `);
+
+  if (fastingType) {
+    dbQuery = dbQuery.eq('is_fasting_food', true)
+                     .contains('fasting_types', [fastingType]);
+  }
+
+  if (dietType === 'jain') {
+    dbQuery = dbQuery.eq('contains_root_veg', false)
+                     .contains('diet_types', ['jain']);
+  } else if (dietType && dietType !== 'All') {
+    dbQuery = dbQuery.contains('diet_types', [dietType.toLowerCase()]);
+  }
+
+  if (query) {
+    const q = query.toLowerCase();
+    dbQuery = dbQuery.or(`name.ilike.%${q}%,hindi_name.ilike.%${q}%,search_terms.cs.{${q}}`);
+  }
+
+  // Limit to 50 results to prevent massive payloads on empty searches
+  dbQuery = dbQuery.limit(50);
+
+  const { data, error } = await dbQuery;
+
+  if (error) {
+    console.error('Error fetching foods from Supabase:', error);
+    return [];
+  }
+
+  // Map database snake_case structure to frontend camelCase expectations
+  return (data || []).map(f => ({
+    id: f.id,
+    name: f.name,
+    hindiName: f.hindi_name,
+    nameAlt: f.name_alt,
+    searchTerms: f.search_terms,
+    category: f.category_id,
+    subcategory: f.subcategory,
+    itemType: f.item_type,
+    state: f.state,
+    region: f.region,
+    defaultServingGrams: parseFloat(f.default_serving_grams),
+    per100g: {
+      calories: parseFloat(f.cal_per_100g),
+      protein: parseFloat(f.protein_per_100g),
+      carbs: parseFloat(f.carbs_per_100g),
+      fat: parseFloat(f.fat_per_100g),
+      fiber: parseFloat(f.fiber_per_100g),
+      sodium: f.sodium_per_100g ? parseFloat(f.sodium_per_100g) : null,
+      vitaminB12: f.vitamin_b12_per_100g ? parseFloat(f.vitamin_b12_per_100g) : null,
+      vitaminD: f.vitamin_d_per_100g ? parseFloat(f.vitamin_d_per_100g) : null,
+      iron: f.iron_per_100g ? parseFloat(f.iron_per_100g) : null,
+      calcium: f.calcium_per_100g ? parseFloat(f.calcium_per_100g) : null
+    },
+    servings: f.servings || [],
+    dietTypes: f.diet_types,
+    tags: f.tags,
+    fastingTypes: f.fasting_types || [],
+    supportedConsistencyTypes: f.supported_consistency_types || [],
+    consistencyMultipliers: f.consistency_multipliers || {},
+    isProcessed: f.is_processed,
+    isFastingFood: f.is_fasting_food,
+    isGlutenFree: f.is_gluten_free,
+    isRecipe: f.is_recipe,
+    containsRootVeg: f.contains_root_veg,
+    hasBeverageModifiers: f.has_beverage_modifiers,
+    gi: f.gi,
+    cookingOilNote: f.cooking_oil_note,
+    estimatedOilG: parseFloat(f.estimated_oil_g),
+    source: f.source,
+    confidence: f.confidence,
+    notes: f.notes,
+    certifications: f.certifications
+  }));
+};
+
 
 /**
  * Returns the last N unique foods logged by parsing the foodLog array.

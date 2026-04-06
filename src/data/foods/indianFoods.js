@@ -11908,4 +11908,2923 @@ export const indianFoods = [
     source: "healthifyme",
     confidence: "medium"
 }
+  ,
+  {
+    id: "mb-biozyme-whey",
+    name: "MuscleBlaze Biozyme Whey Protein",
+    nameAlt: [
+        "mb biozyme",
+        "muscleblaze whey"
+    ],
+    hindiName: "मसलब्लेज़ बायोज़ाइम व्हे",
+    searchTerms: [
+        "mb",
+        "biozyme",
+        "muscleblaze",
+        "whey"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Biozyme Performance Whey",
+    scoopWeightG: 33,
+    proteinType: "concentrate",
+    bcaaG: 5.5,
+    certifications: [
+        "Labdoor",
+        "Trustified Gold",
+        "FSSAI"
+    ],
+    priceINR: 2799,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 364,
+        protein: 75.8,
+        carbs: 7.6,
+        fat: 3.6,
+        fiber: 0,
+        sodium: 300,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-biozyme-performance-whey",
+    name: "MuscleBlaze Biozyme Performance Whey",
+    nameAlt: [
+        "mb performance whey"
+    ],
+    hindiName: "मसलब्लेज़ परफॉरमेंस व्हे",
+    searchTerms: [
+        "mb",
+        "biozyme performance",
+        "muscleblaze"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Biozyme Performance Whey",
+    scoopWeightG: 36,
+    proteinType: "concentrate",
+    bcaaG: 5.5,
+    certifications: [
+        "Trustified Gold"
+    ],
+    priceINR: 2999,
+    originCountry: "India",
+    defaultServingGrams: 36,
+    per100g: {
+        calories: 391,
+        protein: 69.4,
+        carbs: 16.1,
+        fat: 5.3,
+        fiber: 0,
+        sodium: 360,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (36g)",
+            grams: 36
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-raw-whey-concentrate",
+    name: "MuscleBlaze Raw Whey Protein Concentrate (80%)",
+    nameAlt: [
+        "mb raw whey"
+    ],
+    hindiName: "मसलब्लेज़ रॉ व्हे",
+    searchTerms: [
+        "mb",
+        "raw",
+        "muscleblaze raw",
+        "unflavoured"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Raw Whey",
+    scoopWeightG: 33,
+    proteinType: "concentrate",
+    bcaaG: 5.1,
+    certifications: [
+        "FSSAI"
+    ],
+    priceINR: 1699,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 394,
+        protein: 72.7,
+        carbs: 12.1,
+        fat: 4.5,
+        fiber: 0,
+        sodium: 242,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "asitis-atom-whey",
+    name: "AS-IT-IS Nutrition ATOM Whey Protein",
+    nameAlt: [
+        "atom whey",
+        "asitis whey"
+    ],
+    hindiName: "एज़ इट इज़ एटम व्हे",
+    searchTerms: [
+        "asitis",
+        "atom",
+        "as-it-is"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "AS-IT-IS",
+    productLine: "ATOM",
+    scoopWeightG: 33,
+    proteinType: "concentrate",
+    bcaaG: 6.1,
+    eaaG: 12.9,
+    certifications: [
+        "Labdoor",
+        "NABL"
+    ],
+    priceINR: 1499,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 385,
+        protein: 81.8,
+        carbs: 6.1,
+        fat: 1.5,
+        fiber: 0,
+        sodium: 272,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "asitis-raw-whey-concentrate",
+    name: "AS-IT-IS Raw Whey Protein Concentrate",
+    nameAlt: [
+        "asitis raw whey"
+    ],
+    hindiName: "एज़ इट इज़ रॉ व्हे",
+    searchTerms: [
+        "asitis",
+        "raw whey",
+        "as-it-israw"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "AS-IT-IS",
+    productLine: "Raw Whey",
+    scoopWeightG: 33,
+    proteinType: "concentrate",
+    bcaaG: 5.9,
+    certifications: [
+        "Labdoor"
+    ],
+    priceINR: 1199,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 391,
+        protein: 78.8,
+        carbs: 9.1,
+        fat: 4.5,
+        fiber: 0,
+        sodium: 257,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "twt-whey-concentrate-unflavored",
+    name: "The Whole Truth Whey Protein Concentrate",
+    nameAlt: [
+        "twt whey",
+        "whole truth whey"
+    ],
+    hindiName: "दी होल ट्रुथ व्हे",
+    searchTerms: [
+        "twt",
+        "whole truth",
+        "unflavored"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "The Whole Truth",
+    productLine: "Whey Protein Concentrate",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 6.4,
+    certifications: [
+        "Clean label"
+    ],
+    priceINR: 2499,
+    originCountry: "India",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 413,
+        protein: 86.7,
+        carbs: 6.7,
+        fat: 5,
+        fiber: 0,
+        sodium: 233,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "twt-whey-isolate-unflavored",
+    name: "The Whole Truth Whey Protein Isolate",
+    nameAlt: [
+        "twt isolate",
+        "whole truth isolate"
+    ],
+    hindiName: "दी होल ट्रुथ व्हे आइसोलेट",
+    searchTerms: [
+        "twt",
+        "whole truth",
+        "isolate"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "The Whole Truth",
+    productLine: "Whey Protein Isolate",
+    scoopWeightG: 33,
+    proteinType: "isolate",
+    bcaaG: 7.3,
+    certifications: [
+        "Clean label"
+    ],
+    priceINR: 3499,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 394,
+        protein: 90.9,
+        carbs: 3,
+        fat: 1.5,
+        fiber: 0,
+        sodium: 197,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "nakpro-impact-whey",
+    name: "NAKPRO Impact Whey Protein",
+    nameAlt: [
+        "nakpro whey"
+    ],
+    hindiName: "नैकप्रो इम्पैक्ट व्हे",
+    searchTerms: [
+        "nakpro",
+        "impact"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "NAKPRO",
+    productLine: "Impact Whey",
+    scoopWeightG: 33,
+    proteinType: "concentrate",
+    bcaaG: 5.4,
+    certifications: [
+        "Trustified"
+    ],
+    priceINR: 1899,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 376,
+        protein: 72.7,
+        carbs: 9.1,
+        fat: 4.5,
+        fiber: 0,
+        sodium: 303,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "avvatar-absolute-whey",
+    name: "AVVATAR Absolute 100% Whey Protein",
+    nameAlt: [
+        "avvatar whey"
+    ],
+    hindiName: "अवतार एब्सोल्यूट व्हे",
+    searchTerms: [
+        "avvatar",
+        "absolute"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "AVVATAR",
+    productLine: "Absolute Whey",
+    scoopWeightG: 36,
+    proteinType: "concentrate",
+    bcaaG: 5.5,
+    certifications: [
+        "Vegetarian"
+    ],
+    priceINR: 2599,
+    originCountry: "India",
+    defaultServingGrams: 36,
+    per100g: {
+        calories: 403,
+        protein: 69.4,
+        carbs: 15.3,
+        fat: 5.6,
+        fiber: 0,
+        sodium: 333,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (36g)",
+            grams: 36
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "truebasics-clean-whey-isolate",
+    name: "TrueBasics Clean Whey Isolate",
+    nameAlt: [
+        "truebasics whey isolate"
+    ],
+    hindiName: "ट्रूबेसिक्स क्लीन व्हे आइसोलेट",
+    searchTerms: [
+        "truebasics",
+        "clean whey"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "TrueBasics",
+    productLine: "Clean Whey Isolate",
+    scoopWeightG: 33,
+    proteinType: "isolate",
+    bcaaG: 6.9,
+    certifications: [
+        "Trustified Gold"
+    ],
+    priceINR: 3299,
+    originCountry: "India",
+    defaultServingGrams: 33,
+    per100g: {
+        calories: 364,
+        protein: 90.9,
+        carbs: 3,
+        fat: 1.5,
+        fiber: 0,
+        sodium: 242,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 300
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (33g)",
+            grams: 33
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "high-protein"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}
+  ,
+  {
+    id: "on-gold-standard-whey",
+    name: "Optimum Nutrition Gold Standard 100% Whey",
+    nameAlt: [
+        "on gold"
+    ],
+    searchTerms: [
+        "optimum nutrition",
+        "on gold",
+        "whey",
+        "protein",
+        "Optimum Nutrition"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Optimum Nutrition",
+    productLine: "Gold Standard 100% Whey",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 5.5,
+    eaaG: null,
+    certifications: [
+        "Informed Choice"
+    ],
+    priceINR: 4499,
+    originCountry: "USA",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 400,
+        protein: 80,
+        carbs: 10,
+        fat: 3.3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "on-gold-standard-whey-isolate",
+    name: "Optimum Nutrition Gold Standard 100% Whey Isolate",
+    nameAlt: [
+        "on gold isolate"
+    ],
+    searchTerms: [
+        "optimum nutrition",
+        "on gold isolate",
+        "whey",
+        "protein",
+        "Optimum Nutrition"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Optimum Nutrition",
+    productLine: "Gold Standard 100% Whey Isolate",
+    scoopWeightG: 31,
+    proteinType: "isolate",
+    bcaaG: 5.5,
+    eaaG: null,
+    certifications: [
+        "Informed Choice"
+    ],
+    priceINR: 5999,
+    originCountry: "USA",
+    defaultServingGrams: 31,
+    per100g: {
+        calories: 355,
+        protein: 80.6,
+        carbs: 3.2,
+        fat: 1.6,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (31g)",
+            grams: 31
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "myprotein-impact-whey-concentrate",
+    name: "MyProtein Impact Whey Protein",
+    nameAlt: [
+        "myprotein whey"
+    ],
+    searchTerms: [
+        "myprotein",
+        "myprotein whey",
+        "whey",
+        "protein",
+        "MyProtein"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MyProtein",
+    productLine: "Impact Whey",
+    scoopWeightG: 25,
+    proteinType: "concentrate",
+    bcaaG: 4.5,
+    eaaG: null,
+    certifications: [
+        "Labdoor"
+    ],
+    priceINR: 1999,
+    originCountry: "UK",
+    defaultServingGrams: 25,
+    per100g: {
+        calories: 412,
+        protein: 80,
+        carbs: 12,
+        fat: 7.6,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (25g)",
+            grams: 25
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "myprotein-impact-whey-isolate",
+    name: "MyProtein Impact Whey Isolate",
+    nameAlt: [
+        "myprotein isolate"
+    ],
+    searchTerms: [
+        "myprotein",
+        "myprotein isolate",
+        "whey",
+        "protein",
+        "MyProtein"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MyProtein",
+    productLine: "Impact Whey Isolate",
+    scoopWeightG: 25,
+    proteinType: "isolate",
+    bcaaG: 4.9,
+    eaaG: null,
+    certifications: [
+        "Labdoor"
+    ],
+    priceINR: 2799,
+    originCountry: "UK",
+    defaultServingGrams: 25,
+    per100g: {
+        calories: 372,
+        protein: 88,
+        carbs: 4,
+        fat: 2,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (25g)",
+            grams: 25
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "dymatize-iso100",
+    name: "Dymatize ISO 100",
+    nameAlt: [
+        "iso 100"
+    ],
+    searchTerms: [
+        "dymatize",
+        "iso 100",
+        "whey",
+        "protein",
+        "Dymatize"
+    ],
+    category: "supplement",
+    subcategory: "whey-hydrolysate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Dymatize",
+    productLine: "ISO 100",
+    scoopWeightG: 31,
+    proteinType: "hydrolysate",
+    bcaaG: 5.5,
+    eaaG: null,
+    certifications: [
+        "Informed Choice"
+    ],
+    priceINR: 6999,
+    originCountry: "USA",
+    defaultServingGrams: 31,
+    per100g: {
+        calories: 355,
+        protein: 80.6,
+        carbs: 3.2,
+        fat: 1.6,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (31g)",
+            grams: 31
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "bigmuscles-premium-gold-whey",
+    name: "Bigmuscles Nutrition Premium Gold Whey",
+    nameAlt: [
+        "bigmuscles whey"
+    ],
+    searchTerms: [
+        "bigmuscles nutrition",
+        "bigmuscles whey",
+        "whey",
+        "protein",
+        "Bigmuscles Nutrition"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Bigmuscles Nutrition",
+    productLine: "Premium Gold Whey",
+    scoopWeightG: 36,
+    proteinType: "concentrate",
+    bcaaG: 5.8,
+    eaaG: 11,
+    certifications: [
+        "Informed Choice UK"
+    ],
+    priceINR: 2999,
+    originCountry: "India",
+    defaultServingGrams: 36,
+    per100g: {
+        calories: 403,
+        protein: 69.4,
+        carbs: 19.4,
+        fat: 5.6,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (36g)",
+            grams: 36
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "gnc-pro-performance-whey",
+    name: "GNC Pro Performance Whey Protein",
+    nameAlt: [
+        "gnc whey"
+    ],
+    searchTerms: [
+        "gnc",
+        "gnc whey",
+        "whey",
+        "protein",
+        "GNC"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "GNC",
+    productLine: "Pro Performance",
+    scoopWeightG: 34,
+    proteinType: "concentrate",
+    bcaaG: 5,
+    eaaG: null,
+    certifications: [
+        "GNC"
+    ],
+    priceINR: 3499,
+    originCountry: "USA",
+    defaultServingGrams: 34,
+    per100g: {
+        calories: 382,
+        protein: 70.6,
+        carbs: 14.7,
+        fat: 4.4,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (34g)",
+            grams: 34
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "tata-1mg-whey",
+    name: "Tata 1mg Ultra Clean Whey Protein",
+    nameAlt: [
+        "tata whey"
+    ],
+    searchTerms: [
+        "tata 1mg",
+        "tata whey",
+        "whey",
+        "protein",
+        "Tata 1mg"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Tata 1mg",
+    productLine: "Ultra Clean Whey",
+    scoopWeightG: 36,
+    proteinType: "concentrate",
+    bcaaG: 5.6,
+    eaaG: null,
+    certifications: [
+        "Trustified Gold"
+    ],
+    priceINR: 2999,
+    originCountry: "India",
+    defaultServingGrams: 36,
+    per100g: {
+        calories: 375,
+        protein: 69.4,
+        carbs: 11.1,
+        fat: 4.2,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (36g)",
+            grams: 36
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-biozyme-iso-zero",
+    name: "MuscleBlaze Biozyme Iso-Zero",
+    nameAlt: [
+        "mb iso zero"
+    ],
+    searchTerms: [
+        "muscleblaze",
+        "mb iso zero",
+        "whey",
+        "protein",
+        "MuscleBlaze"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Biozyme Iso-Zero",
+    scoopWeightG: 34,
+    proteinType: "isolate",
+    bcaaG: 5.96,
+    eaaG: 12.69,
+    certifications: [
+        "Trustified Gold"
+    ],
+    priceINR: 3799,
+    originCountry: "India",
+    defaultServingGrams: 34,
+    per100g: {
+        calories: 368,
+        protein: 79.4,
+        carbs: 4.4,
+        fat: 2.9,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (34g)",
+            grams: 34
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "nutrabay-pure-whey-concentrate",
+    name: "Nutrabay Pure 100% Whey Protein Concentrate",
+    nameAlt: [
+        "nutrabay wpc"
+    ],
+    searchTerms: [
+        "nutrabay",
+        "nutrabay wpc",
+        "whey",
+        "protein",
+        "Nutrabay"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Nutrabay",
+    productLine: "Pure 100% Whey",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 5.2,
+    eaaG: null,
+    certifications: [
+        "Nutrabay"
+    ],
+    priceINR: 1299,
+    originCountry: "India",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 410,
+        protein: 78,
+        carbs: 7.7,
+        fat: 7.3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "nutrabay-pure-whey-isolate",
+    name: "Nutrabay Pure Whey Protein Isolate",
+    nameAlt: [
+        "nutrabay wpi"
+    ],
+    searchTerms: [
+        "nutrabay",
+        "nutrabay wpi",
+        "whey",
+        "protein",
+        "Nutrabay"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Nutrabay",
+    productLine: "Pure Whey Protein Isolate",
+    scoopWeightG: 30,
+    proteinType: "isolate",
+    bcaaG: 5.8,
+    eaaG: null,
+    certifications: [
+        "Nutrabay"
+    ],
+    priceINR: 1899,
+    originCountry: "India",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 373,
+        protein: 88.3,
+        carbs: 3.3,
+        fat: 1.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "amul-whey-protein",
+    name: "Amul Whey Protein",
+    nameAlt: [
+        "amul whey"
+    ],
+    searchTerms: [
+        "amul",
+        "amul whey",
+        "whey",
+        "protein",
+        "Amul"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Amul",
+    productLine: "Whey Protein",
+    scoopWeightG: 32,
+    proteinType: "concentrate",
+    bcaaG: 5,
+    eaaG: null,
+    certifications: [
+        "FSSAI"
+    ],
+    priceINR: 1599,
+    originCountry: "India",
+    defaultServingGrams: 32,
+    per100g: {
+        calories: 369,
+        protein: 78.1,
+        carbs: 6.3,
+        fat: 4.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (32g)",
+            grams: 32
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "naturaltein-whey-concentrate",
+    name: "Naturaltein Whey Protein Concentrate",
+    nameAlt: [
+        "naturaltein whey"
+    ],
+    searchTerms: [
+        "naturaltein",
+        "naturaltein whey",
+        "whey",
+        "protein",
+        "Naturaltein"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Naturaltein",
+    productLine: "Whey Protein Concentrate",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 5.2,
+    eaaG: null,
+    certifications: [
+        "TUV"
+    ],
+    priceINR: 2299,
+    originCountry: "India",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 367,
+        protein: 72,
+        carbs: 8.3,
+        fat: 5.3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "muscletech-nitrotech-whey",
+    name: "MuscleTech NitroTech Whey Protein",
+    nameAlt: [
+        "nitrotech"
+    ],
+    searchTerms: [
+        "muscletech",
+        "nitrotech",
+        "whey",
+        "protein",
+        "MuscleTech"
+    ],
+    category: "supplement",
+    subcategory: "whey-isolate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleTech",
+    productLine: "NitroTech",
+    scoopWeightG: 46,
+    proteinType: "isolate",
+    bcaaG: 6.8,
+    eaaG: null,
+    certifications: [
+        "Informed Choice"
+    ],
+    priceINR: 5500,
+    originCountry: "USA",
+    defaultServingGrams: 46,
+    per100g: {
+        calories: 348,
+        protein: 65.2,
+        carbs: 8.7,
+        fat: 5.4,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (46g)",
+            grams: 46
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "protyze-clear-whey",
+    name: "Protyze Anytime Clear Whey Protein",
+    nameAlt: [
+        "protyze clear"
+    ],
+    searchTerms: [
+        "protyze",
+        "protyze clear",
+        "whey",
+        "protein",
+        "Protyze"
+    ],
+    category: "supplement",
+    subcategory: "clear-whey",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Protyze",
+    productLine: "Anytime Clear Whey",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 7.2,
+    eaaG: null,
+    certifications: [
+        "FSSAI"
+    ],
+    priceINR: 2699,
+    originCountry: "India",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 343,
+        protein: 80,
+        carbs: 5,
+        fat: 0,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "kevin-levrone-gold-whey",
+    name: "Kevin Levrone Gold Whey",
+    nameAlt: [
+        "levrone gold whey"
+    ],
+    searchTerms: [
+        "kevin levrone",
+        "levrone gold whey",
+        "whey",
+        "protein",
+        "Kevin Levrone"
+    ],
+    category: "supplement",
+    subcategory: "whey-concentrate",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Kevin Levrone",
+    productLine: "Gold Whey",
+    scoopWeightG: 30,
+    proteinType: "concentrate",
+    bcaaG: 4.8,
+    eaaG: null,
+    certifications: [
+        "EU"
+    ],
+    priceINR: 3499,
+    originCountry: "Poland",
+    defaultServingGrams: 30,
+    per100g: {
+        calories: 397,
+        protein: 73.3,
+        carbs: 10,
+        fat: 6.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (30g)",
+            grams: 30
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-mass-gainer-xxl",
+    name: "MuscleBlaze Mass Gainer XXL",
+    nameAlt: [
+        "mb mass gainer"
+    ],
+    searchTerms: [
+        "muscleblaze",
+        "mb mass gainer",
+        "whey",
+        "protein",
+        "MuscleBlaze"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Mass Gainer XXL",
+    scoopWeightG: 150,
+    proteinType: "concentrate",
+    bcaaG: 4.2,
+    eaaG: null,
+    certifications: [
+        "Trustified Gold"
+    ],
+    priceINR: 1899,
+    originCountry: "India",
+    defaultServingGrams: 150,
+    per100g: {
+        calories: 374,
+        protein: 15,
+        carbs: 74.7,
+        fat: 2,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (150g)",
+            grams: 150
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-super-gainer-xxl",
+    name: "MuscleBlaze Super Gainer XXL",
+    nameAlt: [
+        "mb super gainer"
+    ],
+    searchTerms: [
+        "muscleblaze",
+        "mb super gainer",
+        "whey",
+        "protein",
+        "MuscleBlaze"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Super Gainer XXL",
+    scoopWeightG: 75,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: 1699,
+    originCountry: "India",
+    defaultServingGrams: 75,
+    per100g: {
+        calories: 373,
+        protein: 20,
+        carbs: 70.7,
+        fat: 2.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (75g)",
+            grams: 75
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "mb-lean-mass-gainer",
+    name: "MuscleBlaze High Protein Lean Mass Gainer",
+    nameAlt: [
+        "mb lean mass"
+    ],
+    searchTerms: [
+        "muscleblaze",
+        "mb lean mass",
+        "whey",
+        "protein",
+        "MuscleBlaze"
+    ],
+    category: "supplement",
+    subcategory: "lean-mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleBlaze",
+    productLine: "Lean Mass Gainer",
+    scoopWeightG: 75,
+    proteinType: "concentrate",
+    bcaaG: 6.5,
+    eaaG: null,
+    certifications: [],
+    priceINR: 2799,
+    originCountry: "India",
+    defaultServingGrams: 75,
+    per100g: {
+        calories: 393,
+        protein: 40,
+        carbs: 62.7,
+        fat: 2.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (75g)",
+            grams: 75
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "asitis-atom-mass-gainer",
+    name: "AS-IT-IS ATOM Mass Gainer",
+    nameAlt: [
+        "asitis mass gainer"
+    ],
+    searchTerms: [
+        "as-it-is",
+        "asitis mass gainer",
+        "whey",
+        "protein",
+        "AS-IT-IS"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "AS-IT-IS",
+    productLine: "ATOM Mass Gainer",
+    scoopWeightG: 100,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: 2199,
+    originCountry: "India",
+    defaultServingGrams: 100,
+    per100g: {
+        calories: 384,
+        protein: 25,
+        carbs: 63,
+        fat: 4,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (100g)",
+            grams: 100
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "on-serious-mass",
+    name: "Optimum Nutrition Serious Mass",
+    nameAlt: [
+        "on serious mass"
+    ],
+    searchTerms: [
+        "optimum nutrition",
+        "on serious mass",
+        "whey",
+        "protein",
+        "Optimum Nutrition"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Optimum Nutrition",
+    productLine: "Serious Mass",
+    scoopWeightG: 334,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "4499",
+    defaultServingGrams: 334,
+    per100g: {
+        calories: 377,
+        protein: 15,
+        carbs: 75.7,
+        fat: 1.3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (334g)",
+            grams: 334
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "on-serious-mass-half",
+    name: "Optimum Nutrition Serious Mass (Half Serving)",
+    nameAlt: [
+        "on serious mass half"
+    ],
+    searchTerms: [
+        "optimum nutrition",
+        "on serious mass half",
+        "whey",
+        "protein",
+        "Optimum Nutrition"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Optimum Nutrition",
+    productLine: "Serious Mass",
+    scoopWeightG: 167,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "4499",
+    defaultServingGrams: 167,
+    per100g: {
+        calories: 377,
+        protein: 15,
+        carbs: 75.7,
+        fat: 1.3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (167g)",
+            grams: 167
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "labrada-muscle-mass-gainer",
+    name: "Labrada Muscle Mass Gainer",
+    nameAlt: [
+        "labrada mass gainer"
+    ],
+    searchTerms: [
+        "labrada",
+        "labrada mass gainer",
+        "whey",
+        "protein",
+        "Labrada"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "Labrada",
+    productLine: "Muscle Mass Gainer",
+    scoopWeightG: 336,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "6999",
+    defaultServingGrams: 336,
+    per100g: {
+        calories: 370,
+        protein: 15.5,
+        carbs: 74.7,
+        fat: 2.4,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (336g)",
+            grams: 336
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "muscletech-mass-tech-extreme",
+    name: "MuscleTech Mass Tech Extreme 2000",
+    nameAlt: [
+        "masstech extreme"
+    ],
+    searchTerms: [
+        "muscletech",
+        "masstech extreme",
+        "whey",
+        "protein",
+        "MuscleTech"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "MuscleTech",
+    productLine: "Mass Tech Extreme 2000",
+    scoopWeightG: 334,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "9999",
+    defaultServingGrams: 334,
+    per100g: {
+        calories: 599,
+        protein: 24,
+        carbs: 119.8,
+        fat: 3,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (334g)",
+            grams: 334
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie",
+        "extreme-calories",
+        "advanced-only"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "gnc-pro-performance-weight-gainer",
+    name: "GNC Pro Performance Weight Gainer",
+    nameAlt: [
+        "gnc mass gainer"
+    ],
+    searchTerms: [
+        "gnc",
+        "gnc mass gainer",
+        "whey",
+        "protein",
+        "GNC"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "GNC",
+    productLine: "Pro Performance",
+    scoopWeightG: 315,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "8999",
+    defaultServingGrams: 315,
+    per100g: {
+        calories: 508,
+        protein: 16.8,
+        carbs: 120.6,
+        fat: 4.8,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (315g)",
+            grams: 315
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie",
+        "extreme-calories",
+        "advanced-only"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}  ,
+  {
+    id: "bsn-true-mass-1200",
+    name: "BSN True Mass 1200",
+    nameAlt: [
+        "bsn true mass"
+    ],
+    searchTerms: [
+        "bsn",
+        "bsn true mass",
+        "whey",
+        "protein",
+        "BSN"
+    ],
+    category: "supplement",
+    subcategory: "mass-gainer",
+    itemType: "supplement",
+    state: "raw",
+    region: "pan-indian",
+    brand: "BSN",
+    productLine: "True Mass 1200",
+    scoopWeightG: 254,
+    proteinType: "concentrate",
+    bcaaG: null,
+    eaaG: null,
+    certifications: [],
+    priceINR: null,
+    originCountry: "7999",
+    defaultServingGrams: 254,
+    per100g: {
+        calories: 476,
+        protein: 19.7,
+        carbs: 84.6,
+        fat: 6.7,
+        fiber: 0,
+        sodium: 150,
+        vitaminB12: 0,
+        vitaminD: 0,
+        iron: 0,
+        calcium: 200
+    },
+    servings: [
+        {
+            id: "scoop",
+            label: "1 scoop (254g)",
+            grams: 254
+        },
+        {
+            id: "g100",
+            label: "100g",
+            grams: 100
+        },
+        {
+            id: "custom",
+            label: "Custom (g)",
+            grams: 1
+        }
+    ],
+    dietTypes: [
+        "veg",
+        "nonveg"
+    ],
+    tags: [
+        "muscle-building",
+        "bulking",
+        "high-calorie"
+    ],
+    isProcessed: true,
+    isFastingFood: false,
+    fastingTypes: [],
+    isGlutenFree: true,
+    isRecipe: false,
+    containsRootVeg: false,
+    hasBeverageModifiers: false,
+    supportedConsistencyTypes: [],
+    consistencyMultipliers: {},
+    gi: 15,
+    cookingOilNote: null,
+    estimatedOilG: 0,
+    source: "FSSAI-label",
+    confidence: "high"
+}
 ];

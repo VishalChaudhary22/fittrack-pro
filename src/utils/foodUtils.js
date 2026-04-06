@@ -134,6 +134,8 @@ export const searchLocalFoods = (foodsList, query, filters = {}) => {
     const q = query.toLowerCase();
     results = results.filter(f => {
       if (f.name.toLowerCase().includes(q)) return true;
+      if (f.brand && f.brand.toLowerCase().includes(q)) return true;
+      if (f.productLine && f.productLine.toLowerCase().includes(q)) return true;
       if (f.hindiName && f.hindiName.includes(q)) return true;
       if (f.nameAlt?.some(alt => alt.toLowerCase().includes(q))) return true;
       if (f.searchTerms?.some(term => term.toLowerCase().includes(q))) return true;

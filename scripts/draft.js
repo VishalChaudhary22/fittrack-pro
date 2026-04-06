@@ -1,0 +1,1 @@
+const { searchLocalFoods, calcMacros, calcBeverageMacros } = require('../src/utils/foodUtils.js'); // Cannot easily require ES6 modules directly in CJS without babel or `.mjs`. I will make it an `mjs` script instead!

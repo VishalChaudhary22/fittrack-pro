@@ -20,3 +20,12 @@ export const foodCategories = [
   { id: 'sprout-soy', label: 'Sprouts & Plant Protein' },
   { id: 'fasting-food', label: 'Fasting & Vrat Foods' }
 ];
+
+export const supplementSubcategories = [
+  { id: 'whey-concentrate', label: 'Whey Concentrate' },
+  { id: 'whey-isolate', label: 'Whey Isolate' },
+  { id: 'whey-hydrolysate', label: 'Whey Hydrolysate' },
+  { id: 'mass-gainer', label: 'Mass Gainer' },
+  { id: 'lean-mass-gainer', label: 'Lean Mass Gainer' },
+  { id: 'clear-whey', label: 'Clear Whey Isolate' }
+];

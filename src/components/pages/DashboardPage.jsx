@@ -8,6 +8,8 @@ import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeT
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
+import { getCyclePhase } from '../../utils/cycleCalculations';
+import { getActiveFestival } from '../../utils/festivals';
 import {
   calcObjectiveReadiness,
   getMuscleRecoveryStatuses,
@@ -95,7 +97,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog, foodLog } = useApp();
+  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
@@ -208,16 +210,21 @@ export default function DashboardPage() {
     }
   }, [trend, isLoss, user.weightGoal]);
 
-  // Phase 3: Dashboard Macro Widget Data
   const todayLog = useMemo(() => foodLog.filter(l => l.userId === user.id && l.date === todayStr), [foodLog, user.id, todayStr]);
+  const todayWaterLog = useMemo(() => (waterLog || []).filter(l => l.userId === user.id && l.date === todayStr), [waterLog, user.id, todayStr]);
+  const todayWaterTotal = useMemo(() => todayWaterLog.reduce((acc, curr) => acc + curr.ml, 0), [todayWaterLog]);
+
   const todayTotals = useMemo(() => {
     return todayLog.reduce((acc, item) => ({
       calories: acc.calories + (item.macros?.calories || 0),
       protein: acc.protein + (item.macros?.protein || 0),
       carbs: acc.carbs + (item.macros?.carbs || 0),
-      fat: acc.fat + (item.macros?.fat || 0)
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      fats: acc.fats + (item.macros?.fats || 0)
+    }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
   }, [todayLog]);
+
+  const cyclePhase = useMemo(() => user.gender === 'female' ? getCyclePhase(cycleConfig?.startDate, cycleConfig?.cycleLength) : null, [user.gender, cycleConfig]);
+  const activeFestival = useMemo(() => getActiveFestival(), []);
 
   // Use user.weight (profile weight) for macro calculations — must match DietPage exactly
   const { goalKcal, protTarget, carbTarget, fatTarget } = useMemo(() => {
@@ -282,8 +289,13 @@ export default function DashboardPage() {
             WELCOME BACK,<br/>
             <span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8 }}>
-            {new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span>{new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            {cyclePhase && (
+              <span onClick={() => navigate('/cycle')} style={{ cursor: 'pointer', background: cyclePhase.theme, color: 'var(--on-primary)', fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                Day {cyclePhase.currentDay} · {cyclePhase.phase}
+              </span>
+            )}
           </div>
           <Dumbbell size={120} style={{ position: 'absolute', top: -16, right: -16, opacity: 0.06, color: 'var(--on-surface)' }} />
           <button className="btn-p" style={{ position: 'absolute', top: 0, right: 0, padding: '7px 13px', fontSize: 10 }} onClick={() => setShowLog(true)}>
@@ -293,6 +305,16 @@ export default function DashboardPage() {
             <ThemeTogglePill />
           </div>
         </header>
+
+        {activeFestival && (
+          <div style={{ background: 'linear-gradient(135deg, rgba(248,95,27,0.1) 0%, rgba(248,95,27,0.05) 100%)', border: '1px solid var(--primary-container)', borderRadius: 16, padding: 20, marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+            <div style={{ fontSize: 24 }}>✨</div>
+            <div>
+              <h3 className="headline-md" style={{ color: 'var(--primary)', fontSize: 16, marginBottom: 4 }}>{activeFestival.name}</h3>
+              <p style={{ color: 'var(--on-surface-variant)', fontSize: 13, lineHeight: 1.5 }}>{activeFestival.message}</p>
+            </div>
+          </div>
+        )}
 
         {/* Row 1: Weight Snapshot + BMI  (1fr / 1fr) */}
         <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -456,7 +478,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Daily Activity (Similar to Today's Nutrition) */}
-        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16 }}>
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/water')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>DAILY ACTIVITY</div>
@@ -473,7 +495,7 @@ export default function DashboardPage() {
               {[
                 { label: 'Steps', val: 0, target: 10000, color: 'var(--primary)' },
                 { label: 'Cals Burned', val: 0, target: 500, color: '#F85F1B' },
-                { label: 'Water', val: 0, target: 3000, color: '#3b82f6', unit: 'ml' }
+                { label: 'Water', val: todayWaterTotal, target: user.waterGoal || 3000, color: '#3b82f6', unit: 'ml' }
               ].map(m => {
                 const pct = clamp(Math.round((m.val / m.target) * 100) || 0, 0, 100);
                 return (

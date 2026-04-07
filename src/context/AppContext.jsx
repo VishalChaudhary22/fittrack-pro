@@ -26,6 +26,11 @@ export function AppProvider({ children }) {
     { id: '2026-01', label: 'Jan 2026', xp: 130000 },
     { id: '2025-12', label: 'Dec 2025', xp: 98000 },
   ]);
+  const [waterLog, setWaterLog] = useLocalStorage('fittrack_waterLog', []);
+  const [cardioLog, setCardioLog] = useLocalStorage('fittrack_cardioLog', []);
+  const [supplementLog, setSupplementLog] = useLocalStorage('fittrack_supplementLog', []);
+  const [supplementConfig, setSupplementConfig] = useLocalStorage('fittrack_supplementConfig', []);
+  const [cycleConfig, setCycleConfig] = useLocalStorage('fp_cycle_config', { startDate: '', cycleLength: 28 });
 
   const { theme, toggleTheme, initTheme } = useTheme();
   const { toasts, addToast, removeToast } = useToast();
@@ -176,7 +181,13 @@ export function AppProvider({ children }) {
     // Streak
     getStreak, getFoodStreak,
     // Favorites
-    toggleFavoriteFood
+    toggleFavoriteFood,
+    // Phase 3 extensions
+    waterLog, setWaterLog,
+    cardioLog, setCardioLog,
+    supplementLog, setSupplementLog,
+    supplementConfig, setSupplementConfig,
+    cycleConfig, setCycleConfig,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

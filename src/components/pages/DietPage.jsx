@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
@@ -52,7 +52,7 @@ const CONSTANTS = {
 };
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig } = useApp();
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
@@ -111,6 +111,27 @@ export default function DietPage() {
   // Log calculation logic
   const dailyLog = useMemo(() => foodLog.filter(l => l.date === dateStr && l.userId === user.id), [foodLog, dateStr, user.id]);
   
+  const selectedDateWater = useMemo(() => (waterLog || []).filter(l => l.userId === user.id && l.date === dateStr), [waterLog, user.id, dateStr]);
+  const selectedDateWaterTotal = useMemo(() => selectedDateWater.reduce((acc, curr) => acc + curr.ml, 0), [selectedDateWater]);
+  const waterGoal = user.waterGoal || 3000;
+  const waterPct = Math.min(Math.round((selectedDateWaterTotal / waterGoal) * 100) || 0, 100);
+
+  const addWater = (ml) => {
+    setWaterLog(p => [...p, { id: gId(), userId: user.id, date: dateStr, ml, timestamp: new Date().toISOString() }]);
+    addToast(`Logged ${ml}ml of water`, 'success');
+  };
+
+  const userSupps = useMemo(() => supplementConfig || [{ id: 's1', name: 'Whey Protein', dose: '1 scoop' }, { id: 's2', name: 'Creatine', dose: '5g' }, { id: 's3', name: 'Multivitamin', dose: '1 tab' }], [supplementConfig]);
+  const selectedDateSuppLog = useMemo(() => (supplementLog || []).filter(l => l.userId === user.id && l.date === dateStr), [supplementLog, user.id, dateStr]);
+  const toggleSupplement = (suppId) => {
+    const existing = selectedDateSuppLog.find(l => l.suppId === suppId);
+    if (existing) {
+       setSupplementLog(p => p.filter(l => l.id !== existing.id));
+    } else {
+       setSupplementLog(p => [...p, { id: Math.random().toString(36).substring(7), userId: user.id, date: dateStr, suppId, timestamp: new Date().toISOString() }]);
+    }
+  };
+
   const todayTotals = useMemo(() => {
     return dailyLog.reduce((acc, curr) => ({
       calories: acc.calories + (curr.macros?.calories || 0),
@@ -614,6 +635,60 @@ export default function DietPage() {
                  <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You're <strong>{Math.round(protTarget - todayTotals.protein)}g</strong> short on protein today — try: <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey.</span></p>
                </div>
             )}
+
+            {/* HYDRATION WIDGET */}
+            <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16, marginBottom: 24, border: '1px solid var(--outline-variant)' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                   <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Droplet size={18} color="#3b82f6" fill="#3b82f6" fillOpacity={0.2} /></div>
+                   <div>
+                     <h4 className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Hydration</h4>
+                     <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{selectedDateWaterTotal} / {waterGoal} ml</p>
+                   </div>
+                 </div>
+                 <div style={{ padding: '4px 10px', background: 'var(--surface-container-highest)', borderRadius: 20, fontSize: 11, fontWeight: 800, color: '#3b82f6' }}>{waterPct}%</div>
+               </div>
+               
+               <div style={{ height: 6, background: 'var(--surface-container-highest)', borderRadius: 4, overflow: 'hidden', marginBottom: 16 }}>
+                  <div style={{ height: '100%', width: `${waterPct}%`, background: '#3b82f6', borderRadius: 4, transition: 'width 0.5s ease-out' }} />
+               </div>
+
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                 {[{ ml: 250, label: 'Glass' }, { ml: 500, label: 'Bottle' }, { ml: 750, label: 'Shaker' }].map(preset => (
+                   <button key={preset.ml} onClick={() => addWater(preset.ml)} style={{ padding: '8px 4px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'transform 0.1s' }} className="active:scale-95">
+                     <div style={{ fontSize: 13, fontWeight: 800, color: '#3b82f6' }}>+{preset.ml}</div>
+                     <div style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>{preset.label}</div>
+                   </button>
+                 ))}
+               </div>
+            </div>
+
+            {/* SUPPLEMENTS WIDGET */}
+            <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16, marginBottom: 24, border: '1px solid var(--outline-variant)' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                 <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Pill size={18} color="#8b5cf6" /></div>
+                 <div>
+                   <h4 className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Supplements</h4>
+                   <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>Daily Stack</p>
+                 </div>
+               </div>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+                 {userSupps.map(supp => {
+                   const isTaken = selectedDateSuppLog.some(l => l.suppId === supp.id);
+                   return (
+                     <div key={supp.id} onClick={() => toggleSupplement(supp.id)} style={{ padding: 12, borderRadius: 12, background: isTaken ? 'rgba(139, 92, 246, 0.1)' : 'var(--surface-container-highest)', border: isTaken ? '1px solid #8b5cf6' : '1px solid transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
+                       <div>
+                         <div style={{ fontSize: 13, fontWeight: 700, color: isTaken ? '#8b5cf6' : 'var(--on-surface)' }}>{supp.name}</div>
+                         <div style={{ fontSize: 11, color: isTaken ? '#8b5cf6' : 'var(--on-surface-variant)', opacity: 0.8 }}>{supp.dose}</div>
+                       </div>
+                       <div style={{ width: 20, height: 20, borderRadius: '50%', background: isTaken ? '#8b5cf6' : 'var(--surface-container)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                         {isTaken && <Check size={12} color="#fff" strokeWidth={3} />}
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+            </div>
 
             {/* MEAL SLOTS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

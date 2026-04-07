@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2 } from 'lucide-react';
+import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
 import { best1RMFromSets, calc1RM } from '../../utils/calculations';
@@ -12,6 +13,10 @@ export default function ProgressPage() {
   const [ss, setSs] = useState(act?.id || splits[0]?.id);
   const [sd, setSd] = useState('');
   const [se, setSe] = useState('');
+  
+  // Standalone 1RM State
+  const [rmWt, setRmWt] = useState('');
+  const [rmRp, setRmRp] = useState('');
   const split = splits.find(s => s.id === ss);
   const days = split?.days.filter(d => d.type !== 'rest') || [];
   const ul = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal');
@@ -31,7 +36,38 @@ export default function ProgressPage() {
     }).filter(Boolean);
   }, [se, sd, ul, split]);
   const pr = cd.length ? Math.max(...cd.map(d => d.maxWeight)) : 0;
-  const est1rm = cd.length ? Math.max(...cd.map(d => d.est1rm)) : 0;
+  const prData = pr ? cd.find(d => d.maxWeight === pr) : null;
+  const history1RM = cd.length ? Math.max(...cd.map(d => d.est1rm)) : 0;
+  const pbCardRef = useRef(null);
+
+  const sharePB = async () => {
+    if (!pbCardRef.current) return;
+    try {
+      const canvas = await html2canvas(pbCardRef.current, { backgroundColor: '#111827', scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const blob = await (await fetch(imgData)).blob();
+      
+      if (navigator.share) {
+        const file = new File([blob], 'fittrack-pb.png', { type: 'image/png' });
+        await navigator.share({
+          title: 'My New Personal Best!',
+          text: `Check out my new PR on ${se}: ${pr}kg!`,
+          files: [file]
+        });
+      } else {
+        // Fallback for desktop: download
+        const a = document.createElement('a');
+        a.href = imgData; a.download = 'fittrack-pb.png';
+        a.click();
+        addToast('Image saved to downloads', 'success');
+      }
+    } catch (e) {
+       console.error("Export failed", e);
+    }
+  };
+  
+  // Calculated 1RM: manual overrides history
+  const active1RM = (rmWt && rmRp) ? calc1RM(parseFloat(rmWt), parseInt(rmRp)) : history1RM;
 
   // Weekly/monthly summaries
   const weeklySummary = useMemo(() => {
@@ -68,10 +104,37 @@ export default function ProgressPage() {
           <option value="">Any Day</option>
           {days.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
-        <select value={se} onChange={e => setSe(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
-          <option value="">Select Lift</option>
-          {exN.map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
+      </div>
+
+      {/* 8.8.5 ALWAYS VISIBLE 1RM CALCULATOR */}
+      <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', marginBottom: 32, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+         <div style={{ flex: '1 1 200px', paddingRight: 24, borderRight: '1px solid var(--surface-container-highest)' }}>
+           <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 12 }}>ESTIMATED 1RM CALCULATOR</div>
+           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span className="display-lg" style={{ color: 'var(--primary)' }}>{active1RM}</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface-variant)' }}>KG</span>
+           </div>
+         </div>
+         <div style={{ flex: '2 1 300px', display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 150 }}>
+              <label style={{ fontSize: 10, color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>Lift (History Sync)</label>
+              <select value={se} onChange={e => { 
+                setSe(e.target.value); 
+                setRmWt(''); setRmRp(''); // clear manual overrides when changing exercise
+              }} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+                <option value="">Select Lift</option>
+                {exN.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
+              <label style={{ fontSize: 10, color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>Weight</label>
+              <input type="number" placeholder={prData ? prData.maxWeight : "kg"} value={rmWt} onChange={e => setRmWt(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
+              <label style={{ fontSize: 10, color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>Reps</label>
+              <input type="number" placeholder={prData ? Math.round(prData.avgReps) : "reps"} value={rmRp} onChange={e => setRmRp(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: 16, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+            </div>
+         </div>
       </div>
 
       {/* 8.9 Weekly Summary Context Strip */}
@@ -132,11 +195,11 @@ export default function ProgressPage() {
 
         {/* 8.3 Bento Stat Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-          {/* Card 1 - Estimated 1RM */}
+          {/* Card 1 - History 1RM Trend (Replacement for old static 1RM card) */}
           <div className="card" style={{ borderLeft: '4px solid var(--primary)', padding: 24, background: 'var(--surface-container-low)' }}>
-             <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 12 }}>ESTIMATED 1RM</div>
+             <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 12 }}>1RM HISTORY MAX</div>
              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-                <span className="display-lg" style={{ color: 'var(--on-surface)' }}>{est1rm}</span>
+                <span className="display-lg" style={{ color: 'var(--on-surface)' }}>{history1RM}</span>
                 <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface-variant)' }}>KG</span>
              </div>
              {cd.length > 0 && (
@@ -200,11 +263,11 @@ export default function ProgressPage() {
           {/* Left Column: PB Card + Focus Groups */}
           <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* 8.5 PB Glow Card */}
-            <div className="card" style={{ padding: 32, background: 'var(--surface-container-low)', boxShadow: 'var(--glow-primary)', border: '1px solid rgba(255, 181, 155, 0.20)', position: 'relative', overflow: 'hidden' }}>
+            <div ref={pbCardRef} className="card" style={{ padding: 32, background: 'var(--surface-container-low)', boxShadow: 'var(--glow-primary)', border: '1px solid rgba(255, 181, 155, 0.20)', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 16, right: 16, width: 56, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-highest)', borderRadius: '12px 12px 0 0', borderBottom: '4px solid var(--surface-container)', color: 'var(--on-surface-variant)' }}>
                 <Award size={36} color="var(--on-surface-dim)" />
               </div>
-              <div className="label-md" style={{ color: 'var(--primary)', letterSpacing: '0.2em', marginBottom: 24 }}>Personal Best</div>
+              <div className="label-md" style={{ color: 'var(--primary)', letterSpacing: '0.2em', marginBottom: 24 }}>Personal Best • {se}</div>
               <div className="display-lg" style={{ color: 'var(--on-surface)' }}>{pr}</div>
               <div style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginTop: 8, marginBottom: 32 }}>
                 {cd.find(d => d.maxWeight === pr) ? `${cd.find(d => d.maxWeight === pr).avgReps} avg reps · ${cd.find(d => d.maxWeight === pr).sets} sets` : 'No sets data'}
@@ -216,9 +279,9 @@ export default function ProgressPage() {
                     {cd.find(d => d.maxWeight === pr)?.rawDate ? new Date(cd.find(d => d.maxWeight === pr).rawDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown'}
                   </div>
                 </div>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255, 181, 155, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                <button onClick={sharePB} style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255, 181, 155, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', cursor: 'pointer', border: 'none', transition: 'all 0.2s' }} className="active:scale-95">
                   <Share2 size={20} color="currentColor" />
-                </div>
+                </button>
               </div>
             </div>
 

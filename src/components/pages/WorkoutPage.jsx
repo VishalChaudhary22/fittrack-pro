@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, RefreshCcw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -14,6 +14,23 @@ const YOGA_PRESETS = [
   { id: 'pre_workout', name: 'Pre-Workout Activation', poses: ['Downward Dog', 'High Lunge', 'Plank', 'Cobra', 'Child Pose'], durationPerPose: 30 }
 ];
 
+const parseDuration = (repsRange, sets = 1) => {
+  if (!repsRange) return 30 * sets;
+  const lower = repsRange.toLowerCase();
+  const numMatch = lower.match(/(\d+)/);
+  const num = numMatch ? parseInt(numMatch[1]) : 1;
+  if (lower.includes('minute')) return num * 60 * sets;
+  if (lower.includes('breath')) return num * 6 * sets;
+  if (lower.includes('round'))  return 60 * sets;
+  return 30 * sets;
+};
+
+const formatPoseName = (name) => {
+  const match = name.match(/^(.+?)\s*\((.+?)\)$/);
+  if (match) return { sanskrit: match[1].trim(), english: match[2].trim() };
+  return { sanskrit: null, english: name };
+};
+
 const playBeep = (freq = 880, dur = 0.2) => {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -25,49 +42,88 @@ const playBeep = (freq = 880, dur = 0.2) => {
   } catch(e) {}
 };
 
-const YogaSessionView = ({ day, onBack }) => {
+const YogaSessionView = ({ day, onBack, onComplete }) => {
   const [activeSession, setActiveSession] = useState(null);
   const [poseIndex, setPoseIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [breathPhase, setBreathPhase] = useState('idle');
   const [breathTimer, setBreathTimer] = useState(0);
-  const timerRef = useRef(null);
+  const yogaTimerRef = useRef(null);
+  const breathTimerRef = useRef(null);
+  const completedNaturallyRef = useRef(false);
+
+  // Build dynamic "Today's Flow" from the day's actual exercises
+  const dayFlowPreset = useMemo(() => {
+    if (!day?.exercises?.length) return null;
+    const poses = day.exercises.map(ex => ex.name);
+    const durations = day.exercises.map(ex => parseDuration(ex.repsRange, ex.sets));
+    return {
+      id: 'day_flow',
+      name: "Today's Yoga Flow",
+      poses,
+      durations,
+      durationPerPose: 0,
+    };
+  }, [day]);
+
+  // Get per-pose duration (supports both durations[] and flat durationPerPose)
+  const getDuration = (session, index) => {
+    if (session?.durations?.[index]) return session.durations[index];
+    return session?.durationPerPose || 30;
+  };
 
   const startSession = (preset) => {
+    completedNaturallyRef.current = false;
+    setBreathPhase('idle'); // stop breathing if running
     setActiveSession(preset);
     setPoseIndex(0);
-    setTimeLeft(preset.durationPerPose);
+    setTimeLeft(getDuration(preset, 0));
     setIsPlaying(true);
     playBeep(1100, 0.4);
   };
 
   const nextPose = () => {
     if (!activeSession) return;
-    if (poseIndex < activeSession.poses.length - 1) {
-      setPoseIndex(p => p + 1);
-      setTimeLeft(activeSession.durationPerPose);
-      playBeep(880, 0.2);
-    } else endSession();
+    setPoseIndex(prev => {
+      const next = prev + 1;
+      if (next < activeSession.poses.length) {
+        const dur = getDuration(activeSession, next);
+        setTimeLeft(dur);
+        playBeep(880, 0.2);
+        return next;
+      } else {
+        // Completed all poses naturally
+        completedNaturallyRef.current = true;
+        endSession();
+        return prev;
+      }
+    });
   };
 
   const endSession = () => {
     setIsPlaying(false);
+    const wasComplete = completedNaturallyRef.current;
+    const completedSession = activeSession;
     setActiveSession(null);
     playBeep(1100, 0.5);
     playBeep(1300, 0.5);
+    if (wasComplete && onComplete && completedSession) {
+      onComplete(completedSession);
+    }
+    completedNaturallyRef.current = false;
   };
 
   useEffect(() => {
     if (isPlaying && timeLeft > 0) {
-      timerRef.current = setTimeout(() => setTimeLeft(p => p - 1), 1000);
+      yogaTimerRef.current = setTimeout(() => setTimeLeft(p => p - 1), 1000);
       if (timeLeft === 3 || timeLeft === 2) playBeep(600, 0.1);
       if (timeLeft === 1) playBeep(800, 0.2);
     } else if (isPlaying && timeLeft === 0) {
       nextPose();
     }
-    return () => clearTimeout(timerRef.current);
-  }, [isPlaying, timeLeft, activeSession]);
+    return () => clearTimeout(yogaTimerRef.current);
+  }, [isPlaying, timeLeft, activeSession, poseIndex]);
 
   const startBreathing = () => {
     setBreathPhase('inhale'); setBreathTimer(4); playBeep(440, 0.3);
@@ -75,13 +131,19 @@ const YogaSessionView = ({ day, onBack }) => {
 
   useEffect(() => {
     if (breathPhase !== 'idle' && breathTimer > 0) {
-      timerRef.current = setTimeout(() => setBreathTimer(p => p - 1), 1000);
+      breathTimerRef.current = setTimeout(() => setBreathTimer(p => p - 1), 1000);
     } else if (breathPhase !== 'idle' && breathTimer === 0) {
       const nextP = breathPhase === 'inhale' ? 'hold_in' : breathPhase === 'hold_in' ? 'exhale' : breathPhase === 'exhale' ? 'hold_out' : 'inhale';
       setBreathPhase(nextP); setBreathTimer(4); playBeep(nextP.includes('hold') ? 500 : 700, 0.2);
     }
-    return () => clearTimeout(timerRef.current);
+    return () => clearTimeout(breathTimerRef.current);
   }, [breathPhase, breathTimer]);
+
+  const currentPoseDuration = activeSession ? getDuration(activeSession, poseIndex) : 1;
+  const totalFlowDuration = dayFlowPreset ? dayFlowPreset.durations.reduce((a, b) => a + b, 0) : 0;
+  const { sanskrit: currentSanskrit, english: currentEnglish } = activeSession
+    ? formatPoseName(activeSession.poses[poseIndex])
+    : { sanskrit: null, english: '' };
 
   return (
     <div className="pg-in">
@@ -93,12 +155,15 @@ const YogaSessionView = ({ day, onBack }) => {
       {activeSession ? (
         <div className="glass-card" style={{ padding: 40, textAlign: 'center', borderRadius: 24 }}>
           <div className="label-md" style={{ color: 'var(--primary)', marginBottom: 16 }}>{activeSession.name}</div>
-          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', color: 'var(--on-surface)', marginBottom: 8 }}>{activeSession.poses[poseIndex]}</h2>
+          {currentSanskrit && (
+            <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 4, letterSpacing: '0.05em' }}>{currentSanskrit}</div>
+          )}
+          <h2 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', color: 'var(--on-surface)', marginBottom: 8 }}>{currentEnglish}</h2>
           <p style={{ color: 'var(--on-surface-variant)', marginBottom: 32 }}>Pose {poseIndex + 1} of {activeSession.poses.length}</p>
           <div style={{ position: 'relative', width: 200, height: 200, margin: '0 auto 40px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
               <circle cx="100" cy="100" r="90" fill="none" stroke="var(--surface-container)" strokeWidth="8" />
-              <circle cx="100" cy="100" r="90" fill="none" stroke="var(--primary)" strokeWidth="8" strokeDasharray="565.48" strokeDashoffset={565.48 * (1 - Math.max(0, timeLeft) / activeSession.durationPerPose)} style={{ transition: 'stroke-dashoffset 1s linear' }} />
+              <circle cx="100" cy="100" r="90" fill="none" stroke="var(--primary)" strokeWidth="8" strokeDasharray="565.48" strokeDashoffset={565.48 * (1 - Math.max(0, timeLeft) / currentPoseDuration)} style={{ transition: 'stroke-dashoffset 1s linear' }} />
             </svg>
             <div style={{ fontSize: '4rem', fontWeight: 700, color: 'var(--on-surface)' }}>{timeLeft}</div>
           </div>
@@ -106,38 +171,71 @@ const YogaSessionView = ({ day, onBack }) => {
             <button onClick={() => setIsPlaying(!isPlaying)} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--primary)', border: 'none', color: '#000', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isPlaying ? <Pause /> : <Play />}
             </button>
-            <button onClick={endSession} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => { completedNaturallyRef.current = false; endSession(); }} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Square />
             </button>
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginBottom: 32 }}>
-          <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>
-            <h3 className="headline-md" style={{ marginBottom: 16, fontSize: 18 }}>Guided Flexibility</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {YOGA_PRESETS.map(p => (
-                <button key={p.id} onClick={() => startSession(p)} style={{ display: 'flex', justifyContent: 'space-between', padding: 16, background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, color: 'var(--on-surface)', cursor: 'pointer' }} className="active:scale-95">
-                  <span style={{ fontWeight: 600 }}>{p.name}</span>
-                  <span style={{ color: 'var(--on-surface-variant)' }}>{(p.poses.length * p.durationPerPose / 60).toFixed(1)} min</span>
-                </button>
-              ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+          {/* Today's Yoga Flow — primary card from day.exercises */}
+          {dayFlowPreset && (
+            <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 className="headline-md" style={{ fontSize: 18, display: 'flex', alignItems: 'center', gap: 8 }}>🧘 Today's Yoga Flow</h3>
+                <span style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>{dayFlowPreset.poses.length} poses • {(totalFlowDuration / 60).toFixed(1)} min</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {day.exercises.slice(0, 5).map((ex, i) => {
+                  const dur = dayFlowPreset.durations[i];
+                  const mins = Math.floor(dur / 60);
+                  const secs = dur % 60;
+                  const timeStr = mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+                  return (
+                    <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--surface-container)', borderRadius: 10, fontSize: 13 }}>
+                      <span style={{ color: 'var(--on-surface)' }}>{ex.name}{ex.sets > 1 ? ` × ${ex.sets}` : ''}</span>
+                      <span style={{ color: 'var(--on-surface-variant)', fontVariantNumeric: 'tabular-nums' }}>{timeStr}</span>
+                    </div>
+                  );
+                })}
+                {day.exercises.length > 5 && (
+                  <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', paddingLeft: 12 }}>+{day.exercises.length - 5} more</div>
+                )}
+              </div>
+              <button onClick={() => startSession(dayFlowPreset)} className="btn-p" style={{ width: '100%', padding: '14px', fontSize: 14, borderRadius: 14 }}>
+                Start Flow →
+              </button>
             </div>
-          </div>
-          <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-             <h3 className="headline-md" style={{ marginBottom: 8, fontSize: 18 }}>Box Breathing</h3>
-             <p style={{ color: 'var(--on-surface-variant)', fontSize: 13, marginBottom: 24 }}>4s Inhale, 4s Hold, 4s Exhale, 4s Hold</p>
-             {breathPhase !== 'idle' ? (
-               <div style={{ width: 150, height: 150, borderRadius: '50%', border: '4px solid var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: breathPhase === 'inhale' ? 'rgba(255, 181, 155, 0.2)' : 'transparent', transition: 'all 2s ease' }}>
-                  <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--primary)', fontWeight: 700 }}>{breathPhase.replace('_', ' ')}</div>
-                  <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--on-surface)' }}>{breathTimer}</div>
-                  <button onClick={() => setBreathPhase('idle')} style={{ marginTop: 8, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><Square size={16} /></button>
-               </div>
-             ) : (
-               <button onClick={startBreathing} style={{ padding: '16px 32px', borderRadius: 24, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <RefreshCcw size={18} /> Start Session
-               </button>
-             )}
+          )}
+
+          {/* Quick Sessions + Box Breathing */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
+            <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>
+              <h3 className="headline-md" style={{ marginBottom: 16, fontSize: 18 }}>Quick Sessions</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {YOGA_PRESETS.map(p => (
+                  <button key={p.id} onClick={() => startSession(p)} style={{ display: 'flex', justifyContent: 'space-between', padding: 16, background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, color: 'var(--on-surface)', cursor: 'pointer' }} className="active:scale-95">
+                    <span style={{ fontWeight: 600 }}>{p.name}</span>
+                    <span style={{ color: 'var(--on-surface-variant)' }}>{(p.poses.length * p.durationPerPose / 60).toFixed(1)} min</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+               <h3 className="headline-md" style={{ marginBottom: 8, fontSize: 18 }}>Box Breathing</h3>
+               <p style={{ color: 'var(--on-surface-variant)', fontSize: 13, marginBottom: 24 }}>4s Inhale, 4s Hold, 4s Exhale, 4s Hold</p>
+               {breathPhase !== 'idle' ? (
+                 <div style={{ width: 150, height: 150, borderRadius: '50%', border: '4px solid var(--primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: breathPhase === 'inhale' ? 'rgba(255, 181, 155, 0.2)' : 'transparent', transition: 'all 2s ease' }}>
+                    <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--primary)', fontWeight: 700 }}>{breathPhase.replace('_', ' ')}</div>
+                    <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--on-surface)' }}>{breathTimer}</div>
+                    <button onClick={() => setBreathPhase('idle')} style={{ marginTop: 8, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><Square size={16} /></button>
+                 </div>
+               ) : (
+                 <button onClick={startBreathing} style={{ padding: '16px 32px', borderRadius: 24, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <RefreshCcw size={18} /> Start Session
+                 </button>
+               )}
+            </div>
           </div>
         </div>
       )}
@@ -319,7 +417,28 @@ export default function WorkoutPage() {
 
   if (session) {
     if (session.isYoga) {
-      return <YogaSessionView day={session.day} onBack={() => { setSession(null); setDone(null); }} />;
+      const handleYogaComplete = (completedPreset) => {
+        const log = {
+          id: gId(), userId: user.id, splitId: activeSplit.id,
+          dayId: session.day.id, dayName: session.day.name,
+          date: tod(), notes: '',
+          durationMinutes: Math.round(
+            (completedPreset.durations
+              ? completedPreset.durations.reduce((a, b) => a + b, 0)
+              : completedPreset.poses.length * completedPreset.durationPerPose) / 60
+          ),
+          exercises: session.day.exercises.map(ex => ({
+            name: ex.name,
+            muscle: ex.muscle || null,
+            primaryMuscle: ex.primaryMuscle || null,
+            secondaryMuscles: ex.secondaryMuscles || [],
+            sets: [{ reps: ex.sets || 1, weight: 0 }],
+          })),
+        };
+        setWorkoutLogs(p => [...p, log]);
+        addToast('Yoga session logged! 🧘', 'success');
+      };
+      return <YogaSessionView day={session.day} onBack={() => { setSession(null); setDone(null); }} onComplete={handleYogaComplete} />;
     }
     const pct = Math.round((session.exs.flatMap(e => e.sets).filter(s => s.done).length / session.exs.flatMap(e => e.sets).length) * 100) || 0;
     return (

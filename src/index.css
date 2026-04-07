@@ -300,6 +300,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 }
 .skeleton-pulse{animation:shimmer 2s infinite linear; background: linear-gradient(90deg, var(--surface-container-low) 25%, var(--surface-container-high) 50%, var(--surface-container-low) 75%); background-size: 200% 100%;}
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ─── EXERCISE ROW GRID ─────────────────────────────────────────── */
 .ex-r{display:grid;grid-template-columns:34px 1fr 1fr 80px;gap:7px;align-items:center}
 .set-row { display: grid; grid-template-columns: 34px 1fr 1fr 44px; gap: 8px; align-items: center; }

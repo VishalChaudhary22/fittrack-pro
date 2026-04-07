@@ -7,7 +7,8 @@ import { DIET_TYPES } from '../../data/diets';
 import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
-import { calcMacros, calcBeverageMacros, searchRemoteFoods, getRecentFoods } from '../../utils/foodUtils';
+import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
+import { useFoodCache } from '../../hooks/useFoodCache';
 
 function MacroRing({ label, value, max, unit, color, size = 112, strokeWidth = 6 }) {
   const radius = (size - strokeWidth) / 2;
@@ -53,6 +54,7 @@ const CONSTANTS = {
 
 export default function DietPage() {
   const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig } = useApp();
+  const { allFoods, isLoading: foodsLoading } = useFoodCache();
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
@@ -65,8 +67,6 @@ export default function DietPage() {
   const [searchCat, setSearchCat] = useState('All');
   const [searchDiet, setSearchDiet] = useState('All');
   const [searchFasting, setSearchFasting] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
   
   // Detail Pane
   const [selectedFood, setSelectedFood] = useState(null);
@@ -187,23 +187,31 @@ export default function DietPage() {
     }), { iron: 0, vitaminB12: 0, vitaminD: 0 });
   }, [weeklyData]);
 
-  // Remote Search Effect
-  useEffect(() => {
-    // Quick debounce for search input
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      const res = await searchRemoteFoods(searchQuery, { 
-        dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : '', 
-        fastingType: searchFasting 
-      });
-      // apply manual category filter if needed, though usually handled by tags, 
-      // but since 'category' maps to 'category_id', we can filter locally or pass to dbQuery:
-      const finalRes = searchCat !== 'All' ? res.filter(f => f.category === searchCat) : res;
-      setSearchResults(finalRes);
-      setIsSearching(false);
-    }, 300); // 300ms debounce
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchDiet, searchFasting, searchCat]);
+  // Synchronous local search against cached allFoods (hybrid approach)
+  const searchResults = useMemo(() => {
+    if (foodsLoading || !allFoods.length) return [];
+    
+    const q = searchQuery.trim();
+    const hasFilters = searchCat !== 'All' || searchDiet !== 'All' || searchFasting;
+    
+    // No query and no filters → show nothing (recent/favorites shown separately)
+    if (!q && !hasFilters) return [];
+    
+    // Run local search (with or without query)
+    let results = !q
+      ? allFoods
+      : searchLocalFoods(allFoods, q, {
+          dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : null,
+          fastingType: searchFasting || null,
+        });
+    
+    // Apply category filter on top
+    if (searchCat !== 'All') {
+      results = results.filter(f => f.category === searchCat);
+    }
+    
+    return results;
+  }, [searchQuery, searchDiet, searchFasting, searchCat, allFoods, foodsLoading]);
 
 
   const recentFoods = useMemo(() => getRecentFoods(foodLog), [foodLog]);
@@ -284,6 +292,8 @@ export default function DietPage() {
     setShowSearch(true);
     setSelectedFood(null);
     setShowCustom(false);
+    setSearchQuery('');       // Bug 1 fix — always start fresh
+    setSearchCat('All');      // Gap 3 fix — correct default
   };
 
   const handleSelectFood = (food) => {
@@ -341,6 +351,8 @@ export default function DietPage() {
   const editEntry = (entry) => {
     if (!entry.food) return;
     setSearchMealSlot(entry.slot);
+    setSearchQuery('');       // Gap 9 fix — clear stale query behind detail pane
+    setSearchCat('All');      // Gap 9 fix
     handleSelectFood(entry.food);
     setQty(entry.qty || 1);
     setCustomGrams(entry.customGrams || '');
@@ -976,7 +988,7 @@ export default function DietPage() {
                     <div style={{ marginBottom: 32 }}>
                       <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>⭐️ Favorites</p>
                       {favoriteIds.map(fId => {
-                         const food = indianFoods.find(f => f.id === fId);
+                         const food = allFoods.find(f => f.id === fId);
                          if (!food) return null;
                          return (
                           <div key={food.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(food); }} className="tag-d group hover:bg-surface-container-highest transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 8px 8px 0', padding: '10px 16px', borderRadius: 24, cursor: 'pointer', background: 'var(--surface-container-low)' }}>
@@ -990,20 +1002,20 @@ export default function DietPage() {
 
                   <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Results</p>
 
-                  {isSearching && (
+                  {foodsLoading && (
                     <div style={{ padding: 40, textAlign: 'center', color: 'var(--on-surface-variant)' }}>
                       <ActivityIcon size={32} color="var(--primary)" style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-                      <p style={{ fontSize: 14, fontWeight: 600 }}>Searching database...</p>
+                      <p style={{ fontSize: 14, fontWeight: 600 }}>Loading foods...</p>
                     </div>
                   )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {!isSearching && searchResults.map(f => (
+                    {searchResults.map(f => (
                       <div key={f.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(f); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'var(--surface-container-low)', borderRadius: 16, cursor: 'pointer' }} className="group hover:bg-surface-container-high transition-colors">
                         <div style={{ flex: 1 }}>
                           <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && ' 🕉️'}</p>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings[0].label}</span>
+                            <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings?.[0]?.label || 'Serving'}</span>
                             {f.hasBeverageModifiers && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--tertiary-container)', background: 'rgba(231, 108, 55, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Build Drink</span>}
                             {f.category === 'dish' && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)', background: 'rgba(255, 181, 155, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Dish</span>}
                           </div>
@@ -1018,14 +1030,14 @@ export default function DietPage() {
                     ))}
                   </div>
                   
-                  {(!isSearching && searchResults.length === 0) && (
+                  {searchResults.length === 0 && searchQuery.trim().length >= 2 && (
                     <div style={{ textAlign: 'center', padding: 60, color: 'var(--on-surface-variant)' }}>
                       <Search size={48} color="var(--surface-container-highest)" style={{ margin: '0 auto 16px' }} />
                       <p style={{ fontSize: 16, fontWeight: 500 }}>No results found.</p>
                       <button className="btn-d" style={{ marginTop: 24, fontSize: 14, padding: '10px 20px' }} onClick={() => setShowCustom(true)}>+ Add Custom Food</button>
                     </div>
                   )}
-                  {(!isSearching && searchResults.length > 0) && (
+                  {searchResults.length > 0 && (
                     <div style={{ textAlign: 'center', marginTop: 32 }}>
                       <button className="btn-g" onClick={() => setShowCustom(true)}>Can't find it? Add Custom Info</button>
                     </div>

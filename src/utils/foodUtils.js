@@ -134,6 +134,8 @@ export const searchLocalFoods = (foodsList, query, filters = {}) => {
   // 3. Query string fuzzy match
   if (query) {
     const q = query.toLowerCase();
+    // Short-circuit: require at least 2 chars for meaningful fuzzy matching
+    if (q.length < 2) return results;
     results = results.filter(f => {
       if (f.name.toLowerCase().includes(q)) return true;
       if (f.brand && f.brand.toLowerCase().includes(q)) return true;
@@ -192,6 +194,74 @@ export const searchRemoteFoods = async (query, filters = {}) => {
   }
 
   // Map database snake_case structure to frontend camelCase expectations
+  return (data || []).map(f => ({
+    id: f.id,
+    name: f.name,
+    hindiName: f.hindi_name,
+    nameAlt: f.name_alt,
+    searchTerms: f.search_terms,
+    category: f.category_id,
+    subcategory: f.subcategory,
+    itemType: f.item_type,
+    state: f.state,
+    region: f.region,
+    defaultServingGrams: parseFloat(f.default_serving_grams),
+    per100g: {
+      calories: parseFloat(f.cal_per_100g),
+      protein: parseFloat(f.protein_per_100g),
+      carbs: parseFloat(f.carbs_per_100g),
+      fat: parseFloat(f.fat_per_100g),
+      fiber: parseFloat(f.fiber_per_100g),
+      sodium: f.sodium_per_100g ? parseFloat(f.sodium_per_100g) : null,
+      vitaminB12: f.vitamin_b12_per_100g ? parseFloat(f.vitamin_b12_per_100g) : null,
+      vitaminD: f.vitamin_d_per_100g ? parseFloat(f.vitamin_d_per_100g) : null,
+      iron: f.iron_per_100g ? parseFloat(f.iron_per_100g) : null,
+      calcium: f.calcium_per_100g ? parseFloat(f.calcium_per_100g) : null
+    },
+    servings: f.servings || [],
+    dietTypes: f.diet_types,
+    tags: f.tags,
+    fastingTypes: f.fasting_types || [],
+    supportedConsistencyTypes: f.supported_consistency_types || [],
+    consistencyMultipliers: f.consistency_multipliers || {},
+    isProcessed: f.is_processed,
+    isFastingFood: f.is_fasting_food,
+    isGlutenFree: f.is_gluten_free,
+    isRecipe: f.is_recipe,
+    containsRootVeg: f.contains_root_veg,
+    hasBeverageModifiers: f.has_beverage_modifiers,
+    gi: f.gi,
+    cookingOilNote: f.cooking_oil_note,
+    estimatedOilG: parseFloat(f.estimated_oil_g),
+    source: f.source,
+    confidence: f.confidence,
+    notes: f.notes,
+    certifications: f.certifications
+  }));
+};
+
+
+/**
+ * Fetches ALL foods from Supabase for local caching (hybrid approach).
+ * No filters, no limit — returns the full mapped dataset.
+ * @returns {Promise<Array>} Array of food objects in camelCase format
+ */
+export const fetchAllFoods = async () => {
+  const { data, error } = await supabase.from('foods').select(`
+    *,
+    servings:food_servings(
+      id:serving_id,
+      label,
+      grams
+    )
+  `);
+
+  if (error) {
+    console.error('Error fetching all foods from Supabase:', error);
+    throw error;
+  }
+
+  // Map database snake_case to frontend camelCase (same mapping as searchRemoteFoods)
   return (data || []).map(f => ({
     id: f.id,
     name: f.name,

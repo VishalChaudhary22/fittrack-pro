@@ -25,7 +25,7 @@ fittrack-pro/
 ├── State.md                     # This file
 ├── TODO-redesign-phase-1.md     # Kinetic Elite redesign — Phases 0–8 (completed)
 ├── TODO-redesign-phase-2.md     # Workout History Page overhaul (completed)
-├── TODO-redesign-phase-3.md     # Iron League Page overhaul (completed + post-ship fixes)
+├── TODO-redesign-phase-3.md     # Olympus League Page overhaul (completed + post-ship fixes)
 ├── TODO-indian-food-db.md       # Indian food DB — schema, categories, 350 food target (Phase 1–4 done)
 ├── TODO-supplement-db.md        # Whey protein & mass gainer brand database (Phase 5 — data entry pending)
 ├── TODO-dietpage-overhaul.md    # DietPage merge with food logging (Phases A–H done)
@@ -83,7 +83,7 @@ fittrack-pro/
     │   │   ├── SplitsPage.jsx
     │   │   ├── DietPage.jsx            # Full overhaul — food logging merged in
     │   │   ├── ProgressPage.jsx        # Display: "Workout Analytics"
-    │   │   ├── MuscleMapPage.jsx       # Iron League — Phase 3 overhaul
+    │   │   ├── MuscleMapPage.jsx       # Olympus League — Phase 3 overhaul
     │   │   ├── ProfilePage.jsx
     │   │   ├── WeightLogPage.jsx
     │   │   ├── MeasurementsPage.jsx
@@ -199,7 +199,7 @@ Additional shared components in separate files:
 
 | Component | File | What it does |
 |-----------|------|-------------|
-| `AvatarInitials` | `AvatarInitials.jsx` | Circular initials avatar with rank-colored ring border. Used in Iron League leaderboard and player modal. |
+| `AvatarInitials` | `AvatarInitials.jsx` | Circular initials avatar with rank-colored ring border. Used in Olympus League leaderboard and player modal. |
 | `PlayerDetailModal` | `PlayerDetailModal.jsx` | Bottom-sheet slide-up modal showing player's BodyMapSVG, overall rank, progress bar to next tier, and per-muscle XP breakdown. |
 | `ReadinessCheckIn` | `ReadinessCheckIn.jsx` | Bottom-sheet with 4-step questionnaire (sleep, energy, soreness, stress). Auto-computes a 0–100 readiness score blending subjective answers (60%) with objective training load (40%). Saves to `readinessLog` in AppContext. Score reveal animation on completion, auto-closes after 2.2s. |
 
@@ -217,7 +217,7 @@ Rebuilt around the Kinetic Elite aesthetic. Key sections:
 - **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
 - **Weight Trend chart**: `AreaChart` (Recharts) with `GlassTooltip` and an optional goal reference line.
 - **Live Suggestion banner**: Grayscale gym image with gradient overlay, `PulseIndicator`, active split name and schedule chips, "Start Workout" CTA.
-- **Iron League widget**: `MiniBodyMap` + rank badge + weekly muscle group count. Links to `/muscle-map`.
+- **Olympus League widget**: `MiniBodyMap` + rank badge + weekly muscle group count. Links to `/muscle-map`.
 
 ### `/workout` — Workout Tracker
 Three states: **day picker → active session → post-session summary**.
@@ -323,7 +323,7 @@ Display title: **"Workout Analytics"** (file still `ProgressPage.jsx`). Recharts
 
 Each `cd` entry shape: `{ date, rawDate, dayName, maxWeight, volume, avgReps, sets, est1rm }`.
 
-### `/muscle-map` — Iron League
+### `/muscle-map` — Olympus League
 **Phase 3 overhaul complete.** `MuscleMapPage.jsx` is now a 3-tab leaderboard + stats page.
 
 #### Architecture
@@ -481,7 +481,7 @@ Pure training-data-based score (0–100). Considers 7-day rolling volume average
 40% objective (training history) + 60% subjective (check-in). Stored in `readinessLog` via AppContext with shape `{ userId, date, sleepHours, energyLevel, sorenessLevel, stressLevel, score, objectiveScore, checkInComplete }`.
 
 ### Muscle Recovery Statuses (`getMuscleRecoveryStatuses`)
-Returns per-muscle recovery state (optimal / fatigued / critical) based on hours since last training. Uses the same 3-priority fallback chain as Iron League XP (split lookup → log exercise fields → display name parsing).
+Returns per-muscle recovery state (optimal / fatigued / critical) based on hours since last training. Uses the same 3-priority fallback chain as Olympus League XP (split lookup → log exercise fields → display name parsing).
 
 ### Tiers
 | Score | Label | Color | Guidance |
@@ -509,7 +509,7 @@ All persistent state in `AppContext.jsx`, backed by `useLocalStorage`:
 | `fittrack_caloriesLog` | array | Legacy calorie-only log (deprecated, kept for backward compat) |
 | `fittrack_foodLog` | array | Food log entries with full macro snapshots |
 | `fittrack_favoriteFoods` | array | Starred food IDs |
-| `fittrack_monthlyRankHistory` | array | Iron League monthly XP history |
+| `fittrack_monthlyRankHistory` | array | Olympus League monthly XP history |
 
 Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak` (workout), `getFoodStreak` (food logging), `toggleFavoriteFood`.
 
@@ -517,9 +517,9 @@ Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStre
 
 ## 🐛 Bug Fixes Applied
 
-### Iron League XP — 0 XP After Workout (Fixed 2026-04-01)
+### Olympus League XP — 0 XP After Workout (Fixed 2026-04-01)
 
-**Symptom:** Completing a workout showed `+0 XP GAINED` on the post-session screen; Iron League "My Stats" tab showed "Untrained" with 0 Total XP.
+**Symptom:** Completing a workout showed `+0 XP GAINED` on the post-session screen; Olympus League "My Stats" tab showed "Untrained" with 0 Total XP.
 
 **Root causes (two):**
 
@@ -536,7 +536,7 @@ Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStre
   2. **Priority 2** (new): Direct read from `ex.primaryMuscle` / `ex.secondaryMuscles` on the log exercise itself
   3. **Priority 3** (existing): Display name parsing via `exMuscleMap[ex.name]` / `ex.muscle` → `muscleIdFromDisplayName()`
 
-> **Note on monthly reset:** The Iron League is designed to reset each calendar month. Workouts logged in a previous month do not carry over — only new sessions logged in the current month earn XP. This is intentional behaviour.
+> **Note on monthly reset:** The Olympus League is designed to reset each calendar month. Workouts logged in a previous month do not carry over — only new sessions logged in the current month earn XP. This is intentional behaviour.
 
 ### DietPage — Food Search Modal Bugs (Fixed across Phases E–H)
 
@@ -561,9 +561,9 @@ Several rounds of mobile UX fixes on the food search modal:
 | `back-calves` / `back-forearms` | Not in `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` |
 | `ProgressOrb` usage | Only on Dashboard goal card — not yet on other pages |
 | `cascade-item` stagger | Defined in CSS but not applied broadly across all card lists |
-| Friends tab (Iron League) | EmptyState stub — no real social graph backend |
+| Friends tab (Olympus League) | EmptyState stub — no real social graph backend |
 | Time-range filter pills (Analytics) | `[1M] [3M] [6M]` pills are visual only — state wiring deferred |
-| Iron League Phase 3 post-ship fixes | Fixes 1–8 documented in `TODO-redesign-phase-3.md §Phase 3.1`; all marked `[x]` (implemented) |
+| Olympus League Phase 3 post-ship fixes | Fixes 1–8 documented in `TODO-redesign-phase-3.md §Phase 3.1`; all marked `[x]` (implemented) |
 | Leaderboard light-theme rows | Inline `rgba` glass values on leaderboard rows may look off in light mode; prefer `var(--glass-bg)` |
 | B12/D3/Iron alerts | Documented in Phase 4 of food DB plan — not yet implemented in DietPage |
 | GI-aware carb guidance | Documented in Phase 4 — not yet implemented |

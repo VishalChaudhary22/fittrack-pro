@@ -12,6 +12,7 @@
 | React Router DOM | 7.13.1 |
 | Recharts | 3.8.0 |
 | Lucide React | 0.577.0 |
+| Supabase JS | 2.101.1 |
 | Vite | 8.0.0 |
 | ESLint | 9.39.4 |
 
@@ -25,17 +26,43 @@ fittrack-pro/
 ├── TODO-redesign-phase-1.md     # Kinetic Elite redesign — Phases 0–8 (completed)
 ├── TODO-redesign-phase-2.md     # Workout History Page overhaul (completed)
 ├── TODO-redesign-phase-3.md     # Iron League Page overhaul (completed + post-ship fixes)
-├── TODO-indian-food-db.md
+├── TODO-indian-food-db.md       # Indian food DB — schema, categories, 350 food target (Phase 1–4 done)
+├── TODO-supplement-db.md        # Whey protein & mass gainer brand database (Phase 5 — data entry pending)
+├── TODO-dietpage-overhaul.md    # DietPage merge with food logging (Phases A–H done)
+├── TODO-ux-audit.md             # UX audit across all pages
+├── UX-AUDIT-INDEX.md            # Index of per-page UX audit TODOs
+├── TODO-UX-01 through 13.md     # Per-page UX audit files
 ├── TODO-male-anatomy.md
 ├── TODO-female-anatomy.md
+├── TODO-body-wireframe-readiness.md
+├── TODO-readiness-plan.md
 ├── TODO.md
 ├── vercel.json                  # SPA rewrite rules for Vercel
 ├── index.html
 ├── package.json
 ├── vite.config.js
+├── .env                         # VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 ├── .stitch/
 │   ├── DESIGN.md                # Stitch-native design system source of truth
 │   └── designs/                 # Downloaded Stitch HTML + screenshot references
+├── supabase/
+│   ├── config.toml              # Supabase project config
+│   └── migrations/
+│       ├── 20260402091350_init_indian_food_db.sql       # Schema: foods, food_servings, enums
+│       ├── 20260402093722_seed_indian_food_batch_1.sql  # Roti, Breads, Grains, Rice, Millets
+│       ├── 20260402153716_seed_indian_food_batch_4.sql  # Breakfast, Tiffin, Snacks, Street Food
+│       ├── 20260402185051_seed_indian_food_batch_5.sql  # Sweets, Fruits, Drinks + Beverage Builder bases
+│       ├── 20260402185908_seed_indian_food_batch_6.sql  # Oils, Condiments, Supplements, Sprouts/Soy
+│       ├── 20260406213844_seed_indian_food_batch_7.sql  # Packaged Food, Fasting/Vrat Foods
+│       └── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
+├── scripts/                     # Data population & validation scripts
+│   ├── generate_seed.js         # Generates SQL seed from JS food objects
+│   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
+│   ├── add_batch4–7.cjs         # Batch insert scripts for indianFoods.js
+│   ├── generate_supplements.cjs # Generates supplement entries
+│   ├── insert_supplements.cjs   # Inserts supplements into indianFoods.js
+│   ├── insert_whey1.cjs         # Additional whey protein brands
+│   └── run_uats.js              # User acceptance test runner
 ├── public/
 │   └── muscles/
 │       ├── male/                # 17 PNGs (base + highlight per group)
@@ -54,31 +81,46 @@ fittrack-pro/
     │   │   ├── DashboardPage.jsx
     │   │   ├── WorkoutPage.jsx
     │   │   ├── SplitsPage.jsx
-    │   │   ├── DietPage.jsx
-    │   │   ├── ProgressPage.jsx         # Renamed display: "Workout Analytics"
-    │   │   ├── MuscleMapPage.jsx        # Iron League — Phase 3 overhaul
+    │   │   ├── DietPage.jsx            # Full overhaul — food logging merged in
+    │   │   ├── ProgressPage.jsx        # Display: "Workout Analytics"
+    │   │   ├── MuscleMapPage.jsx       # Iron League — Phase 3 overhaul
     │   │   ├── ProfilePage.jsx
     │   │   ├── WeightLogPage.jsx
     │   │   ├── MeasurementsPage.jsx
-    │   │   ├── WorkoutHistoryPage.jsx   # Phase 2 editorial redesign
+    │   │   ├── WorkoutHistoryPage.jsx  # Phase 2 editorial redesign
     │   │   └── ContactPage.jsx
     │   └── shared/
-    │       ├── SharedComponents.jsx     # All shared UI components
-    │       ├── BodyMapSVG.jsx           # Canvas-based anatomical renderer
-    │       ├── AvatarInitials.jsx       # NEW — Initials avatar circle (Phase 3)
-    │       └── PlayerDetailModal.jsx    # NEW — Bottom-sheet muscle modal (Phase 3)
+    │       ├── SharedComponents.jsx    # All shared UI components
+    │       ├── BodyMapSVG.jsx          # Canvas-based anatomical renderer
+    │       ├── AvatarInitials.jsx      # Initials avatar circle (Phase 3)
+    │       ├── PlayerDetailModal.jsx   # Bottom-sheet muscle modal (Phase 3)
+    │       └── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
     ├── context/
-    │   └── AppContext.jsx        # Global state (user, logs, splits, toasts)
+    │   └── AppContext.jsx        # Global state (user, logs, splits, foodLog, favorites, toasts)
     ├── data/
     │   ├── constants.js          # NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE
     │   ├── splits.js             # Default split programs
     │   ├── muscleData.js         # XP calc, rank system, muscle groups
-    │   ├── leaderboardData.js    # NEW — Static mock leaderboard (7 users + muscleXP)
+    │   ├── leaderboardData.js    # Static mock leaderboard (7 users + muscleXP)
     │   ├── diets.js              # Macro targets / diet presets
     │   ├── rankBenchmarks.js
-    │   └── sample.js
+    │   ├── sample.js
+    │   └── foods/
+    │       ├── indianFoods.js    # ~207 food objects (v2.3 schema, 314KB)
+    │       ├── foodCategories.js # 20 category definitions
+    │       └── servingTypes.js   # 18 standardized serving types
     ├── hooks/
+    │   ├── useLocalStorage.js
+    │   ├── useTheme.js
+    │   └── useToast.js
+    ├── lib/
+    │   └── supabaseClient.js     # Supabase client init (URL + anon key from .env)
     └── utils/
+        ├── calculations.js       # BMR, TDEE, deficit calculations
+        ├── foodUtils.js          # Food search (local + remote), macro calc, beverage builder
+        ├── helpers.js            # gId, tod, formatting
+        ├── readinessUtils.js     # Readiness scoring, muscle recovery, spotlight muscles
+        └── storage.js            # localStorage key constants
 ```
 
 ---
@@ -159,6 +201,7 @@ Additional shared components in separate files:
 |-----------|------|-------------|
 | `AvatarInitials` | `AvatarInitials.jsx` | Circular initials avatar with rank-colored ring border. Used in Iron League leaderboard and player modal. |
 | `PlayerDetailModal` | `PlayerDetailModal.jsx` | Bottom-sheet slide-up modal showing player's BodyMapSVG, overall rank, progress bar to next tier, and per-muscle XP breakdown. |
+| `ReadinessCheckIn` | `ReadinessCheckIn.jsx` | Bottom-sheet with 4-step questionnaire (sleep, energy, soreness, stress). Auto-computes a 0–100 readiness score blending subjective answers (60%) with objective training load (40%). Saves to `readinessLog` in AppContext. Score reveal animation on completion, auto-closes after 2.2s. |
 
 ---
 
@@ -167,6 +210,7 @@ Additional shared components in separate files:
 ### `/` — Dashboard
 Rebuilt around the Kinetic Elite aesthetic. Key sections:
 - **Welcome header**: editorial-style `"WELCOME BACK, [NAME]"` in Space Grotesk with ember text-gradient on first name. Theme toggle pill lives here.
+- **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet if no check-in exists for today. Readiness score display with tier colouring (Optimal / Good / Moderate / Low).
 - **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. BMI card has a concentric CSS ring with ember glow + per-range insight text.
 - **Sessions / Streak**: 2-col glass card row with current-week session count, all-time total, and current/longest streak.
 - **Placeholder activity cards**: Steps, Calories Burned, Water Intake — show `—` with a `PulseIndicator + "Coming Soon"` label. No real data sources yet.
@@ -197,8 +241,74 @@ Three states: **day picker → active session → post-session summary**.
 ### `/splits` — Split Management
 View and manage training split programs. Accessible from the primary mobile bottom nav.
 
-### `/diet` — Diet & Nutrition
-Macro tracking and meal logging interface.
+### `/diet` — Diet & Nutrition (Overhauled)
+
+Fully rebuilt. Merges the original diet guide/meal plan content with the Indian Food Database food logging system. ~69KB component file. Architecture:
+
+```
+┌─────────────────────────────────┐
+│  PageHeader (Diet & Nutrition)  │
+│  Compact Stats Strip (5 chips)  │  ← Weight, Height, BMI, TDEE, Activity
+│  GOAL Card (macro rings:        │
+│    consumed/target — always on) │
+│  [Daily Tracker] [Meal Guide]   │  ← Tab switcher
+├─────────────────────────────────┤
+│  TAB: Daily Tracker (default)   │
+│    Date navigation (< Today >)  │
+│    8 Meal Slot Cards            │
+│    Protein Nudge Alert          │
+│    Food Log Streak badge        │
+│  FAB: + Log Food (bottom-right) │
+├─────────────────────────────────┤
+│  TAB: Meal Guide                │
+│    Blueprint Header Card        │
+│    Whey Card + Diet Selector    │
+│    Meal Plan Cards grid         │
+│    Protein Sources Footer       │
+│    Complete Protein Tip         │
+└─────────────────────────────────┘
+```
+
+**Stats strip**: 5 compact pill chips showing Weight, Height, BMI, TDEE, Activity. Label in `--on-surface-variant` @ 10px, value in `--primary` @ 13px bold. Replaced the old full-width material icon cards.
+
+**Goal card**: SVG ring gauges for Kcal, Protein, Carbs, Fat — showing consumed vs target. Rings use `stroke-dasharray`/`stroke-dashoffset`. Summary row above rings shows daily targets (`🔥 2100 kcal · 💪 160g P · 🌾 210g C · 🧈 58g F`). All values are computed dynamically from `calcBMR` / `calcTDEE` / `calcDeficit`, not static presets.
+
+**Tab switcher**: `[🍽 Daily Tracker]` (default) and `[📋 Meal Guide]`. Pill-style with ember gradient on active tab.
+
+**Daily Tracker tab**:
+- Date navigation (prev / "Today" / next), date-aware log filtering
+- 8 meal slot cards: Breakfast, Mid-Morning, Lunch, Evening Snack · Chai, Pre-Workout, Post-Workout, Dinner, Before Bed
+- Each slot shows: icon, name, suggested kcal range, tracked total, circular `+` button
+- Expanding a slot reveals logged food entries (name, P/C/F chips, kcal, delete ✕)
+- "Copy yesterday" ghost button for quick re-logging
+- Protein nudge alert: fires when `consumed protein < target - 20g` and it's past 6pm
+- Food log streak badge showing consecutive logging days
+
+**Meal Guide tab**: Preserved all original diet page logic — BMR/TDEE/deficit calculations, goal detection from weight vs weightGoal, protein multiplier, carb/fat splits, whey scoop recommendation card, diet type selector (Vegan/Vegetarian/Egg/Non-Veg), per-meal macro breakdown cards, protein sources footer.
+
+**Food Search Modal** (bottom sheet, opens from FAB or slot `+` button):
+- Search bar with fuzzy matching on `name`, `nameAlt`, `searchTerms`, `brand`, `productLine`
+- Diet type filter chips: All / Veg / Vegan / Jain / Egg / Non-Veg
+- Fasting/Vrat filter chips: None · Navratri · Ekadashi · Ramzan · Jain Paryushana · Maha Shivratri
+- Category pills (20 categories from `foodCategories.js`)
+- "Recent" section at top (last 10 unique foods logged)
+- Favorites section (starred foods, quick re-add)
+- Results list with badges (Root Veg, Customisable, Fasting-safe)
+- Custom Food quick-add form (name + calories + macros)
+
+**Food Detail Pane** (inside modal, when a food is selected):
+- Food name + category badge
+- Serving picker chips (horizontal scroll, includes delivery sizes with info chip: "📦 Delivery estimate")
+- Custom grams input field
+- Consistency toggle for dishes with `supportedConsistencyTypes` (Watery / Normal / Thick)
+- Quantity multiplier (0.5, 1, 1.5, 2, 2.5, 3)
+- Beverage Builder for `hasBeverageModifiers: true` foods (chai, coffee, haldi-doodh): milk modifier radio + sweetener chips with live calorie preview
+- "🫙 Add cooking oil?" chip for dish-type foods
+- Macro preview card (Cal / P / C / F) — live-updating
+- "Add to [Meal Slot]" CTA
+- Favorite ★ toggle
+
+**Mobile keyboard fixes (Phase H)**: Modal uses `90dvh` (not `vh`) to account for virtual keyboard. `position: fixed` body lock on modal open with scroll position save/restore. Removed `autoFocus` on search input — replaced with 350ms delayed programmatic focus. Save bar uses `position: sticky` (not `fixed`) to avoid scroll traps. `touch-action: pan-y` and `-webkit-overflow-scrolling: touch` on all scroll containers.
 
 ### `/progress` — Workout Analytics
 Display title: **"Workout Analytics"** (file still `ProgressPage.jsx`). Recharts-powered per-exercise performance charts. Layout:
@@ -288,6 +398,123 @@ Feedback / support form.
 
 ---
 
+## 🍛 Indian Food Database
+
+### Data Layer
+
+**Dual storage**: The food database exists in two places simultaneously:
+1. **Local JS** — `src/data/foods/indianFoods.js` (~207 entries, 314KB). Used as the primary runtime data source via `searchLocalFoods()`.
+2. **Supabase (cloud)** — Full Postgres database with `foods` and `food_servings` tables. Populated via 7 migration files. Queryable via `searchRemoteFoods()` in `foodUtils.js`.
+
+The local JS file is the current fallback and primary source. The Supabase remote search is wired and functional but the app defaults to local search in DietPage for offline resilience.
+
+**Supabase schema** (`20260402091350_init_indian_food_db.sql`):
+- `foods` table — stores all food entries with snake_case columns mapping to the v2.3 schema
+- `food_servings` table — per-food serving options (FK to `foods.id`)
+- RLS policies — public read access enabled (`20260407033900_add_rls_public_read.sql`)
+- Client at `src/lib/supabaseClient.js`, credentials via `.env` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
+- `@supabase/supabase-js` v2.101.1 in dependencies
+
+### Schema (v2.3)
+
+Each food object follows this shape:
+
+```js
+{
+  id, name, nameAlt, hindiName, searchTerms,
+  category,          // one of 20 category IDs
+  subcategory, itemType, state, region,
+  defaultServingGrams,
+  per100g: { calories, protein, carbs, fat, fiber, sodium, vitaminB12, vitaminD, iron, calcium },
+  servings: [{ id, label, grams }],
+  dietTypes,         // subset of ['vegan','veg','jain','egg','nonveg']
+  tags,
+  isProcessed, isFastingFood, fastingTypes, isGlutenFree, isRecipe,
+  containsRootVeg,   // for Jain filter
+  hasBeverageModifiers,
+  supportedConsistencyTypes, consistencyMultipliers,
+  gi, cookingOilNote, estimatedOilG,
+  source, confidence, notes
+}
+```
+
+### Categories (20)
+
+`grain-cereal`, `roti-bread`, `rice-dish`, `dal-legume`, `sabzi-veg`, `non-veg`, `egg`, `dairy`, `breakfast`, `snack-street`, `sweet-mithai`, `fruit`, `drink`, `oil-fat`, `condiment`, `supplement`, `packaged-food`, `millet`, `sprout-soy`, `fasting-food`
+
+### Serving Library (18 types)
+
+`roti`, `paratha`, `katori`, `bowl`, `plate`, `piece`, `glass`, `cup`, `tbsp`, `scoop`, `slice`, `g100`, `custom`, `handful`, `medium`, `egg`, `takeaway-container`, `restaurant-portion`, `thali`
+
+Delivery-sized servings (`takeaway-container` 480g, `restaurant-portion` 600g, `thali` 900g) trigger an info chip in the food logger.
+
+### Food Utils (`src/utils/foodUtils.js`)
+
+| Function | What it does |
+|----------|-------------|
+| `calcMacros(food, servingId, qty, consistency, customGrams)` | Computes macros for a given food × serving × quantity, with optional consistency multiplier |
+| `calcBeverageMacros(baseFood, milk, sweeteners)` | Handles chai/coffee/haldi-doodh with milk modifier + sweetener add-ons |
+| `searchLocalFoods(foodsList, query, { dietType, fastingType })` | Fuzzy search across name, nameAlt, searchTerms, hindiName, brand, productLine. Auto-filters `containsRootVeg` for Jain users |
+| `searchRemoteFoods(query, { dietType, fastingType })` | Supabase query with snake_case ↔ camelCase mapping. Joins `food_servings`. Limit 50 |
+| `getRecentFoods(foodLog, n)` | Last N unique foods from the user's log |
+| `getFavoriteFoods(foodsList, favoriteIds)` | Returns foods matching the user's starred IDs |
+
+### Supplement Data (Phase 5 — Planned, Not Yet in DB)
+
+`TODO-supplement-db.md` documents 26 whey protein products and 10 mass gainer products with exact per-scoop label data. These cover major Indian brands (MuscleBlaze, AS-IT-IS, The Whole Truth, NAKPRO, AVVATAR, TrueBasics, Nutrabay, Amul, Naturaltein, Protyze, Tata 1mg) and imports (ON, MyProtein, Dymatize, MuscleTech, Bigmuscles, GNC, Kevin Levrone). The current `indianFoods.js` has 7 generic supplement entries; the brand-specific entries have not been added yet.
+
+Schema extensions for supplements include: `brand`, `productLine`, `scoopWeightG`, `proteinType`, `bcaaG`, `eaaG`, `certifications`, `priceINR`, `originCountry`. These fields exist in the plan but are not yet present on the generic entries in the codebase.
+
+---
+
+## 💪 Daily Readiness System
+
+Located in `src/utils/readinessUtils.js` and `src/components/shared/ReadinessCheckIn.jsx`.
+
+### Objective Readiness (`calcObjectiveReadiness`)
+Pure training-data-based score (0–100). Considers 7-day rolling volume average, last 3-day load ratio, rest gap bonus, and overtraining penalty (6+ sessions/week).
+
+### Subjective Check-In (`ReadinessCheckIn`)
+4-step bottom-sheet questionnaire: sleep hours, energy level, soreness, stress. Each answer is mapped to a 0–100 sub-score with weighted blending (sleep 35%, energy 30%, soreness 20%, stress 15%).
+
+### Final Score
+40% objective (training history) + 60% subjective (check-in). Stored in `readinessLog` via AppContext with shape `{ userId, date, sleepHours, energyLevel, sorenessLevel, stressLevel, score, objectiveScore, checkInComplete }`.
+
+### Muscle Recovery Statuses (`getMuscleRecoveryStatuses`)
+Returns per-muscle recovery state (optimal / fatigued / critical) based on hours since last training. Uses the same 3-priority fallback chain as Iron League XP (split lookup → log exercise fields → display name parsing).
+
+### Tiers
+| Score | Label | Color | Guidance |
+|-------|-------|-------|----------|
+| 80+ | Optimal | `#4ADE80` | Go heavy. This is your window. |
+| 60–79 | Good | `#FBBF24` | Solid session. Moderate intensity. |
+| 40–59 | Moderate | `#F85F1B` | Light session or active recovery. |
+| 0–39 | Low | `#F87171` | Rest day. Your body is building. |
+
+---
+
+## 🔄 AppContext State
+
+All persistent state in `AppContext.jsx`, backed by `useLocalStorage`:
+
+| Key | Type | Purpose |
+|-----|------|---------|
+| `fittrack_users` | array | User profiles |
+| `fittrack_uid` | string | Active user ID |
+| `fittrack_splits` | array | Training split programs |
+| `fittrack_healthLogs` | array | Weight log entries |
+| `fittrack_workoutLogs` | array | Workout session logs |
+| `fittrack_readinessLog` | array | Daily readiness check-in entries |
+| `fittrack_measurements` | array | Body measurement entries |
+| `fittrack_caloriesLog` | array | Legacy calorie-only log (deprecated, kept for backward compat) |
+| `fittrack_foodLog` | array | Food log entries with full macro snapshots |
+| `fittrack_favoriteFoods` | array | Starred food IDs |
+| `fittrack_monthlyRankHistory` | array | Iron League monthly XP history |
+
+Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak` (workout), `getFoodStreak` (food logging), `toggleFavoriteFood`.
+
+---
+
 ## 🐛 Bug Fixes Applied
 
 ### Iron League XP — 0 XP After Workout (Fixed 2026-04-01)
@@ -311,12 +538,25 @@ Feedback / support form.
 
 > **Note on monthly reset:** The Iron League is designed to reset each calendar month. Workouts logged in a previous month do not carry over — only new sessions logged in the current month earn XP. This is intentional behaviour.
 
+### DietPage — Food Search Modal Bugs (Fixed across Phases E–H)
+
+Several rounds of mobile UX fixes on the food search modal:
+
+- **`categoryId` → `category`**: Food data uses `category` but DietPage was referencing `f.categoryId` in 3 places — all category filtering returned empty. Fixed to `f.category`.
+- **`s.desc` → `s.label`**: Serving descriptions were blank because the data uses `label`, not `desc`. Fixed in 2 places.
+- **Custom grams not updating macros**: The input handler was setting `servingId` to `''` instead of `'custom'`, so `calcMacros` never entered the custom grams branch. Fixed to `setServingId('custom')`.
+- **Keyboard scroll issues (iOS)**: Modal height changed from `90vh` to `90dvh`. Body scroll lock via `position: fixed` + scroll position save/restore. Replaced `autoFocus` with 350ms delayed focus. Save bar changed from `position: fixed` to `position: sticky`.
+- **Results list scroll locked**: Added `touch-action: pan-y`, `-webkit-overflow-scrolling: touch`, and `overscrollBehavior: contain` on scroll containers.
+- **Fasting filter**: Replaced native `<select>` with styled pill chips matching the diet type filter row.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work
 
 | Item | Notes |
 |------|-------|
+| Supplement brand entries | 26 whey + 10 mass gainer entries documented in `TODO-supplement-db.md` — not yet added to `indianFoods.js` |
+| Food count vs target | ~207 entries in `indianFoods.js` vs 350 target. Missing items mainly in sweets/mithai, fruits, and regional variants |
 | Steps / Calories / Water data | Placeholder cards on Dashboard, no real data source wired |
 | `back-calves` / `back-forearms` | Not in `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` |
 | `ProgressOrb` usage | Only on Dashboard goal card — not yet on other pages |
@@ -325,3 +565,8 @@ Feedback / support form.
 | Time-range filter pills (Analytics) | `[1M] [3M] [6M]` pills are visual only — state wiring deferred |
 | Iron League Phase 3 post-ship fixes | Fixes 1–8 documented in `TODO-redesign-phase-3.md §Phase 3.1`; all marked `[x]` (implemented) |
 | Leaderboard light-theme rows | Inline `rgba` glass values on leaderboard rows may look off in light mode; prefer `var(--glass-bg)` |
+| B12/D3/Iron alerts | Documented in Phase 4 of food DB plan — not yet implemented in DietPage |
+| GI-aware carb guidance | Documented in Phase 4 — not yet implemented |
+| Recipe builder | Cancelled — comprehensive pre-built coverage + custom food entry is enough |
+| Supabase as primary food source | Remote search is wired but local JS is still the default. Switch pending once data parity is confirmed |
+| UX audit items | `TODO-ux-audit.md` + 13 per-page audit files (`TODO-UX-01` through `TODO-UX-13`) pending review |

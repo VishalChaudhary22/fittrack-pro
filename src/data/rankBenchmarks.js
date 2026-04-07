@@ -1,6 +1,6 @@
 // ─── BENCHMARK PROFILES ──────────────────────────────────────────────────────
 // Hardcoded reference benchmarks representing typical Indian gym-goers.
-// Used for percentile-style comparison on the Iron League page.
+// Used for percentile-style comparison on the Olympus League page.
 // Total XP values correspond to monthly XP accumulation patterns.
 export const MONTHLY_BENCHMARKS = [
   {

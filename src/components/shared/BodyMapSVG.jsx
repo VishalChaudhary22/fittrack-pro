@@ -105,25 +105,25 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
         return;
       }
       
-      // Normalize all canvases to a fixed render size (640x1280)
-      // Male assets are 640x640 — draw centered vertically
-      // Female assets are 640x1280 — draw at native size
+      // Normalize all canvases to a fixed render size
+      // Male assets are 640x640 — draw at native height (640)
+      // Female assets are 640x1280 — draw at native height (1280)
       canvas.width = RENDER_W;
-      canvas.height = RENDER_H;
+      canvas.height = isFemale ? RENDER_H : baseImg.height;
       
       const isFemale = baseSrc.includes('/female/');
       
-      // Compute vertical offset to center shorter (male 640x640) images
+      // Compute vertical offset
       const drawImg = (targetCtx, img) => {
-        const yOffset = Math.round((RENDER_H - img.height) / 2);
+        const yOffset = isFemale ? Math.round((RENDER_H - img.height) / 2) : 0;
         targetCtx.drawImage(img, 0, yOffset);
       };
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawImg(ctx, baseImg);
       
-      // Strip baked-in checkered background & text labels from AI-generated female PNGs
-      if (isFemale) stripBackground(ctx, canvas.width, canvas.height);
+      // Strip baked-in checkered/black background & text labels
+      stripBackground(ctx, canvas.width, canvas.height);
       
       // Build a body silhouette mask from the base — only pixels inside
       // this mask will accept highlight colors (prevents leaking)
@@ -146,7 +146,7 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
       const processLayer = (img, isSecondary) => {
         offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
         drawImg(offCtx, img);
-        if (isFemale) stripBackground(offCtx, offCanvas.width, offCanvas.height);
+        stripBackground(offCtx, offCanvas.width, offCanvas.height);
         const layerData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
         
         for (let i = 0; i < layerData.data.length; i += 4) {

@@ -44,7 +44,7 @@ export const MOCK_LEADERBOARD = [
     tier: 'Silver III',
     totalXP: 14205,
     initials: 'IM',
-    color: '#C0C0C0',
+    color: '#7A8FA6',
     muscleXP: { chest: 1600, back: 2400, shoulders: 1700, biceps: 1100, triceps: 900, traps: 800, quads: 1900, hamstrings: 1400, glutes: 1600, calves: 500, abs: 900, forearms: 400 },
   },
   {
@@ -53,7 +53,7 @@ export const MOCK_LEADERBOARD = [
     tier: 'Silver II',
     totalXP: 12880,
     initials: 'VV',
-    color: '#C0C0C0',
+    color: '#7A8FA6',
     muscleXP: { chest: 1400, back: 2100, shoulders: 1500, biceps: 900, triceps: 800, traps: 700, quads: 1700, hamstrings: 1200, glutes: 1400, calves: 450, abs: 780, forearms: 350 },
   },
   {
@@ -62,7 +62,7 @@ export const MOCK_LEADERBOARD = [
     tier: 'Silver I',
     totalXP: 11940,
     initials: 'TT',
-    color: '#C0C0C0',
+    color: '#7A8FA6',
     muscleXP: { chest: 1200, back: 1900, shoulders: 1300, biceps: 800, triceps: 700, traps: 1800, quads: 1500, hamstrings: 1000, glutes: 1200, calves: 400, abs: 700, forearms: 300 },
   },
   {
@@ -71,7 +71,7 @@ export const MOCK_LEADERBOARD = [
     tier: 'Silver I',
     totalXP: 10112,
     initials: 'ZS',
-    color: '#C0C0C0',
+    color: '#7A8FA6',
     muscleXP: { chest: 1000, back: 1600, shoulders: 1100, biceps: 700, triceps: 600, traps: 600, quads: 1900, hamstrings: 1400, glutes: 1600, calves: 500, abs: 600, forearms: 250 },
   },
 ];

@@ -64,13 +64,13 @@ export const muscleIdFromDisplayName = (displayName) => {
 
 // ─── RANK TIERS ──────────────────────────────────────────────────────────────
 const TIER_STYLES = [
-  { name: 'Untrained',  color: '#555',     bg: 'rgba(85,85,85,.15)' },
+  { name: 'Untrained',  color: '#8A8A96',  bg: 'rgba(100,100,110,.18)' },
   { name: 'Bronze I',   color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
   { name: 'Bronze II',  color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
   { name: 'Bronze III', color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
-  { name: 'Silver I',   color: '#C0C0C0',  bg: 'rgba(192,192,192,.15)' },
-  { name: 'Silver II',  color: '#C0C0C0',  bg: 'rgba(192,192,192,.15)' },
-  { name: 'Silver III', color: '#C0C0C0',  bg: 'rgba(192,192,192,.15)' },
+  { name: 'Silver I',   color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
+  { name: 'Silver II',  color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
+  { name: 'Silver III', color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
   { name: 'Gold I',     color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },
   { name: 'Gold II',    color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },
   { name: 'Gold III',   color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },

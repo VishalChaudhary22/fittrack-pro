@@ -187,7 +187,7 @@ export default function ProfilePage() {
           <div style={{ position: 'absolute', bottom: -8, right: -8, background: 'var(--signature-gradient)', borderRadius: 8, padding: '4px 8px', fontSize: 12, fontWeight: 700, color: 'var(--on-primary)', boxShadow: 'var(--shadow-md)' }}>LVL {lvl}</div>
         </div>
         <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', textTransform: 'uppercase', color: 'var(--on-surface)', marginTop: 20 }}>{user.name}</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 6 }}><Shield size={14} /> {overall.name} · Iron League</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 6 }}><Shield size={14} /> {overall.name} · Olympus League</div>
         <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
           <button style={{ background: 'var(--signature-gradient)', color: 'var(--on-primary)', borderRadius: 14, fontWeight: 700, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', padding: '0 24px', height: 48, border: 'none', cursor: 'pointer' }} onClick={() => { document.getElementById('personal-details')?.scrollIntoView({ behavior: 'smooth' }); setEd(true); }}>Edit Profile</button>
           <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 14, width: 48, height: 48, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => addToast('Profile shared!', 'success')}><Share2 size={20} /></button>

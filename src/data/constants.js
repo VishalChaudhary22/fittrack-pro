@@ -16,7 +16,7 @@ export const NAV = [
   { id: 'workout', label: 'Tracker', Icon: Target, path: '/workout' },
   { id: 'diet', label: 'Diet', Icon: Salad, path: '/diet' },
   { id: 'progress', label: 'Analytics', Icon: TrendingUp, path: '/progress' },
-  { id: 'musclemap', label: 'Iron League', Icon: Activity, path: '/muscle-map' },
+  { id: 'musclemap', label: 'Olympus League', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
   { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
 ];
@@ -34,7 +34,7 @@ export const NAV_MOBILE_MORE = [
   { id: 'history', label: 'History', Icon: Clock, path: '/history' },
   { id: 'weightlog', label: 'Weight Log', Icon: Scale, path: '/weight-log' },
   { id: 'measurements', label: 'Measurements', Icon: Ruler, path: '/measurements' },
-  { id: 'musclemap', label: 'Iron League', Icon: Activity, path: '/muscle-map' },
+  { id: 'musclemap', label: 'Olympus League', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
   { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
 ];

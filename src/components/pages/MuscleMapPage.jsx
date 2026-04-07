@@ -193,7 +193,7 @@ export default function MuscleMapPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Iron League" sub="Your monthly strength league — climb the ranks" />
+      <PageHeader title="Olympus League" sub="Your monthly strength league — ascend Olympus" />
 
       {/* ACHIEVEMENT BANNER (Global Only) */}
       {activeTab === 'leaderboard' && (
@@ -210,7 +210,7 @@ export default function MuscleMapPage() {
                 fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--primary)',
                 fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6,
               }}>
-                IRON LEAGUE STANDING
+                OLYMPUS STANDING
               </div>
               <div style={{
                 fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 28,
@@ -263,7 +263,7 @@ export default function MuscleMapPage() {
             const isCenter = slotIndex === 1;  // center slot is rank 1
             // Medal color by actual rank, not by slot index
             const medalColor = player.rank === 1 ? 'var(--primary)'
-              : player.rank === 2 ? '#C0C0C0'
+              : player.rank === 2 ? '#7A8FA6'
               : '#CD7F32';
             const rankLabel = player.rank === 1 ? '1st' : player.rank === 2 ? '2nd' : '3rd';
             const podiumXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
@@ -651,7 +651,7 @@ export default function MuscleMapPage() {
             <div style={{ height: 12, borderRadius: 6, background: 'var(--surface-container-highest)', overflow: 'hidden', position: 'relative' }}>
               <div style={{
                 height: '100%', borderRadius: 6,
-                background: 'linear-gradient(90deg, #CD7F32, #C0C0C0, #FFD700, #40E0D0, #FF69B4)',
+                background: 'linear-gradient(90deg, #CD7F32, #7A8FA6, #FFD700, #40E0D0, #FF69B4)',
                 width: `${benchmarkPct}%`,
                 transition: 'width .8s cubic-bezier(.4,0,.2,1)',
               }} />

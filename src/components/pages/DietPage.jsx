@@ -1022,9 +1022,9 @@ export default function DietPage() {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                           <button onClick={(e) => { e.stopPropagation(); toggleFavoriteFood(f.id); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
-                            <Star size={20} color={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "var(--outline-variant)"} fill={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "transparent"} className="transition-colors" />
+                            <Star size={20} color={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "var(--on-surface-dim)"} fill={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "transparent"} className="transition-colors" />
                           </button>
-                          <ChevronRight size={20} color="var(--outline-variant)" className="group-hover:text-primary transition-colors" />
+                          <ChevronRight size={20} color="var(--on-surface-dim)" className="group-hover:text-primary transition-colors" />
                         </div>
                       </div>
                     ))}

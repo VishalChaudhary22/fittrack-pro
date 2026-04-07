@@ -14,8 +14,6 @@ import WorkoutHistoryPage from './components/pages/WorkoutHistoryPage';
 import WeightLogPage from './components/pages/WeightLogPage';
 import MeasurementsPage from './components/pages/MeasurementsPage';
 import MuscleMapPage from './components/pages/MuscleMapPage';
-import WaterPage from './components/pages/WaterPage';
-import YogaTimerPage from './components/pages/YogaTimerPage';
 import CycleTrackerPage from './components/pages/CycleTrackerPage';
 function AppInner() {
   const { user, toasts, removeToast } = useApp();
@@ -38,8 +36,6 @@ function AppInner() {
           <Route path="/weight-log" element={<WeightLogPage />} />
           <Route path="/measurements" element={<MeasurementsPage />} />
           <Route path="/muscle-map" element={<MuscleMapPage />} />
-          <Route path="/water" element={<WaterPage />} />
-          <Route path="/yoga-timer" element={<YogaTimerPage />} />
           <Route path="/cycle" element={<CycleTrackerPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

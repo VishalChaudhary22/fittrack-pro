@@ -478,7 +478,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Daily Activity (Similar to Today's Nutrition) */}
-        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/water')}>
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/diet')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>DAILY ACTIVITY</div>

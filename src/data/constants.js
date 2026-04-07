@@ -1,4 +1,4 @@
-import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler, Activity, Droplets, Wind } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler, Activity } from 'lucide-react';
 
 // ─── ACTIVITY LEVELS ──────────────────────────────────────────────────────────
 export const ACTIVITY = {
@@ -18,8 +18,7 @@ export const NAV = [
   { id: 'progress', label: 'Analytics', Icon: TrendingUp, path: '/progress' },
   { id: 'musclemap', label: 'Olympus League', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
-  { id: 'water', label: 'Hydration', Icon: Droplets, path: '/water' },
-  { id: 'yogatimer', label: 'Yoga Timer', Icon: Wind, path: '/yoga-timer' },
+  { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
 ];
 
 // ─── EXTRA NAV (hidden in "More" on mobile) ──────────────────────────────────
@@ -38,8 +37,6 @@ export const NAV_MOBILE_MORE = [
   { id: 'musclemap', label: 'Olympus League', Icon: Activity, path: '/muscle-map' },
   { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
   { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
-  { id: 'water', label: 'Hydration', Icon: Droplets, path: '/water' },
-  { id: 'yogatimer', label: 'Yoga Timer', Icon: Wind, path: '/yoga-timer' },
 ];
 
 // ─── BODY MEASUREMENT FIELDS ─────────────────────────────────────────────────

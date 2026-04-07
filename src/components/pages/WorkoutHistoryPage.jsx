@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';

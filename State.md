@@ -81,14 +81,15 @@ fittrack-pro/
     │   │   ├── DashboardPage.jsx
     │   │   ├── WorkoutPage.jsx
     │   │   ├── SplitsPage.jsx
-    │   │   ├── DietPage.jsx            # Full overhaul — food logging merged in
-    │   │   ├── ProgressPage.jsx        # Display: "Workout Analytics"
+    │   │   ├── DietPage.jsx            # Full overhaul — food logging merged in, supplements & hydration widgets
+    │   │   ├── ProgressPage.jsx        # Display: "Workout Analytics", persistent 1RM calculator, social sharing
     │   │   ├── MuscleMapPage.jsx       # Olympus League — Phase 3 overhaul
     │   │   ├── ProfilePage.jsx
     │   │   ├── WeightLogPage.jsx
     │   │   ├── MeasurementsPage.jsx
-    │   │   ├── WorkoutHistoryPage.jsx  # Phase 2 editorial redesign
-    │   │   └── ContactPage.jsx
+    │   │   ├── WorkoutHistoryPage.jsx  # Phase 2 editorial redesign, Cardio logging tab
+    │   │   ├── ContactPage.jsx
+    │   │   └── CycleTrackerPage.jsx    # Menstrual cycle tracking & advice
     │   └── shared/
     │       ├── SharedComponents.jsx    # All shared UI components
     │       ├── BodyMapSVG.jsx          # Canvas-based anatomical renderer
@@ -117,6 +118,8 @@ fittrack-pro/
     │   └── supabaseClient.js     # Supabase client init (URL + anon key from .env)
     └── utils/
         ├── calculations.js       # BMR, TDEE, deficit calculations
+        ├── cycleCalculations.js  # Menstrual cycle phase logic
+        ├── festivals.js          # Indian holiday detection
         ├── foodUtils.js          # Food search (local + remote), macro calc, beverage builder
         ├── helpers.js            # gId, tod, formatting
         ├── readinessUtils.js     # Readiness scoring, muscle recovery, spotlight muscles
@@ -209,11 +212,11 @@ Additional shared components in separate files:
 
 ### `/` — Dashboard
 Rebuilt around the Kinetic Elite aesthetic. Key sections:
-- **Welcome header**: editorial-style `"WELCOME BACK, [NAME]"` in Space Grotesk with ember text-gradient on first name. Theme toggle pill lives here.
+- **Welcome header**: editorial-style `"WELCOME BACK, [NAME]"` in Space Grotesk with ember text-gradient on first name. Theme toggle pill lives here. Includes a dynamic cycle-phase badge for female athletes and celebratory banners on Indian holidays / festivals.
 - **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet if no check-in exists for today. Readiness score display with tier colouring (Optimal / Good / Moderate / Low).
 - **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. BMI card has a concentric CSS ring with ember glow + per-range insight text.
 - **Sessions / Streak**: 2-col glass card row with current-week session count, all-time total, and current/longest streak.
-- **Placeholder activity cards**: Steps, Calories Burned, Water Intake — show `—` with a `PulseIndicator + "Coming Soon"` label. No real data sources yet.
+- **Placeholder activity cards**: Steps, Calories Burned — show `—` with a `PulseIndicator + "Coming Soon"` label. Water intake is wired to the global hydration tracker.
 - **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
 - **Weight Trend chart**: `AreaChart` (Recharts) with `GlassTooltip` and an optional goal reference line.
 - **Live Suggestion banner**: Grayscale gym image with gradient overlay, `PulseIndicator`, active split name and schedule chips, "Start Workout" CTA.
@@ -238,6 +241,8 @@ Three states: **day picker → active session → post-session summary**.
 
 **Post-session summary**: XP / Sets / Volume row + `BodyMapSVG` mini-map of muscles trained. "Log Another" + "View Map →" actions.
 
+**Yoga Sessions**: Selecting a `type: 'yoga'` day renders the inline `YogaSessionView` — a full-screen guided mobility player with `playBeep` audio sequencing and Box Breathing integration. These do not create tracked workout logs.
+
 ### `/splits` — Split Management
 View and manage training split programs. Accessible from the primary mobile bottom nav.
 
@@ -255,6 +260,8 @@ Fully rebuilt. Merges the original diet guide/meal plan content with the Indian 
 ├─────────────────────────────────┤
 │  TAB: Daily Tracker (default)   │
 │    Date navigation (< Today >)  │
+│    Hydration Tracker Widget     │  ← Dynamic glass-fill progress bar
+│    Supplements Daily Stack      │  ← Click-to-complete pills
 │    8 Meal Slot Cards            │
 │    Protein Nudge Alert          │
 │    Food Log Streak badge        │
@@ -313,12 +320,12 @@ Fully rebuilt. Merges the original diet guide/meal plan content with the Indian 
 ### `/progress` — Workout Analytics
 Display title: **"Workout Analytics"** (file still `ProgressPage.jsx`). Recharts-powered per-exercise performance charts. Layout:
 
-1. **Filter controls** — Split / Day / Exercise cascading dropdowns (3-col grid, Kinetic Elite styled)
+1. **Filter controls** — Split / Day / Exercise cascading dropdowns (3-col grid, Kinetic Elite styled). Include a persistent **1RM Calculator** on top mapping history vs custom parameters.
 2. **Weekly context strip** — inline stats: sessions this week, volume, % change vs prior week, monthly sessions, avg/week
 3. **Hero exercise title** — asymmetric editorial two-line UPPERCASE display (`clamp(2.5rem, 8vw, 4.5rem)`) when exercise is selected
 4. **Bento stat grid** — 3 cards: Est. 1RM (accent, left-border exception), Personal Record, Total Sessions — with `cascade-item` stagger
 5. **Volume Trend chart** — full-width hero `AreaChart` with gradient fill, glassmorphic tooltip, time-range pills `[1M] [3M] [6M]` (visual only)
-6. **5-col layout**: Left (Personal Best glow card + Focus Groups card) · Right (Recent Sessions log, last 5)
+6. **5-col layout**: Left (Personal Best glow card with **html2canvas social sharing** + Focus Groups card) · Right (Recent Sessions log, last 5)
 7. **Secondary charts** — 2-chart grid: Est. 1RM trend (Area) + Avg Reps/Set (Line), 160px height, glassmorphic tooltips
 
 Each `cd` entry shape: `{ date, rawDate, dayName, maxWeight, volume, avgReps, sets, est1rm }`.
@@ -370,11 +377,10 @@ All existing muscle map content in a single scroll:
 `BodyMapSVG` renders via HTML5 Canvas pixel compositing — coral-red highlights over teal-blue base, with alpha-blended secondary muscle dimming.
 
 ### `/history` — Workout History
-**Phase 2 editorial redesign complete.** `WorkoutHistoryPage.jsx` now renders:
-- **Bento stats header**: 3-col grid (Monthly Volume in tons / Time Active in hrs / Sessions this month) with ghost icon watermarks and `display-lg` primary values
-- **Filters**: Search input with inline icon + Split dropdown (Kinetic Elite styled)
-- **Session cards**: hover-accent cards with left ember border when expanded; shows date (label-md primary), day name (Space Grotesk uppercase), Volume / Duration / Exercises / Sets stats row, muscle group tags (derived from split exercise lookup). Expanded section shows per-exercise sets (`Xr × Ykg` chips) and notes.
-- Duration sourced from `durationMinutes` field on log (logs without it show `—`)
+**Phase 2 editorial redesign complete.** `WorkoutHistoryPage.jsx` now renders a top-level tab switcher to toggle between **Weights** and **Cardio** logging. Let users manually enter discrete cardio sessions (e.g. Activity Type, Minutes, Distance, Calories Burned). Gives a rich view into session-specific exercises with ghost watermarks and dynamic volume stats.
+
+### `/cycle` — Cycle Syncing (Period Tracker)
+Female-focused view computing whether the athlete is in menstruation, follicular, ovulation, or luteal phase. Provides contextualized training cues (e.g., dial back heavy lifts in luteal). Syncs to contextual Dashboard profile badge.
 
 ### `/profile` — Profile
 User settings, unit preferences (kg/lbs), theme toggle, personal info.
@@ -510,6 +516,11 @@ All persistent state in `AppContext.jsx`, backed by `useLocalStorage`:
 | `fittrack_foodLog` | array | Food log entries with full macro snapshots |
 | `fittrack_favoriteFoods` | array | Starred food IDs |
 | `fittrack_monthlyRankHistory` | array | Olympus League monthly XP history |
+| `fp_water_log` | array | Hydration tracking logs |
+| `fittrack_cardioLog` | array | Session history for cardio logs |
+| `fittrack_supplementLog` | array | User-logged supplements intake history |
+| `fittrack_supplementConfig` | array | Custom doses and supplements (Whey, Creatine, etc) |
+| `fp_cycle_config` | object | Start date & length for cycle tracking |
 
 Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak` (workout), `getFoodStreak` (food logging), `toggleFavoriteFood`.
 
@@ -557,7 +568,7 @@ Several rounds of mobile UX fixes on the food search modal:
 |------|-------|
 | Supplement brand entries | 26 whey + 10 mass gainer entries documented in `TODO-supplement-db.md` — not yet added to `indianFoods.js` |
 | Food count vs target | ~207 entries in `indianFoods.js` vs 350 target. Missing items mainly in sweets/mithai, fruits, and regional variants |
-| Steps / Calories / Water data | Placeholder cards on Dashboard, no real data source wired |
+| Steps / Calories data | Placeholder cards on Dashboard, no real data source wired |
 | `back-calves` / `back-forearms` | Not in `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` |
 | `ProgressOrb` usage | Only on Dashboard goal card — not yet on other pages |
 | `cascade-item` stagger | Defined in CSS but not applied broadly across all card lists |

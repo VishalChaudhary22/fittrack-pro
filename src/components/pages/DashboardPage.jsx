@@ -108,7 +108,7 @@ export default function DashboardPage() {
   const objectiveScore = objectiveScoreObj.score;
 
 
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayStr = useMemo(() => tod(), []);
   const todayReadiness = useMemo(() => readinessLog.find(r => r.userId === user?.id && r.date === todayStr), [readinessLog, user?.id, todayStr]);
 
   const activeScore = todayReadiness?.checkInComplete ? todayReadiness.score : objectiveScore;
@@ -457,7 +457,7 @@ export default function DashboardPage() {
               {[
                 { label: 'Protein', val: todayTotals.protein, target: protTarget, color: '#3b82f6' },
                 { label: 'Carbs', val: todayTotals.carbs, target: carbTarget, color: '#10b981' },
-                { label: 'Fats', val: todayTotals.fat, target: fatTarget, color: '#f59e0b' }
+                { label: 'Fats', val: todayTotals.fats, target: fatTarget, color: '#f59e0b' }
               ].map(m => {
                 const pct = clamp(Math.round((m.val / m.target) * 100) || 0, 0, 100);
                 const over = m.val > m.target;

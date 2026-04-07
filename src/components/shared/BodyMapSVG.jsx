@@ -105,13 +105,13 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
         return;
       }
       
+      const isFemale = baseSrc.includes('/female/');
+      
       // Normalize all canvases to a fixed render size
       // Male assets are 640x640 — draw at native height (640)
       // Female assets are 640x1280 — draw at native height (1280)
       canvas.width = RENDER_W;
       canvas.height = isFemale ? RENDER_H : baseImg.height;
-      
-      const isFemale = baseSrc.includes('/female/');
       
       // Compute vertical offset
       const drawImg = (targetCtx, img) => {

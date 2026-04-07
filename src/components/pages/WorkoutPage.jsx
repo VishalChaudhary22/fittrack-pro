@@ -154,16 +154,15 @@ export default function WorkoutPage() {
         </div>
 
         <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: 'center', background: 'var(--surface-container-low)', borderRadius: 16, border: 'none' }}>
-          {/* Top Section - XP & Anatomy */}
-          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 24, opacity: xpCount > 0 ? 1 : 0, transition: 'opacity .5s' }}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div><div className="headline-lg" style={{ color: 'var(--primary)', textShadow: '0 0 20px rgba(248,95,27,0.2)' }}>+{Math.round(xpCount).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>XP Gained</div></div>
-              <div style={{ width: 1, background: 'var(--surface-container-highest)' }}></div>
-              <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
-            </div>
-            <div style={{ maxWidth: 240, margin: '0 auto' }}>
-              <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
-            </div>
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginBottom: 20 }}>
+            <div><div className="headline-lg" style={{ color: 'var(--primary)' }}>+{totalXP.toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>XP Gained</div></div>
+            <div style={{ width: 1, background: 'var(--surface-container-highest)' }}></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{totalSets}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Sets</div></div>
+            <div style={{ width: 1, background: 'var(--surface-container-highest)' }}></div>
+            <div><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{Math.round(totalVol).toLocaleString()}</div><div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kg Vol</div></div>
+          </div>
+          <div style={{ maxWidth: 240, margin: '0 auto' }}>
+            <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
           </div>
         </div>
 

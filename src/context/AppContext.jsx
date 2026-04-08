@@ -234,7 +234,7 @@ export function AppProvider({ children }) {
 
     setWorkoutLogs(wl?.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })) || []);
     setHealthLogs(hl?.map(i => ({ ...i, userId: i.user_id })) || []);
-    setFoodLog(fl?.map(i => ({ ...i, userId: i.user_id, mealType: i.meal_type, foodId: i.food_id, foodName: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label })) || []);
+    setFoodLog(fl?.map(i => ({ ...i, userId: i.user_id, mealType: i.meal_type, foodId: i.food_id, foodName: i.food_name, name: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label, slot: i.meal_type, macros: { calories: i.calories || 0, protein: i.protein || 0, carbs: i.carbs || 0, fat: i.fat || 0, fiber: i.fiber || 0, iron: 0, vitaminB12: 0, vitaminD: 0 } })) || []);
     setMeasurements(ml?.map(i => ({ ...i, userId: i.user_id })) || []);
     setReadinessLog(rl?.map(i => ({ ...i, userId: i.user_id, sleepHours: i.sleep_hours, energyLevel: i.energy_level, sorenessLevel: i.soreness_level, stressLevel: i.stress_level, objectiveScore: i.objective_score, checkInComplete: i.check_in_complete })) || []);
     
@@ -324,7 +324,7 @@ export function AppProvider({ children }) {
   })), [profile, healthLogs]);
 
   const setFoodLogSync = useCallback(createSyncSetter('food_logs', foodLog, setFoodLog, (l) => ({
-    id: l.id, date: l.date, meal_type: l.mealType, food_id: l.foodId, food_name: l.foodName, serving_id: l.servingId, serving_label: l.servingLabel, grams: l.grams, quantity: l.quantity, calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat, fiber: l.fiber
+    id: l.id, date: l.date, meal_type: l.mealType || l.slot, food_id: l.foodId, food_name: l.foodName || l.name, serving_id: l.servingId, serving_label: l.servingLabel, grams: l.grams || l.customGrams, quantity: l.quantity || l.qty, calories: l.macros?.calories ?? l.calories, protein: l.macros?.protein ?? l.protein, carbs: l.macros?.carbs ?? l.carbs, fat: l.macros?.fat ?? l.fat, fiber: l.macros?.fiber ?? l.fiber
   })), [profile, foodLog]);
 
   const setMeasurementsSync = useCallback(createSyncSetter('measurements', measurements, setMeasurements, (l) => ({

@@ -432,3 +432,324 @@ good hygiene.
 | ~~2a~~ | ~~Diet/Readiness UTC date~~ | ~~UTC date in `.eq('date', ...)`~~ — **WRONG: no date filter exists in `loadCloudData`** | ~~`AppContext.jsx`~~ | ~~SKIP~~ |
 | 2b | Diet/Readiness async gap **(PRIMARY)** | No localStorage fallback — async Supabase fetch leaves state empty during ~500-1300ms auth+data restore | `AppContext.jsx` | 🟡 ~45 min |
 | 2c | RLS policy gap (edge case) | Missing SELECT policy on `food_logs` or `readiness_logs` | Supabase SQL Editor | 🟢 ~10 min |
+
+---
+---
+
+# Bug Round 3 — 2026-04-09 (Post-Deploy QA)
+
+> **Status:** 🔴 Active  
+> **Reported by:** Vishal, post-deployment testing  
+> **Priority:** All P0 (fundamentally broken UX)
+
+---
+
+## Bug 3.1 — Readiness Check-In Questionnaire Re-Appears After Every Refresh
+
+### Problem
+The readiness check-in modal auto-opens every time the user refreshes the Dashboard,
+even if they already completed it today. It should only appear **once per calendar day**
+(after midnight IST).
+
+### Root Cause
+
+**The `todayReadiness` lookup is correct** — `DashboardPage.jsx:128`:
+```js
+const todayReadiness = useMemo(() =>
+  readinessLog.find(r => r.userId === user?.id && r.date === todayStr),
+  [readinessLog, user?.id, todayStr]
+);
+```
+
+But **on refresh, `readinessLog` starts as `[]`** until `loadCloudData()` finishes.
+During that ~500-1300ms async gap, `todayReadiness` is `undefined`, so the auto-open
+`useEffect` at line 148 fires:
+
+```js
+useEffect(() => {
+  if (!todayReadiness && user?.id) {
+    const timer = setTimeout(() => setShowCheckIn(true), 1400);
+    return () => clearTimeout(timer);
+  }
+}, [todayReadiness, user?.id]);
+```
+
+The 1400ms delay is designed to wait for data, but the Supabase round-trip can
+exceed 1400ms on slow connections, causing the modal to open before `readinessLog`
+is populated.
+
+**Secondary issue:** Even with the localStorage cache (Fix 2 from earlier), the
+cache may be empty for the first session or if the user cleared localStorage.
+
+### Fix
+
+1. **Guard the auto-open with `authLoading`** — Don't auto-open the modal while
+   auth is still initializing. This ensures `loadCloudData()` has had a chance to run.
+2. **Increase the timeout to 2500ms** or better, **tie it to a "data loaded" flag**.
+
+```js
+// DashboardPage.jsx — line 148
+// BEFORE:
+useEffect(() => {
+  if (!todayReadiness && user?.id) {
+    const timer = setTimeout(() => setShowCheckIn(true), 1400);
+    return () => clearTimeout(timer);
+  }
+}, [todayReadiness, user?.id]);
+
+// AFTER:
+const { authLoading } = useApp();  // already destructured in component
+useEffect(() => {
+  if (authLoading) return;  // wait for Supabase data to finish loading
+  if (!todayReadiness && user?.id) {
+    const timer = setTimeout(() => setShowCheckIn(true), 800);
+    return () => clearTimeout(timer);
+  }
+}, [todayReadiness, user?.id, authLoading]);
+```
+
+### Files to Touch
+| File | Change |
+|------|--------|
+| `DashboardPage.jsx` | Add `authLoading` guard to readiness auto-open `useEffect` |
+
+---
+
+## Bug 3.2 — Diet Logs Disappear on Refresh (Macros Schema Mismatch)
+
+### Problem
+Food log entries vanish after refresh. All macro rings show zero. The data IS
+stored in Supabase (confirmed by the `food_logs` table), but it comes back as
+if the macros are missing.
+
+### Root Cause — **CRITICAL: Schema Mismatch**
+
+This is NOT the async gap bug from earlier. This is a **data format mismatch**
+between how DietPage writes food entries and how AppContext reads them back
+from Supabase.
+
+**How DietPage writes food entries** (`DietPage.jsx:313-328`):
+```js
+const item = {
+  id: gId(), userId: user.id, date: dateStr, slot: searchMealSlot,
+  macros: macrosToLog,  // ← NESTED object: { calories, protein, carbs, fat }
+  // ...
+};
+setFoodLog(p => [...updated, item]);
+```
+
+**How the cloud sync mapper sends to Supabase** (`AppContext.jsx:326-328`):
+```js
+setFoodLogSync = createSyncSetter('food_logs', foodLog, setFoodLog, (l) => ({
+  id: l.id, date: l.date, /* ... */
+  calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat, fiber: l.fiber
+  //        ^^^^^^^^^^^ reads FLAT top-level fields like l.calories
+}));
+```
+
+**The mismatch:** DietPage stores macros inside `item.macros.calories`, but the
+cloud sync mapper reads `l.calories` (flat). This means:
+- **`l.calories` is `undefined`** → Supabase gets `null` for all macro columns
+- The sync "succeeds" but writes zeroes/nulls to the DB
+- On refresh, `loadCloudData()` reads back those nulls
+- DietPage reads `item.macros?.calories` → `undefined` → shows zero
+
+**Why it works pre-refresh:** The in-memory `foodLog` array still has the correct
+`item.macros` object from the current session. The cloud sync silently fails to
+persist the actual macro values.
+
+**How DietPage/DashboardPage reads macros** (both files):
+```js
+// Always reads via nested .macros property:
+curr.macros?.calories || 0
+curr.macros?.protein || 0
+```
+
+**How `loadCloudData` reconstructs entries** (`AppContext.jsx:237`):
+```js
+setFoodLog(fl?.map(i => ({
+  ...i, userId: i.user_id, mealType: i.meal_type, foodId: i.food_id,
+  foodName: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label
+  // ❌ MISSING: does NOT reconstruct the `macros` nested object
+})) || []);
+```
+
+The data comes back from Supabase with FLAT columns (`calories`, `protein`, etc.)
+but is never wrapped back into a `macros: { ... }` object. So `item.macros` is
+`undefined` on every entry loaded from the cloud.
+
+### Fix — Two-Part
+
+#### Part A: Fix the cloud sync mapper to read from `macros` object
+
+```js
+// AppContext.jsx — setFoodLogSync mapper
+setFoodLogSync = createSyncSetter('food_logs', foodLog, setFoodLog, (l) => ({
+  id: l.id, date: l.date, meal_type: l.mealType || l.slot,
+  food_id: l.foodId, food_name: l.foodName || l.name,
+  serving_id: l.servingId, serving_label: l.servingLabel,
+  grams: l.grams || l.customGrams, quantity: l.quantity || l.qty,
+  // ✅ Read from nested macros object (how DietPage stores it)
+  calories: l.macros?.calories ?? l.calories,
+  protein: l.macros?.protein ?? l.protein,
+  carbs: l.macros?.carbs ?? l.carbs,
+  fat: l.macros?.fat ?? l.fat,
+  fiber: l.macros?.fiber ?? l.fiber,
+}));
+```
+
+#### Part B: Reconstruct `macros` object when loading from Supabase
+
+```js
+// AppContext.jsx — loadCloudData food_logs mapping
+setFoodLog(fl?.map(i => ({
+  ...i,
+  userId: i.user_id,
+  mealType: i.meal_type,
+  foodId: i.food_id,
+  foodName: i.food_name,
+  name: i.food_name,            // DietPage also reads `.name`
+  servingId: i.serving_id,
+  servingLabel: i.serving_label,
+  slot: i.meal_type,            // DietPage uses `.slot` for grouping
+  // ✅ Reconstruct nested macros object for DietPage/DashboardPage
+  macros: {
+    calories: i.calories || 0,
+    protein: i.protein || 0,
+    carbs: i.carbs || 0,
+    fat: i.fat || 0,
+    fiber: i.fiber || 0,
+    iron: 0, vitaminB12: 0, vitaminD: 0,
+  },
+})) || []);
+```
+
+### Files to Touch
+| File | Change |
+|------|--------|
+| `AppContext.jsx` | Fix `setFoodLogSync` mapper to read `l.macros?.X` · Fix `loadCloudData` to reconstruct `macros` object |
+
+---
+
+## Bug 3.3 — Auth Session Lost on Page Refresh
+
+### Problem
+Users must re-log in every time they refresh the page. Supabase sessions should
+persist across page refreshes automatically via its built-in `localStorage` token.
+
+### Root Cause
+
+The Supabase client at `src/lib/supabaseClient.js:6` uses default options:
+```js
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
+
+Supabase JS v2 **does** persist sessions to `localStorage` by default
+(`auth.persistSession = true`, `auth.storage = localStorage`). However, there
+are two possible failure modes:
+
+1. **The `cleanupOldAuthStorage()` function** at `AppContext.jsx:172` runs after
+   every successful login. If it aggressively removes `localStorage` keys that
+   Supabase uses for session storage, the session would be lost.
+
+2. **The 3-second auth timeout** at lines 103-105:
+   ```js
+   const timeout = setTimeout(() => {
+     if (!initialized) setAuthLoading(false);
+   }, 3000);
+   ```
+   If `onAuthStateChange` doesn't fire within 3 seconds (e.g., network-queued
+   Supabase token refresh), the app renders the login page prematurely.
+
+### Investigation Needed
+- Check what `cleanupOldAuthStorage()` removes — if it touches any `sb-*` keys
+- Check if the Supabase URL and anon key env vars are correctly set in production
+- Verify the Supabase dashboard auth settings (session expiry, refresh token rotation)
+
+### Fix
+
+```js
+// supabaseClient.js — explicitly set persistent session options
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    storageKey: 'fittrack-auth-token',
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
+```
+
+Also audit `cleanupOldAuthStorage()` to ensure it does NOT remove:
+- `fittrack-auth-token` (or whatever `storageKey` we pick)
+- Any keys starting with `sb-`
+
+### Files to Touch
+| File | Change |
+|------|--------|
+| `src/lib/supabaseClient.js` | Add explicit `auth` options with `persistSession: true` |
+| `src/utils/authMigration.js` | Audit `cleanupOldAuthStorage()` |
+| `src/context/AppContext.jsx` | Possibly extend the 3s timeout or add retry logic |
+
+---
+
+## Bug 3.4 — New Users Not Visible in Olympus League
+
+### Problem
+Newly registered users don't appear in the Olympus League leaderboard even though
+they have a `user_profiles` row in Supabase.
+
+### Root Cause
+
+The `fetchPlayers` function at `MuscleMapPage.jsx:125-142` explicitly skips the
+current user (line 126: `if (u.id === user?.id) return null;`) and adds them as
+the `meEntry` separately. **This is correct.**
+
+The probable issue is the **RLS policy on `user_profiles`**. The previous fix
+(`20260409_add_leaderboard_rls.sql`) was supposed to add a public SELECT policy,
+but it may not have been applied to the production Supabase instance.
+
+Verify by checking:
+1. Does `supabase.from('user_profiles').select('id, name, avatar')` return ALL
+   users or only the current user?
+2. Check the RLS policies on `user_profiles` in the Supabase SQL editor.
+
+### Fix
+
+If the public SELECT policy is missing, add it:
+```sql
+-- Already created in migration but may not have been applied
+CREATE POLICY "user_profiles: public read"
+  ON public.user_profiles FOR SELECT
+  USING (true);
+```
+
+Also, add defensive logging to `fetchPlayers`:
+```js
+console.log(`[Olympus] Fetched ${users.length} users, ${allLogs.length} total workout logs`);
+```
+
+### Files to Touch
+| File | Change |
+|------|--------|
+| Supabase SQL Editor | Verify and add public SELECT RLS on `user_profiles` |
+| `MuscleMapPage.jsx` | Add logging if not already present |
+
+---
+
+## Bug Round 3 — Implementation Priority Order
+
+| Order | Bug | Time | Priority |
+|:-----:|-----|:----:|:--------:|
+| 1 | **3.2** — Diet macros schema mismatch | 30 min | P0 — data loss |
+| 2 | **3.3** — Auth session not persisting | 15 min | P0 — broken UX |
+| 3 | **3.1** — Readiness check-in re-opens | 10 min | P1 — annoying |
+| 4 | **3.4** — Olympus new users | 10 min | P1 — visibility |
+
+### Acceptance Criteria
+
+- [ ] Food logs survive page refresh with correct macro values displayed
+- [ ] Auth session persists across `Ctrl+R` — no re-login required
+- [ ] Readiness check-in only auto-opens if not completed today (even after refresh)
+- [ ] Newly registered users appear in Olympus League with 0 XP

@@ -97,7 +97,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
+  const { user, authLoading, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
@@ -146,11 +146,12 @@ export default function DashboardPage() {
   // Auto-open check-in once per day on first dashboard load (if not done)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    if (authLoading) return; // wait for Supabase data to finish loading
     if (!todayReadiness && user?.id) {
-      const timer = setTimeout(() => setShowCheckIn(true), 1400);
+      const timer = setTimeout(() => setShowCheckIn(true), 800);
       return () => clearTimeout(timer);
     }
-  }, [todayReadiness, user?.id]); // intentional — todayReadiness is stable per-render
+  }, [todayReadiness, user?.id, authLoading]); // intentional — todayReadiness is stable per-render
 
   const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id).sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;

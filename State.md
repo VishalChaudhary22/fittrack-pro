@@ -54,7 +54,8 @@ fittrack-pro/
 │       ├── 20260402185051_seed_indian_food_batch_5.sql  # Sweets, Fruits, Drinks + Beverage Builder bases
 │       ├── 20260402185908_seed_indian_food_batch_6.sql  # Oils, Condiments, Supplements, Sprouts/Soy
 │       ├── 20260406213844_seed_indian_food_batch_7.sql  # Packaged Food, Fasting/Vrat Foods
-│       └── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
+│       ├── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
+│       └── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, splits sync
 ├── scripts/                     # Data population & validation scripts
 │   ├── generate_seed.js         # Generates SQL seed from JS food objects
 │   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
@@ -123,7 +124,8 @@ fittrack-pro/
         ├── foodUtils.js          # Food search (local + remote), macro calc, beverage builder
         ├── helpers.js            # gId, tod, formatting
         ├── readinessUtils.js     # Readiness scoring, muscle recovery, spotlight muscles
-        └── storage.js            # localStorage key constants
+        ├── storage.js            # localStorage key constants
+        └── authMigration.js      # Supabase ID mapping & cloud data lazy-upload logic
 ```
 
 ---
@@ -501,28 +503,24 @@ Returns per-muscle recovery state (optimal / fatigued / critical) based on hours
 
 ## 🔄 AppContext State
 
-All persistent state in `AppContext.jsx`, backed by `useLocalStorage`:
+Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synched to **Supabase**, while transient preferences remain in `localStorage`.
 
-| Key | Type | Purpose |
-|-----|------|---------|
-| `fittrack_users` | array | User profiles |
-| `fittrack_uid` | string | Active user ID |
-| `fittrack_splits` | array | Training split programs |
-| `fittrack_healthLogs` | array | Weight log entries |
-| `fittrack_workoutLogs` | array | Workout session logs |
-| `fittrack_readinessLog` | array | Daily readiness check-in entries |
-| `fittrack_measurements` | array | Body measurement entries |
-| `fittrack_caloriesLog` | array | Legacy calorie-only log (deprecated, kept for backward compat) |
-| `fittrack_foodLog` | array | Food log entries with full macro snapshots |
-| `fittrack_favoriteFoods` | array | Starred food IDs |
-| `fittrack_monthlyRankHistory` | array | Olympus League monthly XP history |
-| `fp_water_log` | array | Hydration tracking logs |
-| `fittrack_cardioLog` | array | Session history for cardio logs |
-| `fittrack_supplementLog` | array | User-logged supplements intake history |
-| `fittrack_supplementConfig` | array | Custom doses and supplements (Whey, Creatine, etc) |
-| `fp_cycle_config` | object | Start date & length for cycle tracking |
+| Data Domain | Storage | Persistence Key / Table |
+|-------------|---------|-------------------------|
+| **Identity** | Supabase Auth | `auth.users` / `user_profiles` |
+| **Workouts** | Supabase DB | `workout_logs` |
+| **Health Logs** | Supabase DB | `health_logs` |
+| **Measurements** | Supabase DB | `measurements` |
+| **Food Logs** | Supabase DB | `food_logs` |
+| **Splits** | Supabase DB | `user_splits` |
+| **Readiness** | Supabase DB | `readiness_logs` |
+| **Favorites** | localStorage | `fittrack_favoriteFoods` |
+| **Water Log** | localStorage | `fittrack_waterLog` |
+| **Cardio Log** | localStorage | `fittrack_cardioLog` |
+| **Supplements** | localStorage | `fittrack_supplementLog` |
+| **Cycle Config**| localStorage | `fp_cycle_config` |
 
-Exposed methods: `login`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak` (workout), `getFoodStreak` (food logging), `toggleFavoriteFood`.
+**Exposed methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`.
 
 ---
 

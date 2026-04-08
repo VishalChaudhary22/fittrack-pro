@@ -574,6 +574,16 @@ Several rounds of mobile UX fixes on the food search modal:
 - Fixed UTC date bug: `new Date().toISOString().split('T')[0]` was returning the UTC date, which lagged local midnight. Replaced with local `tod()` helper.
 - Fixed typo: `todayTotals.fat` → `todayTotals.fats`, resolving the `NaN` display.
 
+### Auth Migration & Data Isolation (Fixed 2026-04-08)
+**Symptom:** Race conditions causing double Google sign-in attempts, cross-user data contamination from local migration & demo fallbacks, and UI crashes/NaNs from unset goals or missing physical stats.
+**Fixes applied:**
+- Switched to `onAuthStateChange` as the single source of truth for auth (no double calls with `getSession`).
+- Added robust data isolation: `authMigration.js` now strictly requires email matching before migrating local data to Supabase.
+- Purged all hardcoded `'vishal'` and `'demo'` ID fallbacks across the app.
+- Clear in-memory fitness logs via React `useEffect` when the authenticated `user.id` switches.
+- Per-user scoping for onboarding flags (`fittrack_onboarding_pending:${user.id}`).
+- Null guards on Diet and Dashboard pages (BMR/TDEE calculation limits and 'Targets Locked' UI flow).
+
 ---
 
 ## 🔲 Known Gaps / Pending Work

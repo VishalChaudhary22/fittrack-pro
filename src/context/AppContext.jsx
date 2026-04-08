@@ -17,6 +17,7 @@ export function AppProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // --- Cloud Sync State (Phase Auth-2) ---
   const [splits, setSplits] = useState([]);
@@ -142,6 +143,7 @@ export function AppProvider({ children }) {
         setSupplementConfig([]);
         setCycleConfig({ startDate: '', cycleLength: 28 });
         
+        setDataLoaded(false);
         setAuthLoading(false);
       }
     });
@@ -241,6 +243,7 @@ export function AppProvider({ children }) {
     
     // Spltis fallback to INIT_SPLITS if none exist
     setSplits(sl?.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
+    setDataLoaded(true);
   };
 
   // --- Real-Time Sync (Optional fallback listener if we wanted cross-device immediate, but here we will just mutate explicitly to keep it simple) ---
@@ -270,6 +273,10 @@ export function AppProvider({ children }) {
   };
 
   const logout = async () => {
+    // Immediately clear state so UI shows login page without waiting for onAuthStateChange
+    setProfile(null);
+    setSession(null);
+    setDataLoaded(false);
     await supabase.auth.signOut();
   };
 
@@ -405,7 +412,7 @@ export function AppProvider({ children }) {
   }, [setFavoriteIds]);
 
   const value = {
-    user, authLoading, updateProfile, logout, session,
+    user, authLoading, dataLoaded, updateProfile, logout, session,
     // Provide the Sync wrappers in place of the old setters
     splits, setSplits: setSplitsSync, setActiveSplitId,
     workoutLogs, setWorkoutLogs: setWorkoutLogsSync,

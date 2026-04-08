@@ -11,6 +11,7 @@ import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, up
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
+const getProfileCacheKey = (userId) => `fittrack_profile_${userId}`;
 
 const readPersistedUserArray = (prefix, userId) => {
   if (!userId) return [];
@@ -51,6 +52,65 @@ const READINESS_STRESS_FROM_DB = {
   0: 'low',
   1: 'medium',
   2: 'high',
+};
+
+const readCachedProfile = (userId) => {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(getProfileCacheKey(userId));
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const persistCachedProfile = (profile) => {
+  if (!profile?.id) return;
+  try {
+    localStorage.setItem(getProfileCacheKey(profile.id), JSON.stringify(profile));
+  } catch {
+    // Ignore storage quota and private-mode write failures.
+  }
+};
+
+const getAvatarInitials = (value) => {
+  if (!value) return 'U';
+  const initials = value
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  return initials || value.slice(0, 2).toUpperCase() || 'U';
+};
+
+const buildFallbackProfile = (sessionUser, cachedProfile = null) => {
+  if (!sessionUser?.id) return null;
+
+  const meta = sessionUser.user_metadata || {};
+  const displayName = cachedProfile?.name
+    || meta.full_name
+    || meta.name
+    || sessionUser.email?.split('@')[0]
+    || 'User';
+
+  return {
+    id: sessionUser.id,
+    name: displayName,
+    gender: cachedProfile?.gender || meta.gender || 'male',
+    avatar: cachedProfile?.avatar || getAvatarInitials(displayName),
+    avatar_type: cachedProfile?.avatar_type || null,
+    avatar_url: cachedProfile?.avatar_url || null,
+    active_split_id: cachedProfile?.active_split_id || null,
+    unit_weight: cachedProfile?.unit_weight || 'kg',
+    unit_height: cachedProfile?.unit_height || 'cm',
+    is_admin: cachedProfile?.is_admin || false,
+    created_at: cachedProfile?.created_at || sessionUser.created_at || null,
+    ...cachedProfile,
+    id: sessionUser.id,
+  };
 };
 
 const mapFoodLogFromCloud = (item, cachedItem = null) => {
@@ -219,39 +279,70 @@ export function AppProvider({ children }) {
   // --- Supabase Auth Listener ---
   useEffect(() => {
     let initialized = false;
+    let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('[Auth] onAuthStateChange:', _event, session ? `user=${session.user.id}` : 'no session');
-      initialized = true; // Mark IMMEDIATELY so the 3s timeout doesn't prematurely show login
-      setSession(session);
-      if (session?.user) {
-        localStorage.setItem('fittrack_last_user_id', session.user.id);
-        await fetchProfile(session.user.id);
-      } else {
-        localStorage.removeItem('fittrack_last_user_id');
-        // Clear cloud state
-        setProfile(null);
-        setSplits(INIT_SPLITS);
-        setHealthLogs([]);
-        setWorkoutLogs([]);
-        setReadinessLog([]);
-        setMeasurements([]);
-        setFoodLog([]);
-        // Clear local-only prefs (Fix 6)
-        setFavoriteIds([]);
-        setSupplementConfig([]);
-        setCycleConfig({ startDate: '', cycleLength: 28 });
-        
-        setDataLoaded(false);
+    const handleSessionBootstrap = (nextSession) => {
+      if (!mounted) return;
+
+      const nextUser = nextSession?.user || null;
+      console.log('[Auth] Session bootstrap:', nextUser ? `user=${nextUser.id}` : 'no session');
+      initialized = true;
+      setSession(nextSession);
+
+      if (nextUser) {
+        localStorage.setItem('fittrack_last_user_id', nextUser.id);
+        const cachedProfile = readCachedProfile(nextUser.id);
+        const fallbackProfile = buildFallbackProfile(nextUser, cachedProfile);
+        if (fallbackProfile) {
+          setProfile(prev => {
+            if (prev?.id === nextUser.id) return { ...fallbackProfile, ...prev };
+            return fallbackProfile;
+          });
+          persistCachedProfile(fallbackProfile);
+        }
         setAuthLoading(false);
+        void fetchProfile(nextUser.id);
+        return;
       }
+
+      localStorage.removeItem('fittrack_last_user_id');
+      // Clear cloud state
+      setProfile(null);
+      setSplits(INIT_SPLITS);
+      setHealthLogs([]);
+      setWorkoutLogs([]);
+      setReadinessLog([]);
+      setMeasurements([]);
+      setFoodLog([]);
+      // Clear local-only prefs (Fix 6)
+      setFavoriteIds([]);
+      setSupplementConfig([]);
+      setCycleConfig({ startDate: '', cycleLength: 28 });
+      
+      setDataLoaded(false);
+      setAuthLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      console.log('[Auth] onAuthStateChange:', _event, nextSession ? `user=${nextSession.user.id}` : 'no session');
+      handleSessionBootstrap(nextSession);
     });
 
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        if (!initialized) handleSessionBootstrap(data.session);
+      })
+      .catch((error) => {
+        console.error('[Auth] Initial session check failed:', error?.message || error);
+        if (mounted) setAuthLoading(false);
+      });
+
     const timeout = setTimeout(() => {
-      if (!initialized) setAuthLoading(false);
+      if (!initialized && mounted) setAuthLoading(false);
     }, 3000);
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
@@ -287,17 +378,21 @@ export function AppProvider({ children }) {
           console.error('[Auth] Profile upsert failed:', upsertError.message);
           const { data: retryData } = await supabase
             .from('user_profiles').select('*').eq('id', userId).single();
-          setProfile(retryData);
+          if (retryData) {
+            setProfile(retryData);
+            persistCachedProfile(retryData);
+          }
         } else {
           setProfile(created);
+          persistCachedProfile(created);
           localStorage.setItem(`fittrack_onboarding_pending:${userId}`, 'true');
           localStorage.setItem('fittrack_user_created_at', new Date().toISOString());
         }
       } else if (error) {
         console.error('[Auth] Profile fetch error:', error.message);
-        setProfile(null);
       } else {
         setProfile(data);
+        persistCachedProfile(data);
       }
 
       setSession(await supabase.auth.getSession().then(r => r.data.session));
@@ -315,6 +410,8 @@ export function AppProvider({ children }) {
 
       // Load cloud data!
       await loadCloudData(userId);
+    } catch (error) {
+      console.error('[Auth] Profile bootstrap failed:', error?.message || error);
     } finally {
       cleanupOldAuthStorage();
       isFetchingProfile.current = false;

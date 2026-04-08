@@ -1042,16 +1042,19 @@ Fix in this order — each is a blocker for real users:
 ## 3. Post-Auth Review: Final Bugs
 > **Identified:** 2026-04-08
 
-### Bug 9: Diet Page Null Stats Rendering
+### Bug 9: Diet Page Null Stats Rendering ✅ FIXED
+- **Fixed:** 2026-04-08
 - **Root Cause:** `DietPage.jsx` renders stats inside a template literal (e.g. `${user.weight}kg`). When the user starts with no stats, it outputs "nullkg" instead of a blank state (`—`).
 - **Proposed Fix:** Adjust lines ~390 in `DietPage.jsx` to map a safely validated `stats` array instead of hardcoded JSX output, replacing any `null`/`NaN` calculations (like `tdee`) with `'—'`.
 
-### Bug 10: Strict Per-User Data Isolation Failing For Cross-Account Sign-ups
+### Bug 10: Strict Per-User Data Isolation Failing For Cross-Account Sign-ups ✅ FIXED
+- **Fixed:** 2026-04-08
 - **Root Cause:** A combination of previously unpatched `authMigration.js` loops uploading old development data into the first Auth UUID created on the machine, combined with AppContext not forcefully wiping auxiliary local storages (like `fittrack_cardioLog` and `waterLog`) on logout.
 - **Proposed Fix:** 
   1. Expand the `AppContext.jsx` account switch listener to wipe `cardioLog`, `waterLog`, `supplementLog`, and `supplementConfig`.
   2. Acknowledge old test instances were contaminated prior to the Auth-1.2 fix. To clear this reliably for local devs, a manual `delete from workout_logs` in Supabase is required for the new conflicting emails, but code logic is now secure against uploading it under `uploadLocalDataToCloud`.
 
-### Bug 11: Newly Registered Users 0XP Visibility
+### Bug 11: Newly Registered Users 0XP Visibility ✅ FIXED
+- **Fixed:** 2026-04-08
 - **Root Cause:** `MuscleMapPage.jsx` renders a pre-baked `MOCK_LEADERBOARD` arrays combined with the local `meEntry`. It currently does not perform a global database fetch for `user_profiles` or `workout_logs` of other real players in the same app.
 - **Proposed Fix:** Modify `MuscleMapPage.jsx` to fetch `user_profiles` globally (via a standalone Supabase select) and incorporate them dynamically into the Leaderboard with their corresponding XP (using their logs if available) or 0 XP initially.

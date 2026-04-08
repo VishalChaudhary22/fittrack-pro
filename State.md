@@ -582,7 +582,9 @@ Several rounds of mobile UX fixes on the food search modal:
 - Purged all hardcoded `'vishal'` and `'demo'` ID fallbacks across the app.
 - Clear in-memory fitness logs via React `useEffect` when the authenticated `user.id` switches.
 - Per-user scoping for onboarding flags (`fittrack_onboarding_pending:${user.id}`).
-- Null guards on Diet and Dashboard pages (BMR/TDEE calculation limits and 'Targets Locked' UI flow).
+- Null guards on Diet and Dashboard pages: replaced `nullkg`/`nullcm` and `NaN` TDEE with blank states (`—`).
+- Hardened account isolation: `AppContext` now resets auxiliary local storage (`cardioLog`, `waterLog`, etc.) on account switch.
+- Olympus League Global Leaderboard: Real-time Supabase fetch for `user_profiles` ensures newly registered 0XP users are visible.
 
 ---
 

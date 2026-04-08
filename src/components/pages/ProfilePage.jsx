@@ -25,7 +25,7 @@ const PRESETS = [
 
 function AvatarPickerModal({ open, onClose }) {
   const [tab, setTab] = useState('Marvel');
-  const { user, setUsers } = useApp();
+  const { user, updateProfile } = useApp();
   
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
@@ -35,32 +35,32 @@ function AvatarPickerModal({ open, onClose }) {
 
   if (!open) return null;
 
-  const handlePreset = (id) => {
+  const handlePreset = async (id) => {
     const url = `/avatars/${id}.png`;
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, avatarUrl: url, avatarType: 'preset' } : u));
+    await updateProfile({ avatarUrl: url, avatarType: 'preset' });
     onClose();
   };
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const max = 256;
-        const scale = Math.min(1, Math.min(max / img.width, max / img.height));
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, avatarUrl: dataUrl, avatarType: 'upload' } : u));
-        onClose();
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > 400) { h *= 400 / w; w = 400; } }
+          else { if (h > 400) { w *= 400 / h; h = 400; } }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          await updateProfile({ avatarUrl: dataUrl, avatarType: 'upload' });
+          onClose();
+        };
+        img.src = e.target.result;
       };
-      img.src = reader.result;
-    };
     reader.readAsDataURL(file);
   };
 
@@ -101,7 +101,7 @@ function AvatarPickerModal({ open, onClose }) {
 }
 
 export default function ProfilePage() {
-  const { user, setUsers, logout, toggleTheme, addToast, workoutLogs, splits, getStreak } = useApp();
+  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak } = useApp();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -109,14 +109,14 @@ export default function ProfilePage() {
   
   const unitWeight = user.unitWeight || 'kg';
   const unitHeight = user.unitHeight || 'cm';
-  const toggleUnitWeight = () => setUsers(p => p.map(u => u.id === user.id ? { ...u, unitWeight: unitWeight === 'kg' ? 'lbs' : 'kg' } : u));
-  const toggleUnitHeight = () => setUsers(p => p.map(u => u.id === user.id ? { ...u, unitHeight: unitHeight === 'cm' ? 'ft' : 'cm' } : u));
+  const toggleUnitWeight = async () => await updateProfile({ unitWeight: unitWeight === 'kg' ? 'lbs' : 'kg' });
+  const toggleUnitHeight = async () => await updateProfile({ unitHeight: unitHeight === 'cm' ? 'ft' : 'cm' });
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
-  const save = () => {
-    setUsers(p => p.map(u => u.id === user.id ? { ...u, ...f, weight: parseFloat(f.weight), height: parseFloat(f.height), age: parseInt(f.age), workoutDays: parseInt(f.workoutDays), weightGoal: f.weightGoal ? parseFloat(f.weightGoal) : null } : u));
+  const save = async () => {
+    await updateProfile({ ...f, weight: parseFloat(f.weight), height: parseFloat(f.height), age: parseInt(f.age), workoutDays: parseInt(f.workoutDays), weightGoal: f.weightGoal ? parseFloat(f.weightGoal) : null });
     setEd(false);
-    addToast('Profile updated!', 'success');
+    addToast('Profile updated successfully', 'success');
   };
 
   const handleExport = () => { exportData(); addToast('Data exported!', 'success'); };

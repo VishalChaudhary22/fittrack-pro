@@ -560,6 +560,22 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Results list scroll locked**: Added `touch-action: pan-y`, `-webkit-overflow-scrolling: touch`, and `overscrollBehavior: contain` on scroll containers.
 - **Fasting filter**: Replaced native `<select>` with styled pill chips matching the diet type filter row.
 
+### DietPage — Food Search Re-architecture (Fixed 2026-04-07)
+**Symptom:** Opening the food search modal showed a spinner overlaid on previous search results, sometimes causing race conditions and stale UI due to per-keystroke Supabase calls. Favorites crashed because `indianFoods` wasn't imported. Favourites star and chevron icons were very faint in dark mode.
+**Fixes applied:**
+- Created `hooks/useFoodCache.js` for hybrid caching (fetches complete Supabase dataset on mount with local fallback).
+- Modified `searchLocalFoods` to use this synchronous cache — eliminated network latency and race conditions.
+- Fixed `DietPage.jsx` to clear `searchQuery` and `searchCat` state upon modal open/re-open.
+- Fixed favourites crash by correctly passing the `allFoods` array.
+- Updated `Star` and `ChevronRight` icon color tokens from `var(--outline-variant)` to `var(--on-surface-dim)` for visibility.
+- Added missing `@keyframes spin` to `index.css`.
+
+### DashboardPage — Stale Nutrition & NaN Fats (Fixed 2026-04-07)
+**Symptom:** "Today's Nutrition" card on the home page showed yesterday's calories and `NaN` for fats.
+**Fixes applied:**
+- Fixed UTC date bug: `new Date().toISOString().split('T')[0]` was returning the UTC date, which lagged local midnight. Replaced with local `tod()` helper.
+- Fixed typo: `todayTotals.fat` → `todayTotals.fats`, resolving the `NaN` display.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work

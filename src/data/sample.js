@@ -28,10 +28,5 @@ export const genSample = () => {
   return { hl, wl };
 };
 
-export const INIT_USERS = [{
-  id: 'vishal', name: 'Vishal Chaudhary', email: 'vishal@fittrack.com', password: 'admin123',
-  age: 32, gender: 'male', weight: 83.5, height: 175, weightGoal: 78, weightGoalStart: 85,
-  goalWeeks: 20, goalSetDate: '2024-11-01', activityLevel: 'active', workoutDays: 6,
-  isAdmin: true, activeSplitId: 'ppl', joinDate: '2024-01-15',
-  avatar: 'VC', avatarType: 'preset', avatarUrl: null, unitWeight: 'kg', unitHeight: 'cm',
-}];
+// (User data is now handled via Supabase Auth & user_profiles table)
+export const INIT_USERS = [];

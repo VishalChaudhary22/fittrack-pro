@@ -124,21 +124,23 @@
 
 ---
 
-### 3.7 Yoga / Meditation Timer
+### 3.7 Yoga / Meditation Timer [COMPLETED]
 
 **Goal:** Dedicated timer page for yoga and breathwork — the Home Workouts split already has yoga exercises but no tooling to guide them.
 
+**Status:** Completed and integrated. The Yoga Flow view successfully plays an automated audio-guided sequence of poses (with sets/durations), integrated with the web audio API and speech synthesis.
+
 **Requirements:**
-- Breath hold timer with configurable inhale / hold / exhale phases (e.g., 4-7-8 breathing, box breathing).
-- Guided session flow — auto-advance through a list of poses with configurable hold times per pose.
-- Audio cues on phase transitions using Web Audio API (same pattern as existing rest timer in `WorkoutPage.jsx`).
-- Session summary at the end: total duration, poses completed.
-- Preset sessions: Surya Namaskar (12 poses), Evening Wind-Down, Pre-Workout Activation.
+- ~~Breath hold timer with configurable inhale / hold / exhale phases (e.g., 4-7-8 breathing, box breathing).~~
+- ~~Guided session flow — auto-advance through a list of poses with configurable hold times per pose.~~
+- ~~Audio cues on phase transitions using Web Audio API (same pattern as existing rest timer in `WorkoutPage.jsx`).~~
+- ~~Session summary at the end: total duration, poses completed.~~
+- Preset sessions: ~~Surya Namaskar (12 poses), Evening Wind-Down, Pre-Workout Activation.~~
 
 **New files:**
-- `src/components/pages/YogaTimerPage.jsx`
-- Add route `/yoga-timer` in `App.jsx`
-- Add nav item under "More" in `src/data/constants.js`
+- ~~`src/components/pages/YogaTimerPage.jsx`~~ (Implemented as `YogaSessionView` inside `WorkoutPage.jsx`)
+- ~~Add route `/yoga-timer` in `App.jsx`~~
+- ~~Add nav item under "More" in `src/data/constants.js`~~
 
 ---
 
@@ -268,7 +270,7 @@ Weekly RPE notes are stored in each exercise's `notes` field (e.g., `"W1:1x3@5,1
 | 3     | 3.8 1RM Calculator Page | 🟡 Medium | Medium |
 | 4     | 3.2 Cardio Logging | 🟡 Medium | Medium |
 | 5     | 3.3 Supplement Reminders | 🟡 Medium | Medium |
-| 6     | 3.7 Yoga Timer | 🟡 Medium | Low |
+| 6     | ~~3.7 Yoga Timer~~ | 🟢 Done | High |
 | 7     | 3.4 Period Tracker | 🟡 Medium | Medium |
 | 8     | 3.5 Festival Adaptations | 🟢 Small | Low |
 | 9     | 3.10 Social Sharing | 🔴 Large | Medium |

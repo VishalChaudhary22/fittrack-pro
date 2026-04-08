@@ -97,7 +97,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, healthLogs, setHealthLogs, workoutLogs, splits, setUsers, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
+  const { user, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
@@ -255,8 +255,8 @@ export default function DashboardPage() {
     addToast(`Weight logged: ${isImpWeight ? kgToLbs(w) + ' lbs' : w + ' kg'}`, 'success');
   };
 
-  const saveGoal = () => {
-    setUsers(p => p.map(u => u.id === user.id ? { ...u, weightGoal: goalTarget, weightGoalStart: latestWeight, goalWeeks: goalWeeks, goalSetDate: tod() } : u));
+  const saveGoal = async () => {
+    await updateProfile({ weightGoal: goalTarget, weightGoalStart: latestWeight, goalWeeks: goalWeeks, goalSetDate: tod() });
     setShowGoal(false);
     addToast('Weight goal updated!', 'success');
   };
@@ -861,7 +861,7 @@ export default function DashboardPage() {
             )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="btn-p" style={{ flex: 1, padding: '13px' }} onClick={saveGoal}>Set Goal</button>
-              {user.weightGoal && <button className="btn-g" style={{ padding: '13px 16px' }} onClick={() => { setUsers(p => p.map(u => u.id === user.id ? { ...u, weightGoal: null, weightGoalStart: null, goalWeeks: null } : u)); setShowGoal(false); addToast('Goal cleared', 'info'); }}>Clear</button>}
+              {user.weightGoal && <button className="btn-g" style={{ padding: '13px 16px' }} onClick={async () => { await updateProfile({ weightGoal: null, weightGoalStart: null, goalWeeks: null }); setShowGoal(false); addToast('Goal cleared', 'info'); }}>Clear</button>}
             </div>
           </div>
         </div>

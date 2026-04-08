@@ -16,7 +16,35 @@ import MeasurementsPage from './components/pages/MeasurementsPage';
 import MuscleMapPage from './components/pages/MuscleMapPage';
 import CycleTrackerPage from './components/pages/CycleTrackerPage';
 function AppInner() {
-  const { user, toasts, removeToast } = useApp();
+  const { user, authLoading, toasts, removeToast } = useApp();
+
+  if (authLoading) {
+    return (
+      <div className="mo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+            fontSize: 28, letterSpacing: '-0.04em', color: 'var(--primary)',
+            textTransform: 'uppercase', marginBottom: 16,
+          }}>
+            FitTrack Pro
+          </div>
+          <div style={{
+            width: 48, height: 4, background: 'linear-gradient(135deg, var(--primary), #FF9A5C)',
+            borderRadius: 2, margin: '0 auto',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }} />
+        </div>
+        <style>{`
+          @keyframes pulse {
+            0% { opacity: 0.4; width: 48px; }
+            50% { opacity: 1; width: 72px; }
+            100% { opacity: 0.4; width: 48px; }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   if (!user) return <AuthModal />;
 

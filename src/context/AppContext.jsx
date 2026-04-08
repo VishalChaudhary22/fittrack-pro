@@ -121,6 +121,7 @@ export function AppProvider({ children }) {
     let initialized = false;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('[Auth] onAuthStateChange:', _event, session ? `user=${session.user.id}` : 'no session');
       setSession(session);
       if (session?.user) {
         localStorage.setItem('fittrack_last_user_id', session.user.id);
@@ -234,7 +235,7 @@ export function AppProvider({ children }) {
 
     setWorkoutLogs(wl?.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })) || []);
     setHealthLogs(hl?.map(i => ({ ...i, userId: i.user_id })) || []);
-    setFoodLog(fl?.map(i => ({ ...i, userId: i.user_id, mealType: i.meal_type, foodId: i.food_id, foodName: i.food_name, name: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label, slot: i.meal_type, macros: { calories: i.calories || 0, protein: i.protein || 0, carbs: i.carbs || 0, fat: i.fat || 0, fiber: i.fiber || 0, iron: 0, vitaminB12: 0, vitaminD: 0 } })) || []);
+    setFoodLog(fl?.map(i => ({ ...i, userId: i.user_id, mealType: i.meal_type || 'Breakfast', foodId: i.food_id, foodName: i.food_name, name: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label, slot: i.meal_type || 'Breakfast', macros: { calories: Number(i.calories) || 0, protein: Number(i.protein) || 0, carbs: Number(i.carbs) || 0, fat: Number(i.fat) || 0, fiber: Number(i.fiber) || 0, iron: 0, vitaminB12: 0, vitaminD: 0 } })) || []);
     setMeasurements(ml?.map(i => ({ ...i, userId: i.user_id })) || []);
     setReadinessLog(rl?.map(i => ({ ...i, userId: i.user_id, sleepHours: i.sleep_hours, energyLevel: i.energy_level, sorenessLevel: i.soreness_level, stressLevel: i.stress_level, objectiveScore: i.objective_score, checkInComplete: i.check_in_complete })) || []);
     

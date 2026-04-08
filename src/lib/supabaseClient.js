@@ -6,8 +6,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-a
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    storageKey: 'fittrack-auth-token',
-    storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true,
   },

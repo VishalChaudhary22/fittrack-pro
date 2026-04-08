@@ -361,7 +361,6 @@ export default function WorkoutPage() {
         }),
       };
     });
-    });
     const timestamp = Date.now();
     sessionStorage.setItem('fittrack_session_start', String(timestamp));
     startTimeRef.current = timestamp;

@@ -152,7 +152,7 @@ const pickPreferredReadinessEntry = (existingEntry, nextEntry) => {
 const mergeReadinessEntries = (cloudEntries, localEntries, userId) => {
   const mergedByDate = new Map();
 
-  [...cloudEntries, ...localEntries.filter(entry => entry?.userId === userId)].forEach(entry => {
+  [...localEntries.filter(entry => entry?.userId === userId), ...cloudEntries].forEach(entry => {
     const key = getReadinessKey(entry, userId);
     const existingEntry = mergedByDate.get(key);
     mergedByDate.set(key, existingEntry ? pickPreferredReadinessEntry(existingEntry, entry) : entry);
@@ -567,8 +567,17 @@ export function AppProvider({ children }) {
       }
     };
 
+    const pollIfVisible = () => {
+      if (document.visibilityState === 'visible') {
+        scheduleCloudRefresh(userId);
+      }
+    };
+
     window.addEventListener('focus', handleRefresh);
+    window.addEventListener('online', handleRefresh);
+    window.addEventListener('pageshow', handleRefresh);
     document.addEventListener('visibilitychange', handleRefresh);
+    const pollInterval = window.setInterval(pollIfVisible, 15000);
 
     const channel = supabase
       .channel(`fittrack-sync-${userId}`)
@@ -592,7 +601,10 @@ export function AppProvider({ children }) {
 
     return () => {
       window.removeEventListener('focus', handleRefresh);
+      window.removeEventListener('online', handleRefresh);
+      window.removeEventListener('pageshow', handleRefresh);
       document.removeEventListener('visibilitychange', handleRefresh);
+      window.clearInterval(pollInterval);
       if (cloudRefreshTimerRef.current) {
         clearTimeout(cloudRefreshTimerRef.current);
         cloudRefreshTimerRef.current = null;

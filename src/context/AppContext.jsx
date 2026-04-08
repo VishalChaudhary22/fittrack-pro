@@ -113,6 +113,54 @@ const buildFallbackProfile = (sessionUser, cachedProfile = null) => {
   };
 };
 
+const getEntryTime = (entry) => {
+  const candidate = entry?.updated_at || entry?.created_at || entry?.timestamp;
+  const timestamp = candidate ? new Date(candidate).getTime() : NaN;
+  if (Number.isFinite(timestamp)) return timestamp;
+
+  const fallback = entry?.date ? new Date(`${entry.date}T12:00:00`).getTime() : NaN;
+  return Number.isFinite(fallback) ? fallback : 0;
+};
+
+const mergeFoodEntries = (cloudEntries, localEntries, userId) => {
+  const merged = [...cloudEntries];
+  const knownIds = new Set(cloudEntries.map(entry => entry.id));
+
+  localEntries
+    .filter(entry => entry?.userId === userId)
+    .forEach(entry => {
+      if (!knownIds.has(entry.id)) merged.push(entry);
+    });
+
+  return merged.sort((a, b) => getEntryTime(b) - getEntryTime(a));
+};
+
+const getReadinessKey = (entry, userId) => `${entry?.userId || userId}:${entry?.date || ''}`;
+
+const pickPreferredReadinessEntry = (existingEntry, nextEntry) => {
+  const existingComplete = Boolean(existingEntry?.checkInComplete);
+  const nextComplete = Boolean(nextEntry?.checkInComplete);
+  if (existingComplete !== nextComplete) return nextComplete ? nextEntry : existingEntry;
+
+  const existingTime = getEntryTime(existingEntry);
+  const nextTime = getEntryTime(nextEntry);
+  if (existingTime !== nextTime) return nextTime > existingTime ? nextEntry : existingEntry;
+
+  return nextEntry;
+};
+
+const mergeReadinessEntries = (cloudEntries, localEntries, userId) => {
+  const mergedByDate = new Map();
+
+  [...cloudEntries, ...localEntries.filter(entry => entry?.userId === userId)].forEach(entry => {
+    const key = getReadinessKey(entry, userId);
+    const existingEntry = mergedByDate.get(key);
+    mergedByDate.set(key, existingEntry ? pickPreferredReadinessEntry(existingEntry, entry) : entry);
+  });
+
+  return [...mergedByDate.values()].sort((a, b) => b.date.localeCompare(a.date));
+};
+
 const mapFoodLogFromCloud = (item, cachedItem = null) => {
   const quantity = normalizeNumber(item.quantity);
   const grams = normalizeNumber(item.grams);
@@ -247,6 +295,22 @@ export function AppProvider({ children }) {
 
   const isFetchingProfile = useRef(false);
   const prevUserIdRef = useRef(null);
+  const foodLogRef = useRef(foodLog);
+  const readinessLogRef = useRef(readinessLog);
+  const currentUserIdRef = useRef(null);
+  const cloudRefreshTimerRef = useRef(null);
+
+  useEffect(() => {
+    foodLogRef.current = foodLog;
+  }, [foodLog]);
+
+  useEffect(() => {
+    readinessLogRef.current = readinessLog;
+  }, [readinessLog]);
+
+  useEffect(() => {
+    currentUserIdRef.current = session?.user?.id || profile?.id || localStorage.getItem('fittrack_last_user_id') || null;
+  }, [session?.user?.id, profile?.id]);
 
   useEffect(() => {
     if (!session?.user?.id) {
@@ -419,9 +483,11 @@ export function AppProvider({ children }) {
     }
   };
 
-  const loadCloudData = async (userId) => {
+  const loadCloudData = useCallback(async (userId) => {
+    if (!userId) return;
+
     const [
-      { data: wl }, { data: hl }, { data: fl }, { data: ml }, { data: rl }, { data: sl }
+      workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes,
     ] = await Promise.all([
       supabase.from('workout_logs').select('*').eq('user_id', userId),
       supabase.from('health_logs').select('*').eq('user_id', userId),
@@ -431,35 +497,109 @@ export function AppProvider({ children }) {
       supabase.from('user_splits').select('*').eq('user_id', userId),
     ]);
 
+    const cloudErrors = [workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes]
+      .map(result => result.error)
+      .filter(Boolean);
+    if (cloudErrors.length > 0) {
+      console.error('[CloudSync] Cloud load errors:', cloudErrors.map(error => error.message));
+    }
+
+    const wl = workoutRes.data || [];
+    const hl = healthRes.data || [];
+    const fl = foodRes.data || [];
+    const ml = measurementRes.data || [];
+    const rl = readinessRes.data || [];
+    const sl = splitsRes.data || [];
+
     const persistedFoodLog = readPersistedUserArray('fittrack_foodLog', userId);
     const persistedReadinessLog = readPersistedUserArray('fittrack_readinessLog', userId);
-    const cachedFoodSource = foodLog.length > 0 ? foodLog : persistedFoodLog;
-    const cachedReadinessSource = readinessLog.length > 0 ? readinessLog : persistedReadinessLog;
+    const cachedFoodSource = foodLogRef.current.length > 0 ? foodLogRef.current : persistedFoodLog;
+    const cachedReadinessSource = readinessLogRef.current.length > 0 ? readinessLogRef.current : persistedReadinessLog;
 
-    setWorkoutLogs(wl?.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })) || []);
-    setHealthLogs(hl?.map(i => ({ ...i, userId: i.user_id })) || []);
-    const mappedFoodLog = fl?.length ? fl.map(item => {
+    setWorkoutLogs(wl.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })));
+    setHealthLogs(hl.map(i => ({ ...i, userId: i.user_id })));
+
+    const mappedFoodLogFromCloud = fl.map(item => {
       const cachedItem = cachedFoodSource.find(entry => entry.id === item.id);
       return mapFoodLogFromCloud(item, cachedItem);
-    }) : cachedFoodSource;
-    if (mappedFoodLog.length > 0 || foodLog.length === 0) {
-      setFoodLog(mappedFoodLog);
+    });
+    const mergedFoodLog = mappedFoodLogFromCloud.length > 0
+      ? mergeFoodEntries(mappedFoodLogFromCloud, cachedFoodSource, userId)
+      : cachedFoodSource;
+    if (mergedFoodLog.length > 0 || foodLogRef.current.length === 0) {
+      setFoodLog(mergedFoodLog);
     }
-    setMeasurements(ml?.map(i => ({ ...i, userId: i.user_id })) || []);
-    const mappedReadinessLog = rl?.length ? rl.map(item => {
+
+    setMeasurements(ml.map(i => ({ ...i, userId: i.user_id })));
+
+    const mappedReadinessFromCloud = rl.map(item => {
       const cachedItem = cachedReadinessSource.find(entry => entry.id === item.id || (entry.userId === userId && entry.date === item.date));
       return mapReadinessFromCloud(item, cachedItem);
-    }) : cachedReadinessSource;
-    if (mappedReadinessLog.length > 0 || readinessLog.length === 0) {
-      setReadinessLog(mappedReadinessLog);
+    });
+    const mergedReadinessLog = mappedReadinessFromCloud.length > 0
+      ? mergeReadinessEntries(mappedReadinessFromCloud, cachedReadinessSource, userId)
+      : cachedReadinessSource;
+    if (mergedReadinessLog.length > 0 || readinessLogRef.current.length === 0) {
+      setReadinessLog(mergedReadinessLog);
     }
     
     // Spltis fallback to INIT_SPLITS if none exist
-    setSplits(sl?.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
+    setSplits(sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
     setDataLoaded(true);
-  };
+  }, [setFoodLog, setReadinessLog]);
 
-  // --- Real-Time Sync (Optional fallback listener if we wanted cross-device immediate, but here we will just mutate explicitly to keep it simple) ---
+  const scheduleCloudRefresh = useCallback((userId) => {
+    if (!userId) return;
+    if (cloudRefreshTimerRef.current) clearTimeout(cloudRefreshTimerRef.current);
+    cloudRefreshTimerRef.current = setTimeout(() => {
+      cloudRefreshTimerRef.current = null;
+      void loadCloudData(userId);
+    }, 250);
+  }, [loadCloudData]);
+
+  useEffect(() => {
+    const userId = session?.user?.id || profile?.id;
+    if (!userId) return undefined;
+
+    const handleRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        scheduleCloudRefresh(userId);
+      }
+    };
+
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+
+    const channel = supabase
+      .channel(`fittrack-sync-${userId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'food_logs',
+        filter: `user_id=eq.${userId}`,
+      }, () => {
+        scheduleCloudRefresh(userId);
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'readiness_logs',
+        filter: `user_id=eq.${userId}`,
+      }, () => {
+        scheduleCloudRefresh(userId);
+      })
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+      if (cloudRefreshTimerRef.current) {
+        clearTimeout(cloudRefreshTimerRef.current);
+        cloudRefreshTimerRef.current = null;
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id, profile?.id, scheduleCloudRefresh]);
 
   const updateProfile = async (updates) => {
     if (!profile) return;
@@ -515,7 +655,7 @@ export function AppProvider({ children }) {
       
       // Compute delta and sync asynchronously to avoid blocking the React render
       setTimeout(async () => {
-        const currentUserId = profile?.id;
+        const currentUserId = currentUserIdRef.current;
         if (!currentUserId) return;
         
         const toUpsert = next.filter(n => !prev.some(p => p.id === n.id) || JSON.stringify(prev.find(p => p.id === n.id)) !== JSON.stringify(n));

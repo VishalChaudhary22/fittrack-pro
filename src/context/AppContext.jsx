@@ -64,6 +64,10 @@ export function AppProvider({ children }) {
       setFoodLog([]);
       setCaloriesLog([]);
       setReadinessLog([]);
+      setWaterLog([]);
+      setCardioLog([]);
+      setSupplementLog([]);
+      setSupplementConfig([]);
     }
   
     prevUserIdRef.current = session.user.id;

@@ -8,6 +8,7 @@ import PlayerDetailModal from '../shared/PlayerDetailModal';
 import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank } from '../../data/muscleData';
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
 import { MOCK_LEADERBOARD } from '../../data/leaderboardData';
+import { supabase } from '../../lib/supabaseClient';
 
 // ─── RANK BADGE ──────────────────────────────────────────────────────────────
 const RankBadge = ({ rank, size = 'md' }) => {
@@ -104,7 +105,42 @@ export default function MuscleMapPage() {
 
   const overall = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
 
-  // Build and sort the full leaderboard including the real user
+  const [globalPlayers, setGlobalPlayers] = useState([]);
+
+  useEffect(() => {
+    async function fetchPlayers() {
+      const { data: users } = await supabase.from('user_profiles').select('id, name, avatar');
+      if (!users) return;
+
+      let allLogs = [];
+      const { data: logs } = await supabase.from('workout_logs').select('user_id, exercises');
+      if (logs) allLogs = logs;
+
+      const players = users.map(u => {
+        if (u.id === user?.id) return null;
+        
+        const uLogs = allLogs.filter(l => l.user_id === u.id);
+        const mxp = calcAllMuscleXP(uLogs, splits, u.id);
+        const uOverall = getOverallRank(mxp);
+
+        return {
+          id: u.id,
+          name: u.name || 'Athlete',
+          isMe: false,
+          totalXP: uOverall.totalXP,
+          tier: uOverall.name,
+          initials: u.avatar || 'U',
+          color: '#343A40',
+          muscleXP: mxp,
+        };
+      }).filter(Boolean);
+
+      setGlobalPlayers(players);
+    }
+    fetchPlayers();
+  }, [user?.id, splits]);
+
+  // Build and sort the full leaderboard including the real user and global players
   const fullLeaderboard = useMemo(() => {
     const meEntry = {
       id: user?.id,
@@ -116,10 +152,10 @@ export default function MuscleMapPage() {
       color: '#FFB59B',  // primary color
       muscleXP: muscleXP,
     };
-    return [...MOCK_LEADERBOARD, meEntry]
+    return [...MOCK_LEADERBOARD, ...globalPlayers, meEntry]
       .sort((a, b) => b.totalXP - a.totalXP)
       .map((p, i) => ({ ...p, rank: i + 1 }));
-  }, [overall.totalXP, overall.name, muscleXP, user]);
+  }, [overall.totalXP, overall.name, muscleXP, user, globalPlayers]);
 
   const filteredLeaderboard = useMemo(() => {
     if (muscleFilter === 'all') return fullLeaderboard;

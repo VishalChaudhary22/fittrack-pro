@@ -387,11 +387,11 @@ export default function DietPage() {
       <section style={{ marginBottom: 40 }}>
         {/* STATS ROW */}
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
-          {[{ l: 'Weight', v: isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`, i: Scale },
-            { l: 'Height', v: isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`, i: Ruler },
-            { l: 'BMI Score', v: bmi, i: Calculator },
-            { l: 'TDEE', v: `${tdee} kcal`, i: Zap },
-            { l: 'Activity', v: (user.activityLevel || 'moderate').charAt(0).toUpperCase() + (user.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
+          {[{ l: 'Weight', v: user?.weight ? (isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`) : '—', i: Scale },
+            { l: 'Height', v: user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`) : '—', i: Ruler },
+            { l: 'BMI Score', v: (!bmi || isNaN(bmi) || bmi === 0) ? '—' : bmi, i: Calculator },
+            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal`, i: Zap },
+            { l: 'Activity', v: (user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
             const Icon = s.i;
             return (
               <div key={s.l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: 'var(--surface-container-low)', padding: '8px 16px', borderRadius: 20, border: '1px solid var(--surface-container-highest)' }}>

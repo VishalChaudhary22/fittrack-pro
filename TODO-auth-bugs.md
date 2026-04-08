@@ -1036,3 +1036,22 @@ Fix in this order — each is a blocker for real users:
 **On Bug 5 priority:** Many Indian gym coaches (like Vishal) use a single phone to demo apps to multiple clients. If Vishal shows the app to two different clients named "Rahul" on the same device, their data leaking into each other's accounts is a catastrophic trust failure that would kill coaching subscriptions.
 
 **On Bug 3:** Indian fitness app users (25–35, urban, gym-going demographic) are increasingly macro-aware (influenced by YouTube coaches like Ranveer Allahbadia, Tarun Gill, Guru Mann). Showing fake/broken macro numbers is worse than showing nothing — it erodes trust in the entire nutrition feature.
+
+---
+
+## 3. Post-Auth Review: Final Bugs
+> **Identified:** 2026-04-08
+
+### Bug 9: Diet Page Null Stats Rendering
+- **Root Cause:** `DietPage.jsx` renders stats inside a template literal (e.g. `${user.weight}kg`). When the user starts with no stats, it outputs "nullkg" instead of a blank state (`—`).
+- **Proposed Fix:** Adjust lines ~390 in `DietPage.jsx` to map a safely validated `stats` array instead of hardcoded JSX output, replacing any `null`/`NaN` calculations (like `tdee`) with `'—'`.
+
+### Bug 10: Strict Per-User Data Isolation Failing For Cross-Account Sign-ups
+- **Root Cause:** A combination of previously unpatched `authMigration.js` loops uploading old development data into the first Auth UUID created on the machine, combined with AppContext not forcefully wiping auxiliary local storages (like `fittrack_cardioLog` and `waterLog`) on logout.
+- **Proposed Fix:** 
+  1. Expand the `AppContext.jsx` account switch listener to wipe `cardioLog`, `waterLog`, `supplementLog`, and `supplementConfig`.
+  2. Acknowledge old test instances were contaminated prior to the Auth-1.2 fix. To clear this reliably for local devs, a manual `delete from workout_logs` in Supabase is required for the new conflicting emails, but code logic is now secure against uploading it under `uploadLocalDataToCloud`.
+
+### Bug 11: Newly Registered Users 0XP Visibility
+- **Root Cause:** `MuscleMapPage.jsx` renders a pre-baked `MOCK_LEADERBOARD` arrays combined with the local `meEntry`. It currently does not perform a global database fetch for `user_profiles` or `workout_logs` of other real players in the same app.
+- **Proposed Fix:** Modify `MuscleMapPage.jsx` to fetch `user_profiles` globally (via a standalone Supabase select) and incorporate them dynamically into the Leaderboard with their corresponding XP (using their logs if available) or 0 XP initially.

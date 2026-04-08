@@ -634,23 +634,30 @@ export default function DietPage() {
       <section id="foodLogSection">
         {activeTab === 'tracker' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <h4 className="headline-md" style={{ fontSize: 24, textTransform: 'uppercase', letterSpacing: '-1px' }}>Daily Tracker</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 className="headline-md" style={{ fontSize: 22, textTransform: 'uppercase', letterSpacing: '-1px', margin: 0, lineHeight: 1 }}>Daily Tracker</h4>
                 {getFoodStreak().current >= 3 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface-container-highest)', border: '1px solid rgba(245,158,11,0.2)', padding: '4px 10px', borderRadius: 20 }}>
-                     <Flame size={14} color="#f59e0b" />
-                     <span style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>{getFoodStreak().current} Day Streak</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(248, 95, 27, 0.1)', border: '1px solid rgba(248, 95, 27, 0.25)', padding: '6px 12px', borderRadius: 20 }}>
+                     <Flame size={14} color="var(--primary-container)" />
+                     <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary-container)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{getFoodStreak().current} Day</span>
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button className="btn-g" onClick={handleCopyYesterday} style={{ padding: '8px 16px', fontSize: 12 }}><Copy size={14} style={{ display: 'inline', marginRight: 6 }}/>Copy Y'day</button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-container-highest)', borderRadius: 20, padding: 4 }}>
-                  <button onClick={() => changeDate(-1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronLeft size={16}/></button>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)', minWidth: 80, textAlign: 'center' }}>{dateStr === tod() ? 'Today' : dateStr}</span>
-                  <button onClick={() => changeDate(1)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer' }}><ChevronRight size={16}/></button>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, width: '100%' }}>
+                <div style={{ flex: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container-highest)', borderRadius: 12, padding: '4px' }}>
+                  <button onClick={() => changeDate(-1)} style={{ padding: '8px', background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', display: 'flex' }}><ChevronLeft size={16}/></button>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)', textAlign: 'center', whiteSpace: 'nowrap' }}>{dateStr === tod() ? 'Today' : dateStr}</span>
+                  <button onClick={() => changeDate(1)} style={{ padding: '8px', background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', display: 'flex' }}><ChevronRight size={16}/></button>
                 </div>
+                <button 
+                  onClick={handleCopyYesterday} 
+                  style={{ flex: 1, padding: '0 12px', fontSize: 12, fontWeight: 700, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', borderRadius: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container)'}
+                  onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container-highest)'}
+                >
+                  <Copy size={14} style={{ color: 'var(--on-surface-variant)' }}/> Copy Y'day
+                </button>
               </div>
             </div>
 

@@ -99,7 +99,7 @@ fittrack-pro/
     │       ├── PlayerDetailModal.jsx   # Bottom-sheet muscle modal (Phase 3)
     │       └── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
     ├── context/
-    │   └── AppContext.jsx        # Global auth + hybrid cloud/local app state, per-user Diet/Readiness cache, sync wrappers
+    │   └── AppContext.jsx        # Global auth + hybrid cloud/local app state, per-user cache, cross-device refresh + sync wrappers
     ├── data/
     │   ├── constants.js          # NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE
     │   ├── splits.js             # Default split programs
@@ -540,8 +540,9 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 
 ### Auth / Boot Flow
 - `supabase.auth.onAuthStateChange()` is the single auth source of truth
-- `authLoading` gates the whole app until auth/profile hydration completes
+- `authLoading` gates the whole app until session bootstrap completes; a signed-in user can be seeded from the current session plus cached profile while cloud profile/data fetch continues in the background
 - `dataLoaded` gates readiness-sensitive UI so the dashboard does not show false empty states during refresh
+- authenticated profile fallback is cached per user in `fittrack_profile_<userId>` to prevent the desktop app from getting stuck on a permanent loading screen if profile fetch stalls
 - on login:
   1. fetch / create `user_profiles`
   2. optionally migrate legacy local data if old email matches
@@ -573,6 +574,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 ### Cloud Rehydration Notes
 - **Food logs**: AppContext normalizes cloud rows back into the richer Diet entry shape (`mealType`, `slot`, `qty`, `customGrams`, `macros`, etc.). If cloud returns empty but a per-user local cache exists, DietPage restores from that cache so logged meals do not disappear after refresh.
 - **Readiness logs**: AppContext normalizes integer DB values back into the UI enum strings and restores the saved `score` / `objectiveScore`, preventing the questionnaire from reappearing after refresh.
+- **Cross-device refresh**: AppContext subscribes to Supabase `postgres_changes` for `food_logs` and `readiness_logs`, refreshes again on `focus`, `visibilitychange`, `online`, and `pageshow`, and also runs a 15-second visible-tab polling fallback for browsers that miss realtime updates.
+- **Cloud merge policy**: food logs merge cloud rows with richer cached local entries by `id`; readiness merges by user+date and prefers completed/newer cloud-backed entries so phone and desktop do not drift into separate same-day readiness states.
 - **Sync setters**: `createSyncSetter()` wraps `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, and `setSplits`, computes add/update/delete deltas, normalizes `undefined` / empty-string / `NaN` values to `null`, then upserts/deletes in Supabase asynchronously.
 
 ---
@@ -653,6 +656,25 @@ Several rounds of mobile UX fixes on the food search modal:
   - AppContext now normalizes `food_logs` rows back into the full Diet entry shape (`slot`, `mealType`, `qty`, `customGrams`, `macros`, `sourceType`).
   - Added a direct per-user local fallback (`fittrack_foodLog_<userId>`) during cloud rehydration so logged meals still appear after refresh even if older cloud rows are incomplete or absent.
   - `authMigration.js` upload mapping now sends normalized food/readiness payloads so future rows land in Supabase in the correct shape.
+
+### Desktop Auth Bootstrap Loading Hang (Fixed 2026-04-09)
+**Symptom:** Desktop web sessions could stay on the FitTrack Pro loading screen indefinitely if the live Supabase profile fetch stalled during startup.
+**Fixes applied:**
+- AppContext now seeds signed-in UI state from `supabase.auth.getSession()` plus a cached/fallback profile instead of blocking the whole app on `user_profiles` fetch.
+- Added per-user profile caching (`fittrack_profile_<userId>`) so desktop reloads can recover instantly from the last known good profile shape.
+- Hardened profile bootstrap error handling so transient fetch failures no longer blank the profile or leave `authLoading` stuck forever.
+
+### Cross-Device Readiness & Meal Sync (Fixed 2026-04-09)
+**Symptoms:**
+- Logging readiness on phone and then opening Mac could still reopen the questionnaire and create a conflicting same-day score.
+- Meals and readiness updates were reliable from Mac → phone, but not consistently from phone → Mac.
+
+**Fixes applied:**
+- Added Supabase realtime subscriptions for `food_logs` and `readiness_logs` scoped to the authenticated `user_id`.
+- Added browser-side refresh fallbacks on `focus`, `visibilitychange`, `online`, and `pageshow`, plus a 15-second polling backup while the tab is visible.
+- Switched cloud rehydration to merge against live refs (`foodLogRef` / `readinessLogRef`) instead of stale render snapshots, reducing race conditions when another device writes during an in-flight load.
+- Readiness merge now deduplicates by `userId + date` and prefers completed/newer entries, preventing separate same-day readiness states across devices.
+- Dashboard now auto-closes the readiness sheet if today's check-in appears from another device before the user completes it locally.
 
 ---
 

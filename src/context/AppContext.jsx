@@ -12,6 +12,17 @@ import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, up
 const AppContext = createContext(null);
 const SAMPLE = genSample();
 
+const readPersistedUserArray = (prefix, userId) => {
+  if (!userId) return [];
+  try {
+    const raw = localStorage.getItem(`${prefix}_${userId}`);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 const normalizeNumber = (value) => {
   if (value === '' || value === null || value === undefined) return null;
   const parsed = Number(value);
@@ -323,20 +334,25 @@ export function AppProvider({ children }) {
       supabase.from('user_splits').select('*').eq('user_id', userId),
     ]);
 
+    const persistedFoodLog = readPersistedUserArray('fittrack_foodLog', userId);
+    const persistedReadinessLog = readPersistedUserArray('fittrack_readinessLog', userId);
+    const cachedFoodSource = foodLog.length > 0 ? foodLog : persistedFoodLog;
+    const cachedReadinessSource = readinessLog.length > 0 ? readinessLog : persistedReadinessLog;
+
     setWorkoutLogs(wl?.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })) || []);
     setHealthLogs(hl?.map(i => ({ ...i, userId: i.user_id })) || []);
-    const mappedFoodLog = fl?.map(item => {
-      const cachedItem = foodLog.find(entry => entry.id === item.id);
+    const mappedFoodLog = fl?.length ? fl.map(item => {
+      const cachedItem = cachedFoodSource.find(entry => entry.id === item.id);
       return mapFoodLogFromCloud(item, cachedItem);
-    }) || [];
+    }) : cachedFoodSource;
     if (mappedFoodLog.length > 0 || foodLog.length === 0) {
       setFoodLog(mappedFoodLog);
     }
     setMeasurements(ml?.map(i => ({ ...i, userId: i.user_id })) || []);
-    const mappedReadinessLog = rl?.map(item => {
-      const cachedItem = readinessLog.find(entry => entry.id === item.id || (entry.userId === userId && entry.date === item.date));
+    const mappedReadinessLog = rl?.length ? rl.map(item => {
+      const cachedItem = cachedReadinessSource.find(entry => entry.id === item.id || (entry.userId === userId && entry.date === item.date));
       return mapReadinessFromCloud(item, cachedItem);
-    }) || [];
+    }) : cachedReadinessSource;
     if (mappedReadinessLog.length > 0 || readinessLog.length === 0) {
       setReadinessLog(mappedReadinessLog);
     }

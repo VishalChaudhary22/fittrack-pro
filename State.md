@@ -584,7 +584,7 @@ Several rounds of mobile UX fixes on the food search modal:
 - Per-user scoping for onboarding flags (`fittrack_onboarding_pending:${user.id}`).
 - Null guards on Diet and Dashboard pages: replaced `nullkg`/`nullcm` and `NaN` TDEE with blank states (`—`).
 - Hardened account isolation: `AppContext` now resets auxiliary local storage (`cardioLog`, `waterLog`, etc.) on account switch.
-- Olympus League Global Leaderboard: Real-time Supabase fetch for `user_profiles` ensures newly registered 0XP users are visible.
+- Olympus League Global Leaderboard: Real-time Supabase fetch for `user_profiles` ensures newly registered 0XP users are visible. **Note:** Requires public SELECT policies on `user_profiles` and `workout_logs` (added in `supabase/migrations/20260409_add_leaderboard_rls.sql`). Added debug console logging to `MuscleMapPage.jsx`.
 
 ---
 

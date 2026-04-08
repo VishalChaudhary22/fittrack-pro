@@ -109,11 +109,17 @@ export default function MuscleMapPage() {
 
   useEffect(() => {
     async function fetchPlayers() {
-      const { data: users } = await supabase.from('user_profiles').select('id, name, avatar');
-      if (!users) return;
+      const { data: users, error: usersErr } = await supabase.from('user_profiles').select('id, name, avatar');
+      if (usersErr) console.error('[Olympus] Failed to fetch user_profiles:', usersErr.message);
+      if (!users || users.length === 0) {
+        console.warn('[Olympus] No users returned from user_profiles — check RLS policies');
+        return;
+      }
+      console.log(`[Olympus] Fetched ${users.length} user profiles from Supabase`);
 
       let allLogs = [];
-      const { data: logs } = await supabase.from('workout_logs').select('user_id, exercises');
+      const { data: logs, error: logsErr } = await supabase.from('workout_logs').select('user_id, exercises');
+      if (logsErr) console.error('[Olympus] Failed to fetch workout_logs:', logsErr.message);
       if (logs) allLogs = logs;
 
       const players = users.map(u => {

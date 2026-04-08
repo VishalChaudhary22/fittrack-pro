@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useContext, useCallback, useEffect, useState, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
 import { useToast } from '../hooks/useToast';
@@ -7,7 +7,7 @@ import { INIT_SPLITS } from '../data/splits';
 
 // Supabase & Migration imports
 import { supabase } from '../lib/supabaseClient';
-import { getOldUserId, uploadLocalDataToCloud } from '../utils/authMigration';
+import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, uploadLocalDataToCloud } from '../utils/authMigration';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -45,60 +45,130 @@ export function AppProvider({ children }) {
 
   useEffect(() => { initTheme(); }, [initTheme]);
 
+  const isFetchingProfile = useRef(false);
+  const prevUserIdRef = useRef(null);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      prevUserIdRef.current = null;
+      return;
+    }
+  
+    if (prevUserIdRef.current && prevUserIdRef.current !== session.user.id) {
+      // A different user has logged in on this device in this session.
+      console.log('[Auth] Account switched — resetting all local state');
+      
+      setWorkoutLogs([]);
+      setHealthLogs([]);
+      setMeasurements([]);
+      setFoodLog([]);
+      setCaloriesLog([]);
+      setReadinessLog([]);
+    }
+  
+    prevUserIdRef.current = session.user.id;
+  }, [session?.user?.id]);
+
   // --- Supabase Auth Listener ---
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) fetchProfile(session.user.id);
-      else setAuthLoading(false);
-    });
+    let initialized = false;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        await fetchProfile(session.user.id);
       } else {
+        // Clear cloud state
         setProfile(null);
+        setSplits(INIT_SPLITS);
+        setHealthLogs([]);
+        setWorkoutLogs([]);
+        setReadinessLog([]);
+        setMeasurements([]);
+        setFoodLog([]);
+        // Clear local-only prefs (Fix 6)
+        setFavoriteIds([]);
+        setSupplementConfig([]);
+        setCycleConfig({ startDate: '', cycleLength: 28 });
+        
         setAuthLoading(false);
       }
+      initialized = true;
     });
-    return () => subscription.unsubscribe();
+
+    const timeout = setTimeout(() => {
+      if (!initialized) setAuthLoading(false);
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const fetchProfile = async (userId) => {
-    // Check for local data upload FIRST
-    await uploadLocalDataToCloud(userId);
+    if (isFetchingProfile.current) return;
+    isFetchingProfile.current = true;
 
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      const meta = authUser?.user_metadata || {};
-      const newProfile = {
-        id: userId,
-        name: meta.full_name || meta.name || authUser?.email?.split('@')[0] || 'User',
-        gender: meta.gender || 'male',
-        avatar: (meta.full_name || meta.name || 'U').slice(0, 2).toUpperCase(),
-      };
-      const { data: created } = await supabase
+    try {
+      const { data, error } = await supabase
         .from('user_profiles')
-        .insert(newProfile)
-        .select()
+        .select('*')
+        .eq('id', userId)
         .single();
-      
-      setProfile(created);
-      localStorage.setItem('fittrack_onboarding_pending', 'true');
-    } else {
-      setProfile(data);
-    }
 
-    // Load cloud data!
-    await loadCloudData(userId);
-    setAuthLoading(false);
+      if (error && error.code === 'PGRST116') {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const meta = authUser?.user_metadata || {};
+        const newProfile = {
+          id: userId,
+          name: meta.full_name || meta.name || authUser?.email?.split('@')[0] || 'User',
+          gender: meta.gender || 'male',
+          avatar: (meta.full_name || meta.name || 'U').slice(0, 2).toUpperCase(),
+        };
+        const { data: created, error: upsertError } = await supabase
+          .from('user_profiles')
+          .upsert(newProfile, { onConflict: 'id' })
+          .select()
+          .single();
+        
+        if (upsertError) {
+          console.error('[Auth] Profile upsert failed:', upsertError.message);
+          const { data: retryData } = await supabase
+            .from('user_profiles').select('*').eq('id', userId).single();
+          setProfile(retryData);
+        } else {
+          setProfile(created);
+          localStorage.setItem(`fittrack_onboarding_pending:${userId}`, 'true');
+          localStorage.setItem('fittrack_user_created_at', new Date().toISOString());
+        }
+      } else if (error) {
+        console.error('[Auth] Profile fetch error:', error.message);
+        setProfile(null);
+      } else {
+        setProfile(data);
+      }
+
+      setSession(await supabase.auth.getSession().then(r => r.data.session));
+
+      // Run data migration — email-gated
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const { shouldMigrate, oldUid } = getOldUserIdIfEmailMatches(authUser?.email);
+      if (shouldMigrate && oldUid) {
+        migrateLocalData(userId, oldUid);
+        addToast('Your existing data has been linked to your account!', 'success');
+      }
+
+      // Check for local data upload
+      await uploadLocalDataToCloud(userId);
+
+      // Load cloud data!
+      await loadCloudData(userId);
+    } finally {
+      cleanupOldAuthStorage();
+      isFetchingProfile.current = false;
+      setAuthLoading(false);
+    }
   };
 
   const loadCloudData = async (userId) => {
@@ -131,7 +201,7 @@ export function AppProvider({ children }) {
       name: 'name', gender: 'gender', age: 'age', height: 'height', weight: 'weight',
       weightGoal: 'weight_goal', weightGoalStart: 'weight_goal_start',
       goalWeeks: 'goal_weeks', goalSetDate: 'goal_set_date',
-      activity: 'activity', workoutDays: 'workout_days',
+      activity: 'activity', activityLevel: 'activity', workoutDays: 'workout_days',
       dietType: 'diet_type', units: 'units', unitWeight: 'unit_weight', unitHeight: 'unit_height',
       avatar: 'avatar', avatarType: 'avatar_type', avatarUrl: 'avatar_url',
       activeSplitId: 'active_split_id', isAdmin: 'is_admin',
@@ -160,7 +230,7 @@ export function AppProvider({ children }) {
   const user = profile ? {
     id: session?.user?.id, email: session?.user?.email, name: profile.name, gender: profile.gender, age: profile.age,
     height: profile.height, weight: profile.weight, weightGoal: profile.weight_goal, weightGoalStart: profile.weight_goal_start,
-    goalWeeks: profile.goal_weeks, goalSetDate: profile.goal_set_date, activity: profile.activity, workoutDays: profile.workout_days,
+    goalWeeks: profile.goal_weeks, goalSetDate: profile.goal_set_date, activity: profile.activity, activityLevel: profile.activity, workoutDays: profile.workout_days,
     dietType: profile.diet_type, units: profile.units, unitWeight: profile.unit_weight || 'kg', unitHeight: profile.unit_height || 'cm',
     avatar: profile.avatar, avatarType: profile.avatar_type, avatarUrl: profile.avatar_url, activeSplitId: profile.active_split_id,
     isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
@@ -230,7 +300,7 @@ export function AppProvider({ children }) {
   const getStreak = useCallback(() => {
     // Streak logic unchanged
     if (!user) return { current: 0, longest: 0 };
-    const userWo = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal');
+    const userWo = workoutLogs.filter(l => l.userId === user.id);
     const dates = [...new Set(userWo.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
     if (dates.length === 0) return { current: 0, longest: 0 };
     let current = 0, longest = 0, streak = 1;

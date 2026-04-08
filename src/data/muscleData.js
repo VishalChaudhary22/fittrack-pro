@@ -105,7 +105,7 @@ export const getRank = (xp, type = 'muscle') => {
 // Computes total XP per muscle group from workout logs
 // Filters to current calendar month only and applies volume + consistency bonuses.
 export const calcAllMuscleXP = (workoutLogs, splits, user) => {
-  const userId = typeof user === 'string' ? user : (user?.id || 'vishal');
+  const userId = typeof user === 'string' ? user : user?.id;
   const activeSplitId = typeof user === 'string' ? 'ppl' : (user?.activeSplitId || 'ppl');
   
   const xp = {};
@@ -145,7 +145,7 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
   startOfMonth.setHours(0, 0, 0, 0);
   
   const userLogs = workoutLogs.filter(l => 
-    (l.userId === userId || l.userId === 'vishal') && 
+    l.userId === userId && 
     new Date(l.date + 'T00:00:00') >= startOfMonth
   );
 
@@ -319,7 +319,7 @@ export const getWeeklyMuscles = (workoutLogs, splits, userId) => {
   });
 
   const userLogs = workoutLogs.filter(l =>
-    (l.userId === userId || l.userId === 'vishal') &&
+    l.userId === userId &&
     new Date(l.date + 'T00:00:00') >= startOfWeek
   );
 

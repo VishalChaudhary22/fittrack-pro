@@ -69,6 +69,7 @@ export default function AuthModal() {
         workout_days: parseInt(f.workoutDays) || 4,
         avatar: f.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
       });
+      localStorage.setItem(`fittrack_onboarding_pending:${data.user.id}`, 'true');
     }
 
     setLoading(false);

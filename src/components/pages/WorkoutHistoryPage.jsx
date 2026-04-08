@@ -37,7 +37,7 @@ export default function WorkoutHistoryPage() {
 
   const userLogs = useMemo(() => {
     let logs = [...workoutLogs]
-      .filter(l => l.userId === user.id || l.userId === 'vishal')
+      .filter(l => l.userId === user.id)
       .sort((a, b) => new Date(b.date) - new Date(a.date));
     if (filterSplit) logs = logs.filter(l => l.splitId === filterSplit);
     if (search) {

@@ -101,6 +101,22 @@ export default function DashboardPage() {
   const [showCheckIn, setShowCheckIn] = useState(false);
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
+
+  const isNewUser = useMemo(() => {
+    if (!user?.id) return false;
+    const onboardingKey = `fittrack_onboarding_pending:${user.id}`;
+    const hasSeenWelcomeKey = `fittrack_has_seen_welcome:${user.id}`;
+    return localStorage.getItem(onboardingKey) === 'true'
+      && localStorage.getItem(hasSeenWelcomeKey) !== 'true';
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !isNewUser) return;
+    const onboardingKey = `fittrack_onboarding_pending:${user.id}`;
+    const hasSeenWelcomeKey = `fittrack_has_seen_welcome:${user.id}`;
+    localStorage.removeItem(onboardingKey);
+    localStorage.setItem(hasSeenWelcomeKey, 'true');
+  }, [user?.id, isNewUser]);
   
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   
@@ -136,7 +152,7 @@ export default function DashboardPage() {
     }
   }, [todayReadiness, user?.id]); // intentional — todayReadiness is stable per-render
 
-  const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id || l.userId === 'vishal').sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
+  const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id).sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;
   const bmi = calcBMI(latestWeight, user.height);
   const bmiCat = getBMICat(bmi);
@@ -167,7 +183,7 @@ export default function DashboardPage() {
   }, [allUserLogs]);
 
   const activeSplit = splits.find(s => s.id === user.activeSplitId);
-  const userWo = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal');
+  const userWo = workoutLogs.filter(l => l.userId === user.id);
   const thisWk = userWo.filter(l => (new Date() - new Date(l.date)) / 86400000 <= 7).length;
   const streak = getStreak();
 
@@ -247,6 +263,9 @@ export default function DashboardPage() {
 
   const calPct = clamp(Math.round((todayTotals.calories / goalKcal) * 100) || 0, 0, 100);
 
+  const hasBodyMetrics = Number.isFinite(user?.weight) && Number.isFinite(user?.height) && Number.isFinite(user?.age);
+  const hasNutritionTargets = hasBodyMetrics && Number.isFinite(goalKcal) && Number.isFinite(protTarget);
+
   const saveLog = () => {
     const w = parseFloat(logWeight);
     if (!w || isNaN(w)) return;
@@ -286,7 +305,7 @@ export default function DashboardPage() {
             SESSION ACTIVE
           </div>
           <div style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
-            WELCOME BACK,<br/>
+            {isNewUser ? 'WELCOME,' : 'WELCOME BACK,'}<br/>
             <span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span>
           </div>
           <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -339,9 +358,9 @@ export default function DashboardPage() {
                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 4 }}>CURRENT</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                   <span style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1 }}>
-                    {isImpWeight ? kgToLbs(latestWeight) : latestWeight}
+                    {latestWeight ? (isImpWeight ? kgToLbs(latestWeight) : latestWeight) : '—'}
                   </span>
-                  <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>{isImpWeight ? 'lbs' : 'kg'}</span>
+                  {latestWeight && <span style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>{isImpWeight ? 'lbs' : 'kg'}</span>}
                 </div>
               </div>
               
@@ -371,30 +390,34 @@ export default function DashboardPage() {
             <Activity size={28} style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15, color: 'var(--on-surface)' }} />
             <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 16 }}>METABOLIC INDEX</div>
             
-            <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
-              <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi || '—'}</span>
-                <span style={{ fontSize: 10, color: 'var(--primary-container)', marginTop: 4, fontWeight: 700 }}>{bmiCat.label}</span>
+            {bmi && !isNaN(bmi) ? (<>
+              <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+                <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi}</span>
+                  <span style={{ fontSize: 10, color: 'var(--primary-container)', marginTop: 4, fontWeight: 700 }}>{bmiCat.label}</span>
+                </div>
               </div>
-            </div>
-            
-            <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center', padding: '0 8px', lineHeight: 1.4, marginTop: 12, marginBottom: 12 }}>
-              {getBMIInsight(bmi)}
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
-              {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
-                const isActive = bmiCat.label.startsWith(s.l);
-                return (
-                  <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
-                    <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
-                  </div>
-                );
-              })}
-            </div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center', padding: '0 8px', lineHeight: 1.4, marginTop: 12, marginBottom: 12 }}>
+                {getBMIInsight(bmi)}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
+                {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
+                  const isActive = bmiCat.label.startsWith(s.l);
+                  return (
+                    <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
+                      <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>) : (
+              <div style={{ fontSize: 12, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '24px 16px' }}>
+                Add weight & height in Profile to see BMI
+              </div>
+            )}
           </div>
         </div>
 
@@ -439,6 +462,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Today's Nutrition (Phase 3 Macro Widget) */}
+        {!hasNutritionTargets ? (
+          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', textAlign: 'center' }} onClick={() => navigate('/profile')}>
+            <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 8 }}>TODAY'S NUTRITION</div>
+            <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Complete your profile to unlock daily targets</div>
+          </div>
+        ) : (
         <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/diet')}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
@@ -476,6 +505,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Daily Activity (Similar to Today's Nutrition) */}
         <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/diet')}>

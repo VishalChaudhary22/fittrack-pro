@@ -4,13 +4,24 @@ import { supabase } from '../lib/supabaseClient';
  * Phase Auth-1: Migration utilities to transition local fitness data from the old
  * random ID system to the new Supabase UUID system.
  */
-export const getOldUserId = () => {
+export const getOldUserIdIfEmailMatches = (currentEmail) => {
+  if (!currentEmail) return { shouldMigrate: false, oldUid: null };
+
+  const raw = localStorage.getItem('fittrack_users');
+  if (!raw) return { shouldMigrate: false, oldUid: null };
+
   try {
-    const uidStr = localStorage.getItem('fittrack_uid');
-    if (!uidStr) return null;
-    return JSON.parse(uidStr);
+    const users = JSON.parse(raw);
+    const oldUser = users?.[0];
+    if (!oldUser?.id) return { shouldMigrate: false, oldUid: null };
+
+    if (oldUser.email?.toLowerCase() === currentEmail.toLowerCase()) {
+      return { shouldMigrate: true, oldUid: oldUser.id };
+    }
+
+    return { shouldMigrate: false, oldUid: null };
   } catch {
-    return null;
+    return { shouldMigrate: false, oldUid: null };
   }
 };
 
@@ -85,8 +96,8 @@ export const uploadLocalDataToCloud = async (userId) => {
     try { 
       const parsed = JSON.parse(localStorage.getItem(key));
       if (!Array.isArray(parsed)) return [];
-      // Only upload data matching the current user id (or the global vishal/demo)
-      return parsed.filter(i => i.userId === userId || i.userId === 'vishal' || i.userId === 'demo');
+      // Only upload data matching the current user id
+      return parsed.filter(i => i.userId === userId);
     } catch { return []; }
   };
 

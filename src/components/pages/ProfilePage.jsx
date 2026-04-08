@@ -151,10 +151,10 @@ export default function ProfilePage() {
   // Elite Achievements Data
   const streak = getStreak();
   const achievements = useMemo(() => {
-    const isHeavyHitter = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal').some(log => 
+    const isHeavyHitter = workoutLogs.filter(l => l.userId === user.id).some(log => 
       log.exercises?.some(ex => ex.sets?.some(s => s.weight >= user.weight * 2.5))
     );
-    const monthlyVol = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal').filter(l => {
+    const monthlyVol = workoutLogs.filter(l => l.userId === user.id).filter(l => {
       const d = new Date(l.date); const now = new Date();
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).reduce((acc, log) => {

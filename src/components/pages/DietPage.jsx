@@ -82,6 +82,9 @@ export default function DietPage() {
   const [customInput, setCustomInput] = useState({ name: '', cals: '', p: '', c: '', f: '' });
   const [editingEntry, setEditingEntry] = useState(null);
 
+  const canCalculate = Boolean(Number.isFinite(user?.weight) && Number.isFinite(user?.height) && Number.isFinite(user?.age));
+  const isUnset = !canCalculate || !user?.weightGoal;
+
   // Body stats
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
@@ -403,6 +406,20 @@ export default function DietPage() {
 
         {/* GOAL SECTION WRAPPER */}
         <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)', boxShadow: 'var(--glow-primary)', marginBottom: 24, position: 'relative' }}>
+          {isUnset ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <span className="headline-md" style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🎯</span>
+              <h2 className="headline-lg" style={{ fontSize: 24, marginBottom: 12, color: 'var(--on-surface)' }}>Targets Locked</h2>
+              <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
+                Complete your profile with your age, height, current weight, and target weight to generate your personalized macros.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button className="btn-p" onClick={() => window.location.hash = '#/profile'} style={{ width: 'auto', padding: '12px 32px' }}>
+                  Update Profile
+                </button>
+              </div>
+            </div>
+          ) : (<>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: 16, marginBottom: 32 }}>
             <div style={{ textAlign: 'center' }}>
               <span style={{ color: 'var(--primary-container)', fontSize: 9, letterSpacing: '3px', fontWeight: 900, textTransform: 'uppercase' }}>Phase Status</span>
@@ -437,6 +454,7 @@ export default function DietPage() {
               TRACK TODAY <ArrowDown size={14} color="var(--primary)" />
             </button>
           </div>
+          </>)}
         </div>
 
         {/* TAB SWITCHER */}

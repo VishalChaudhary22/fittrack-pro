@@ -19,7 +19,7 @@ export default function ProgressPage() {
   const [rmRp, setRmRp] = useState('');
   const split = splits.find(s => s.id === ss);
   const days = split?.days.filter(d => d.type !== 'rest') || [];
-  const ul = workoutLogs.filter(l => l.userId === user.id || l.userId === 'vishal');
+  const ul = workoutLogs.filter(l => l.userId === user.id);
 
   const exN = useMemo(() => { const n = new Set(); ul.filter(l => !sd || l.dayId === sd).forEach(l => l.exercises?.forEach(e => n.add(e.name))); if (sd) days.find(d => d.id === sd)?.exercises.forEach(e => n.add(e.name)); return [...n]; }, [sd, ul, days]);
   const cd = useMemo(() => {

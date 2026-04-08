@@ -107,7 +107,7 @@ export default function MuscleMapPage() {
   // Build and sort the full leaderboard including the real user
   const fullLeaderboard = useMemo(() => {
     const meEntry = {
-      id: user?.id || 'vishal',
+      id: user?.id,
       name: 'You',
       isMe: true,
       totalXP: overall.totalXP,
@@ -158,7 +158,7 @@ export default function MuscleMapPage() {
     startOfWeek.setHours(0, 0, 0, 0);
     const uniqueDates = new Set(
       workoutLogs
-        .filter(l => (l.userId === user?.id || l.userId === 'vishal') && new Date(l.date + 'T00:00:00') >= startOfWeek)
+        .filter(l => l.userId === user?.id && new Date(l.date + 'T00:00:00') >= startOfWeek)
         .map(l => l.date)
     );
     return uniqueDates.size;

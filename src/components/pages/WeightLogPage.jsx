@@ -14,7 +14,7 @@ export default function WeightLogPage() {
 
   const userLogs = useMemo(() =>
     [...healthLogs]
-      .filter(l => l.userId === user.id || l.userId === 'vishal')
+      .filter(l => l.userId === user.id)
       .sort((a, b) => new Date(b.date) - new Date(a.date)),
     [healthLogs, user.id]);
 

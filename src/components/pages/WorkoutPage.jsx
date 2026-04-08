@@ -324,7 +324,7 @@ export default function WorkoutPage() {
       return;
     }
     const exs = day.exercises.map(ex => {
-      const prev = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      const prev = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
       return {
         ...ex, sv: ex.variants ? ex.variants[0] : null,
         sets: Array.from({ length: ex.sets || 3 }, () => {
@@ -586,7 +586,7 @@ export default function WorkoutPage() {
       {!activeSplit ? <EmptyState Icon={Trophy} title="No Split Selected" message="Go to Splits to select a workout program first" /> :
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 10 }}>
           {wDays.map(day => {
-            const last = workoutLogs.filter(l => (l.userId === user.id || l.userId === 'vishal') && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            const last = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             return (
               <div key={day.id} className="card stripe" style={{ padding: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Last: {fmt(last.date)}</span>}</div>

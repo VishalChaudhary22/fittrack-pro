@@ -12,6 +12,94 @@ import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, up
 const AppContext = createContext(null);
 const SAMPLE = genSample();
 
+const normalizeNumber = (value) => {
+  if (value === '' || value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const READINESS_SORENESS_TO_DB = {
+  none: 0,
+  mild: 1,
+  significant: 2,
+};
+
+const READINESS_SORENESS_FROM_DB = {
+  0: 'none',
+  1: 'mild',
+  2: 'significant',
+};
+
+const READINESS_STRESS_TO_DB = {
+  low: 0,
+  medium: 1,
+  high: 2,
+};
+
+const READINESS_STRESS_FROM_DB = {
+  0: 'low',
+  1: 'medium',
+  2: 'high',
+};
+
+const mapFoodLogFromCloud = (item, cachedItem = null) => {
+  const quantity = normalizeNumber(item.quantity);
+  const grams = normalizeNumber(item.grams);
+  const calories = normalizeNumber(item.calories);
+  const protein = normalizeNumber(item.protein);
+  const carbs = normalizeNumber(item.carbs);
+  const fat = normalizeNumber(item.fat);
+  const fiber = normalizeNumber(item.fiber);
+
+  return {
+    ...cachedItem,
+    ...item,
+    userId: item.user_id,
+    mealType: item.meal_type || cachedItem?.mealType || 'Breakfast',
+    slot: item.meal_type || cachedItem?.slot || 'Breakfast',
+    foodId: item.food_id,
+    foodName: item.food_name,
+    name: item.food_name || cachedItem?.name || 'Food',
+    servingId: item.serving_id || cachedItem?.servingId || '',
+    servingLabel: item.serving_label || cachedItem?.servingLabel || '',
+    qty: quantity ?? cachedItem?.qty ?? 1,
+    quantity: quantity ?? cachedItem?.quantity ?? cachedItem?.qty ?? 1,
+    customGrams: grams ?? cachedItem?.customGrams ?? '',
+    grams: grams ?? cachedItem?.grams ?? null,
+    sourceType: item.source_type || cachedItem?.sourceType || 'database',
+    macros: {
+      calories: calories ?? cachedItem?.macros?.calories ?? 0,
+      protein: protein ?? cachedItem?.macros?.protein ?? 0,
+      carbs: carbs ?? cachedItem?.macros?.carbs ?? 0,
+      fat: fat ?? cachedItem?.macros?.fat ?? 0,
+      fiber: fiber ?? cachedItem?.macros?.fiber ?? 0,
+      iron: cachedItem?.macros?.iron ?? 0,
+      vitaminB12: cachedItem?.macros?.vitaminB12 ?? 0,
+      vitaminD: cachedItem?.macros?.vitaminD ?? 0,
+    },
+  };
+};
+
+const mapReadinessFromCloud = (item, cachedItem = null) => {
+  const sorenessLevel = normalizeNumber(item.soreness_level);
+  const stressLevel = normalizeNumber(item.stress_level);
+  const score = normalizeNumber(item.score);
+  const objectiveScore = normalizeNumber(item.objective_score);
+
+  return {
+    ...cachedItem,
+    ...item,
+    userId: item.user_id,
+    sleepHours: normalizeNumber(item.sleep_hours) ?? cachedItem?.sleepHours ?? null,
+    energyLevel: normalizeNumber(item.energy_level) ?? cachedItem?.energyLevel ?? null,
+    sorenessLevel: READINESS_SORENESS_FROM_DB[sorenessLevel] ?? cachedItem?.sorenessLevel ?? null,
+    stressLevel: READINESS_STRESS_FROM_DB[stressLevel] ?? cachedItem?.stressLevel ?? null,
+    score: score ?? cachedItem?.score ?? null,
+    objectiveScore: objectiveScore ?? cachedItem?.objectiveScore ?? null,
+    checkInComplete: item.check_in_complete ?? cachedItem?.checkInComplete ?? false,
+  };
+};
+
 export function AppProvider({ children }) {
   // --- Supabase Auth State ---
   const [session, setSession] = useState(null);
@@ -237,9 +325,21 @@ export function AppProvider({ children }) {
 
     setWorkoutLogs(wl?.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })) || []);
     setHealthLogs(hl?.map(i => ({ ...i, userId: i.user_id })) || []);
-    setFoodLog(fl?.map(i => ({ ...i, userId: i.user_id, mealType: i.meal_type || 'Breakfast', foodId: i.food_id, foodName: i.food_name, name: i.food_name, servingId: i.serving_id, servingLabel: i.serving_label, slot: i.meal_type || 'Breakfast', macros: { calories: Number(i.calories) || 0, protein: Number(i.protein) || 0, carbs: Number(i.carbs) || 0, fat: Number(i.fat) || 0, fiber: Number(i.fiber) || 0, iron: 0, vitaminB12: 0, vitaminD: 0 } })) || []);
+    const mappedFoodLog = fl?.map(item => {
+      const cachedItem = foodLog.find(entry => entry.id === item.id);
+      return mapFoodLogFromCloud(item, cachedItem);
+    }) || [];
+    if (mappedFoodLog.length > 0 || foodLog.length === 0) {
+      setFoodLog(mappedFoodLog);
+    }
     setMeasurements(ml?.map(i => ({ ...i, userId: i.user_id })) || []);
-    setReadinessLog(rl?.map(i => ({ ...i, userId: i.user_id, sleepHours: i.sleep_hours, energyLevel: i.energy_level, sorenessLevel: i.soreness_level, stressLevel: i.stress_level, objectiveScore: i.objective_score, checkInComplete: i.check_in_complete })) || []);
+    const mappedReadinessLog = rl?.map(item => {
+      const cachedItem = readinessLog.find(entry => entry.id === item.id || (entry.userId === userId && entry.date === item.date));
+      return mapReadinessFromCloud(item, cachedItem);
+    }) || [];
+    if (mappedReadinessLog.length > 0 || readinessLog.length === 0) {
+      setReadinessLog(mappedReadinessLog);
+    }
     
     // Spltis fallback to INIT_SPLITS if none exist
     setSplits(sl?.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
@@ -311,8 +411,13 @@ export function AppProvider({ children }) {
         if (toUpsert.length > 0) {
           const mapped = toUpsert.map(i => {
             const mappedItem = mapperToCloud(i);
-            // Ensure no undefined values which cause Supabase to fail silently, replace with null
-            const cleanMappedItem = Object.fromEntries(Object.entries(mappedItem).map(([k, v]) => [k, v === undefined ? null : v]));
+            // Normalize values Supabase numeric columns reject, like undefined, empty string, and NaN.
+            const cleanMappedItem = Object.fromEntries(
+              Object.entries(mappedItem).map(([k, v]) => [
+                k,
+                v === undefined || v === '' || (typeof v === 'number' && Number.isNaN(v)) ? null : v,
+              ])
+            );
             return { ...cleanMappedItem, user_id: currentUserId };
           });
           const { error } = await supabase.from(table).upsert(mapped, { onConflict: 'id' });
@@ -337,7 +442,21 @@ export function AppProvider({ children }) {
   })), [profile, healthLogs]);
 
   const setFoodLogSync = useCallback(createSyncSetter('food_logs', foodLog, setFoodLog, (l) => ({
-    id: l.id, date: l.date, meal_type: l.mealType || l.slot, food_id: l.foodId, food_name: l.foodName || l.name, serving_id: l.servingId, serving_label: l.servingLabel, grams: l.grams || l.customGrams, quantity: l.quantity || l.qty, calories: l.macros?.calories ?? l.calories, protein: l.macros?.protein ?? l.protein, carbs: l.macros?.carbs ?? l.carbs, fat: l.macros?.fat ?? l.fat, fiber: l.macros?.fiber ?? l.fiber
+    id: l.id,
+    date: l.date,
+    meal_type: l.mealType || l.slot,
+    food_id: l.foodId,
+    food_name: l.foodName || l.name,
+    serving_id: l.servingId,
+    serving_label: l.servingLabel || null,
+    grams: normalizeNumber(l.grams ?? l.customGrams),
+    quantity: normalizeNumber(l.quantity ?? l.qty) ?? 1,
+    calories: normalizeNumber(l.macros?.calories ?? l.calories),
+    protein: normalizeNumber(l.macros?.protein ?? l.protein),
+    carbs: normalizeNumber(l.macros?.carbs ?? l.carbs),
+    fat: normalizeNumber(l.macros?.fat ?? l.fat),
+    fiber: normalizeNumber(l.macros?.fiber ?? l.fiber),
+    source_type: l.sourceType || null,
   })), [profile, foodLog]);
 
   const setMeasurementsSync = useCallback(createSyncSetter('measurements', measurements, setMeasurements, (l) => ({
@@ -345,7 +464,19 @@ export function AppProvider({ children }) {
   })), [profile, measurements]);
 
   const setReadinessLogSync = useCallback(createSyncSetter('readiness_logs', readinessLog, setReadinessLog, (l) => ({
-    id: l.id, date: l.date, sleep_hours: l.sleepHours, energy_level: l.energyLevel, soreness_level: l.sorenessLevel, stress_level: l.stressLevel, score: l.score, objective_score: l.objectiveScore, check_in_complete: l.checkInComplete
+    id: l.id,
+    date: l.date,
+    sleep_hours: normalizeNumber(l.sleepHours),
+    energy_level: normalizeNumber(l.energyLevel),
+    soreness_level: typeof l.sorenessLevel === 'string'
+      ? READINESS_SORENESS_TO_DB[l.sorenessLevel] ?? null
+      : normalizeNumber(l.sorenessLevel),
+    stress_level: typeof l.stressLevel === 'string'
+      ? READINESS_STRESS_TO_DB[l.stressLevel] ?? null
+      : normalizeNumber(l.stressLevel),
+    score: normalizeNumber(l.score),
+    objective_score: normalizeNumber(l.objectiveScore),
+    check_in_complete: l.checkInComplete,
   })), [profile, readinessLog]);
 
   const setSplitsSync = useCallback(createSyncSetter('user_splits', splits, setSplits, (l) => ({

@@ -126,8 +126,12 @@ export default function DashboardPage() {
 
   const todayStr = useMemo(() => tod(), []);
   const todayReadiness = useMemo(() => readinessLog.find(r => r.userId === user?.id && r.date === todayStr), [readinessLog, user?.id, todayStr]);
+  const hasCompletedReadiness = Boolean(
+    todayReadiness?.checkInComplete
+    && Number.isFinite(todayReadiness?.score)
+  );
 
-  const activeScore = todayReadiness?.checkInComplete ? todayReadiness.score : objectiveScore;
+  const activeScore = hasCompletedReadiness ? todayReadiness.score : objectiveScore;
   const activeTier = getTier(activeScore);
 
   const muscleStatuses = useMemo(() => getMuscleRecoveryStatuses(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
@@ -147,11 +151,11 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!dataLoaded) return; // wait for cloud data to fully load (readinessLog populated)
-    if (!todayReadiness && user?.id) {
+    if (!hasCompletedReadiness && user?.id) {
       const timer = setTimeout(() => setShowCheckIn(true), 800);
       return () => clearTimeout(timer);
     }
-  }, [todayReadiness, user?.id, dataLoaded]); // intentional — todayReadiness is stable per-render
+  }, [hasCompletedReadiness, user?.id, dataLoaded]); // intentional — readiness completion is stable per-render
 
   const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id).sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;

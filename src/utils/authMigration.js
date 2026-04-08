@@ -1,5 +1,23 @@
 import { supabase } from '../lib/supabaseClient';
 
+const normalizeNumber = (value) => {
+  if (value === '' || value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const READINESS_SORENESS_TO_DB = {
+  none: 0,
+  mild: 1,
+  significant: 2,
+};
+
+const READINESS_STRESS_TO_DB = {
+  low: 0,
+  medium: 1,
+  high: 2,
+};
+
 /**
  * Phase Auth-1: Migration utilities to transition local fitness data from the old
  * random ID system to the new Supabase UUID system.
@@ -129,10 +147,22 @@ export const uploadLocalDataToCloud = async (userId) => {
   const fl = safeParse('fittrack_foodLog');
   if (fl.length) {
     const mapped = fl.map(l => ({
-      id: l.id, user_id: userId, date: l.date, meal_type: l.mealType,
-      food_id: l.foodId, food_name: l.foodName, serving_id: l.servingId,
-      serving_label: l.servingLabel, grams: l.grams, quantity: l.quantity,
-      calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat, fiber: l.fiber
+      id: l.id,
+      user_id: userId,
+      date: l.date,
+      meal_type: l.mealType || l.slot,
+      food_id: l.foodId,
+      food_name: l.foodName || l.name,
+      serving_id: l.servingId,
+      serving_label: l.servingLabel || null,
+      grams: normalizeNumber(l.grams ?? l.customGrams),
+      quantity: normalizeNumber(l.quantity ?? l.qty) ?? 1,
+      calories: normalizeNumber(l.macros?.calories ?? l.calories),
+      protein: normalizeNumber(l.macros?.protein ?? l.protein),
+      carbs: normalizeNumber(l.macros?.carbs ?? l.carbs),
+      fat: normalizeNumber(l.macros?.fat ?? l.fat),
+      fiber: normalizeNumber(l.macros?.fiber ?? l.fiber),
+      source_type: l.sourceType || null,
     }));
     await supabase.from('food_logs').upsert(mapped, { onConflict: 'id' });
     localStorage.removeItem('fittrack_foodLog');
@@ -155,10 +185,20 @@ export const uploadLocalDataToCloud = async (userId) => {
   const rl = safeParse('fittrack_readinessLog');
   if (rl.length) {
     const mapped = rl.map(l => ({
-      id: l.id, user_id: userId, date: l.date, sleep_hours: l.sleepHours,
-      energy_level: l.energyLevel, soreness_level: l.sorenessLevel,
-      stress_level: l.stressLevel, score: l.score, objective_score: l.objectiveScore,
-      check_in_complete: l.checkInComplete
+      id: l.id,
+      user_id: userId,
+      date: l.date,
+      sleep_hours: normalizeNumber(l.sleepHours),
+      energy_level: normalizeNumber(l.energyLevel),
+      soreness_level: typeof l.sorenessLevel === 'string'
+        ? READINESS_SORENESS_TO_DB[l.sorenessLevel] ?? null
+        : normalizeNumber(l.sorenessLevel),
+      stress_level: typeof l.stressLevel === 'string'
+        ? READINESS_STRESS_TO_DB[l.stressLevel] ?? null
+        : normalizeNumber(l.stressLevel),
+      score: normalizeNumber(l.score),
+      objective_score: normalizeNumber(l.objectiveScore),
+      check_in_complete: l.checkInComplete,
     }));
     await supabase.from('readiness_logs').upsert(mapped, { onConflict: 'id' });
     localStorage.removeItem('fittrack_readinessLog');

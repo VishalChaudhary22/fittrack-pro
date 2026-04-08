@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
-import { fmt } from '../../utils/helpers';
+import { fmt, tod } from '../../utils/helpers';
 import { getMusclesForExercise, MUSCLE_GROUPS } from '../../data/muscleData';
 
 // Format duration from durationMinutes
@@ -124,7 +124,7 @@ export default function WorkoutHistoryPage() {
     setCardioLog(p => [...p, {
        id: Math.random().toString(36).substring(7),
        userId: user.id,
-       date: new Date().toISOString().split('T')[0],
+       date: tod(),
        type: cType,
        minutes: parseInt(cMins),
        distance: cDist ? parseFloat(cDist) : 0,

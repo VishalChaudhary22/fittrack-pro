@@ -297,30 +297,35 @@ export function AppProvider({ children }) {
   // To avoid rewriting all 21 setters in the app, we provide a smart wrapper that updates local AND cloud state.
   
   const createSyncSetter = (table, localState, setLocalState, mapperToCloud) => async (updater) => {
-    const prev = localState;
-    const next = typeof updater === 'function' ? updater(prev) : updater;
-    setLocalState(next); // Synchronous UI update
+    setLocalState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      
+      // Compute delta and sync asynchronously to avoid blocking the React render
+      setTimeout(async () => {
+        const currentUserId = profile?.id;
+        if (!currentUserId) return;
+        
+        const toUpsert = next.filter(n => !prev.some(p => p.id === n.id) || JSON.stringify(prev.find(p => p.id === n.id)) !== JSON.stringify(n));
+        const toDeleteIds = prev.filter(p => !next.some(n => n.id === p.id)).map(p => p.id);
 
-    // Side-effects run safely outside of setState React logic
-    const currentUserId = profile?.id;
-    if (!currentUserId) return;
-    
-    // Find added/updated
-    const toUpsert = next.filter(n => !prev.some(p => p.id === n.id) || JSON.stringify(prev.find(p => p.id === n.id)) !== JSON.stringify(n));
-    // Find deleted
-    const toDeleteIds = prev.filter(p => !next.some(n => n.id === p.id)).map(p => p.id);
+        if (toUpsert.length > 0) {
+          const mapped = toUpsert.map(i => {
+            const mappedItem = mapperToCloud(i);
+            // Ensure no undefined values which cause Supabase to fail silently, replace with null
+            const cleanMappedItem = Object.fromEntries(Object.entries(mappedItem).map(([k, v]) => [k, v === undefined ? null : v]));
+            return { ...cleanMappedItem, user_id: currentUserId };
+          });
+          const { error } = await supabase.from(table).upsert(mapped, { onConflict: 'id' });
+          if (error) console.error(`[CloudSync] Upsert failed for ${table}:`, error.message, mapped);
+        }
+        if (toDeleteIds.length > 0) {
+          const { error } = await supabase.from(table).delete().in('id', toDeleteIds);
+          if (error) console.error(`[CloudSync] Delete failed for ${table}:`, error.message, toDeleteIds);
+        }
+      }, 0);
 
-    try {
-      if (toUpsert.length > 0) {
-        const mapped = toUpsert.map(i => ({ ...mapperToCloud(i), user_id: currentUserId }));
-        await supabase.from(table).upsert(mapped, { onConflict: 'id' });
-      }
-      if (toDeleteIds.length > 0) {
-        await supabase.from(table).delete().in('id', toDeleteIds);
-      }
-    } catch (e) {
-      console.error(`[CloudSync] Failed to sync ${table}:`, e);
-    }
+      return next;
+    });
   };
 
   const setWorkoutLogsSync = useCallback(createSyncSetter('workout_logs', workoutLogs, setWorkoutLogs, (l) => ({

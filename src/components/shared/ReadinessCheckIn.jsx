@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { calcReadinessScore, getTier } from '../../utils/readinessUtils';
+import { tod } from '../../utils/helpers';
 
 export default function ReadinessCheckIn({ objectiveScore, onClose }) {
   const { user, logReadiness } = useApp();
@@ -36,7 +37,7 @@ export default function ReadinessCheckIn({ objectiveScore, onClose }) {
       // Final step — compute and save
       const score = calcReadinessScore(updated, objectiveScore);
       setFinalScore(score);
-      const today = new Date().toISOString().split('T')[0];
+      const today = tod();
       logReadiness({
         userId: user.id,
         date: today,

@@ -122,6 +122,7 @@ export function AppProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('[Auth] onAuthStateChange:', _event, session ? `user=${session.user.id}` : 'no session');
+      initialized = true; // Mark IMMEDIATELY so the 3s timeout doesn't prematurely show login
       setSession(session);
       if (session?.user) {
         localStorage.setItem('fittrack_last_user_id', session.user.id);
@@ -143,7 +144,6 @@ export function AppProvider({ children }) {
         
         setAuthLoading(false);
       }
-      initialized = true;
     });
 
     const timeout = setTimeout(() => {

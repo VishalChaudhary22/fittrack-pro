@@ -22,9 +22,49 @@ export function AppProvider({ children }) {
   const [splits, setSplits] = useState([]);
   const [healthLogs, setHealthLogs] = useState([]);
   const [workoutLogs, setWorkoutLogs] = useState([]);
-  const [readinessLog, setReadinessLog] = useState([]);
+  const [readinessLog, setReadinessLogState] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return [];
+    try { return JSON.parse(localStorage.getItem(`fittrack_readinessLog_${cachedUserId}`) || '[]'); }
+    catch { return []; }
+  });
   const [measurements, setMeasurements] = useState([]);
-  const [foodLog, setFoodLog] = useState([]);
+  const [foodLog, setFoodLogState] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return [];
+    try { return JSON.parse(localStorage.getItem(`fittrack_foodLog_${cachedUserId}`) || '[]'); }
+    catch { return []; }
+  });
+
+  const setReadinessLog = useCallback((updater) => {
+    setReadinessLogState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+      if (cachedUserId) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 90);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+        const pruned = next.filter(e => e.date >= cutoffStr);
+        localStorage.setItem(`fittrack_readinessLog_${cachedUserId}`, JSON.stringify(pruned));
+      }
+      return next;
+    });
+  }, []);
+
+  const setFoodLog = useCallback((updater) => {
+    setFoodLogState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+      if (cachedUserId) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 90);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+        const pruned = next.filter(e => e.date >= cutoffStr);
+        localStorage.setItem(`fittrack_foodLog_${cachedUserId}`, JSON.stringify(pruned));
+      }
+      return next;
+    });
+  }, []);
 
   // --- Phase 3 / Non-Migrated Local State ---
   const [favoriteIds, setFavoriteIds] = useLocalStorage('fittrack_favoriteFoods', []);
@@ -68,6 +108,9 @@ export function AppProvider({ children }) {
       setCardioLog([]);
       setSupplementLog([]);
       setSupplementConfig([]);
+      
+      localStorage.removeItem(`fittrack_foodLog_${prevUserIdRef.current}`);
+      localStorage.removeItem(`fittrack_readinessLog_${prevUserIdRef.current}`);
     }
   
     prevUserIdRef.current = session.user.id;
@@ -80,8 +123,10 @@ export function AppProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session?.user) {
+        localStorage.setItem('fittrack_last_user_id', session.user.id);
         await fetchProfile(session.user.id);
       } else {
+        localStorage.removeItem('fittrack_last_user_id');
         // Clear cloud state
         setProfile(null);
         setSplits(INIT_SPLITS);

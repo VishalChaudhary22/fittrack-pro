@@ -307,6 +307,35 @@ export default function WorkoutPage() {
   const finishBtnRef = useRef(null);
   const [showFAB, setShowFAB] = useState(true);
 
+  const startTimeRef = useRef(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  // Recover startTime from sessionStorage on mount (survives Ctrl+R)
+  useEffect(() => {
+    const saved = sessionStorage.getItem('fittrack_session_start');
+    if (saved && session) startTimeRef.current = parseInt(saved, 10);
+  }, [session]);
+
+  // Ticking interval — runs only when a non-yoga session is active
+  useEffect(() => {
+    if (!session || session.isYoga || done) return;
+    if (!startTimeRef.current) {
+      startTimeRef.current = session.startTime || Date.now();
+    }
+    const tick = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [session, done]);
+
+  const fmtElapsed = (secs) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+
   useEffect(() => {
     if (!finishBtnRef.current) return;
     const observer = new IntersectionObserver(
@@ -332,8 +361,12 @@ export default function WorkoutPage() {
         }),
       };
     });
-    const timestamp = new Date().getTime();
-    setSession({ day, exs, notes: '', startTime: timestamp }); setDone(null);
+    });
+    const timestamp = Date.now();
+    sessionStorage.setItem('fittrack_session_start', String(timestamp));
+    startTimeRef.current = timestamp;
+    setSession({ day, exs, notes: '', startTime: timestamp });
+    setDone(null);
   };
 
   const upd = (ei, si, f, v) => setSession(p => {
@@ -350,6 +383,9 @@ export default function WorkoutPage() {
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
   const finish = () => {
+    sessionStorage.removeItem('fittrack_session_start');
+    startTimeRef.current = null;
+    setElapsed(0);
     const endTimestamp = new Date().getTime();
     const log = {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
@@ -547,7 +583,12 @@ export default function WorkoutPage() {
         <button onClick={finish} style={{ width: '100%', padding: '20px', fontSize: 18, borderRadius: 16, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(248,95,27,0.3)', transition: 'transform 0.1s' }} onMouseDown={e => e.currentTarget.style.transform='scale(0.98)'} onMouseUp={e => e.currentTarget.style.transform='scale(1)'}>
           Finish Workout
         </button>
-        <button onClick={() => { setSession(null); setTimer(null); }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
+        <button onClick={() => {
+          sessionStorage.removeItem('fittrack_session_start');
+          startTimeRef.current = null;
+          setElapsed(0);
+          setSession(null); setTimer(null);
+        }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
           Discard Workout
         </button>
       </section>
@@ -566,12 +607,15 @@ export default function WorkoutPage() {
             </button>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', width: 130 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', width: 130 }}>
             <span style={{ position: 'relative', display: 'flex', width: 8, height: 8, flexShrink: 0 }}>
               <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
               <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
             </span>
-            <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9, whiteSpace: 'nowrap' }}>Live tracking</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', lineHeight: 1 }}>Live</span>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 13, letterSpacing: '-0.02em', color: 'var(--primary)', lineHeight: 1 }}>{fmtElapsed(elapsed)}</span>
+            </div>
           </div>
         </div>
       </Portal>

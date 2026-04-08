@@ -437,7 +437,8 @@ export function AppProvider({ children }) {
             return { ...cleanMappedItem, user_id: currentUserId };
           });
           const { error } = await supabase.from(table).upsert(mapped, { onConflict: 'id' });
-          if (error) console.error(`[CloudSync] Upsert failed for ${table}:`, error.message, mapped);
+          if (error) console.error(`[CloudSync] ❌ Upsert FAILED for ${table}:`, error.message, mapped);
+          else console.log(`[CloudSync] ✅ Upserted ${mapped.length} row(s) to ${table}`);
         }
         if (toDeleteIds.length > 0) {
           const { error } = await supabase.from(table).delete().in('id', toDeleteIds);

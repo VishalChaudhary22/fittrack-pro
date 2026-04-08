@@ -438,7 +438,7 @@ good hygiene.
 
 # Bug Round 3 — 2026-04-09 (Post-Deploy QA)
 
-> **Status:** 🔴 Active  
+> **Status:** 🟢 Completed / Fixed  
 > **Reported by:** Vishal, post-deployment testing  
 > **Priority:** All P0 (fundamentally broken UX)
 
@@ -578,7 +578,14 @@ The data comes back from Supabase with FLAT columns (`calories`, `protein`, etc.
 but is never wrapped back into a `macros: { ... }` object. So `item.macros` is
 `undefined` on every entry loaded from the cloud.
 
-### Fix — Two-Part
+
+### Actual Root Causes Fixed:
+1. **Timezone Bug (Readiness & Cardio):** Both logs used `new Date().toISOString().split('T')[0]` which returned a UTC date string. For users in timezones like IST (+5:30), logging after UTC midnight (but before local midnight) caused the entry to save under the PREVIOUS local day. This meant `todayReadiness` in Dashboard was always `undefined`, explaining why the modal re-opened and the card didn't update.
+2. **Stale Closure Bug:** `createSyncSetter` in `AppContext.jsx` bound `prev` to the `useCallback` enclosure. Rapid updates used stale closures, dropping the update payload.
+3. **Supabase Silent Fails:** `createSyncSetter` was wrapping mapped outputs, but passed `undefined` fields when optional properties were missing (like `vitaminD`). Supabase's `upsert` silently ignores updates containing `undefined`.
+
+
+### Fix — Multi-Part
 
 #### Part A: Fix the cloud sync mapper to read from `macros` object
 

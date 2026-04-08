@@ -55,7 +55,8 @@ fittrack-pro/
 │       ├── 20260402185908_seed_indian_food_batch_6.sql  # Oils, Condiments, Supplements, Sprouts/Soy
 │       ├── 20260406213844_seed_indian_food_batch_7.sql  # Packaged Food, Fasting/Vrat Foods
 │       ├── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
-│       └── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, splits sync
+│       ├── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, measurements, readiness, splits sync
+│       └── 20260409_add_leaderboard_rls.sql             # Public SELECT policies for leaderboard reads on user_profiles + workout_logs
 ├── scripts/                     # Data population & validation scripts
 │   ├── generate_seed.js         # Generates SQL seed from JS food objects
 │   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
@@ -98,7 +99,7 @@ fittrack-pro/
     │       ├── PlayerDetailModal.jsx   # Bottom-sheet muscle modal (Phase 3)
     │       └── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
     ├── context/
-    │   └── AppContext.jsx        # Global state (user, logs, splits, foodLog, favorites, toasts)
+    │   └── AppContext.jsx        # Global auth + hybrid cloud/local app state, per-user Diet/Readiness cache, sync wrappers
     ├── data/
     │   ├── constants.js          # NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE
     │   ├── splits.js             # Default split programs
@@ -113,6 +114,7 @@ fittrack-pro/
     │       └── servingTypes.js   # 18 standardized serving types
     ├── hooks/
     │   ├── useLocalStorage.js
+    │   ├── useFoodCache.js
     │   ├── useTheme.js
     │   └── useToast.js
     ├── lib/
@@ -125,7 +127,7 @@ fittrack-pro/
         ├── helpers.js            # gId, tod, formatting
         ├── readinessUtils.js     # Readiness scoring, muscle recovery, spotlight muscles
         ├── storage.js            # localStorage key constants
-        └── authMigration.js      # Supabase ID mapping & cloud data lazy-upload logic
+        └── authMigration.js      # Legacy ID migration + first-login cloud upload normalization
 ```
 
 ---
@@ -206,7 +208,7 @@ Additional shared components in separate files:
 |-----------|------|-------------|
 | `AvatarInitials` | `AvatarInitials.jsx` | Circular initials avatar with rank-colored ring border. Used in Olympus League leaderboard and player modal. |
 | `PlayerDetailModal` | `PlayerDetailModal.jsx` | Bottom-sheet slide-up modal showing player's BodyMapSVG, overall rank, progress bar to next tier, and per-muscle XP breakdown. |
-| `ReadinessCheckIn` | `ReadinessCheckIn.jsx` | Bottom-sheet with 4-step questionnaire (sleep, energy, soreness, stress). Auto-computes a 0–100 readiness score blending subjective answers (60%) with objective training load (40%). Saves to `readinessLog` in AppContext. Score reveal animation on completion, auto-closes after 2.2s. |
+| `ReadinessCheckIn` | `ReadinessCheckIn.jsx` | Bottom-sheet with 4-step questionnaire (sleep, energy, soreness, stress). Auto-computes a 0–100 readiness score blending subjective answers (60%) with objective training load (40%). Saves via `logReadiness()` into AppContext, syncs to `readiness_logs`, and survives refresh through per-user cache + cloud rehydration. Score reveal animation on completion, auto-closes after 2.2s. |
 
 ---
 
@@ -214,8 +216,8 @@ Additional shared components in separate files:
 
 ### `/` — Dashboard
 Rebuilt around the Kinetic Elite aesthetic. Key sections:
-- **Welcome header**: editorial-style `"WELCOME BACK, [NAME]"` in Space Grotesk with ember text-gradient on first name. Theme toggle pill lives here. Includes a dynamic cycle-phase badge for female athletes and celebratory banners on Indian holidays / festivals.
-- **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet if no check-in exists for today. Readiness score display with tier colouring (Optimal / Good / Moderate / Low).
+- **Welcome header**: editorial-style headline in Space Grotesk with ember text-gradient on the first name. Greeting is now user-aware: first-time accounts see `"WELCOME, [NAME]"` once, then subsequent visits show `"WELCOME BACK, [NAME]"`. Theme toggle pill lives here. Includes a dynamic cycle-phase badge for female athletes and celebratory banners on Indian holidays / festivals.
+- **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet only if no completed check-in exists for today. Dashboard waits for `dataLoaded` before deciding whether to re-open the questionnaire, preventing false re-prompts during auth/cloud rehydration. Readiness card uses the saved subjective score when present and falls back to the objective training-only score otherwise.
 - **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. BMI card has a concentric CSS ring with ember glow + per-range insight text.
 - **Sessions / Streak**: 2-col glass card row with current-week session count, all-time total, and current/longest streak.
 - **Placeholder activity cards**: Steps, Calories Burned — show `—` with a `PulseIndicator + "Coming Soon"` label. Water intake is wired to the global hydration tracker.
@@ -250,24 +252,24 @@ View and manage training split programs. Accessible from the primary mobile bott
 
 ### `/diet` — Diet & Nutrition (Overhauled)
 
-Fully rebuilt. Merges the original diet guide/meal plan content with the Indian Food Database food logging system. ~69KB component file. Architecture:
+Fully rebuilt. Merges the original diet guide/meal plan content with the Indian Food Database food logging system. Uses `useFoodCache()` for one-time Supabase fetch + local fallback, and survives refresh through a hybrid `food_logs` cloud model plus per-user local cache in AppContext. Architecture:
 
 ```
 ┌─────────────────────────────────┐
 │  PageHeader (Diet & Nutrition)  │
 │  Compact Stats Strip (5 chips)  │  ← Weight, Height, BMI, TDEE, Activity
-│  GOAL Card (macro rings:        │
-│    consumed/target — always on) │
-│  [Daily Tracker] [Meal Guide]   │  ← Tab switcher
+│  Goal / Setup Card              │  ← Macro rings OR "Targets Locked" CTA
+│  [Daily Tracker] [Meal Guide]   │
+│  [Analysis]                     │  ← 3-tab switcher
 ├─────────────────────────────────┤
 │  TAB: Daily Tracker (default)   │
 │    Date navigation (< Today >)  │
 │    Hydration Tracker Widget     │  ← Dynamic glass-fill progress bar
 │    Supplements Daily Stack      │  ← Click-to-complete pills
-│    8 Meal Slot Cards            │
+│    6 Meal Slot Cards            │
 │    Protein Nudge Alert          │
 │    Food Log Streak badge        │
-│  FAB: + Log Food (bottom-right) │
+│    Per-slot food list + edit    │
 ├─────────────────────────────────┤
 │  TAB: Meal Guide                │
 │    Blueprint Header Card        │
@@ -275,27 +277,44 @@ Fully rebuilt. Merges the original diet guide/meal plan content with the Indian 
 │    Meal Plan Cards grid         │
 │    Protein Sources Footer       │
 │    Complete Protein Tip         │
+├─────────────────────────────────┤
+│  TAB: Analysis                  │
+│    B12 / D3 / Iron alerts       │
+│    Weekly macro adherence chart │
 └─────────────────────────────────┘
 ```
 
 **Stats strip**: 5 compact pill chips showing Weight, Height, BMI, TDEE, Activity. Label in `--on-surface-variant` @ 10px, value in `--primary` @ 13px bold. Replaced the old full-width material icon cards.
 
-**Goal card**: SVG ring gauges for Kcal, Protein, Carbs, Fat — showing consumed vs target. Rings use `stroke-dasharray`/`stroke-dashoffset`. Summary row above rings shows daily targets (`🔥 2100 kcal · 💪 160g P · 🌾 210g C · 🧈 58g F`). All values are computed dynamically from `calcBMR` / `calcTDEE` / `calcDeficit`, not static presets.
+**Goal card**:
+- **Configured profile**: SVG ring gauges for Kcal, Protein, Carbs, Fat — showing consumed vs target. Rings use `stroke-dasharray`/`stroke-dashoffset`. Summary row above rings shows daily targets (`🔥 2100 kcal · 💪 160g P · 🌾 210g C · 🧈 58g F`). All values are computed dynamically from `calcBMR` / `calcTDEE` / `calcDeficit`, not static presets.
+- **Incomplete profile**: The card switches to a `"Targets Locked"` setup state with a CTA to update the profile when age, height, weight, or target weight is missing.
 
-**Tab switcher**: `[🍽 Daily Tracker]` (default) and `[📋 Meal Guide]`. Pill-style with ember gradient on active tab.
+**Tab switcher**: `[🍽 Daily Tracker]`, `[📋 Meal Guide]`, `[📊 Analysis]`. Pill-style with ember gradient on active tab.
 
 **Daily Tracker tab**:
 - Date navigation (prev / "Today" / next), date-aware log filtering
-- 8 meal slot cards: Breakfast, Mid-Morning, Lunch, Evening Snack · Chai, Pre-Workout, Post-Workout, Dinner, Before Bed
+- 6 meal slot cards: Breakfast, Mid-Morning, Lunch, Pre-Workout, Post-Workout Dinner, Before Bed
 - Each slot shows: icon, name, suggested kcal range, tracked total, circular `+` button
-- Expanding a slot reveals logged food entries (name, P/C/F chips, kcal, delete ✕)
+- Expanding a slot reveals logged food entries (name, P/C/F chips, kcal, edit/delete actions)
 - "Copy yesterday" ghost button for quick re-logging
-- Protein nudge alert: fires when `consumed protein < target - 20g` and it's past 6pm
+- Protein nudge alert: fires when `consumed protein < target - 30g` and it's past 6pm
 - Food log streak badge showing consecutive logging days
+- Hydration widget persists independently via `fittrack_waterLog`
+- Supplement daily stack persists independently via `fittrack_supplementLog`
+- Food entries persist through optimistic in-memory state, per-user local cache `fittrack_foodLog_<supabase-user-id>`, cloud sync to `food_logs`, and refresh rehydration that merges cloud rows with richer cached local entry shape when needed
 
-**Meal Guide tab**: Preserved all original diet page logic — BMR/TDEE/deficit calculations, goal detection from weight vs weightGoal, protein multiplier, carb/fat splits, whey scoop recommendation card, diet type selector (Vegan/Vegetarian/Egg/Non-Veg), per-meal macro breakdown cards, protein sources footer.
+**Meal Guide tab**: Preserved all original diet page logic — BMR/TDEE/deficit calculations, goal detection from weight vs weightGoal, protein multiplier, carb/fat splits, whey scoop recommendation card, diet type selector (`veg`, `vegan`, `jain`, `egg`, `nonveg`), per-meal macro breakdown cards, protein sources footer.
 
-**Food Search Modal** (bottom sheet, opens from FAB or slot `+` button):
+**Analysis tab**:
+- Weekly macro adherence stacked bar chart (Protein / Carbs / Fat)
+- Weekly micronutrient rollups for B12, Vitamin D, and Iron
+- Conditional deficiency alerts:
+  - Low B12 for veg / vegan / jain diets
+  - Low Vitamin D3
+  - Low Iron for female users
+
+**Food Search Modal** (bottom sheet, opens from a meal slot `+` button and related quick-log entry points):
 - Search bar with fuzzy matching on `name`, `nameAlt`, `searchTerms`, `brand`, `productLine`
 - Diet type filter chips: All / Veg / Vegan / Jain / Egg / Non-Veg
 - Fasting/Vrat filter chips: None · Navratri · Ekadashi · Ramzan · Jain Paryushana · Maha Shivratri
@@ -385,7 +404,7 @@ All existing muscle map content in a single scroll:
 Female-focused view computing whether the athlete is in menstruation, follicular, ovulation, or luteal phase. Provides contextualized training cues (e.g., dial back heavy lifts in luteal). Syncs to contextual Dashboard profile badge.
 
 ### `/profile` — Profile
-User settings, unit preferences (kg/lbs), theme toggle, personal info.
+User settings, unit preferences (kg/lbs and cm/ft), theme toggle, personal info, avatar selection/upload, export/import, streak/achievement summaries, and metabolic cards (BMI / BMR / TDEE). `activityLevel` UI is mapped back to the `activity` column in `user_profiles`.
 
 ### `/weight-log` — Weight Log
 Dedicated view for body weight history entries.
@@ -402,7 +421,11 @@ Feedback / support form.
 
 - **Desktop**: collapsible `Sidebar` (230px expanded, 54px icon-only). No right border — tonal background separation only. `headline-md` "FITTRACK" wordmark in Space Grotesk. Active nav items use `--glow-primary` and `--primary-container` colour.
 - **Mobile**: fixed `BottomNav` — glassmorphic fill, no top border. "More" sheet opens a second-level glassmorphic card with secondary routes.
-- **Auth gate**: `AuthModal` blocks all routes until a user is selected/created.
+- **Auth gate**: `AuthModal` blocks all routes until Supabase auth + profile hydration finishes.
+- **AuthModal modes**: `login`, `register`, `verify`, `forgot-sent`.
+- **Providers**: Email/password, Google OAuth, and a hardcoded demo sign-in (`demo@fittrackpro.in`).
+- **Registration flow**: Inserts `user_profiles` immediately after `signUp`, captures age/height/weight/activity/workout_days, and marks `fittrack_onboarding_pending:<userId>` so the first dashboard visit uses the new-user greeting.
+- **Forgot password**: `resetPasswordForEmail()` is wired to `${window.location.origin}/reset-password`, but no in-app reset-password route is currently mounted in `App.jsx`.
 
 ---
 
@@ -411,10 +434,10 @@ Feedback / support form.
 ### Data Layer
 
 **Dual storage**: The food database exists in two places simultaneously:
-1. **Local JS** — `src/data/foods/indianFoods.js` (~207 entries, 314KB). Used as the primary runtime data source via `searchLocalFoods()`.
-2. **Supabase (cloud)** — Full Postgres database with `foods` and `food_servings` tables. Populated via 7 migration files. Queryable via `searchRemoteFoods()` in `foodUtils.js`.
+1. **Local JS** — `src/data/foods/indianFoods.js` (~207 entries, 314KB). Used as the guaranteed fallback runtime data source via `searchLocalFoods()`.
+2. **Supabase (cloud)** — Full Postgres database with `foods` and `food_servings` tables. Populated via 7 migration files. Queryable via `searchRemoteFoods()` / `fetchAllFoods()` in `foodUtils.js`.
 
-The local JS file is the current fallback and primary source. The Supabase remote search is wired and functional but the app defaults to local search in DietPage for offline resilience.
+The current runtime path is hybrid: `useFoodCache()` first attempts a one-time full Supabase fetch, then falls back to local `indianFoods.js` if that fetch fails or returns empty. All actual Diet search/filter UI runs synchronously against the cached in-memory array.
 
 **Supabase schema** (`20260402091350_init_indian_food_db.sql`):
 - `foods` table — stores all food entries with snake_case columns mapping to the v2.3 schema
@@ -485,8 +508,18 @@ Pure training-data-based score (0–100). Considers 7-day rolling volume average
 ### Subjective Check-In (`ReadinessCheckIn`)
 4-step bottom-sheet questionnaire: sleep hours, energy level, soreness, stress. Each answer is mapped to a 0–100 sub-score with weighted blending (sleep 35%, energy 30%, soreness 20%, stress 15%).
 
+For storage/sync:
+- UI keeps soreness as `'none' | 'mild' | 'significant'`
+- UI keeps stress as `'low' | 'medium' | 'high'`
+- AppContext maps those to integer DB values for `readiness_logs` and back on rehydration
+
 ### Final Score
 40% objective (training history) + 60% subjective (check-in). Stored in `readinessLog` via AppContext with shape `{ userId, date, sleepHours, energyLevel, sorenessLevel, stressLevel, score, objectiveScore, checkInComplete }`.
+
+Refresh persistence:
+- cached locally per authenticated user in `fittrack_readinessLog_<supabase-user-id>`
+- synced to Supabase `readiness_logs`
+- dashboard rehydrates the saved score before deciding whether to reopen the questionnaire
 
 ### Muscle Recovery Statuses (`getMuscleRecoveryStatuses`)
 Returns per-muscle recovery state (optimal / fatigued / critical) based on hours since last training. Uses the same 3-priority fallback chain as Olympus League XP (split lookup → log exercise fields → display name parsing).
@@ -503,7 +536,21 @@ Returns per-muscle recovery state (optimal / fatigued / critical) based on hours
 
 ## 🔄 AppContext State
 
-Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synched to **Supabase**, while transient preferences remain in `localStorage`.
+Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synched to **Supabase**, while some preferences and refresh-resilience caches remain in `localStorage`.
+
+### Auth / Boot Flow
+- `supabase.auth.onAuthStateChange()` is the single auth source of truth
+- `authLoading` gates the whole app until auth/profile hydration completes
+- `dataLoaded` gates readiness-sensitive UI so the dashboard does not show false empty states during refresh
+- on login:
+  1. fetch / create `user_profiles`
+  2. optionally migrate legacy local data if old email matches
+  3. upload user-scoped local logs to cloud
+  4. load cloud data into React state
+- on account switch:
+  - clears in-memory user-scoped state
+  - clears per-user Diet/Readiness cache keys from the previous account
+  - resets auxiliary local-only logs/config where needed
 
 | Data Domain | Storage | Persistence Key / Table |
 |-------------|---------|-------------------------|
@@ -511,16 +558,22 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Workouts** | Supabase DB | `workout_logs` |
 | **Health Logs** | Supabase DB | `health_logs` |
 | **Measurements** | Supabase DB | `measurements` |
-| **Food Logs** | Supabase DB | `food_logs` |
+| **Food Logs** | Supabase DB + per-user cache | `food_logs` + `fittrack_foodLog_<userId>` |
 | **Splits** | Supabase DB | `user_splits` |
-| **Readiness** | Supabase DB | `readiness_logs` |
+| **Readiness** | Supabase DB + per-user cache | `readiness_logs` + `fittrack_readinessLog_<userId>` |
 | **Favorites** | localStorage | `fittrack_favoriteFoods` |
 | **Water Log** | localStorage | `fittrack_waterLog` |
 | **Cardio Log** | localStorage | `fittrack_cardioLog` |
 | **Supplements** | localStorage | `fittrack_supplementLog` |
+| **Supplement Config** | localStorage | `fittrack_supplementConfig` |
 | **Cycle Config**| localStorage | `fp_cycle_config` |
 
 **Exposed methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`.
+
+### Cloud Rehydration Notes
+- **Food logs**: AppContext normalizes cloud rows back into the richer Diet entry shape (`mealType`, `slot`, `qty`, `customGrams`, `macros`, etc.). If cloud returns empty but a per-user local cache exists, DietPage restores from that cache so logged meals do not disappear after refresh.
+- **Readiness logs**: AppContext normalizes integer DB values back into the UI enum strings and restores the saved `score` / `objectiveScore`, preventing the questionnaire from reappearing after refresh.
+- **Sync setters**: `createSyncSetter()` wraps `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, and `setSplits`, computes add/update/delete deltas, normalizes `undefined` / empty-string / `NaN` values to `null`, then upserts/deletes in Supabase asynchronously.
 
 ---
 
@@ -586,6 +639,21 @@ Several rounds of mobile UX fixes on the food search modal:
 - Hardened account isolation: `AppContext` now resets auxiliary local storage (`cardioLog`, `waterLog`, etc.) on account switch.
 - Olympus League Global Leaderboard: Real-time Supabase fetch for `user_profiles` ensures newly registered 0XP users are visible. **Note:** Requires public SELECT policies on `user_profiles` and `workout_logs` (added in `supabase/migrations/20260409_add_leaderboard_rls.sql`). Added debug console logging to `MuscleMapPage.jsx`.
 
+### Readiness & Diet Refresh Persistence (Fixed 2026-04-09)
+**Symptoms:**
+- Readiness score reset to the objective number after refresh, questionnaire reopened, and widget score drifted from the score revealed in the check-in sheet.
+- Diet page lost logged meals after refresh even though workout tracking and water intake were still present.
+
+**Fixes applied:**
+- **Readiness**:
+  - AppContext now normalizes `readiness_logs` DB rows back into the UI shape, including `score`, `objectiveScore`, `sorenessLevel`, and `stressLevel`.
+  - Dashboard now treats a day as "completed" only when the saved readiness entry has both `checkInComplete` and a valid numeric `score`.
+  - The readiness questionnaire waits for `dataLoaded` before deciding whether today's check-in is missing.
+- **Diet**:
+  - AppContext now normalizes `food_logs` rows back into the full Diet entry shape (`slot`, `mealType`, `qty`, `customGrams`, `macros`, `sourceType`).
+  - Added a direct per-user local fallback (`fittrack_foodLog_<userId>`) during cloud rehydration so logged meals still appear after refresh even if older cloud rows are incomplete or absent.
+  - `authMigration.js` upload mapping now sends normalized food/readiness payloads so future rows land in Supabase in the correct shape.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work
@@ -602,8 +670,10 @@ Several rounds of mobile UX fixes on the food search modal:
 | Time-range filter pills (Analytics) | `[1M] [3M] [6M]` pills are visual only — state wiring deferred |
 | Olympus League Phase 3 post-ship fixes | Fixes 1–8 documented in `TODO-redesign-phase-3.md §Phase 3.1`; all marked `[x]` (implemented) |
 | Leaderboard light-theme rows | Inline `rgba` glass values on leaderboard rows may look off in light mode; prefer `var(--glass-bg)` |
-| B12/D3/Iron alerts | Documented in Phase 4 of food DB plan — not yet implemented in DietPage |
+| B12/D3/Iron alerts | Implemented on DietPage Analysis tab; thresholds may still need tuning against real usage |
 | GI-aware carb guidance | Documented in Phase 4 — not yet implemented |
 | Recipe builder | Cancelled — comprehensive pre-built coverage + custom food entry is enough |
-| Supabase as primary food source | Remote search is wired but local JS is still the default. Switch pending once data parity is confirmed |
+| Supabase as primary food source | `useFoodCache()` fetches full remote food data first, then falls back to local JS. Search execution in DietPage is still local/in-memory after cache load |
+| Food entry cloud completeness | Diet refresh now falls back to per-user local cache if cloud rows are missing/incomplete; long-term goal is to make `food_logs` authoritative for every meal |
+| Reset-password route | Forgot-password email flow is wired, but `/reset-password` is not yet mounted in the router |
 | UX audit items | `TODO-ux-audit.md` + 13 per-page audit files (`TODO-UX-01` through `TODO-UX-13`) pending review |

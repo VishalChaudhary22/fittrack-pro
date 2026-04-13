@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Upload, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield } from 'lucide-react';
+import { LogOut, Download, Upload, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
@@ -235,16 +235,16 @@ export default function ProfilePage() {
       {/* Stats Strip (9.8) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: 10, uppercase: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMI</span><span style={{ fontSize: 8, background: 'var(--surface-container-highest)', borderRadius: 8, color: 'var(--on-surface-variant)', padding: '3px 8px' }}>{getBMICat(bmi).label}</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMI</span><span style={{ fontSize: 8, background: 'var(--surface-container-highest)', borderRadius: 8, color: 'var(--on-surface-variant)', padding: '3px 8px' }}>{getBMICat(bmi).label}</span></div>
           <div className="display-lg" style={{ color: 'var(--primary)' }}>{bmi}</div>
         </div>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 10, uppercase: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
           <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{bmr}</div>
           <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
         </div>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 10, uppercase: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>TDEE</div>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>TDEE</div>
           <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{tdee}</div>
           <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
         </div>
@@ -292,29 +292,83 @@ export default function ProfilePage() {
       </div>
 
       {/* Personal Details (9.6) */}
-      <div id="personal-details" style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, alignItems: 'center' }}>
+      <div id="personal-details" style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: '18px 20px', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, alignItems: 'center' }}>
           <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Personal Details</div>
-          <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : 'Edit'}</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {ed && <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: 'var(--on-surface-variant)', background: 'transparent' }} onClick={() => setEd(false)}>Cancel</button>}
+            <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : 'Edit'}</button>
+          </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-          {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: unitWeight === 'lbs' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number' }].map(fld => {
-            const dispVal = (k, v) => {
-              if (!v && v !== 0) return 'Not set';
-              if (unitWeight === 'lbs' && (k === 'weight' || k === 'weightGoal')) return kgToLbs(v);
-              if (unitHeight === 'ft' && k === 'height') return cmToFtIn(v);
-              return String(v);
-            };
-            return (
-              <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <label style={{ fontSize: 10, fontWeight: 700, uppercase: 'uppercase', color: 'var(--on-surface-dim)' }}>{fld.l}</label>
-                {ed ? <input type={fld.t} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 14, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 14, color: fld.k === 'weightGoal' && !user[fld.k] ? 'var(--on-surface-dim)' : 'var(--on-surface)', fontWeight: 500 }}>{dispVal(fld.k, user[fld.k])}</div>}
-              </div>
-            );
-          })}
-          <div style={{ background: 'var(--surface-container)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}><label style={{ fontSize: 10, fontWeight: 700, uppercase: 'uppercase', color: 'var(--on-surface-dim)' }}>Gender</label>{ed ? <select value={f.gender} onChange={sf('gender')} style={{ padding: '6px 0', fontSize: 14, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select> : <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 500 }}>{user.gender}</div>}</div>
-          <div style={{ background: 'var(--surface-container)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}><label style={{ fontSize: 10, fontWeight: 700, uppercase: 'uppercase', color: 'var(--on-surface-dim)' }}>Activity Level</label>{ed ? <select value={f.activityLevel} onChange={sf('activityLevel')} style={{ padding: '6px 0', fontSize: 14, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>{Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select> : <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 500 }}>{ACTIVITY[user.activityLevel || 'moderate']?.label}</div>}</div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Row 1: Full Name, Email */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Email', k: 'email', t: 'email' }].map(fld => {
+              const dispVal = user[fld.k] || '—';
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Row 2: Age, Weight, Height, Gender */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 10 }}>
+            {[{ l: 'Age', k: 'age', t: 'number', min: 10, max: 100 }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }].map(fld => {
+              const v = user[fld.k];
+              let dispVal = (!v && v !== 0) ? '—' : String(v);
+              if (v && unitWeight === 'lbs' && fld.k === 'weight') dispVal = kgToLbs(v);
+              if (v && unitHeight === 'ft' && fld.k === 'height') dispVal = cmToFtIn(v);
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} min={fld.min} max={fld.max} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, fontFamily: 'monospace' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+            
+            <div style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="input-gender" style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>Gender</label>
+              {ed ? (
+                <select id="input-gender" value={f.gender} onChange={sf('gender')} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, textTransform: 'capitalize' }}>{user.gender || '—'}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3: Workout Days, Steps, Activity */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
+            {[{ l: 'Workout Days/Week', k: 'workoutDays', t: 'number', min: 1, max: 7 }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number', placeholder: 'e.g. 10000' }].map(fld => {
+              const dispVal = (!user[fld.k] && user[fld.k] !== 0) ? '—' : String(user[fld.k]);
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} placeholder={fld.placeholder} min={fld.min} max={fld.max} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, fontFamily: 'monospace' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+            
+            <div style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="input-activityLevel" style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>Activity Level</label>
+              {ed ? (
+                <select id="input-activityLevel" value={f.activityLevel} onChange={sf('activityLevel')} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>
+                  {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500 }}>{ACTIVITY[user.activityLevel || 'moderate']?.label || '—'}</div>
+              )}
+            </div>
+          </div>
         </div>
+        <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 12, textAlign: 'right' }}>To update your goal weight, visit the Diet page.</div>
       </div>
 
       {/* Connected Devices (9.6b) */}
@@ -327,7 +381,7 @@ export default function ProfilePage() {
             }}
             style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
           >
-            🔗 Connect Fitbit — Auto-sync steps daily
+            <Link size={16} /> Connect Fitbit — Auto-sync steps daily
           </button>
           <button
             onClick={() => {
@@ -335,14 +389,14 @@ export default function ProfilePage() {
             }}
             style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
           >
-            🚴 Connect Strava — Auto-sync cardio runs & rides
+            <Bike size={16} /> Connect Strava — Auto-sync cardio runs & rides
           </button>
         </div>
       </div>
 
       {/* Settings & Actions (9.7) */}
       <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
-        <div className="label-md" style={{ uppercase: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Settings</div>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Settings</div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
           {/* Weight */}

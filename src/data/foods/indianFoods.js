@@ -14826,7 +14826,6 @@ export const indianFoods = [
     estimatedOilG: 0,
     source: "FSSAI-label",
     confidence: "high"
-}
 },
   // ==========================================
   // EXTENDED DB: Phase 1 (Batches P, Q, R, N, B6)
@@ -15777,8 +15776,7 @@ export const indianFoods = [
     estimatedOilG: 7,
     source: 'USDA',
     confidence: 'medium'
-  }
-},
+  },
   // ==========================================
   // EXTENDED DB: Phase 2 (Batch A - QSR & Biryani)
   // ==========================================
@@ -16459,8 +16457,7 @@ export const indianFoods = [
     estimatedOilG: 2,
     source: 'curated-estimate',
     confidence: 'medium'
-  }
-},
+  },
   // ==========================================
   // EXTENDED DB: Phase 3 (Batches I, J, K - Modern, Health & Cloud Kitchens)
   // ==========================================
@@ -16823,8 +16820,7 @@ export const indianFoods = [
     estimatedOilG: 0,
     source: 'curated-estimate',
     confidence: 'medium'
-  }
-},
+  },
   // ==========================================
   // EXTENDED DB: Phase 4 (Batches B, C, D, E - Cafe, Subway, Alcohol, Indo-Chinese)
   // ==========================================
@@ -17235,8 +17231,7 @@ export const indianFoods = [
     estimatedOilG: 0,
     source: 'USDA',
     confidence: 'high'
-  }
-},
+  },
   // ==========================================
   // EXTENDED DB: Phase 5 (Batches F,G,H,L,M,O - Niche, Global & Regional)
   // ==========================================

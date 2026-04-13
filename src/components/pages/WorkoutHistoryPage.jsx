@@ -349,7 +349,14 @@ export default function WorkoutHistoryPage() {
                   <span style={{ fontSize: 16, color: 'var(--on-surface)', fontWeight: 700, lineHeight: 1 }}>{new Date(c.date).getDate()}</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--on-surface)' }}>{c.type}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--on-surface)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {c.type}
+                    {c.source === 'strava' && (
+                      <span style={{ fontSize: 9, background: '#FC4C02', color: '#fff', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 800 }}>
+                        Strava
+                      </span>
+                    )}
+                  </div>
                   <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{c.minutes} mins {c.distance ? `· ${c.distance} km` : ''}</div>
                 </div>
               </div>

@@ -106,10 +106,12 @@ export function getMuscleRecoveryStatuses(workoutLogs, splits, userId) {
 // 0–100 score based purely on workout history.
 // Called even when check-in hasn't been completed.
 
-export function calcObjectiveReadiness(workoutLogs, userId) {
+export function calcObjectiveReadiness(workoutLogs, stepLogs, user) {
+  const userId = user?.id;
   const now = new Date();
 
   const userLogs = workoutLogs.filter(l => l.userId === userId);
+  const userSteps = (stepLogs || []).filter(l => l.user_id === userId || l.userId === userId);
 
   const logVolume = (log) =>
     (log.exercises || []).reduce((t, ex) =>
@@ -163,8 +165,19 @@ export function calcObjectiveReadiness(workoutLogs, userId) {
   // Overtraining penalty (6+ sessions in 7 days)
   const penalty = weekLogs.length >= 6 ? 14 : weekLogs.length >= 5 ? 6 : 0;
 
+  // Active recovery bonus from steps (or fatigue from extreme steps)
+  const stepGoal = user?.stepGoal || 10000;
+  const recentStepLogs = userSteps.filter(l => new Date((l.date || '') + 'T00:00:00') >= d3Ago);
+  const avgRecentSteps = recentStepLogs.length > 0 
+    ? recentStepLogs.reduce((acc, l) => acc + (l.steps || 0), 0) / recentStepLogs.length 
+    : 0;
+    
+  let stepFactor = 0;
+  if (avgRecentSteps > stepGoal * 1.5) stepFactor = -8; // Fatigue from excessive walking
+  else if (avgRecentSteps > stepGoal * 0.5) stepFactor = 5; // Light active recovery
+
   return {
-    score: Math.round(Math.min(100, Math.max(0, loadScore + restBonus - penalty))),
+    score: Math.round(Math.min(100, Math.max(0, loadScore + restBonus - penalty + stepFactor))),
     loadRatio,
   };
 }

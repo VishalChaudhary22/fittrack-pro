@@ -114,7 +114,7 @@ export default function ProfilePage() {
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
   const save = async () => {
-    await updateProfile({ ...f, weight: parseFloat(f.weight), height: parseFloat(f.height), age: parseInt(f.age), workoutDays: parseInt(f.workoutDays), weightGoal: f.weightGoal ? parseFloat(f.weightGoal) : null });
+    await updateProfile({ ...f, weight: parseFloat(f.weight), height: parseFloat(f.height), age: parseInt(f.age), workoutDays: parseInt(f.workoutDays), weightGoal: f.weightGoal ? parseFloat(f.weightGoal) : null, stepGoal: f.stepGoal ? parseInt(f.stepGoal, 10) : 10000 });
     setEd(false);
     addToast('Profile updated successfully', 'success');
   };
@@ -260,7 +260,7 @@ export default function ProfilePage() {
           <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : 'Edit'}</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-          {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: unitWeight === 'lbs' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }].map(fld => {
+          {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Age', k: 'age', t: 'number' }, { l: 'Email', k: 'email', t: 'email' }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }, { l: unitWeight === 'lbs' ? 'Weight Goal (lbs)' : 'Weight Goal (kg)', k: 'weightGoal', t: 'number' }, { l: 'Workout Days/Week', k: 'workoutDays', t: 'number' }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number' }].map(fld => {
             const dispVal = (k, v) => {
               if (!v && v !== 0) return 'Not set';
               if (unitWeight === 'lbs' && (k === 'weight' || k === 'weightGoal')) return kgToLbs(v);
@@ -276,6 +276,29 @@ export default function ProfilePage() {
           })}
           <div style={{ background: 'var(--surface-container)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}><label style={{ fontSize: 10, fontWeight: 700, uppercase: 'uppercase', color: 'var(--on-surface-dim)' }}>Gender</label>{ed ? <select value={f.gender} onChange={sf('gender')} style={{ padding: '6px 0', fontSize: 14, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select> : <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 500 }}>{user.gender}</div>}</div>
           <div style={{ background: 'var(--surface-container)', borderRadius: 12, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}><label style={{ fontSize: 10, fontWeight: 700, uppercase: 'uppercase', color: 'var(--on-surface-dim)' }}>Activity Level</label>{ed ? <select value={f.activityLevel} onChange={sf('activityLevel')} style={{ padding: '6px 0', fontSize: 14, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>{Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select> : <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 500 }}>{ACTIVITY[user.activityLevel || 'moderate']?.label}</div>}</div>
+        </div>
+      </div>
+
+      {/* Connected Devices (9.6b) */}
+      <div id="connected-devices" style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 16 }}>Connected Devices</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
+          <button
+            onClick={() => {
+              window.location.href = `/fitbit/authorize?state=${user.id}`;
+            }}
+            style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            🔗 Connect Fitbit — Auto-sync steps daily
+          </button>
+          <button
+            onClick={() => {
+              window.location.href = `/strava/authorize?state=${user.id}`;
+            }}
+            style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            🚴 Connect Strava — Auto-sync cardio runs & rides
+          </button>
         </div>
       </div>
 

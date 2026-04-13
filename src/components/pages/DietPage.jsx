@@ -9,6 +9,8 @@ import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
 import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
 import { useFoodCache } from '../../hooks/useFoodCache';
+import { calcWorkoutCalories, calcCardioCalories } from '../../data/metValues';
+import { getDisplayStepLog } from '../../utils/activityUtils';
 
 function MacroRing({ label, value, max, unit, color, size = 112, strokeWidth = 6 }) {
   const radius = (size - strokeWidth) / 2;
@@ -53,7 +55,7 @@ const CONSTANTS = {
 };
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   
   const [diet, setDiet] = useState('nonveg');
@@ -146,6 +148,19 @@ export default function DietPage() {
       vitaminD: acc.vitaminD + (curr.macros?.vitaminD || 0)
     }), { calories: 0, protein: 0, carbs: 0, fat: 0, iron: 0, vitaminB12: 0, vitaminD: 0 });
   }, [dailyLog]);
+
+  const todayCaloriesBurned = useMemo(() => {
+    const workoutCals = workoutLogs
+      .filter(l => l.date === dateStr && l.userId === user?.id)
+      .reduce((sum, log) => sum + (calcWorkoutCalories(log, user?.weight) || 0), 0);
+    const cardioRecord = (cardioLog || []).filter(c => c.date === dateStr && c.userId === user?.id);
+    const cardioCals = cardioRecord.reduce((sum, c) => sum + calcCardioCalories(c, user?.weight), 0);
+    const activeStepLog = getDisplayStepLog(stepLogs, dateStr);
+    const stepCals = activeStepLog?.calories_active || 0;
+    return workoutCals + cardioCals + stepCals;
+  }, [workoutLogs, cardioLog, stepLogs, user?.id, user?.weight, dateStr]);
+
+  const energyBalance = todayTotals.calories - todayCaloriesBurned;
 
   // Phase 4 - Weekly Analysis Logic
   const last7Days = useMemo(() => {
@@ -445,6 +460,21 @@ export default function DietPage() {
             <MacroRing label="Carbs" value={todayTotals.carbs} max={carbsTarget} unit="Grams" color="var(--tertiary-container)" />
             <MacroRing label="Fats" value={todayTotals.fat} max={fatTarget} unit="Grams" color="#FACC15" />
           </div>
+
+          <div style={{ background: 'var(--surface-container-highest)', borderRadius: 16, padding: '16px 20px', marginTop: 24, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 10, uppercase: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700, letterSpacing: '1px' }}>ENERGY BALANCE</div>
+              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>
+                In: <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{Math.round(todayTotals.calories)}</span> - Out: <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{Math.round(todayCaloriesBurned)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <div className="headline-md" style={{ fontSize: 24, color: energyBalance > goalKcal ? 'var(--error)' : 'var(--primary)' }}>
+                {Math.round(energyBalance)} <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', textTransform: 'uppercase' }}>Kcal Net</span>
+              </div>
+            </div>
+          </div>
+
           <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 16, textAlign: 'center' }}>
             ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal weight' : 'current weight'} ({isImpWeight ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
           </div>

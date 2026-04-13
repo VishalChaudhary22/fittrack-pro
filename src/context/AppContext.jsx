@@ -243,6 +243,7 @@ export function AppProvider({ children }) {
     try { return JSON.parse(localStorage.getItem(`fittrack_foodLog_${cachedUserId}`) || '[]'); }
     catch { return []; }
   });
+  const [stepLogs, setStepLogsState] = useState([]);
 
   const setReadinessLog = useCallback((updater) => {
     setReadinessLogState(prev => {
@@ -378,6 +379,7 @@ export function AppProvider({ children }) {
       setReadinessLog([]);
       setMeasurements([]);
       setFoodLog([]);
+      setStepLogsState([]);
       // Clear local-only prefs (Fix 6)
       setFavoriteIds([]);
       setSupplementConfig([]);
@@ -495,9 +497,10 @@ export function AppProvider({ children }) {
       supabase.from('measurements').select('*').eq('user_id', userId),
       supabase.from('readiness_logs').select('*').eq('user_id', userId),
       supabase.from('user_splits').select('*').eq('user_id', userId),
+      supabase.from('step_logs').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(90),
     ]);
 
-    const cloudErrors = [workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes]
+    const cloudErrors = [workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes]
       .map(result => result.error)
       .filter(Boolean);
     if (cloudErrors.length > 0) {
@@ -510,6 +513,7 @@ export function AppProvider({ children }) {
     const ml = measurementRes.data || [];
     const rl = readinessRes.data || [];
     const sl = splitsRes.data || [];
+    const stepData = stepRes.data || [];
 
     const persistedFoodLog = readPersistedUserArray('fittrack_foodLog', userId);
     const persistedReadinessLog = readPersistedUserArray('fittrack_readinessLog', userId);
@@ -543,6 +547,8 @@ export function AppProvider({ children }) {
       setReadinessLog(mergedReadinessLog);
     }
     
+    setStepLogsState(stepData);
+
     // Spltis fallback to INIT_SPLITS if none exist
     setSplits(sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
     setDataLoaded(true);
@@ -622,7 +628,7 @@ export function AppProvider({ children }) {
       activity: 'activity', activityLevel: 'activity', workoutDays: 'workout_days',
       dietType: 'diet_type', units: 'units', unitWeight: 'unit_weight', unitHeight: 'unit_height',
       avatar: 'avatar', avatarType: 'avatar_type', avatarUrl: 'avatar_url',
-      activeSplitId: 'active_split_id', isAdmin: 'is_admin',
+      activeSplitId: 'active_split_id', isAdmin: 'is_admin', stepGoal: 'step_goal',
     };
     const snakeUpdates = {};
     for (const [camel, snake] of Object.entries(keyMap)) {
@@ -656,6 +662,7 @@ export function AppProvider({ children }) {
     dietType: profile.diet_type, units: profile.units, unitWeight: profile.unit_weight || 'kg', unitHeight: profile.unit_height || 'cm',
     avatar: profile.avatar, avatarType: profile.avatar_type, avatarUrl: profile.avatar_url, activeSplitId: profile.active_split_id,
     isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
+    stepGoal: profile.step_goal || 10000,
   } : null;
 
   // --- Mutator Wrappers for Cloud Sync ---
@@ -756,6 +763,27 @@ export function AppProvider({ children }) {
     });
   }, [setReadinessLogSync]);
 
+  const logSteps = useCallback(async ({ steps, date, source = 'manual', distanceKm, caloriesActive, floors }) => {
+    if (!profile?.id) return;
+    const userId = profile.id;
+    const entry = {
+      id: `${userId}_${date}_${source}`,
+      user_id: userId,
+      date,
+      steps,
+      distance_km: distanceKm || null,
+      calories_active: caloriesActive || null,
+      floors: floors || null,
+      source,
+      synced_at: new Date().toISOString(),
+    };
+    await supabase.from('step_logs').upsert(entry, { onConflict: 'id' });
+    setStepLogsState(prev => {
+      const filtered = prev.filter(l => !(l.date === date && l.source === source));
+      return [...filtered, entry].sort((a, b) => b.date.localeCompare(a.date));
+    });
+  }, [profile?.id]);
+
   const getStreak = useCallback(() => {
     // Streak logic unchanged
     if (!user) return { current: 0, longest: 0 };
@@ -822,6 +850,8 @@ export function AppProvider({ children }) {
     foodLog, setFoodLog: setFoodLogSync,
     measurements, setMeasurements: setMeasurementsSync,
     readinessLog, setReadinessLog: setReadinessLogSync, logReadiness,
+
+    stepLogs, logSteps,
 
     caloriesLog, setCaloriesLog,
     favoriteIds, setFavoriteIds,

@@ -19,6 +19,9 @@ import {
   MUSCLE_LABELS,
 } from '../../utils/readinessUtils';
 import ReadinessCheckIn from '../shared/ReadinessCheckIn';
+import { calcWorkoutCalories, calcCardioCalories } from '../../data/metValues';
+import { getStepGoalPercent, formatSteps, getDisplayStepLog, getSourceLabel } from '../../utils/activityUtils';
+import { usePedometer } from '../../hooks/usePedometer';
 
 const getBMIInsight = (bmi) => {
   if (!bmi) return '';
@@ -97,8 +100,10 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig } = useApp();
+  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
+  const [showStepModal, setShowStepModal] = useState(false);
+  const [stepInputVal, setStepInputVal] = useState('');
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';
 
@@ -120,7 +125,7 @@ export default function DashboardPage() {
   
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   
-  const objectiveScoreObj = useMemo(() => calcObjectiveReadiness(workoutLogs, user?.id), [workoutLogs, user?.id]);
+  const objectiveScoreObj = useMemo(() => calcObjectiveReadiness(workoutLogs, stepLogs, user), [workoutLogs, stepLogs, user]);
   const objectiveScore = objectiveScoreObj.score;
 
 
@@ -250,8 +255,34 @@ export default function DashboardPage() {
     }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
   }, [todayLog]);
 
+  const todayCaloriesBurned = useMemo(() => {
+    const workoutCals = workoutLogs
+      .filter(l => l.date === todayStr && l.userId === user?.id)
+      .reduce((sum, log) => sum + (calcWorkoutCalories(log, user?.weight) || 0), 0);
+    const cardioCals = (cardioLog || [])
+      .filter(c => c.date === todayStr && c.userId === user?.id)
+      .reduce((sum, c) => sum + calcCardioCalories(c, user?.weight), 0);
+    return workoutCals + cardioCals;
+  }, [workoutLogs, cardioLog, user?.id, user?.weight, todayStr]);
+
+  const displayStepLog = useMemo(() => getDisplayStepLog(stepLogs, todayStr), [stepLogs, todayStr]);
+  const todaySteps = displayStepLog?.steps || 0;
+  const stepGoal = user.stepGoal || 10000;
+  const stepPct = getStepGoalPercent(todaySteps, stepGoal);
+
   const cyclePhase = useMemo(() => user.gender === 'female' ? getCyclePhase(cycleConfig?.startDate, cycleConfig?.cycleLength) : null, [user.gender, cycleConfig]);
   const activeFestival = useMemo(() => getActiveFestival(), []);
+
+  // Set up live pedometer
+  const initialBrowserSteps = displayStepLog?.source === 'browser_sensor' ? todaySteps : 0;
+  const { isTracking, steps: liveSteps, supported, error: pedoError, startTracking, stopTracking } = usePedometer(initialBrowserSteps);
+
+  // Auto-save logic: every 50 steps
+  useEffect(() => {
+    if (isTracking && liveSteps > 0 && liveSteps % 50 === 0) {
+      logSteps({ steps: liveSteps, date: todayStr, source: 'browser_sensor' });
+    }
+  }, [liveSteps, isTracking, logSteps, todayStr]);
 
   // Use user.weight (profile weight) for macro calculations — must match DietPage exactly
   const { goalKcal, protTarget, carbTarget, fatTarget } = useMemo(() => {
@@ -519,23 +550,38 @@ export default function DashboardPage() {
         )}
 
         {/* Daily Activity (Similar to Today's Nutrition) */}
-        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => navigate('/diet')}>
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setShowStepModal(true)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>DAILY ACTIVITY</div>
-              <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>0 / 10K <span style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>Steps</span></div>
+              {todaySteps > 0 ? (
+                <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>
+                  {formatSteps(todaySteps)} <span style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>/ {formatSteps(stepGoal)}</span>
+                </div>
+              ) : (
+                <div className="headline-md" style={{ color: 'var(--on-surface)', marginTop: 2 }}>
+                  — <span style={{ fontSize: 14, color: 'var(--on-surface-variant)' }}>tap to log</span>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              {displayStepLog?.source && (
+                 <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>
+                   {getSourceLabel(displayStepLog.source)}
+                 </div>
+              )}
             </div>
           </div>
           
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
             <div style={{ flexShrink: 0 }}>
-               <ProgressOrb progress={0} size={90} label={`0%`} subLabel="Steps" color="var(--primary)" />
+               <ProgressOrb progress={stepPct} size={90} label={`${stepPct}%`} subLabel="Steps" color="var(--primary)" />
             </div>
             
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { label: 'Steps', val: 0, target: 10000, color: 'var(--primary)' },
-                { label: 'Cals Burned', val: 0, target: 500, color: '#F85F1B' },
+                { label: 'Steps', val: todaySteps, target: stepGoal, color: 'var(--primary)' },
+                { label: 'Cals Burned', val: todayCaloriesBurned + (displayStepLog?.calories_active || 0), target: 500, color: '#F85F1B' },
                 { label: 'Water', val: todayWaterTotal, target: user.waterGoal || 3000, color: '#3b82f6', unit: 'ml' }
               ].map(m => {
                 const pct = clamp(Math.round((m.val / m.target) * 100) || 0, 0, 100);
@@ -872,6 +918,74 @@ export default function DashboardPage() {
             </div>
             <div style={{ marginBottom: 16 }}><label>Notes (optional)</label><input placeholder="Post-morning, post-workout..." value={logNote} onChange={e => setLogNote(e.target.value)} /></div>
             <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveLog}>Save Log</button>
+          </div>
+        </div>
+        </Portal>
+      )}
+
+      {/* Log Steps Modal */}
+      {showStepModal && (
+        <Portal>
+        <div className="mo">
+          <div className="md" style={{ maxWidth: 360 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Steps</div>
+              <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowStepModal(false)}><X size={14} /></button>
+            </div>
+
+            {/* Manual Entry */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Manual Entry</label>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <input
+                  type="number"
+                  placeholder="e.g. 8500"
+                  value={stepInputVal}
+                  onChange={e => setStepInputVal(e.target.value)}
+                  style={{ flex: 1, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 8, border: 'none', color: '#fff', fontSize: 16 }}
+                />
+                <button className="btn-p" style={{ padding: '0 20px' }} onClick={() => {
+                  const val = parseInt(stepInputVal, 10);
+                  if (val > 0) {
+                    logSteps({ steps: val, date: todayStr, source: 'manual' });
+                    addToast('Steps logged for today!', 'success');
+                  }
+                  setShowStepModal(false);
+                }}>Save</button>
+              </div>
+            </div>
+
+            <div style={{ height: 1, background: 'var(--surface-container-highest)', marginBottom: 24 }} />
+
+            {/* Live Pedometer */}
+            <div>
+              <label style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Live Browser Sensor</label>
+              {supported ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 12, marginBottom: 16 }}>
+                    <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Live Steps</div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{isTracking ? liveSteps : (displayStepLog?.source === 'browser_sensor' ? todaySteps : 0)}</div>
+                  </div>
+                  {pedoError && <div style={{ fontSize: 12, color: 'var(--error)', marginBottom: 12 }}>{pedoError}</div>}
+                  {isTracking ? (
+                    <button className="btn-g" style={{ width: '100%', padding: '13px' }} onClick={() => {
+                      stopTracking();
+                      logSteps({ steps: liveSteps, date: todayStr, source: 'browser_sensor' });
+                      addToast('Tracking stopped & saved', 'success');
+                    }}>Stop Tracking & Save</button>
+                  ) : (
+                    <button className="btn-p" style={{ width: '100%', padding: '13px', background: 'var(--signature-gradient)' }} onClick={startTracking}>
+                      Start Live Tracking
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div style={{ fontSize: 12, color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', padding: 12, borderRadius: 8 }}>
+                  Device motion not supported on this browser/device.
+                </div>
+              )}
+            </div>
+            
           </div>
         </div>
         </Portal>

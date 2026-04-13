@@ -115,17 +115,19 @@ fittrack-pro/
     ├── hooks/
     │   ├── useLocalStorage.js
     │   ├── useFoodCache.js
+    │   ├── usePedometer.js       # Live browser pedometry via DeviceMotion
     │   ├── useTheme.js
     │   └── useToast.js
     ├── lib/
     │   └── supabaseClient.js     # Supabase client init (URL + anon key from .env)
     └── utils/
         ├── calculations.js       # BMR, TDEE, deficit calculations
+        ├── activityUtils.js      # Activity tracking & step goals helpers
         ├── cycleCalculations.js  # Menstrual cycle phase logic
         ├── festivals.js          # Indian holiday detection
         ├── foodUtils.js          # Food search (local + remote), macro calc, beverage builder
         ├── helpers.js            # gId, tod, formatting
-        ├── readinessUtils.js     # Readiness scoring, muscle recovery, spotlight muscles
+        ├── readinessUtils.js     # Readiness scoring (includes steps), muscle recovery, spotlight muscles
         ├── storage.js            # localStorage key constants
         └── authMigration.js      # Legacy ID migration + first-login cloud upload normalization
 ```
@@ -538,20 +540,46 @@ Returns per-muscle recovery state (optimal / fatigued / critical) based on hours
 
 Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synched to **Supabase**, while some preferences and refresh-resilience caches remain in `localStorage`.
 
+### Helper Utilities (module-level, not exported)
+
+| Function | Purpose |
+|----------|--------|
+| `readPersistedUserArray(prefix, userId)` | Safely reads a per-user array from localStorage, returns `[]` on missing / corrupt data |
+| `normalizeNumber(value)` | Coerces a value to a finite `Number` or `null`; guards against `''`, `undefined`, `NaN` before Supabase upserts |
+| `readCachedProfile(userId)` | Reads the last-known profile object from `fittrack_profile_<userId>` |
+| `persistCachedProfile(profile)` | Writes a profile snapshot to `fittrack_profile_<userId>`; ignores quota/private-mode errors |
+| `buildFallbackProfile(sessionUser, cachedProfile)` | Constructs a minimal usable profile from the Supabase session + cached field so the app never blocks on a live DB fetch |
+| `getEntryTime(entry)` | Returns a comparable timestamp for a food/readiness entry using `updated_at` → `created_at` → `timestamp` → `date` fallback chain |
+| `mergeFoodEntries(cloudEntries, localEntries, userId)` | Merges cloud and local food log arrays by `id`, appending any local-only items and sorting by entry time |
+| `mergeReadinessEntries(cloudEntries, localEntries, userId)` | Deduplicates readiness entries by `userId:date` key, preferring completed/newer entries |
+| `pickPreferredReadinessEntry(existing, next)` | Tie-breaks two same-day readiness entries: prioritises `checkInComplete`, then newer timestamp |
+| `mapFoodLogFromCloud(item, cachedItem)` | Normalises a raw `food_logs` DB row into the full Diet entry shape, merging with optional cached item for micro-fields (`iron`, `vitaminB12`, `vitaminD`) |
+| `mapReadinessFromCloud(item, cachedItem)` | Normalises a raw `readiness_logs` DB row back to UI enums (`soreness` 0-2 → `'none'/'mild'/'significant'`, same for stress) |
+| `READINESS_SORENESS_TO_DB / FROM_DB` | Bidirectional maps `none/mild/significant` ↔ `0/1/2` |
+| `READINESS_STRESS_TO_DB / FROM_DB` | Bidirectional maps `low/medium/high` ↔ `0/1/2` |
+| `getAvatarInitials(value)` | Returns 1–2 uppercase initials from a display name string |
+
 ### Auth / Boot Flow
-- `supabase.auth.onAuthStateChange()` is the single auth source of truth
-- `authLoading` gates the whole app until session bootstrap completes; a signed-in user can be seeded from the current session plus cached profile while cloud profile/data fetch continues in the background
-- `dataLoaded` gates readiness-sensitive UI so the dashboard does not show false empty states during refresh
-- authenticated profile fallback is cached per user in `fittrack_profile_<userId>` to prevent the desktop app from getting stuck on a permanent loading screen if profile fetch stalls
+- `supabase.auth.onAuthStateChange()` is the single auth source of truth — fires for every session event
+- Boot sequence runs `handleSessionBootstrap` which is called by both `onAuthStateChange` and the initial `getSession()` check (deduplicated via `initialized` flag)
+- `initialized` is set **synchronously** at the top of `handleSessionBootstrap` before any async work, so the 3-second safety timeout cannot interfere after a valid session has started bootstrapping
+- When a session exists, `authLoading` is cleared immediately using `buildFallbackProfile` + the `fittrack_profile_<userId>` cache — the live `user_profiles` fetch runs **in the background** and updates profile/session state when done, without blocking the app
+- When no session exists, all cloud state is cleared and both `authLoading` and `dataLoaded` are set to `false`
+- `dataLoaded` is set to `true` only once `loadCloudData` completes; the Dashboard readiness auto-open guard waits on this flag to avoid a false empty-state prompt during cloud rehydration
 - on login:
-  1. fetch / create `user_profiles`
-  2. optionally migrate legacy local data if old email matches
-  3. upload user-scoped local logs to cloud
-  4. load cloud data into React state
+  1. `handleSessionBootstrap` seeds fallback profile + clears `authLoading`
+  2. `fetchProfile` fetches/creates live `user_profiles` row, writes to cache
+  3. `uploadLocalDataToCloud` migrates any legacy local data (email-gated)
+  4. `loadCloudData` fetches all tables in parallel and merges into React state, setting `dataLoaded = true`
+- on logout:
+  - `logout()` immediately clears `profile`, `session`, and `dataLoaded` so the UI snaps to login without waiting for the `SIGNED_OUT` event
+  - `onAuthStateChange(SIGNED_OUT)` then fires and clears remaining cloud state
 - on account switch:
-  - clears in-memory user-scoped state
-  - clears per-user Diet/Readiness cache keys from the previous account
-  - resets auxiliary local-only logs/config where needed
+  - A `useEffect` on `session.user.id` detects the ID change and zeroes all in-memory fitness logs
+  - Clears per-user food/readiness localStorage keys for the previous `userId`
+  - Resets all auxiliary local-only logs (`waterLog`, `cardioLog`, `supplementLog`, etc.)
+
+### Data State
 
 | Data Domain | Storage | Persistence Key / Table |
 |-------------|---------|-------------------------|
@@ -559,9 +587,11 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Workouts** | Supabase DB | `workout_logs` |
 | **Health Logs** | Supabase DB | `health_logs` |
 | **Measurements** | Supabase DB | `measurements` |
-| **Food Logs** | Supabase DB + per-user cache | `food_logs` + `fittrack_foodLog_<userId>` |
+| **Food Logs** | Supabase DB + per-user write-through cache | `food_logs` + `fittrack_foodLog_<userId>` (90-day TTL prune on every write) |
 | **Splits** | Supabase DB | `user_splits` |
-| **Readiness** | Supabase DB + per-user cache | `readiness_logs` + `fittrack_readinessLog_<userId>` |
+| **Readiness** | Supabase DB + per-user write-through cache | `readiness_logs` + `fittrack_readinessLog_<userId>` (90-day TTL prune on every write) |
+| **Profile cache** | localStorage | `fittrack_profile_<userId>` |
+| **Last user** | localStorage | `fittrack_last_user_id` |
 | **Favorites** | localStorage | `fittrack_favoriteFoods` |
 | **Water Log** | localStorage | `fittrack_waterLog` |
 | **Cardio Log** | localStorage | `fittrack_cardioLog` |
@@ -569,14 +599,51 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Supplement Config** | localStorage | `fittrack_supplementConfig` |
 | **Cycle Config**| localStorage | `fp_cycle_config` |
 
-**Exposed methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`.
+### Live Refs
+- `foodLogRef` — always mirrors current `foodLog` state; used by `loadCloudData` to merge against live data rather than a stale closure snapshot
+- `readinessLogRef` — same pattern for `readinessLog`
+- `currentUserIdRef` — mirrors `session.user.id || profile.id || localStorage fittrack_last_user_id`; read inside `createSyncSetter`'s `setTimeout` to avoid stale closure userId
+- `isFetchingProfile` — ref-based mutex preventing concurrent `fetchProfile` calls
+- `cloudRefreshTimerRef` — debounce handle (250 ms) for `scheduleCloudRefresh` to coalesce rapid realtime events
+
+### Cloud Sync & Realtime
+- **`scheduleCloudRefresh(userId)`**: 250ms debounced wrapper around `loadCloudData` so multiple rapid realtime events collapse into a single re-fetch
+- **Supabase realtime**: subscribes channel `fittrack-sync-<userId>` to `postgres_changes` for `food_logs` and `readiness_logs` scoped by `user_id=eq.<userId>`. Any insert/update/delete triggers `scheduleCloudRefresh`.
+- **Browser lifecycle**: `focus`, `online`, `pageshow`, and `visibilitychange` all trigger `scheduleCloudRefresh` when the tab is visible
+- **15-second polling**: `setInterval` calls `scheduleCloudRefresh` every 15 s whenever the tab is visible — catches browsers that miss the realtime push
+- All listeners and the realtime channel are torn down in the `useEffect` cleanup when the user changes or logs out
+
+### Write-Through Cache (Food & Readiness)
+`setFoodLog` and `setReadinessLog` are not plain React state setters — they wrap `setFoodLogState` / `setReadinessLogState` with a write-through that:
+1. Computes the next array from the updater
+2. Prunes entries older than 90 days
+3. Immediately writes the pruned array to `fittrack_foodLog_<userId>` / `fittrack_readinessLog_<userId>` in localStorage
+4. Returns `next` to React for re-render
+
+This guarantees that even if the Supabase upsert fails, the local cache is always up-to-date for the next refresh fallback.
+
+### `createSyncSetter` (Cloud Delta Sync)
+Factory function used to build all six cloud-backed setters. Given a `table`, a current state array, a `setState`, and a `mapperToCloud`:
+1. Calls `setLocalState(prev => ...)` synchronously to update React state
+2. Inside a `setTimeout(0)`, reads `currentUserIdRef.current` (avoids stale closure userId)
+3. Computes `toUpsert` (new or changed items by deep JSON comparison) and `toDeleteIds`
+4. Normalizes every field to remove `undefined`, `''`, and `NaN` before the Supabase payload
+5. Calls `supabase.from(table).upsert(mapped, { onConflict: 'id' })`; logs `✅` on success or `❌` with the full Supabase error on failure
+6. Calls `supabase.from(table).delete().in('id', toDeleteIds)` for removed rows
+
+### Exposed Context API
+**Methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`, `removeToast`
+
+**Sync setters (replace original setters):** `setSplits`, `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`
+
+**Local-only setters (no cloud):** `setCaloriesLog`, `setFavoriteIds`, `setMonthlyRankHistory`, `toggleTheme`, `setWaterLog`, `setCardioLog`, `setSupplementLog`, `setSupplementConfig`, `setCycleConfig`
 
 ### Cloud Rehydration Notes
-- **Food logs**: AppContext normalizes cloud rows back into the richer Diet entry shape (`mealType`, `slot`, `qty`, `customGrams`, `macros`, etc.). If cloud returns empty but a per-user local cache exists, DietPage restores from that cache so logged meals do not disappear after refresh.
-- **Readiness logs**: AppContext normalizes integer DB values back into the UI enum strings and restores the saved `score` / `objectiveScore`, preventing the questionnaire from reappearing after refresh.
-- **Cross-device refresh**: AppContext subscribes to Supabase `postgres_changes` for `food_logs` and `readiness_logs`, refreshes again on `focus`, `visibilitychange`, `online`, and `pageshow`, and also runs a 15-second visible-tab polling fallback for browsers that miss realtime updates.
-- **Cloud merge policy**: food logs merge cloud rows with richer cached local entries by `id`; readiness merges by user+date and prefers completed/newer cloud-backed entries so phone and desktop do not drift into separate same-day readiness states.
-- **Sync setters**: `createSyncSetter()` wraps `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, and `setSplits`, computes add/update/delete deltas, normalizes `undefined` / empty-string / `NaN` values to `null`, then upserts/deletes in Supabase asynchronously.
+- **Food logs**: `mapFoodLogFromCloud` reconstructs the full Diet entry shape from the flat `food_logs` row, merging with the cached local item for micro-nutrient fields not stored in Supabase (`iron`, `vitaminB12`, `vitaminD`). `slot` and `mealType` default to `'Breakfast'` when `meal_type` is null. Macro values use `normalizeNumber` + `Number()` coercion for null-safety.
+- **Readiness logs**: `mapReadinessFromCloud` maps integer DB columns back to UI enum strings and restores `score`, `objectiveScore`, and `checkInComplete`.
+- **Merge priority**: `loadCloudData` reads live `foodLogRef.current` / `readinessLogRef.current` (not stale render snapshots) when computing the cache source, eliminating race conditions when another device writes during an in-flight load.
+- **Fallback chain**: if cloud returns 0 food rows, `cachedFoodSource` (ref → localStorage) is used directly. Same for readiness. Cloud data is written into state only if `mergedLog.length > 0 || currentRef.length === 0`.
+- **Splits**: falls back to `INIT_SPLITS` (default programs) when `user_splits` returns empty.
 
 ---
 
@@ -659,10 +726,13 @@ Several rounds of mobile UX fixes on the food search modal:
 
 ### Desktop Auth Bootstrap Loading Hang (Fixed 2026-04-09)
 **Symptom:** Desktop web sessions could stay on the FitTrack Pro loading screen indefinitely if the live Supabase profile fetch stalled during startup.
+**Root cause:** The original boot sequence blocked `authLoading` on the completion of `fetchProfile`, which includes `user_profiles` DB fetch, migration, and `loadCloudData` — a chain that can take 3–10 s. Any transient error left `authLoading` stuck forever.
 **Fixes applied:**
-- AppContext now seeds signed-in UI state from `supabase.auth.getSession()` plus a cached/fallback profile instead of blocking the whole app on `user_profiles` fetch.
-- Added per-user profile caching (`fittrack_profile_<userId>`) so desktop reloads can recover instantly from the last known good profile shape.
-- Hardened profile bootstrap error handling so transient fetch failures no longer blank the profile or leave `authLoading` stuck forever.
+- `handleSessionBootstrap` now sets `initialized = true` **synchronously** before any `await`, so the 3-second fallback timer only fires for truly unresponsive sessions.
+- `authLoading` is cleared immediately after constructing a `buildFallbackProfile` from the session + `fittrack_profile_<userId>` cache — the live profile fetch runs in the background.
+- `fetchProfile` is guarded by an `isFetchingProfile` ref-mutex to prevent double-calls from the `onAuthStateChange` + `getSession` race.
+- Errors in `fetchProfile` are caught and logged; the `finally` block always clears `isFetchingProfile` and ensures `authLoading` is false.
+- Removed the custom `storageKey` from the Supabase client config (it orphaned existing sessions using the default `sb-<ref>-auth-token` key).
 
 ### Cross-Device Readiness & Meal Sync (Fixed 2026-04-09)
 **Symptoms:**
@@ -670,11 +740,26 @@ Several rounds of mobile UX fixes on the food search modal:
 - Meals and readiness updates were reliable from Mac → phone, but not consistently from phone → Mac.
 
 **Fixes applied:**
-- Added Supabase realtime subscriptions for `food_logs` and `readiness_logs` scoped to the authenticated `user_id`.
-- Added browser-side refresh fallbacks on `focus`, `visibilitychange`, `online`, and `pageshow`, plus a 15-second polling backup while the tab is visible.
-- Switched cloud rehydration to merge against live refs (`foodLogRef` / `readinessLogRef`) instead of stale render snapshots, reducing race conditions when another device writes during an in-flight load.
-- Readiness merge now deduplicates by `userId + date` and prefers completed/newer entries, preventing separate same-day readiness states across devices.
-- Dashboard now auto-closes the readiness sheet if today's check-in appears from another device before the user completes it locally.
+- Added Supabase realtime channel `fittrack-sync-<userId>` subscribing to `postgres_changes` for `food_logs` and `readiness_logs` filtered to the authenticated user.
+- Added browser-side refresh triggers on `focus`, `visibilitychange`, `online`, and `pageshow`, plus a 15-second visible-tab polling interval.
+- All triggers call the debounced `scheduleCloudRefresh(userId)` (250 ms) to coalesce bursts.
+- Switched `loadCloudData` to read from live refs (`foodLogRef.current` / `readinessLogRef.current`) instead of stale render closures, eliminating a race where mid-flight cloud loads overwrote concurrent local writes.
+- Readiness merge deduplicates by `userId:date` key and applies `pickPreferredReadinessEntry` tie-breaking (completed > newer timestamp).
+- Dashboard auto-closes the readiness sheet when a completed check-in arrives from the cloud before the local form is submitted.
+
+### Write-Through Cache & 90-Day Pruning (Implemented 2026-04-09)
+**Motivation:** The `setFoodLog` / `setReadinessLog` setters previously only updated React state. A Supabase upsert failure would cause data to appear on-screen but disappear after refresh.
+**Implementation:** Both setters now write-through to their per-user localStorage key on every state update, pruning entries older than 90 days to prevent unbounded growth. This makes the local cache reliably authoritative for the next refresh fallback, independent of Supabase availability.
+
+### Diet Page Header Layout Overlap (Fixed 2026-04-09)
+**Symptom:** On mobile screens, the "DAILY TRACKER" headline, 3-Day Streak badge, "Copy Y'day" button, and `< Today >` date picker were all on a single flex row, causing text bleed, overflow off-screen, and overlapping elements.
+**Fix:** Restructured into a responsive 2-row layout:
+- Row 1: `DAILY TRACKER` title (left) + Streak badge (right), ember-themed pill using `var(--primary-container)` color
+- Row 2: `< Today >` date navigator and `Copy Y'day` button as equal-flex siblings, both using `var(--surface-container-highest)` background + 12px border-radius — visually unified, no `minWidth` constraint that caused bleed
+- `white-space: nowrap` added to both pill labels to prevent letter-stacking on very narrow screens
+
+### Supabase Upsert Debug Logging (Added 2026-04-09)
+`createSyncSetter` now emits `[CloudSync] ✅ Upserted N row(s) to <table>` on success and `[CloudSync] ❌ Upsert FAILED for <table>: <message>` on error, making it trivial to confirm from browser DevTools whether data is actually reaching the cloud.
 
 ---
 
@@ -690,12 +775,12 @@ Several rounds of mobile UX fixes on the food search modal:
 | `cascade-item` stagger | Defined in CSS but not applied broadly across all card lists |
 | Friends tab (Olympus League) | EmptyState stub — no real social graph backend |
 | Time-range filter pills (Analytics) | `[1M] [3M] [6M]` pills are visual only — state wiring deferred |
-| Olympus League Phase 3 post-ship fixes | Fixes 1–8 documented in `TODO-redesign-phase-3.md §Phase 3.1`; all marked `[x]` (implemented) |
 | Leaderboard light-theme rows | Inline `rgba` glass values on leaderboard rows may look off in light mode; prefer `var(--glass-bg)` |
 | B12/D3/Iron alerts | Implemented on DietPage Analysis tab; thresholds may still need tuning against real usage |
 | GI-aware carb guidance | Documented in Phase 4 — not yet implemented |
 | Recipe builder | Cancelled — comprehensive pre-built coverage + custom food entry is enough |
 | Supabase as primary food source | `useFoodCache()` fetches full remote food data first, then falls back to local JS. Search execution in DietPage is still local/in-memory after cache load |
-| Food entry cloud completeness | Diet refresh now falls back to per-user local cache if cloud rows are missing/incomplete; long-term goal is to make `food_logs` authoritative for every meal |
+| Food entry cloud completeness | `food_logs` now authoritative with local write-through fallback; long-term goal is to verify upsert success rates in production logs and remove debug `✅/❌` console statements |
 | Reset-password route | Forgot-password email flow is wired, but `/reset-password` is not yet mounted in the router |
 | UX audit items | `TODO-ux-audit.md` + 13 per-page audit files (`TODO-UX-01` through `TODO-UX-13`) pending review |
+| Supabase upsert debug logging | `[CloudSync] ✅/❌` console.log statements in `createSyncSetter` should be removed or downgraded before a production-hardened release |

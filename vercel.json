@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/fitbit/:path*",
+      "destination": "https://YOUR_SUPABASE_URL.supabase.co/functions/v1/fitbit-oauth/:path*"
+    },
+    {
+      "source": "/strava/:path*",
+      "destination": "https://YOUR_SUPABASE_URL.supabase.co/functions/v1/strava-oauth/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

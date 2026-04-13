@@ -107,6 +107,24 @@ export default function ProfilePage() {
   const [confirm, setConfirm] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   
+  useEffect(() => {
+    if (user && !ed) {
+      setF({
+        ...user,
+        name: user.name || '',
+        gender: user.gender || 'male',
+        age: user.age ?? '',
+        height: user.height ?? '',
+        weight: user.weight ?? '',
+        weightGoal: user.weightGoal ?? '',
+        activity: user.activity || 'moderate',
+        workoutDays: user.workoutDays ?? 4,
+        dietType: user.dietType || 'veg',
+        stepGoal: user.stepGoal ?? 10000,
+      });
+    }
+  }, [user?.id, user?.weight, user?.height, user?.name, user?.age]);
+  
   const unitWeight = user.unitWeight || 'kg';
   const unitHeight = user.unitHeight || 'cm';
   const toggleUnitWeight = async () => await updateProfile({ unitWeight: unitWeight === 'kg' ? 'lbs' : 'kg' });
@@ -114,9 +132,29 @@ export default function ProfilePage() {
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
   const save = async () => {
-    await updateProfile({ ...f, weight: parseFloat(f.weight), height: parseFloat(f.height), age: parseInt(f.age), workoutDays: parseInt(f.workoutDays), weightGoal: f.weightGoal ? parseFloat(f.weightGoal) : null, stepGoal: f.stepGoal ? parseInt(f.stepGoal, 10) : 10000 });
-    setEd(false);
-    addToast('Profile updated successfully', 'success');
+    const safeParse = (v, fn = parseFloat) => {
+      if (v === '' || v == null) return null;
+      const n = fn(v);
+      return Number.isFinite(n) ? n : null;
+    };
+    const sanitized = {
+      ...f,
+      weight: safeParse(f.weight),
+      height: safeParse(f.height),
+      age: safeParse(f.age, parseInt),
+      weightGoal: safeParse(f.weightGoal),
+      workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
+      stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
+    };
+
+    const { error } = await updateProfile(sanitized);
+    if (error) {
+      addToast('Failed to save — please try again', 'error');
+      console.error('[ProfilePage] save error:', error);
+    } else {
+      addToast('Profile updated successfully', 'success');
+      setEd(false);
+    }
   };
 
   const handleExport = () => { exportData(); addToast('Data exported!', 'success'); };

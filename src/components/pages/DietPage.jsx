@@ -74,6 +74,43 @@ export default function DietPage() {
   const [selectedFood, setSelectedFood] = useState(null);
   const [servingId, setServingId] = useState('');
   const [qty, setQty] = useState(1);
+  const [qtyInput, setQtyInput] = useState('1');
+  
+  useEffect(() => {
+    setQtyInput(String(qty));
+  }, [qty]);
+
+  const handleQtyInputChange = (e) => setQtyInput(e.target.value);
+  const handleQtyInputBlur = () => {
+    const parsed = parseFloat(qtyInput);
+    if (!isNaN(parsed) && parsed > 0) {
+      const rounded = Math.max(0.25, Math.round(parsed * 4) / 4);
+      setQty(rounded);
+      setQtyInput(String(rounded));
+    } else {
+      setQtyInput(String(qty));
+    }
+  };
+  const handleQtyMinus = () => {
+    const next = Math.max(0.25, qty - 0.25);
+    setQty(next);
+    setQtyInput(String(next));
+  };
+  const handleQtyPlus = () => {
+    const next = qty + 0.25;
+    setQty(next);
+    setQtyInput(String(next));
+  };
+
+  const totalGrams = useMemo(() => {
+    if (!selectedFood || !servingId) return null;
+    if (servingId === 'custom' && customGrams) {
+      return parseFloat(customGrams) * qty;
+    }
+    const serving = selectedFood.servings?.find(s => s.id === servingId);
+    if (!serving?.grams) return null;
+    return serving.grams * qty;
+  }, [selectedFood, servingId, customGrams, qty]);
   const [customGrams, setCustomGrams] = useState('');
   const [consistency, setConsistency] = useState('standard');
   const [milkMod, setMilkMod] = useState('none');
@@ -212,8 +249,8 @@ export default function DietPage() {
     const q = searchQuery.trim();
     const hasFilters = searchDiet !== 'All' || searchFasting;
     
-    // No query and no filters → show nothing (recent/favorites shown separately)
-    if (!q && !hasFilters) return [];
+    // No query and no filters → show a sample of foods so the list isn't empty
+    if (!q && !hasFilters) return allFoods.slice(0, 50);
     
     // Run local search (with or without query)
     let results = searchLocalFoods(allFoods, q, {
@@ -859,6 +896,11 @@ export default function DietPage() {
                         {selectedFood.servings?.map(s => (
                           <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                             {s.isDeliveryPortion && '📦 '} {s.label} ({s.grams}g)
+                            {servingId === s.id && s.grams && qty !== 1 && (
+                              <span style={{ opacity: 0.8, marginLeft: 4 }}>
+                                → {Math.round(s.grams * qty * 10) / 10}g
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -869,10 +911,64 @@ export default function DietPage() {
                       {!customGrams && (
                         <>
                           <label>Multiplier (Qty)</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, background: 'var(--surface-container-high)', width: 'max-content', padding: 6, borderRadius: 10 }}>
-                            <button className="btn-g" onClick={() => setQty(Math.max(0.25, qty - 0.25))} style={{ padding: '10px 14px', background: 'var(--surface-container-highest)' }}>-</button>
-                            <span style={{ fontSize: 18, fontWeight: 800, width: 36, textAlign: 'center' }}>{qty}</span>
-                            <button className="btn-g" onClick={() => setQty(qty + 0.25)} style={{ padding: '10px 14px', background: 'var(--surface-container-highest)' }}>+</button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, background: 'var(--surface-container-high)', width: 'fit-content', padding: 6, borderRadius: 12 }}>
+                            <button
+                              onClick={handleQtyMinus}
+                              style={{
+                                width: 36, height: 36, borderRadius: 8, border: 'none',
+                                background: qty <= 0.25 ? 'transparent' : 'var(--surface-container-highest)',
+                                color: qty <= 0.25 ? 'var(--on-surface-dim)' : 'var(--on-surface)',
+                                cursor: qty <= 0.25 ? 'not-allowed' : 'pointer',
+                                fontSize: 18, fontWeight: 700,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'background .15s',
+                              }}
+                              disabled={qty <= 0.25}
+                              aria-label="Decrease quantity"
+                            >
+                              −
+                            </button>
+
+                            <input
+                              type="number"
+                              value={qtyInput}
+                              onChange={handleQtyInputChange}
+                              onBlur={handleQtyInputBlur}
+                              onFocus={e => e.target.select()}
+                              inputMode="decimal"
+                              step="0.25"
+                              min="0.25"
+                              style={{
+                                width: 60,
+                                textAlign: 'center',
+                                background: 'transparent',
+                                border: 'none',
+                                outline: 'none',
+                                fontFamily: "'Space Grotesk', sans-serif",
+                                fontWeight: 800,
+                                fontSize: 18,
+                                color: 'var(--on-surface)',
+                                padding: '4px 0',
+                                MozAppearance: 'textfield',
+                              }}
+                              aria-label="Quantity"
+                            />
+
+                            <button
+                              onClick={handleQtyPlus}
+                              style={{
+                                width: 36, height: 36, borderRadius: 8, border: 'none',
+                                background: 'var(--surface-container-highest)',
+                                color: 'var(--on-surface)',
+                                cursor: 'pointer',
+                                fontSize: 18, fontWeight: 700,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'background .15s',
+                              }}
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
                           </div>
                         </>
                       )}
@@ -954,8 +1050,22 @@ export default function DietPage() {
                       )}
                     </div>
 
-                    {/* Sticky Bottom Save Action (H3a — position:sticky, not fixed) */}
+                    {/* Sticky Bottom Save Action */}
                     <div style={{ position: 'sticky', bottom: 0, left: 0, right: 0, background: 'var(--surface-container-lowest)', padding: '12px 16px', boxShadow: '0 -4px 20px rgba(0,0,0,0.4)', zIndex: 10, flexShrink: 0, borderTop: '1px solid var(--surface-container-highest)' }}>
+                      {totalGrams != null && (
+                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 6, fontWeight: 600 }}>
+                          {qty !== 1 && (
+                            <span style={{ color: 'var(--on-surface-dim)', marginRight: 4 }}>
+                              {qty} × {selectedFood?.servings?.find(s => s.id === servingId)?.grams ?? customGrams}g =
+                            </span>
+                          )}
+                          <span style={{ color: 'var(--primary)', fontWeight: 800 }}>
+                            {Math.round(totalGrams * 10) / 10}g
+                          </span>
+                          {' '}total
+                        </div>
+                      )}
+                      
                       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 10 }}>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kcal</div>

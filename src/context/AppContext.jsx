@@ -634,12 +634,23 @@ export function AppProvider({ children }) {
     for (const [camel, snake] of Object.entries(keyMap)) {
       if (updates[camel] !== undefined) snakeUpdates[snake] = updates[camel];
     }
-    const { data, error } = await supabase.from('user_profiles')
+    let { data, error } = await supabase.from('user_profiles')
       .update(snakeUpdates)
       .eq('id', profile.id)
       .select()
-      .single();
-    if (!error) setProfile(data);
+      .maybeSingle();
+
+    if (!data && !error) {
+      // Profile row missing (Google OAuth edge case), fallback to insert
+      const { data: insertData, error: insertError } = await supabase.from('user_profiles')
+        .insert({ id: profile.id, ...snakeUpdates })
+        .select()
+        .single();
+      data = insertData;
+      error = insertError;
+    }
+
+    if (!error && data) setProfile(data);
     return { error };
   };
 

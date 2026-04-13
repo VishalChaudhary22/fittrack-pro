@@ -489,7 +489,7 @@ export function AppProvider({ children }) {
     if (!userId) return;
 
     const [
-      workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes,
+      workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes
     ] = await Promise.all([
       supabase.from('workout_logs').select('*').eq('user_id', userId),
       supabase.from('health_logs').select('*').eq('user_id', userId),

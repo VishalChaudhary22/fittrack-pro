@@ -162,11 +162,7 @@ export default function DashboardPage() {
     }
   }, [hasCompletedReadiness, user?.id, dataLoaded]); // intentional — readiness completion is stable per-render
 
-  useEffect(() => {
-    if (hasCompletedReadiness && showCheckIn) {
-      setShowCheckIn(false);
-    }
-  }, [hasCompletedReadiness, showCheckIn]);
+
 
   const allUserLogs = useMemo(() => [...healthLogs].filter(l => l.userId === user.id).sort((a, b) => new Date(a.date) - new Date(b.date)), [healthLogs, user.id]);
   const latestWeight = allUserLogs.length > 0 ? allUserLogs[allUserLogs.length - 1].weight : user.weight;

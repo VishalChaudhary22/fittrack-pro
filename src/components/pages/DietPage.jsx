@@ -210,26 +210,19 @@ export default function DietPage() {
     if (foodsLoading || !allFoods.length) return [];
     
     const q = searchQuery.trim();
-    const hasFilters = searchCat !== 'All' || searchDiet !== 'All' || searchFasting;
+    const hasFilters = searchDiet !== 'All' || searchFasting;
     
     // No query and no filters → show nothing (recent/favorites shown separately)
     if (!q && !hasFilters) return [];
     
     // Run local search (with or without query)
-    let results = !q
-      ? allFoods
-      : searchLocalFoods(allFoods, q, {
-          dietType: searchDiet !== 'All' ? searchDiet.toLowerCase() : null,
-          fastingType: searchFasting || null,
-        });
-    
-    // Apply category filter on top
-    if (searchCat !== 'All') {
-      results = results.filter(f => f.category === searchCat);
-    }
+    let results = searchLocalFoods(allFoods, q, {
+      dietType: searchDiet !== 'All' ? searchDiet.replace('-', '').toLowerCase() : null,
+      fastingType: searchFasting || null,
+    });
     
     return results;
-  }, [searchQuery, searchDiet, searchFasting, searchCat, allFoods, foodsLoading]);
+  }, [searchQuery, searchDiet, searchFasting, allFoods, foodsLoading]);
 
 
   const recentFoods = useMemo(() => getRecentFoods(foodLog), [foodLog]);
@@ -1017,12 +1010,7 @@ export default function DietPage() {
                   })}
                 </div>
 
-                {/* Category Pills */}
-                <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', background: 'var(--surface)', flexShrink: 0 }} className="hide-scrollbar">
-                  {[{ id: 'All', label: 'All' }, ...foodCategories].map(c => (
-                    <button key={c.id} onClick={() => setSearchCat(c.id)} style={{ whiteSpace: 'nowrap', padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 600, border: 'none', background: searchCat === c.id ? 'var(--surface-container-highest)' : 'transparent', color: searchCat === c.id ? 'var(--primary)' : 'var(--on-surface-dim)', cursor: 'pointer' }}>{c.label}</button>
-                  ))}
-                </div>
+
 
                 {/* Results List */}
                 <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: '16px 24px', paddingBottom: 40 }}>

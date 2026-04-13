@@ -26,8 +26,10 @@ fittrack-pro/
 ├── TODO-redesign-phase-1.md     # Kinetic Elite redesign — Phases 0–8 (completed)
 ├── TODO-redesign-phase-2.md     # Workout History Page overhaul (completed)
 ├── TODO-redesign-phase-3.md     # Olympus League Page overhaul (completed + post-ship fixes)
-├── TODO-indian-food-db.md       # Indian food DB — schema, categories, 350 food target (Phase 1–4 done)
-├── TODO-supplement-db.md        # Whey protein & mass gainer brand database (Phase 5 — data entry pending)
+├── TODO-indian-food-db.md       # Indian food DB — schema, categories (Phases 1-4 done)
+├── India-extended-food-db.md    # Extended DB v3.1 ingest plans (Injected ~54 QSR/Modern gaps into indianFoods.js)
+├── TODO-activity-tracking.md    # Activity tracking roadmap (Phases 1-4 completed using usePedometer & OAuth)
+├── TODO-supplement-db.md        # Whey protein & mass gainer brand database (data entry pending)
 ├── TODO-dietpage-overhaul.md    # DietPage merge with food logging (Phases A–H done)
 ├── TODO-ux-audit.md             # UX audit across all pages
 ├── UX-AUDIT-INDEX.md            # Index of per-page UX audit TODOs
@@ -109,7 +111,7 @@ fittrack-pro/
     │   ├── rankBenchmarks.js
     │   ├── sample.js
     │   └── foods/
-    │       ├── indianFoods.js    # ~207 food objects (v2.3 schema, 314KB)
+    │       ├── indianFoods.js    # ~261 food objects (v3.1 schema extended, 350KB+), including Phase 1-5 newly injected QSR/Niche DB
     │       ├── foodCategories.js # 20 category definitions
     │       └── servingTypes.js   # 18 standardized serving types
     ├── hooks/

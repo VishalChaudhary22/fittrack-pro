@@ -102,15 +102,6 @@ export default function DietPage() {
     setQtyInput(String(next));
   };
 
-  const totalGrams = useMemo(() => {
-    if (!selectedFood || !servingId) return null;
-    if (servingId === 'custom' && customGrams) {
-      return parseFloat(customGrams) * qty;
-    }
-    const serving = selectedFood.servings?.find(s => s.id === servingId);
-    if (!serving?.grams) return null;
-    return serving.grams * qty;
-  }, [selectedFood, servingId, customGrams, qty]);
   const [customGrams, setCustomGrams] = useState('');
   const [consistency, setConsistency] = useState('standard');
   const [milkMod, setMilkMod] = useState('none');
@@ -120,6 +111,16 @@ export default function DietPage() {
   const [showCustom, setShowCustom] = useState(false);
   const [customInput, setCustomInput] = useState({ name: '', cals: '', p: '', c: '', f: '' });
   const [editingEntry, setEditingEntry] = useState(null);
+
+  const totalGrams = useMemo(() => {
+    if (!selectedFood || !servingId) return null;
+    if (servingId === 'custom' && customGrams) {
+      return parseFloat(customGrams) * qty;
+    }
+    const serving = selectedFood.servings?.find(s => s.id === servingId);
+    if (!serving?.grams) return null;
+    return serving.grams * qty;
+  }, [selectedFood, servingId, customGrams, qty]);
 
   const canCalculate = Boolean(Number.isFinite(user?.weight) && Number.isFinite(user?.height) && Number.isFinite(user?.age));
   const isUnset = !canCalculate || !user?.weightGoal;

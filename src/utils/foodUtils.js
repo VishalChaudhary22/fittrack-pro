@@ -126,8 +126,14 @@ export const searchLocalFoods = (foodsList, query, filters = {}) => {
   // 2. Jain filter enforces strict constraints universally
   if (dietType === 'jain') {
     results = results.filter(f => !f.containsRootVeg && f.dietTypes.includes('jain'));
+  } else if (dietType === 'egg') {
+    // Egg category should filter OUT basic veg items like milk
+    results = results.filter(f => f.dietTypes.includes('egg') && !f.dietTypes.includes('veg'));
+  } else if (dietType === 'nonveg') {
+    // Non-veg category should ONLY show meats, not eggs or veg
+    results = results.filter(f => f.dietTypes.includes('nonveg') && !f.dietTypes.includes('egg') && !f.dietTypes.includes('veg'));
   } else if (dietType) {
-    // Other dietary filters
+    // Other dietary filters (veg, vegan)
     results = results.filter(f => f.dietTypes.includes(dietType));
   }
 
@@ -174,6 +180,12 @@ export const searchRemoteFoods = async (query, filters = {}) => {
   if (dietType === 'jain') {
     dbQuery = dbQuery.eq('contains_root_veg', false)
                      .contains('diet_types', ['jain']);
+  } else if (dietType === 'egg') {
+    dbQuery = dbQuery.contains('diet_types', ['egg']).not('diet_types', 'cs', '{"veg"}');
+  } else if (dietType === 'nonveg') {
+    dbQuery = dbQuery.contains('diet_types', ['nonveg'])
+                     .not('diet_types', 'cs', '{"veg"}')
+                     .not('diet_types', 'cs', '{"egg"}');
   } else if (dietType && dietType !== 'All') {
     dbQuery = dbQuery.contains('diet_types', [dietType.toLowerCase()]);
   }

@@ -147,7 +147,6 @@ export default function ProfilePage() {
         height: safeParse(f.height),
         activity: f.activityLevel || f.activity || 'moderate',
         workout_days: safeParse(f.workoutDays, parseInt) ?? 4,
-        step_goal: safeParse(f.stepGoal, parseInt) ?? 10000,
       };
       console.log('[ProfilePage] Direct Supabase save:', snakeUpdates, 'userId:', user.id);
 

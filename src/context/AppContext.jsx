@@ -631,7 +631,7 @@ export function AppProvider({ children }) {
       activity: 'activity', activityLevel: 'activity', workoutDays: 'workout_days',
       dietType: 'diet_type', units: 'units', unitWeight: 'unit_weight', unitHeight: 'unit_height',
       avatar: 'avatar', avatarType: 'avatar_type', avatarUrl: 'avatar_url',
-      activeSplitId: 'active_split_id', isAdmin: 'is_admin', stepGoal: 'step_goal',
+      activeSplitId: 'active_split_id', isAdmin: 'is_admin',
     };
     const snakeUpdates = {};
     for (const [camel, snake] of Object.entries(keyMap)) {

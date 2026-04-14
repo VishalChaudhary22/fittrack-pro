@@ -137,12 +137,14 @@ export default function ProfilePage() {
       const n = fn(v);
       return Number.isFinite(n) ? n : null;
     };
+    // Only send the fields the form actually edits — never spread the full user/f object
     const sanitized = {
-      ...f,
+      name: f.name || '',
+      gender: f.gender || 'male',
+      age: safeParse(f.age, parseInt),
       weight: safeParse(f.weight),
       height: safeParse(f.height),
-      age: safeParse(f.age, parseInt),
-      weightGoal: safeParse(f.weightGoal),
+      activityLevel: f.activityLevel || f.activity || 'moderate',
       workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
       stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
     };
@@ -368,7 +370,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 12, textAlign: 'right' }}>To update your goal weight, visit the Diet page.</div>
+        <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 12, textAlign: 'right' }}>To update your goal weight, visit the Home page.</div>
       </div>
 
       {/* Connected Devices (9.6b) */}

@@ -620,7 +620,10 @@ export function AppProvider({ children }) {
   }, [session?.user?.id, profile?.id, scheduleCloudRefresh]);
 
   const updateProfile = async (updates) => {
-    if (!profile) return;
+    if (!profile) {
+      console.warn('[updateProfile] No profile loaded — cannot save');
+      return { error: { message: 'Profile not loaded' } };
+    }
     const keyMap = {
       name: 'name', gender: 'gender', age: 'age', height: 'height', weight: 'weight',
       weightGoal: 'weight_goal', weightGoalStart: 'weight_goal_start',
@@ -634,20 +637,27 @@ export function AppProvider({ children }) {
     for (const [camel, snake] of Object.entries(keyMap)) {
       if (updates[camel] !== undefined) snakeUpdates[snake] = updates[camel];
     }
+    console.log('[updateProfile] snakeUpdates:', snakeUpdates, 'profile.id:', profile.id);
+
     let { data, error } = await supabase.from('user_profiles')
       .update(snakeUpdates)
       .eq('id', profile.id)
       .select()
       .maybeSingle();
 
+    console.log('[updateProfile] update result:', { data: !!data, error: error?.message || null });
+
     if (!data && !error) {
-      // Profile row missing (Google OAuth edge case), fallback to insert
-      const { data: insertData, error: insertError } = await supabase.from('user_profiles')
-        .insert({ id: profile.id, ...snakeUpdates })
+      // Row update returned nothing — could be missing row or RLS block.
+      // Try upsert instead of insert to avoid duplicate key errors.
+      console.log('[updateProfile] No data returned from update, trying upsert fallback...');
+      const { data: upsertData, error: upsertError } = await supabase.from('user_profiles')
+        .upsert({ id: profile.id, ...snakeUpdates }, { onConflict: 'id' })
         .select()
         .single();
-      data = insertData;
-      error = insertError;
+      data = upsertData;
+      error = upsertError;
+      console.log('[updateProfile] upsert result:', { data: !!data, error: error?.message || null });
     }
 
     if (!error && data) setProfile(data);

@@ -16,7 +16,7 @@ export const Sidebar = () => {
 
   return (
     <div className="ds" style={{ width: sb ? 230 : 54, background: 'var(--surface-container-low)', borderRight: 'none', display: 'flex', flexDirection: 'column', transition: 'width .22s var(--ease-spring)', flexShrink: 0, position: 'sticky', top: 0, height: '100dvh', overflow: 'hidden', zIndex: 'var(--z-nav)' }}>
-      <div style={{ padding: '24px 16px 16px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
+      <div role="button" aria-label={sb ? "Collapse sidebar" : "Expand sidebar"} tabIndex={0} onKeyDown={e => e.key === 'Enter' && setSb(!sb)} style={{ padding: '24px 16px 16px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
         <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--signature-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: 'var(--glow-primary)' }}><Dumbbell size={18} color="var(--on-primary)" /></div>
         {sb && <div className="headline-md" style={{ color: 'var(--on-surface)', whiteSpace: 'nowrap' }}>FITTRACK</div>}
       </div>

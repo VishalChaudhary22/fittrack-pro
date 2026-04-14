@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import AvatarInitials from '../shared/AvatarInitials';
+import ErrorBoundary from '../shared/ErrorBoundary';
 import PlayerDetailModal from '../shared/PlayerDetailModal';
 import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank } from '../../data/muscleData';
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
@@ -512,7 +513,9 @@ export default function MuscleMapPage() {
           {/* subtle glow overlay matching overall rank color */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(circle at 50% -20%, ${overall.color}20, transparent 70%)`, pointerEvents: 'none' }} />
           
-          <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
+          <ErrorBoundary>
+            <BodyMapSVG muscleXP={muscleXP} gender={user?.gender} />
+          </ErrorBoundary>
 
           {/* Rank Display */}
           <div className="tonal-break" style={{ marginTop: 24, padding: '16px', background: 'var(--surface-container-highest)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, RefreshCcw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState, Portal, PulseIndicator } from '../shared/SharedComponents';
+import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
@@ -168,10 +168,10 @@ const YogaSessionView = ({ day, onBack, onComplete }) => {
             <div style={{ fontSize: '4rem', fontWeight: 700, color: 'var(--on-surface)' }}>{timeLeft}</div>
           </div>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <button onClick={() => setIsPlaying(!isPlaying)} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--primary)', border: 'none', color: '#000', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? "Pause session" : "Play session"} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--primary)', border: 'none', color: '#000', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isPlaying ? <Pause /> : <Play />}
             </button>
-            <button onClick={() => { completedNaturallyRef.current = false; endSession(); }} style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => { completedNaturallyRef.current = false; endSession(); }} aria-label="Stop session" style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Square />
             </button>
           </div>
@@ -302,6 +302,7 @@ export default function WorkoutPage() {
   const [done, setDone] = useState(null);
   const [timer, setTimer] = useState(null); // { active, seconds }
   const [restSeconds, setRestSeconds] = useState(90);
+  const [confirmFinish, setConfirmFinish] = useState(false);
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
 
   const finishBtnRef = useRef(null);
@@ -315,6 +316,17 @@ export default function WorkoutPage() {
     const saved = sessionStorage.getItem('fittrack_session_start');
     if (saved && session) startTimeRef.current = parseInt(saved, 10);
   }, [session]);
+
+  // Unload Guard
+  useEffect(() => {
+    if (!session || done) return;
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [session, done]);
 
   // Ticking interval — runs only when a non-yoga session is active
   useEffect(() => {
@@ -354,10 +366,15 @@ export default function WorkoutPage() {
     }
     const exs = day.exercises.map(ex => {
       const prev = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      let prevEx = null;
+      if (prev) {
+        prevEx = prev.exercises.find(e => e.name === ex.name || (ex.variants && ex.variants.includes(e.name)));
+      }
       return {
-        ...ex, sv: ex.variants ? ex.variants[0] : null,
-        sets: Array.from({ length: ex.sets || 3 }, () => {
-          return { reps: '', weight: '', done: false, targetRep: ex.repsRange || '8-12' };
+        ...ex, sv: prevEx?.name || (ex.variants ? ex.variants[0] : null),
+        sets: Array.from({ length: ex.sets || 3 }, (_, i) => {
+          const pSet = prevEx?.sets[i];
+          return { reps: '', weight: pSet ? String(pSet.weight) : '', done: false, targetRep: pSet ? String(pSet.reps) : (ex.repsRange || '8-12') };
         }),
       };
     });
@@ -382,6 +399,16 @@ export default function WorkoutPage() {
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
   const finish = () => {
+    const undoneCount = session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0);
+    if (undoneCount > 0) {
+      setConfirmFinish(true);
+      return;
+    }
+    doFinish();
+  };
+
+  const doFinish = () => {
+    setConfirmFinish(false);
     sessionStorage.removeItem('fittrack_session_start');
     startTimeRef.current = null;
     setElapsed(0);
@@ -510,11 +537,25 @@ export default function WorkoutPage() {
                     {ex.muscle || 'Full Body'} • {focusType}
                   </p>
                 </div>
-                <button style={{ background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                <button aria-label="Exercise options" style={{ minWidth: 44, minHeight: 44, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                 </button>
               </div>
 
+              {/* Last Session Reference Row (UX-4.5) */}
+              {(() => {
+                const prevLog = workoutLogs.filter(l => l.userId === user.id && l.dayId === session.day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                const pe = prevLog?.exercises?.find(e => e.name === (ex.sv || ex.name));
+                if (!pe?.sets?.length) return null;
+                return (
+                  <div style={{ padding: '6px 12px', marginBottom: 8, background: 'var(--surface-container)', borderRadius: 10, borderLeft: '2px solid var(--primary-container)', fontSize: 11, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+                    <span style={{ color: 'var(--on-surface-dim)', fontWeight: 700, marginRight: 4 }}>PREV ({fmt(prevLog.date)}):</span>
+                    {pe.sets.map((s, i) => (
+                      <span key={i} style={{ color: 'var(--on-surface-variant)' }}>{s.reps}r × {s.weight}kg{i < pe.sets.length - 1 ? ',' : ''}</span>
+                    ))}
+                  </div>
+                );
+              })()}
               {/* Set Grid Headers */}
               <div className="set-row" style={{ padding: '0 12px', marginBottom: 8 }}>
                 {['SET', 'REPS', 'KG', 'DONE'].map((h, i) => (
@@ -537,16 +578,16 @@ export default function WorkoutPage() {
                     <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
                     
                     <div style={{ paddingRight: 8 }}>
-                      <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ width: '100%', background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
+                      <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ width: '100%', minHeight: 44, background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
                     </div>
                     
                     <div style={{ paddingRight: 8 }}>
-                      <input type="number" step=".5" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ width: '100%', background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
+                      <input type="number" step=".5" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ width: '100%', minHeight: 44, background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
                     </div>
                     
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' }}>
                       <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
-                        width: 38, height: 38, borderRadius: 10,
+                        width: 44, height: 44, borderRadius: 10,
                         background: s.done ? 'var(--surface-container-highest)' : 'var(--surface-container-highest)',
                         color: s.done ? 'var(--primary)' : 'var(--on-surface-variant)',
                         border: s.done ? '1px solid var(--primary-container)' : '1px solid transparent',
@@ -556,7 +597,7 @@ export default function WorkoutPage() {
                         <Check size={18} strokeWidth={s.done ? 3 : 2} />
                       </button>
                       {ex.sets.length > 1 && (
-                        <button onClick={() => rmS(ei, si)} style={{ background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: '6px 4px', fontSize: 10 }} title="Remove set">✕</button>
+                        <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
                       )}
                     </div>
                   </div>
@@ -644,6 +685,16 @@ export default function WorkoutPage() {
           })}
         </div>
       }
+      <ConfirmDialog
+        open={confirmFinish}
+        title="Unfinished Sets"
+        message={`You have ${session ? session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) : 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
+        confirmLabel="Save Partial"
+        cancelLabel="Keep Editing"
+        danger={false}
+        onConfirm={doFinish}
+        onCancel={() => setConfirmFinish(false)}
+      />
     </div>
   );
 }

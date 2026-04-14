@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Sidebar, BottomNav } from './components/layout/Layout';
 import { ToastContainer } from './components/shared/SharedComponents';
+import ErrorBoundary from './components/shared/ErrorBoundary';
 import AuthModal from './components/pages/AuthModal';
 import DashboardPage from './components/pages/DashboardPage';
 import SplitsPage from './components/pages/SplitsPage';
@@ -53,18 +54,18 @@ function AppInner() {
       <Sidebar />
       <main className="mc" style={{ flex: 1, padding: '22px 24px', overflowY: 'auto' }}>
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/splits" element={<SplitsPage />} />
-          <Route path="/workout" element={<WorkoutPage />} />
-          <Route path="/diet" element={<DietPage />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/history" element={<WorkoutHistoryPage />} />
-          <Route path="/weight-log" element={<WeightLogPage />} />
-          <Route path="/measurements" element={<MeasurementsPage />} />
-          <Route path="/muscle-map" element={<MuscleMapPage />} />
-          <Route path="/cycle" element={<CycleTrackerPage />} />
+          <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+          <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
+          <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
+          <Route path="/diet" element={<ErrorBoundary><DietPage /></ErrorBoundary>} />
+          <Route path="/progress" element={<ErrorBoundary><ProgressPage /></ErrorBoundary>} />
+          <Route path="/contact" element={<ErrorBoundary><ContactPage /></ErrorBoundary>} />
+          <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
+          <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage /></ErrorBoundary>} />
+          <Route path="/weight-log" element={<ErrorBoundary><WeightLogPage /></ErrorBoundary>} />
+          <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
+          <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage /></ErrorBoundary>} />
+          <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

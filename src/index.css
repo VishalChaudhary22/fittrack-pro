@@ -180,6 +180,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .card:hover{
   background:var(--surface-container);
 }
+.card-interactive:active,
+.card[style*="cursor: pointer"]:active,
+.glass-card[style*="cursor: pointer"]:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+  transition: transform .1s var(--ease-spring), opacity .1s var(--ease-smooth);
+}
 .card>*{position:relative;z-index:1}
 .card-p{background:var(--surface-container);border:none;border-radius:20px;overflow:hidden;box-shadow:none;}
 
@@ -308,7 +315,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ex-r{display:grid;grid-template-columns:34px 1fr 1fr 80px;gap:7px;align-items:center}
 .set-row { display: grid; grid-template-columns: 34px 1fr 1fr 44px; gap: 8px; align-items: center; }
 .add-set-btn {
-  width: 100%; padding: 12px; margin-top: 10px; border-radius: 12px;
+  width: 100%; min-height: 44px; padding: 12px; margin-top: 10px; border-radius: 12px;
   border: 1.5px dashed var(--outline-variant); background: transparent;
   font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.75rem; font-weight: 500;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-surface-dim);

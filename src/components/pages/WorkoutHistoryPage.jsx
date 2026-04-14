@@ -364,7 +364,7 @@ export default function WorkoutHistoryPage() {
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: '#F85F1B' }}>{c.calories} kcal</div>
                 </div>
-                <button style={{ background: 'transparent', border: 'none', color: 'var(--on-surface-dim)', cursor: 'pointer' }} onClick={() => deleteCardio(c.id)}><Trash2 size={16} /></button>
+                <button aria-label="Delete cardio session" style={{ background: 'transparent', border: 'none', color: 'var(--on-surface-dim)', cursor: 'pointer' }} onClick={() => deleteCardio(c.id)}><Trash2 size={16} /></button>
               </div>
             </div>
           ))}

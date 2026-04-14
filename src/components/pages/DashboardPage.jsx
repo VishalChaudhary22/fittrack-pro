@@ -638,17 +638,26 @@ export default function DashboardPage() {
         {/* Weight Trend Chart */}
         <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16 }}>
           <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 16 }}>WEIGHT TREND</div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={chartData}>
-              <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
-              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
-              <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} axisLine={false} tickLine={false} />
-              <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />
-              <Area type="monotone" dataKey="weight" stroke="#F85F1B" strokeWidth={2} fill="url(#wg)" dot={{ fill: '#F85F1B', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Weight" />
-              {user.weightGoal && <ReferenceLine y={isImpWeight ? kgToLbs(user.weightGoal) : user.weightGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />}
-            </AreaChart>
-          </ResponsiveContainer>
+          {chartData.length >= 2 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={chartData}>
+                <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
+                <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
+                <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} axisLine={false} tickLine={false} />
+                <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />
+                <Area type="monotone" dataKey="weight" stroke="#F85F1B" strokeWidth={2} fill="url(#wg)" dot={{ fill: '#F85F1B', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Weight" />
+                {user.weightGoal && <ReferenceLine y={isImpWeight ? kgToLbs(user.weightGoal) : user.weightGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 10, position: 'insideTopRight' }} />}
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--on-surface-variant)' }}>
+               <Activity size={32} color="var(--primary)" style={{ opacity: 0.8, marginBottom: 12, filter: 'drop-shadow(var(--glow-primary))' }} />
+               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Insufficient Data</div>
+               <div style={{ fontSize: 12, marginTop: 4, maxWidth: 220, textAlign: 'center' }}>Log weight for at least two days to see your trend chart.</div>
+               <button className="btn-g" style={{ marginTop: 20, padding: '10px 20px', fontSize: 13 }} onClick={() => setShowLog(true)}>Log Weight</button>
+            </div>
+          )}
         </div>
 
         {/* Live Suggestion Banner */}
@@ -906,7 +915,7 @@ export default function DashboardPage() {
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Weight</div>
-              <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowLog(false)}><X size={14} /></button>
+              <button className="btn-g" aria-label="Close modal" style={{ padding: '5px 9px' }} onClick={() => setShowLog(false)}><X size={14} /></button>
             </div>
             <div style={{ marginBottom: 16 }}>
               <label>Select Weight ({isImpWeight ? 'lbs' : 'kg'})</label>
@@ -926,7 +935,7 @@ export default function DashboardPage() {
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Steps</div>
-              <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowStepModal(false)}><X size={14} /></button>
+              <button className="btn-g" aria-label="Close step modal" style={{ padding: '5px 9px' }} onClick={() => setShowStepModal(false)}><X size={14} /></button>
             </div>
 
             {/* Manual Entry */}
@@ -994,7 +1003,7 @@ export default function DashboardPage() {
           <div className="md" style={{ maxWidth: 400 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Set Weight Goal</div>
-              <button className="btn-g" style={{ padding: '5px 9px' }} onClick={() => setShowGoal(false)}><X size={14} /></button>
+              <button className="btn-g" aria-label="Close goal modal" style={{ padding: '5px 9px' }} onClick={() => setShowGoal(false)}><X size={14} /></button>
             </div>
             <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--primary)' }}>{isImpWeight ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>

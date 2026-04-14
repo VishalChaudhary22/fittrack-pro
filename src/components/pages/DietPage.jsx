@@ -833,7 +833,7 @@ export default function DietPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                               <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--on-surface)' }}>{Math.round(i.macros?.calories||0)}</span>
                               {i.food && <button onClick={(e) => { e.stopPropagation(); editEntry(i); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Edit2 size={14}/></button>}
-                              <button onClick={(e) => { e.stopPropagation(); removeEntry(i.id); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><X size={14}/></button>
+                              <button aria-label="Remove food entry" onClick={(e) => { e.stopPropagation(); removeEntry(i.id); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><X size={14}/></button>
                             </div>
                           </div>
                         ))}
@@ -869,7 +869,7 @@ export default function DietPage() {
               <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: 16, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => { setSelectedFood(null); setShowCustom(false); }}><ChevronLeft size={20}/></button>
-                  <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
+                  <button className="btn-g" aria-label="Close search" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
                 </div>
                 
                 {showCustom ? (
@@ -1099,7 +1099,7 @@ export default function DietPage() {
                 <div style={{ padding: '16px 24px 12px', background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <h3 className="headline-md" style={{ margin: 0, fontSize: 20 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
-                    <button className="btn-g" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
+                    <button className="btn-g" aria-label="Close meal search" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
                   </div>
                   <div style={{ position: 'relative' }}>
                     <Search style={{ position: 'absolute', top: 14, left: 16, color: 'var(--on-surface-dim)' }} size={18} />

@@ -63,8 +63,8 @@ export default function WeightLogPage() {
                     <input type="number" step=".1" value={editVal.weight} onChange={e => setEditVal(p => ({ ...p, weight: e.target.value }))} style={{ fontSize: 13, padding: '8px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
                     <input value={editVal.notes} onChange={e => setEditVal(p => ({ ...p, notes: e.target.value }))} placeholder="Notes..." style={{ fontSize: 13, padding: '8px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button className="btn-p" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 8 }} onClick={saveEdit}>✓</button>
-                      <button className="btn-g" style={{ padding: '6px 10px', fontSize: 12, borderRadius: 8 }} onClick={() => setEditId(null)}><X size={14} /></button>
+                      <button className="btn-p" aria-label="Save weight edit" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 8 }} onClick={saveEdit}>✓</button>
+                      <button className="btn-g" aria-label="Cancel edit" style={{ padding: '6px 10px', fontSize: 12, borderRadius: 8 }} onClick={() => setEditId(null)}><X size={14} /></button>
                     </div>
                   </>
                 ) : (
@@ -76,8 +76,8 @@ export default function WeightLogPage() {
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>{log.notes || '—'}</div>
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button className="btn-g" style={{ padding: '6px 10px', borderRadius: 8 }} onClick={() => startEdit(log)}><Edit2 size={14} /></button>
-                      <button className="btn-d" style={{ padding: '6px 10px', borderRadius: 8 }} onClick={() => deleteLog(log.id)}><Trash2 size={14} /></button>
+                      <button className="btn-g" aria-label="Edit weight log" style={{ padding: '6px 10px', borderRadius: 8 }} onClick={() => startEdit(log)}><Edit2 size={14} /></button>
+                      <button className="btn-d" aria-label="Delete weight log" style={{ padding: '6px 10px', borderRadius: 8 }} onClick={() => deleteLog(log.id)}><Trash2 size={14} /></button>
                     </div>
                   </>
                 )}

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Ruler, X, Plus } from 'lucide-react';
+import { Ruler, X, Plus, Activity } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../data/constants';
@@ -69,7 +69,14 @@ export default function MeasurementsPage() {
         </div>
       ) : userMeasurements.length === 0 ? (
         <EmptyState Icon={Ruler} title="No Measurements" message="Log your body measurements to track physique changes over time" action={() => setShowAdd(true)} actionLabel="Log First Measurement" />
-      ) : null}
+      ) : (
+        <div className="card" style={{ padding: 40, marginBottom: 24, border: 'none', textAlign: 'center', color: 'var(--on-surface-variant)' }}>
+          <Activity size={32} color="var(--primary)" style={{ opacity: 0.8, marginBottom: 12, margin: '0 auto', filter: 'drop-shadow(var(--glow-primary))' }} />
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Insufficient Data</div>
+          <div style={{ fontSize: 12, marginTop: 4, maxWidth: 220, margin: '0 auto' }}>Log {MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label.toLowerCase()} for at least two days to see your trend chart.</div>
+          <button className="btn-g" style={{ marginTop: 20, padding: '10px 20px', fontSize: 13 }} onClick={() => setShowAdd(true)}>Log Measurement</button>
+        </div>
+      )}
 
       {/* History table */}
       {userMeasurements.length > 0 && (
@@ -107,7 +114,7 @@ export default function MeasurementsPage() {
           <div className="md" style={{ maxWidth: 460 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div className="headline-lg">Log Measurements</div>
-              <button className="btn-g" style={{ padding: '8px', borderRadius: 12 }} onClick={() => setShowAdd(false)}><X size={18} /></button>
+              <button className="btn-g" aria-label="Close add measurement" style={{ padding: '8px', borderRadius: 12 }} onClick={() => setShowAdd(false)}><X size={18} /></button>
             </div>
             <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 20 }}>Enter measurements in cm. Leave blank for any you don't want to track.</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 16, marginBottom: 24 }}>

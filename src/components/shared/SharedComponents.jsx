@@ -59,7 +59,14 @@ export const ProgressOrb = ({ progress = 0, size = 120, label, subLabel }) => {
 };
 
 // ─── PORTAL (renders children at document.body to avoid transform stacking) ──
-export const Portal = ({ children }) => createPortal(children, document.body);
+export const Portal = ({ children }) => {
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = originalStyle; };
+  }, []);
+  return createPortal(children, document.body);
+};
 // ─── STAT CARD ────────────────────────────────────────────────────────────────
 export const StatCard = ({ label, value, unit, Icon, sub, trend, onClick, badge }) => (
   <div className="card" style={{ padding: '20px 18px', position: 'relative', overflow: 'hidden', cursor: onClick ? 'pointer' : 'default', userSelect: 'none' }}

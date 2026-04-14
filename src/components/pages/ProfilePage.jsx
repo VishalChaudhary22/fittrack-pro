@@ -132,30 +132,38 @@ export default function ProfilePage() {
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
   const save = async () => {
-    const safeParse = (v, fn = parseFloat) => {
-      if (v === '' || v == null) return null;
-      const n = fn(v);
-      return Number.isFinite(n) ? n : null;
-    };
-    // Only send the fields the form actually edits — never spread the full user/f object
-    const sanitized = {
-      name: f.name || '',
-      gender: f.gender || 'male',
-      age: safeParse(f.age, parseInt),
-      weight: safeParse(f.weight),
-      height: safeParse(f.height),
-      activityLevel: f.activityLevel || f.activity || 'moderate',
-      workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
-      stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
-    };
+    try {
+      const safeParse = (v, fn = parseFloat) => {
+        if (v === '' || v == null) return null;
+        const n = fn(v);
+        return Number.isFinite(n) ? n : null;
+      };
+      // Only send the fields the form actually edits
+      const sanitized = {
+        name: f.name || '',
+        gender: f.gender || 'male',
+        age: safeParse(f.age, parseInt),
+        weight: safeParse(f.weight),
+        height: safeParse(f.height),
+        activityLevel: f.activityLevel || f.activity || 'moderate',
+        workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
+        stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
+      };
+      console.log('[ProfilePage] save() calling updateProfile with:', sanitized);
 
-    const { error } = await updateProfile(sanitized);
-    if (error) {
-      addToast('Failed to save — please try again', 'error');
-      console.error('[ProfilePage] save error:', error);
-    } else {
-      addToast('Profile updated successfully', 'success');
-      setEd(false);
+      const result = await updateProfile(sanitized);
+      console.log('[ProfilePage] updateProfile returned:', JSON.stringify(result));
+
+      if (!result || result.error) {
+        addToast('Failed to save — please try again', 'error');
+        console.error('[ProfilePage] save error:', result?.error);
+      } else {
+        addToast('Profile updated successfully', 'success');
+        setEd(false);
+      }
+    } catch (ex) {
+      addToast('Failed to save — unexpected error', 'error');
+      console.error('[ProfilePage] save EXCEPTION:', ex);
     }
   };
 

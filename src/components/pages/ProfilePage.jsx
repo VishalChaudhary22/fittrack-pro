@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { LogOut, Download, Upload, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { supabase } from '../../lib/supabaseClient';
 import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
@@ -139,31 +138,22 @@ export default function ProfilePage() {
         const n = fn(v);
         return Number.isFinite(n) ? n : null;
       };
-      const snakeUpdates = {
+      const sanitized = {
         name: f.name || '',
         gender: f.gender || 'male',
         age: safeParse(f.age, parseInt),
         weight: safeParse(f.weight),
         height: safeParse(f.height),
-        activity: f.activityLevel || f.activity || 'moderate',
-        workout_days: safeParse(f.workoutDays, parseInt) ?? 4,
+        activityLevel: f.activityLevel || f.activity || 'moderate',
+        workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
+        stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
       };
-      console.log('[ProfilePage] Direct Supabase save:', snakeUpdates, 'userId:', user.id);
 
-      const { data, error } = await supabase.from('user_profiles')
-        .update(snakeUpdates)
-        .eq('id', user.id)
-        .select()
-        .single();
-      
-      console.log('[ProfilePage] Supabase result:', { data: !!data, error: error?.message || error?.code || null });
+      const result = await updateProfile(sanitized);
 
-      if (error) {
-        addToast(`Save failed: ${error.message}`, 'error');
-        console.error('[ProfilePage] Supabase error details:', error);
+      if (!result || result.error) {
+        addToast(`Save failed: ${result?.error?.message || 'Unknown error'}`, 'error');
       } else {
-        // Also tell AppContext about the update so the user object refreshes
-        await updateProfile({});
         addToast('Profile updated successfully', 'success');
         setEd(false);
       }

@@ -58,8 +58,13 @@ export const ProgressOrb = ({ progress = 0, size = 120, label, subLabel }) => {
   );
 };
 
-// ─── PORTAL (renders children at document.body to avoid transform stacking) ──
+// ─── PORTAL (renders children at document.body) ──
 export const Portal = ({ children }) => {
+  return createPortal(children, document.body);
+};
+
+// ─── MODAL PORTAL (renders at document.body with scroll lock) ──
+export const ModalPortal = ({ children }) => {
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -276,23 +281,23 @@ export const ToastContainer = ({ toasts, removeToast }) => (
 );
 
 // ─── CONFIRM DIALOG ───────────────────────────────────────────────────────────
-export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', danger = false }) => {
+export const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false }) => {
   if (!open) return null;
   return (
-    <Portal>
+    <ModalPortal>
       <div className="mo">
         <div className="md" style={{ maxWidth: 380, textAlign: 'center' }}>
           <div className="headline-md" style={{ marginBottom: 8, color: 'var(--on-surface)' }}>{title}</div>
           <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 20, lineHeight: 1.5 }}>{message}</div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>Cancel</button>
+            <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={onCancel}>{cancelLabel}</button>
             <button className={danger ? 'btn-danger' : 'btn-p'} style={{
               flex: 1, padding: '12px'
             }} onClick={onConfirm}>{confirmLabel}</button>
           </div>
         </div>
       </div>
-    </Portal>
+    </ModalPortal>
   );
 };
 

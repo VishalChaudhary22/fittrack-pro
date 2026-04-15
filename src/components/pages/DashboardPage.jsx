@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { ScrollPicker, Portal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
+import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
@@ -900,17 +900,17 @@ export default function DashboardPage() {
       {/* ── Check-in Modal ── */}
       {/* ⚠️ GAP-G8 FIX: Wrap in Portal to guarantee z-index layering above all Dashboard modals */}
       {showCheckIn && (
-        <Portal>
+        <ModalPortal>
           <ReadinessCheckIn
             objectiveScore={objectiveScore}
             onClose={() => setShowCheckIn(false)}
           />
-        </Portal>
+        </ModalPortal>
       )}
 
       {/* Log Weight Modal */}
       {showLog && (
-        <Portal>
+        <ModalPortal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -925,12 +925,12 @@ export default function DashboardPage() {
             <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveLog}>Save Log</button>
           </div>
         </div>
-        </Portal>
+        </ModalPortal>
       )}
 
       {/* Log Steps Modal */}
       {showStepModal && (
-        <Portal>
+        <ModalPortal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 360 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -993,12 +993,12 @@ export default function DashboardPage() {
             
           </div>
         </div>
-        </Portal>
+        </ModalPortal>
       )}
 
       {/* Set Goal Modal */}
       {showGoal && (
-        <Portal>
+        <ModalPortal>
         <div className="mo">
           <div className="md" style={{ maxWidth: 400 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -1025,7 +1025,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        </Portal>
+        </ModalPortal>
       )}
     </>
   );

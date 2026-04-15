@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, X, Edit2, Trash2, Check, Dumbbell, Repeat, Zap, Target, Trophy, Home, Award, Flame } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, ConfirmDialog, Portal } from '../shared/SharedComponents';
+import { PageHeader, ConfirmDialog, ModalPortal } from '../shared/SharedComponents';
 import { gId } from '../../utils/helpers';
 
 export default function SplitsPage() {
@@ -156,14 +156,14 @@ export default function SplitsPage() {
         );
       })}
       {addSp && (
-        <Portal><div className="mo"><div className="md" style={{ maxWidth: 400 }}>
+        <ModalPortal><div className="mo"><div className="md" style={{ maxWidth: 400 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}><div className="headline-lg" style={{ color: 'var(--on-surface)' }}>New Split</div><button className="btn-g" style={{ padding: '6px 10px', border: 'none', background: 'var(--surface-container-highest)' }} onClick={() => setAddSp(false)}><X size={16} /></button></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div><label style={{ color: 'var(--on-surface-variant)', fontSize: 12, marginBottom: 6, display: 'block' }}>Name</label><input placeholder="e.g. Bro Split" value={ns.name} onChange={e => setNs(p => ({ ...p, name: e.target.value }))} style={{ width: '100%' }} /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: 12 }}><div><label style={{ color: 'var(--on-surface-variant)', fontSize: 12, marginBottom: 6, display: 'block' }}>Icon</label><select value={ns.icon} onChange={e => setNs(p => ({ ...p, icon: e.target.value }))} style={{ fontSize: 13, width: '100%' }}>{Object.keys(ICON_MAP).map(k => <option key={k} value={k}>{k}</option>)}</select></div><div><label style={{ color: 'var(--on-surface-variant)', fontSize: 12, marginBottom: 6, display: 'block' }}>Description</label><input placeholder="5 days/week..." value={ns.description} onChange={e => setNs(p => ({ ...p, description: e.target.value }))} style={{ width: '100%' }} /></div></div>
             <button className="btn-p" style={{ width: '100%', padding: '14px', borderRadius: 12, fontSize: 15, marginTop: 8 }} onClick={addSpFn}>Create Split</button>
           </div>
-        </div></div></Portal>
+        </div></div></ModalPortal>
       )}
       <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>

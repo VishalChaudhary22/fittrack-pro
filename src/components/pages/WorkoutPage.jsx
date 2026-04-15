@@ -298,7 +298,12 @@ export default function WorkoutPage() {
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
   const nav = useNavigate();
   const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('fittrack_active_workout');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [done, setDone] = useState(null);
   const [timer, setTimer] = useState(null); // { active, seconds }
   const [restSeconds, setRestSeconds] = useState(90);
@@ -316,6 +321,15 @@ export default function WorkoutPage() {
     const saved = sessionStorage.getItem('fittrack_session_start');
     if (saved && session) startTimeRef.current = parseInt(saved, 10);
   }, [session]);
+
+  // Persist active session to sessionStorage (survives navigation)
+  useEffect(() => {
+    if (session && !done && !session.isYoga) {
+      sessionStorage.setItem('fittrack_active_workout', JSON.stringify(session));
+    } else {
+      sessionStorage.removeItem('fittrack_active_workout');
+    }
+  }, [session, done]);
 
   // Unload Guard
   useEffect(() => {
@@ -410,6 +424,7 @@ export default function WorkoutPage() {
   const doFinish = () => {
     setConfirmFinish(false);
     sessionStorage.removeItem('fittrack_session_start');
+    sessionStorage.removeItem('fittrack_active_workout');
     startTimeRef.current = null;
     setElapsed(0);
     const endTimestamp = new Date().getTime();
@@ -437,13 +452,13 @@ export default function WorkoutPage() {
 
     const sessionPrimaryMuscles = [...new Set(
       done.exercises.map(doneEx => {
-        const exItem = session.exs.find(e => (e.sv || e.name) === doneEx.name);
+        const exItem = session?.exs?.find(e => (e.sv || e.name) === doneEx.name);
         return exItem?.primaryMuscle || exItem?.muscle?.toLowerCase();
       }).filter(Boolean)
     )];
     const sessionSecondaryMuscles = [...new Set(
       done.exercises.flatMap(doneEx => {
-        const exItem = session.exs.find(e => (e.sv || e.name) === doneEx.name);
+        const exItem = session?.exs?.find(e => (e.sv || e.name) === doneEx.name);
         return exItem?.secondaryMuscles || [];
       })
     )].filter(m => !sessionPrimaryMuscles.includes(m));
@@ -590,7 +605,9 @@ export default function WorkoutPage() {
                         width: 44, height: 44, borderRadius: 10,
                         background: s.done ? 'var(--surface-container-highest)' : 'var(--surface-container-highest)',
                         color: s.done ? 'var(--primary)' : 'var(--on-surface-variant)',
-                        border: s.done ? '1px solid var(--primary-container)' : '1px solid transparent',
+                        border: 'none',
+                        outline: s.done ? '1.5px solid var(--primary-container)' : '1.5px solid transparent',
+                        outlineOffset: '-1.5px',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all .2s'
                       }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = s.done ? 'var(--primary)' : 'var(--on-surface-variant)'}>
@@ -625,6 +642,7 @@ export default function WorkoutPage() {
         </button>
         <button onClick={() => {
           sessionStorage.removeItem('fittrack_session_start');
+          sessionStorage.removeItem('fittrack_active_workout');
           startTimeRef.current = null;
           setElapsed(0);
           setSession(null); setTimer(null);
@@ -659,6 +677,16 @@ export default function WorkoutPage() {
           </div>
         </div>
       </Portal>
+      <ConfirmDialog
+        open={confirmFinish}
+        title="Unfinished Sets"
+        message={`You have ${session ? session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) : 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
+        confirmLabel="Save Partial"
+        cancelLabel="Keep Editing"
+        danger={false}
+        onConfirm={doFinish}
+        onCancel={() => setConfirmFinish(false)}
+      />
     </div>
   );
   }
@@ -685,16 +713,7 @@ export default function WorkoutPage() {
           })}
         </div>
       }
-      <ConfirmDialog
-        open={confirmFinish}
-        title="Unfinished Sets"
-        message={`You have ${session ? session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) : 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
-        confirmLabel="Save Partial"
-        cancelLabel="Keep Editing"
-        danger={false}
-        onConfirm={doFinish}
-        onCancel={() => setConfirmFinish(false)}
-      />
+
     </div>
   );
 }

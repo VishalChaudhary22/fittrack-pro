@@ -44,6 +44,8 @@ function vibrateRestComplete() {
 
 const ACTIVE_SESSION_KEY = 'fittrack_activeWorkoutSession';
 const REST_TIMER_KEY = 'fittrack_activeRestTimer';
+const REST_TIMER_POS_KEY = 'fittrack_activeRestTimerPos';
+const SESSION_STALE_MS = 8 * 60 * 60 * 1000;
 const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 function persistActiveSession(session) {
@@ -342,18 +344,29 @@ export default function WorkoutPage() {
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
   const nav = useNavigate();
   const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
-  const [session, setSession] = useState(null);
+  // --- Session state: auto-resume from localStorage on mount ---
+  const [session, setSession] = useState(() => {
+    try {
+      const saved = loadPersistedSession(user?.id);
+      if (saved && (Date.now() - (saved.lastUpdated || saved.startTime)) < SESSION_STALE_MS) {
+        return saved; // Fresh session — auto-resume
+      }
+    } catch {}
+    return null;
+  });
   const [done, setDone] = useState(null);
 
-  // Resume Session UI State
-  const [persistedSession, setPersistedSession] = useState(null);
-
-  useEffect(() => {
-    if (user?.id) {
-      const saved = loadPersistedSession(user.id);
-      if (saved) setPersistedSession(saved);
-    }
-  }, [user]);
+  // Resume card — only for stale sessions (8-24h)
+  const [persistedSession, setPersistedSession] = useState(() => {
+    try {
+      const saved = loadPersistedSession(user?.id);
+      if (saved && (Date.now() - (saved.lastUpdated || saved.startTime)) >= SESSION_STALE_MS) {
+        return saved; // Stale — show resume card
+      }
+    } catch {}
+    return null;
+  });
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   // Timer State (Fix 3 & 5)
   const [restDuration, setRestDuration] = useState(() => {
@@ -374,6 +387,13 @@ export default function WorkoutPage() {
   const startTimeRef = useRef(null);
   const [elapsed, setElapsed] = useState(0);
 
+  // Recover startTime on auto-resume
+  useEffect(() => {
+    if (session && session.startTime && !startTimeRef.current) {
+      startTimeRef.current = session.startTime;
+    }
+  }, [session]);
+
   // Persist active session (Fix 6)
   useEffect(() => {
     if (session && !done && !session.isYoga) {
@@ -383,7 +403,7 @@ export default function WorkoutPage() {
     }
   }, [session, done, user]);
 
-  // Read timer from localstorage on mount (Fix 3)
+  // Read timer from localStorage on mount (Fix 3) — also restore position
   useEffect(() => {
     const saved = localStorage.getItem(REST_TIMER_KEY);
     if (saved) {
@@ -391,8 +411,14 @@ export default function WorkoutPage() {
        if (endsAt > Date.now()) {
           setRestEndsAt(endsAt);
           setRestActive(true);
+          // Restore timer position
+          try {
+            const posRaw = localStorage.getItem(REST_TIMER_POS_KEY);
+            if (posRaw) setRestTimerPosition(JSON.parse(posRaw));
+          } catch {}
        } else {
           localStorage.removeItem(REST_TIMER_KEY);
+          localStorage.removeItem(REST_TIMER_POS_KEY);
           playRestCompleteChime();
           vibrateRestComplete();
        }
@@ -408,6 +434,7 @@ export default function WorkoutPage() {
       if (remaining <= 0) {
         clearInterval(interval);
         localStorage.removeItem(REST_TIMER_KEY);
+        localStorage.removeItem(REST_TIMER_POS_KEY);
         setRestActive(false);
         setRestTimerPosition(null);
         playRestCompleteChime();
@@ -426,6 +453,7 @@ export default function WorkoutPage() {
           const endsAt = parseInt(saved, 10);
           if (endsAt <= Date.now()) {
             localStorage.removeItem(REST_TIMER_KEY);
+            localStorage.removeItem(REST_TIMER_POS_KEY);
             setRestActive(false);
             setRestTimerPosition(null);
             playRestCompleteChime();
@@ -447,6 +475,7 @@ export default function WorkoutPage() {
 
   function skipRestTimer() {
     localStorage.removeItem(REST_TIMER_KEY);
+    localStorage.removeItem(REST_TIMER_POS_KEY);
     setRestActive(false);
     setRestTimerPosition(null);
   }
@@ -463,6 +492,7 @@ export default function WorkoutPage() {
     getAudioCtx(); // unlock audio on user gesture
     const endsAt = Date.now() + restDuration * 1000;
     localStorage.setItem(REST_TIMER_KEY, String(endsAt));
+    localStorage.setItem(REST_TIMER_POS_KEY, JSON.stringify({ ei, si }));
     setRestEndsAt(endsAt);
     setRestSecondsLeft(restDuration);
     setRestActive(true);
@@ -815,19 +845,11 @@ export default function WorkoutPage() {
       <ConfirmDialog
         open={confirmFinish}
         title="Unfinished Sets"
-        message={`You have ${session ? session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) : 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
+        message={`You have ${session?.exs?.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) || 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
         confirmLabel="Save Partial"
         cancelLabel="Keep Editing"
-        danger={!session}
-        onConfirm={() => {
-          if (!session) {
-             clearPersistedSession();
-             setPersistedSession(null);
-             setConfirmFinish(false);
-          } else {
-             doFinish();
-          }
-        }}
+        danger={false}
+        onConfirm={doFinish}
         onCancel={() => setConfirmFinish(false)}
       />
     </div>
@@ -844,14 +866,14 @@ export default function WorkoutPage() {
             const exerciseCount = persistedSession.exs?.length || 0;
             const completedSets = persistedSession.exs?.flatMap(e => e.sets).filter(s => s.done).length || 0;
             const timeAgo = formatTimeAgo(persistedSession.startTime);
-            const isStale = (Date.now() - persistedSession.startTime) > (8 * 60 * 60 * 1000);
+            const hoursAgo = Math.floor((Date.now() - persistedSession.startTime) / 3600000);
             
             return (
               <div style={{ background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary-container)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  {isStale ? <span style={{ fontSize: 14 }}>⚠️</span> : <PulseIndicator color="var(--primary)" />}
-                  <span className="label-md" style={{ color: isStale ? 'var(--on-surface-variant)' : 'var(--primary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                    {isStale ? `SESSION FROM ${Math.floor((Date.now() - persistedSession.startTime)/3600000)}H AGO` : 'ACTIVE SESSION IN PROGRESS'}
+                  <span style={{ fontSize: 14 }}>⚠️</span>
+                  <span className="label-md" style={{ color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {`SESSION FROM ${hoursAgo}H AGO`}
                   </span>
                 </div>
                 <div className="title-md" style={{ color: 'var(--on-surface)', marginBottom: 4 }}>
@@ -868,10 +890,24 @@ export default function WorkoutPage() {
                   }} style={{ padding: '10px 20px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: 13, letterSpacing: '0.05em' }}>
                     RESUME SESSION
                   </button>
-                  <button onClick={() => setConfirmFinish(true)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <button onClick={() => setConfirmDiscard(true)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Discard
                   </button>
                 </div>
+                <ConfirmDialog
+                  open={confirmDiscard}
+                  title="Discard Session?"
+                  message={`This will permanently delete all ${completedSets} sets logged in this session.`}
+                  confirmLabel="Discard"
+                  cancelLabel="Cancel"
+                  danger={true}
+                  onConfirm={() => {
+                    clearPersistedSession();
+                    setPersistedSession(null);
+                    setConfirmDiscard(false);
+                  }}
+                  onCancel={() => setConfirmDiscard(false)}
+                />
               </div>
             );
           })()}

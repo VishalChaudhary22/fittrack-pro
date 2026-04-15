@@ -3,9 +3,81 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, RefreshCcw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
-import { gId, tod, fmt } from '../../utils/helpers';
+import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
+
+// ─── AUDIO & PERSISTENCE HELPERS ────────────────────────────────────────────────
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function playRestCompleteChime() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523.25, 659.25, 783.99];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.18;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.35, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t);
+      osc.stop(t + 0.55);
+    });
+  } catch (e) {
+    // silently fail
+  }
+}
+
+function vibrateRestComplete() {
+  if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+}
+
+const ACTIVE_SESSION_KEY = 'fittrack_activeWorkoutSession';
+const REST_TIMER_KEY = 'fittrack_activeRestTimer';
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function persistActiveSession(session) {
+  try {
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({
+      ...session,
+      lastUpdated: Date.now(),
+    }));
+  } catch (e) {}
+}
+
+function clearPersistedSession() {
+  localStorage.removeItem(ACTIVE_SESSION_KEY);
+}
+
+function loadPersistedSession(currentUserId) {
+  try {
+    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.userId && parsed.userId !== currentUserId) return null;
+    if (Date.now() - parsed.lastUpdated > SESSION_MAX_AGE_MS) {
+      clearPersistedSession();
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+// Migration cleanup - run once on script load
+sessionStorage.removeItem('fittrack_active_workout');
+sessionStorage.removeItem('fittrack_session_start');
 
 // ─── YOGA / BREATHWORK (Inline Session) ────────────────────────────────────────
 const YOGA_PRESETS = [
@@ -244,37 +316,9 @@ const YogaSessionView = ({ day, onBack, onComplete }) => {
 };
 
 // ─── HERO REST TIMER (Inline Session) ─────────────────────────────────────────
-const RestTimer = ({ seconds, onDone, onCancel }) => {
-  const [left, setLeft] = useState(seconds);
-  const intRef = useRef(null);
-
-  useEffect(() => {
-    intRef.current = setInterval(() => {
-      setLeft(p => {
-        if (p <= 1) {
-          clearInterval(intRef.current);
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            osc.connect(g); g.connect(ctx.destination);
-            osc.frequency.value = 880; g.gain.value = 0.3;
-            osc.start(); osc.stop(ctx.currentTime + 0.2);
-            setTimeout(() => { const o2 = ctx.createOscillator(); const g2 = ctx.createGain(); o2.connect(g2); g2.connect(ctx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(ctx.currentTime + 0.3); }, 250);
-          } catch (error) { /* no audio */ }
-          onDone();
-          return 0;
-        }
-        return p - 1;
-      });
-    }, 1000);
-    return () => clearInterval(intRef.current);
-  }, [seconds, onDone]);
-
-  useEffect(() => { setLeft(seconds); }, [seconds]);
-
-  const mins = Math.floor(left / 60);
-  const secs = left % 60;
+const RestTimer = ({ secondsLeft, onSkip, onExtend }) => {
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
 
   return (
     <section style={{ marginBottom: 40, position: 'relative' }}>
@@ -286,8 +330,8 @@ const RestTimer = ({ seconds, onDone, onCancel }) => {
           <span style={{ position: 'absolute', top: 16, right: -32, fontSize: '2rem', fontWeight: 300, color: 'var(--primary)', letterSpacing: 0 }}>s</span>
         </div>
         <div style={{ display: 'flex', gap: 16, marginTop: 32, zIndex: 1 }}>
-          <button onClick={() => setLeft(p => p + 30)} style={{ padding: '8px 24px', borderRadius: 999, background: 'var(--surface-container-highest)', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-surface)', border: 'none', cursor: 'pointer' }}>+30s</button>
-          <button onClick={onCancel} style={{ padding: '8px 32px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', fontSize: 14, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-primary-container)', border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(248,95,27,0.2)' }}>Skip</button>
+          <button onClick={() => onExtend(30)} style={{ padding: '8px 24px', borderRadius: 999, background: 'var(--surface-container-highest)', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-surface)', border: 'none', cursor: 'pointer' }}>+30s</button>
+          <button onClick={onSkip} style={{ padding: '8px 32px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', fontSize: 14, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--on-primary-container)', border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(248,95,27,0.2)' }}>Skip</button>
         </div>
       </div>
     </section>
@@ -298,15 +342,29 @@ export default function WorkoutPage() {
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
   const nav = useNavigate();
   const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
-  const [session, setSession] = useState(() => {
-    try {
-      const raw = sessionStorage.getItem('fittrack_active_workout');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  });
+  const [session, setSession] = useState(null);
   const [done, setDone] = useState(null);
-  const [timer, setTimer] = useState(null); // { active, seconds }
-  const [restSeconds, setRestSeconds] = useState(90);
+
+  // Resume Session UI State
+  const [persistedSession, setPersistedSession] = useState(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      const saved = loadPersistedSession(user.id);
+      if (saved) setPersistedSession(saved);
+    }
+  }, [user]);
+
+  // Timer State (Fix 3 & 5)
+  const [restDuration, setRestDuration] = useState(() => {
+    const saved = localStorage.getItem('fittrack_restTimerDuration');
+    return saved ? parseInt(saved, 10) : 90;
+  });
+  const [restActive, setRestActive] = useState(false);
+  const [restEndsAt, setRestEndsAt] = useState(null);
+  const [restSecondsLeft, setRestSecondsLeft] = useState(0);
+  const [restTimerPosition, setRestTimerPosition] = useState(null); // { ei, si }
+
   const [confirmFinish, setConfirmFinish] = useState(false);
   const wDays = activeSplit?.days.filter(d => d.type !== 'rest') || [];
 
@@ -316,20 +374,100 @@ export default function WorkoutPage() {
   const startTimeRef = useRef(null);
   const [elapsed, setElapsed] = useState(0);
 
-  // Recover startTime from sessionStorage on mount (survives Ctrl+R)
-  useEffect(() => {
-    const saved = sessionStorage.getItem('fittrack_session_start');
-    if (saved && session) startTimeRef.current = parseInt(saved, 10);
-  }, [session]);
-
-  // Persist active session to sessionStorage (survives navigation)
+  // Persist active session (Fix 6)
   useEffect(() => {
     if (session && !done && !session.isYoga) {
-      sessionStorage.setItem('fittrack_active_workout', JSON.stringify(session));
-    } else {
-      sessionStorage.removeItem('fittrack_active_workout');
+      persistActiveSession({ ...session, userId: user.id });
+    } else if (done) {
+      clearPersistedSession();
     }
-  }, [session, done]);
+  }, [session, done, user]);
+
+  // Read timer from localstorage on mount (Fix 3)
+  useEffect(() => {
+    const saved = localStorage.getItem(REST_TIMER_KEY);
+    if (saved) {
+       const endsAt = parseInt(saved, 10);
+       if (endsAt > Date.now()) {
+          setRestEndsAt(endsAt);
+          setRestActive(true);
+       } else {
+          localStorage.removeItem(REST_TIMER_KEY);
+          playRestCompleteChime();
+          vibrateRestComplete();
+       }
+    }
+  }, []);
+
+  // Tick rest timer (Fix 3)
+  useEffect(() => {
+    if (!restActive || !restEndsAt) return;
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, restEndsAt - Date.now());
+      setRestSecondsLeft(Math.ceil(remaining / 1000));
+      if (remaining <= 0) {
+        clearInterval(interval);
+        localStorage.removeItem(REST_TIMER_KEY);
+        setRestActive(false);
+        setRestTimerPosition(null);
+        playRestCompleteChime();
+        vibrateRestComplete();
+      }
+    }, 250);
+    return () => clearInterval(interval);
+  }, [restActive, restEndsAt]);
+
+  // Page visibility handler (Fix 3)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const saved = localStorage.getItem(REST_TIMER_KEY);
+        if (saved) {
+          const endsAt = parseInt(saved, 10);
+          if (endsAt <= Date.now()) {
+            localStorage.removeItem(REST_TIMER_KEY);
+            setRestActive(false);
+            setRestTimerPosition(null);
+            playRestCompleteChime();
+            vibrateRestComplete();
+          } else {
+            setRestEndsAt(endsAt);
+          }
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
+  function handleRestDurationChange(newSeconds) {
+    setRestDuration(newSeconds);
+    localStorage.setItem('fittrack_restTimerDuration', String(newSeconds));
+  }
+
+  function skipRestTimer() {
+    localStorage.removeItem(REST_TIMER_KEY);
+    setRestActive(false);
+    setRestTimerPosition(null);
+  }
+
+  function extendRestTimer(extraSeconds) {
+    setRestEndsAt(prev => {
+      const newEnd = (prev || Date.now()) + extraSeconds * 1000;
+      localStorage.setItem(REST_TIMER_KEY, String(newEnd));
+      return newEnd;
+    });
+  }
+
+  function doStartRestTimer(ei, si) {
+    getAudioCtx(); // unlock audio on user gesture
+    const endsAt = Date.now() + restDuration * 1000;
+    localStorage.setItem(REST_TIMER_KEY, String(endsAt));
+    setRestEndsAt(endsAt);
+    setRestSecondsLeft(restDuration);
+    setRestActive(true);
+    setRestTimerPosition({ ei, si });
+  }
 
   // Unload Guard
   useEffect(() => {
@@ -393,7 +531,6 @@ export default function WorkoutPage() {
       };
     });
     const timestamp = Date.now();
-    sessionStorage.setItem('fittrack_session_start', String(timestamp));
     startTimeRef.current = timestamp;
     setSession({ day, exs, notes: '', startTime: timestamp });
     setDone(null);
@@ -404,7 +541,7 @@ export default function WorkoutPage() {
     s[si] = { ...s[si], [f]: f === 'done' ? v : v };
     e[ei] = { ...e[ei], sets: s };
     // Auto-start timer when marking set done
-    if (f === 'done' && v) setTimer({ active: true, ei, si });
+    if (f === 'done' && v) doStartRestTimer(ei, si);
     return { ...p, exs: e };
   });
 
@@ -423,8 +560,7 @@ export default function WorkoutPage() {
 
   const doFinish = () => {
     setConfirmFinish(false);
-    sessionStorage.removeItem('fittrack_session_start');
-    sessionStorage.removeItem('fittrack_active_workout');
+    clearPersistedSession();
     startTimeRef.current = null;
     setElapsed(0);
     const endTimestamp = new Date().getTime();
@@ -439,7 +575,7 @@ export default function WorkoutPage() {
         sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 }))
       })).filter(ex => ex.sets.length > 0),
     };
-    setWorkoutLogs(p => [...p, log]); setDone(log); setTimer(null);
+    setWorkoutLogs(p => [...p, log]); setDone(log); skipRestTimer();
     addToast('Workout saved!', 'success');
   };
 
@@ -528,7 +664,7 @@ export default function WorkoutPage() {
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <Timer size={16} color="var(--on-surface-dim)" />
-          <select value={restSeconds} onChange={e => setRestSeconds(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '2px 6px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 6, color: 'var(--on-surface)', letterSpacing: '0.05em' }}>
+          <select value={restDuration} onChange={e => handleRestDurationChange(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '2px 6px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 6, color: 'var(--on-surface)', letterSpacing: '0.05em' }}>
             {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
           </select>
         </div>
@@ -582,8 +718,8 @@ export default function WorkoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {ex.sets.map((s, si) => (
                   <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {timer?.active && timer.ei === ei && timer.si === si && (
-                      <RestTimer seconds={restSeconds} onDone={() => setTimer(null)} onCancel={() => setTimer(null)} />
+                    {restActive && restTimerPosition?.ei === ei && restTimerPosition?.si === si && (
+                      <RestTimer secondsLeft={restSecondsLeft} onSkip={skipRestTimer} onExtend={extendRestTimer} />
                     )}
                     <div className="set-row" style={{ 
                       background: 'var(--surface-container-low)', padding: 12, borderRadius: 12, transition: 'all 0.2s', 
@@ -641,11 +777,10 @@ export default function WorkoutPage() {
           Finish Workout
         </button>
         <button onClick={() => {
-          sessionStorage.removeItem('fittrack_session_start');
-          sessionStorage.removeItem('fittrack_active_workout');
+          clearPersistedSession();
           startTimeRef.current = null;
           setElapsed(0);
-          setSession(null); setTimer(null);
+          setSession(null); skipRestTimer();
         }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
           Discard Workout
         </button>
@@ -683,8 +818,16 @@ export default function WorkoutPage() {
         message={`You have ${session ? session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) : 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
         confirmLabel="Save Partial"
         cancelLabel="Keep Editing"
-        danger={false}
-        onConfirm={doFinish}
+        danger={!session}
+        onConfirm={() => {
+          if (!session) {
+             clearPersistedSession();
+             setPersistedSession(null);
+             setConfirmFinish(false);
+          } else {
+             doFinish();
+          }
+        }}
         onCancel={() => setConfirmFinish(false)}
       />
     </div>
@@ -696,7 +839,43 @@ export default function WorkoutPage() {
     <div className="pg-in">
       <PageHeader title="Workout Tracker" sub={activeSplit ? activeSplit.name : 'Select a split first'} />
       {!activeSplit ? <EmptyState Icon={Trophy} title="No Split Selected" message="Go to Splits to select a workout program first" /> :
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 10 }}>
+        <>
+          {persistedSession && !session && (() => {
+            const exerciseCount = persistedSession.exs?.length || 0;
+            const completedSets = persistedSession.exs?.flatMap(e => e.sets).filter(s => s.done).length || 0;
+            const timeAgo = formatTimeAgo(persistedSession.startTime);
+            const isStale = (Date.now() - persistedSession.startTime) > (8 * 60 * 60 * 1000);
+            
+            return (
+              <div style={{ background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary-container)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  {isStale ? <span style={{ fontSize: 14 }}>⚠️</span> : <PulseIndicator color="var(--primary)" />}
+                  <span className="label-md" style={{ color: isStale ? 'var(--on-surface-variant)' : 'var(--primary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {isStale ? `SESSION FROM ${Math.floor((Date.now() - persistedSession.startTime)/3600000)}H AGO` : 'ACTIVE SESSION IN PROGRESS'}
+                  </span>
+                </div>
+                <div className="title-md" style={{ color: 'var(--on-surface)', marginBottom: 4 }}>
+                  {persistedSession.day?.name} • {activeSplit.name}
+                </div>
+                <div className="body-md" style={{ color: 'var(--on-surface-variant)', marginBottom: 16 }}>
+                  Started {timeAgo} • {exerciseCount} exercises • {completedSets} sets done
+                </div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <button onClick={() => {
+                    setSession(persistedSession);
+                    startTimeRef.current = persistedSession.startTime;
+                    setPersistedSession(null);
+                  }} style={{ padding: '10px 20px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: 13, letterSpacing: '0.05em' }}>
+                    RESUME SESSION
+                  </button>
+                  <button onClick={() => setConfirmFinish(true)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Discard
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 10 }}>
           {wDays.map(day => {
             const last = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             return (
@@ -712,6 +891,7 @@ export default function WorkoutPage() {
             );
           })}
         </div>
+        </>
       }
 
     </div>

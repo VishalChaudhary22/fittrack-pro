@@ -40,3 +40,12 @@ export const mkWtItemsImperial = (lo = 66, hi = 440, step = 0.5) => {
   for (let v = lo; v <= hi; v = parseFloat((v + step).toFixed(1))) a.push(v);
   return a;
 };
+
+export const formatTimeAgo = (ms) => {
+  const mins = Math.floor((Date.now() - ms) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem > 0 ? `${hrs}h ${rem}m ago` : `${hrs}h ago`;
+};

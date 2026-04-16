@@ -340,6 +340,162 @@ const RestTimer = ({ secondsLeft, onSkip, onExtend }) => {
   );
 };
 
+const EXERCISE_ALTERNATIVES = {
+  // ── UPPER PUSH ──────────────────────────────────────────────────────
+  'Smith Machine Incline Press': ['Incline Barbell Bench Press', 'Incline Dumbbell Press'],
+  'Flat Dumbbell Press': ['Flat Barbell Bench Press', 'Machine Chest Press', 'Pec Dec Flyes'],
+  'Incline Dumbbell Press': ['Smith Machine Incline Press', 'Incline Barbell Bench Press'],
+  'Chest Machine Press': ['Flat Barbell Bench Press', 'Flat Dumbbell Press'],
+
+  // ── UPPER PULL ──────────────────────────────────────────────────────
+  'Wide Grip Lat Pulldowns': [],
+  'Close Grip Lat Pulldowns': ['Wide Grip Lat Pulldowns'],
+  'Seated Horizontal Row': ['Dumbbell Row', 'Barbell Row'],
+  'T-Bar Rows': ['Seated Cable Row', 'Dumbbell Row'],
+
+  // ── SHOULDERS ───────────────────────────────────────────────────────
+  'Lateral Raises': [],
+  'Rear Delt Flyes': ['Face Pulls'],
+
+  // ── BICEPS ──────────────────────────────────────────────────────────
+  'Biceps Cable Curls': ['Dumbbell Curls', 'EZ Bar Curls'],
+  'Hammer Curls': ['Rope Hammer Curls'],
+  'Incline Bench Bicep Curls': [],
+  'Preacher Curls': [],
+
+  // ── TRICEPS ─────────────────────────────────────────────────────────
+  'Single Hand Tricep Pushdowns': ['Tricep Rope Pushdowns', 'Straight Bar Pushdowns'],
+  'Single Hand Overhead Tricep Extension': ['Overhead Tricep Extension (Cable)', 'Overhead Tricep Extension (Dumbbell)'],
+  'Single Hand Overhead Cable Tricep Extension': ['Overhead Tricep Extension (Cable)', 'Overhead Tricep Extension (Dumbbell)'],
+
+  // ── LEGS ────────────────────────────────────────────────────────────
+  'Squats': ['Smith Machine Squats', 'Leg Press', 'Pendulum Squats', 'Hack Squats'],
+  'Leg Press': ['Squats', 'Hack Squats', 'Pendulum Squats'],
+  'Leg Extension': [],
+  'Leg Curls': ['Romanian Deadlift (RDL)'],
+  'Romanian Deadlift': ['Leg Curls'],
+  'Leg Abductor Machine': [],
+  'Leg Adductor Machine': [],
+  'Standing Calf Raises': [],
+};
+
+function ExerciseSwapModal({ exerciseName, onSwap, onClose }) {
+  const alternatives = EXERCISE_ALTERNATIVES[exerciseName] || [];
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 500,
+        background: 'var(--glass-bg-heavy, rgba(0,0,0,0.7))',
+        backdropFilter: 'var(--glass-blur-sm, blur(8px))',
+        display: 'flex', alignItems: 'flex-end',
+      }}
+      onClick={onClose}
+    >
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); opacity: 0.8; }
+          to   { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+      <div
+        style={{
+          width: '100%',
+          background: 'var(--surface-container-low)',
+          borderRadius: '24px 24px 0 0',
+          padding: '20px 20px 32px',
+          maxHeight: '60vh', overflowY: 'auto',
+          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{
+          width: 40, height: 4,
+          background: 'var(--surface-container-highest)',
+          borderRadius: 2, margin: '0 auto 20px',
+        }} />
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 10, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.15em',
+          color: 'var(--on-surface-dim)', marginBottom: 6,
+        }}>
+          Swap Exercise
+        </div>
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 16, fontWeight: 700,
+          color: 'var(--primary)', marginBottom: 20,
+          letterSpacing: '-0.02em',
+        }}>
+          {exerciseName}
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            width: '100%', padding: '14px 16px', minHeight: 44,
+            borderRadius: 12, border: 'none', cursor: 'pointer',
+            background: 'var(--surface-container-highest)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            fontFamily: "'Be Vietnam Pro', sans-serif",
+            fontSize: 14, fontWeight: 600,
+            color: 'var(--on-surface)', marginBottom: 10,
+            transition: 'transform 0.1s',
+          }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <span>Keep current</span>
+          <span style={{
+            fontSize: 9, color: 'var(--on-surface-dim)',
+            textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700,
+          }}>Current</span>
+        </button>
+        {alternatives.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '20px 16px',
+            fontSize: 13, color: 'var(--on-surface-dim)',
+            fontFamily: "'Be Vietnam Pro', sans-serif",
+          }}>
+            No swap options available for this exercise
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {alternatives.map(alt => (
+              <button
+                key={alt}
+                onClick={() => { onSwap(alt); onClose(); }}
+                style={{
+                  width: '100%', padding: '14px 16px', minHeight: 44,
+                  borderRadius: 12, border: 'none', cursor: 'pointer',
+                  background: 'var(--surface-container)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  fontFamily: "'Be Vietnam Pro', sans-serif",
+                  fontSize: 14, fontWeight: 600,
+                  color: 'var(--on-surface)',
+                  transition: 'background 0.15s, transform 0.1s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container-high)'}
+                onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container)'}
+                onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
+                onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <span>{alt}</span>
+                <span style={{
+                  fontSize: 9, color: 'var(--primary)',
+                  fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em',
+                }}>
+                  Swap
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function WorkoutPage() {
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
   const nav = useNavigate();
@@ -367,6 +523,7 @@ export default function WorkoutPage() {
     return null;
   });
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [swapTarget, setSwapTarget] = useState(null);
 
   // Timer State (Fix 3 & 5)
   const [restDuration, setRestDuration] = useState(() => {
@@ -579,6 +736,15 @@ export default function WorkoutPage() {
   const rmS = (ei, si) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sets: e[ei].sets.filter((_, i) => i !== si) }; return { ...p, exs: e }; });
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
+  const swapExercise = (exerciseIndex, newName) => {
+    setSession(prev => ({
+      ...prev,
+      exs: prev.exs.map((ex, i) =>
+        i === exerciseIndex ? { ...ex, sv: newName } : ex
+      ),
+    }));
+  };
+
   const finish = () => {
     const undoneCount = session.exs.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0);
     if (undoneCount > 0) {
@@ -712,6 +878,23 @@ export default function WorkoutPage() {
                 <div>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
                     {ex.sv || ex.name}
+                    {(EXERCISE_ALTERNATIVES[ex.name] !== undefined && !ex.variants) && (
+                      <button
+                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.name })}
+                        aria-label={`Swap ${ex.name}`}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          padding: '6px', borderRadius: 8,
+                          color: 'var(--on-surface-dim)',
+                          display: 'flex', alignItems: 'center',
+                          transition: 'color 0.15s',
+                        }}
+                        onMouseOver={e => e.currentTarget.style.color = 'var(--primary)'}
+                        onMouseOut={e => e.currentTarget.style.color = 'var(--on-surface-dim)'}
+                      >
+                        <RefreshCcw size={15} />
+                      </button>
+                    )}
                   </h3>
                   {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 0, marginBottom: 4, fontSize: 11, padding: '2px 8px', width: 'auto', borderRadius: 6, background: 'var(--surface-container)', border: 'none' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
                   <p className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -852,6 +1035,13 @@ export default function WorkoutPage() {
         onConfirm={doFinish}
         onCancel={() => setConfirmFinish(false)}
       />
+      {swapTarget && (
+        <ExerciseSwapModal
+          exerciseName={swapTarget.name}
+          onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
+          onClose={() => setSwapTarget(null)}
+        />
+      )}
     </div>
   );
   }

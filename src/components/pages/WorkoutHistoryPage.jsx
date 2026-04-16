@@ -65,9 +65,16 @@ export default function WorkoutHistoryPage() {
   const getSessionMuscles = (exercises) => {
     const muscles = new Set();
     exercises?.forEach(ex => {
-      const muscleField = exMuscleMap[ex.name];
-      if (muscleField) {
-        getMusclesForExercise(muscleField).forEach(m => muscles.add(m));
+      // Priority 1: use primaryMuscle stored directly in the log (works for swapped exercises)
+      if (ex.primaryMuscle) {
+        muscles.add(ex.primaryMuscle);
+        (ex.secondaryMuscles || []).forEach(m => muscles.add(m));
+      } else {
+        // Priority 2: fallback to split-based name lookup
+        const muscleField = exMuscleMap[ex.name];
+        if (muscleField) {
+          getMusclesForExercise(muscleField).forEach(m => muscles.add(m));
+        }
       }
     });
     return [...muscles].slice(0, 3).map(key =>

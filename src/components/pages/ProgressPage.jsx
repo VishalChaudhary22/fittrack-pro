@@ -298,7 +298,15 @@ export default function ProgressPage() {
               <div className="label-md" style={{ color: 'var(--on-surface-dim)', marginBottom: 16 }}>Focus Groups</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {(() => {
-                  const exDef = split?.days.flatMap(d => d.exercises).find(e => e.name === se);
+                  // Try split definition first
+                  let exDef = split?.days.flatMap(d => d.exercises).find(e => e.name === se);
+                  
+                  // Fallback: scan workout logs for primaryMuscle data
+                  if (!exDef) {
+                    const logEx = ul.flatMap(l => l.exercises || []).find(e => e.name === se);
+                    if (logEx) exDef = logEx; // log entries also have primaryMuscle/secondaryMuscles
+                  }
+                  
                   const pM = exDef?.primaryMuscle || exDef?.muscle || null;
                   const sM = exDef?.secondaryMuscles || [];
                   if (!pM && sM.length === 0) return <span style={{ background: 'var(--surface-container-highest)', borderRadius: 24, fontSize: 10, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 12px' }}>General</span>;

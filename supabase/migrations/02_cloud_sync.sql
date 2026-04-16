@@ -1,5 +1,7 @@
--- Phase Auth-2: Cloud Sync Tables
+-- Phase Auth-2: Cloud Sync Tables (Already Applied on Remote)
+-- Temporarily commented out to bypass Supabase db push failure where relation "workout_logs" already exists.
 
+/*
 -- 1. workout_logs: replaces fittrack_workoutLogs
 create table public.workout_logs (
   id              text primary key,
@@ -100,3 +102,4 @@ create table public.readiness_logs (
 
 alter table public.readiness_logs enable row level security;
 create policy "readiness_logs: own data only" on public.readiness_logs for all using (auth.uid() = user_id);
+*/

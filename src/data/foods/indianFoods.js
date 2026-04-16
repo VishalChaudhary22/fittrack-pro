@@ -6534,4 +6534,5943 @@ export const indianFoods = [
     source: 'curated-estimate',
     confidence: 'medium'
   }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B1 - Peanut Butters (Pass 1)
+  // ==========================================
+  {
+    "id": "pb-pintola-all-natural",
+    "name": "Pintola All Natural Peanut Butter",
+    "nameAlt": [
+      "unsweetened peanut butter"
+    ],
+    "hindiName": "पिनटोला नेचुरल पीनट बटर",
+    "searchTerms": [
+      "pintola",
+      "all natural",
+      "peanut butter",
+      "unsweetened",
+      "natural"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Pintola",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 600,
+      "protein": 30.0,
+      "carbs": 18.0,
+      "fat": 50.0,
+      "fiber": 9.0,
+      "sodium": 10,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 45
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri",
+      "ekadashi"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-pintola-classic",
+    "name": "Pintola Classic Peanut Butter",
+    "nameAlt": [
+      "sweetened peanut butter"
+    ],
+    "hindiName": "पिनटोला क्लासिक पीनट बटर",
+    "searchTerms": [
+      "pintola",
+      "classic",
+      "peanut butter",
+      "sweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Pintola",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 605,
+      "protein": 26.0,
+      "carbs": 22.0,
+      "fat": 44.6,
+      "fiber": 7.2,
+      "sodium": 280,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.2,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "vegan"
+    ],
+    "tags": [
+      "high-fat",
+      "high-calorie"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-pintola-high-protein-dark-choco",
+    "name": "Pintola High Protein Dark Chocolate Peanut Butter",
+    "nameAlt": [
+      "whey peanut butter"
+    ],
+    "hindiName": "पिनटोला हाई प्रोटीन पीनट बटर",
+    "searchTerms": [
+      "pintola",
+      "high protein",
+      "dark chocolate",
+      "whey"
+    ],
+    "category": "supplement",
+    "subcategory": "peanut-butter",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Pintola",
+    "allergens": [
+      "peanuts",
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 583,
+      "protein": 30.0,
+      "carbs": 36.0,
+      "fat": 38.0,
+      "fiber": 6.2,
+      "sodium": 120,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-protein",
+      "high-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-myfitness-original",
+    "name": "MyFitness Original Peanut Butter",
+    "nameAlt": [
+      "my fitness classic peanut butter"
+    ],
+    "hindiName": "मायफिटनेस पीनट बटर",
+    "searchTerms": [
+      "myfitness",
+      "original",
+      "peanut butter",
+      "sweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "MyFitness",
+    "allergens": [
+      "peanuts",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 620,
+      "protein": 26.0,
+      "carbs": 19.0,
+      "fat": 46.0,
+      "fiber": 6.0,
+      "sodium": 300,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.1,
+      "calcium": 35
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "vegan"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-myfitness-chocolate-crispy",
+    "name": "MyFitness Chocolate Peanut Butter (Crispy)",
+    "nameAlt": [
+      "chocolate peanut butter my fitness"
+    ],
+    "hindiName": "मायफिटनेस चॉकलेट पीनट बटर",
+    "searchTerms": [
+      "myfitness",
+      "chocolate",
+      "peanut butter",
+      "crispy"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "MyFitness",
+    "allergens": [
+      "peanuts",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 630,
+      "protein": 24.0,
+      "carbs": 30.0,
+      "fat": 50.0,
+      "fiber": 10.0,
+      "sodium": 186,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-sugar",
+      "high-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 38,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-alpino-natural",
+    "name": "Alpino Natural Peanut Butter",
+    "nameAlt": [
+      "alpino unsweetened"
+    ],
+    "hindiName": "अल्पिनो नेचुरल पीनट बटर",
+    "searchTerms": [
+      "alpino",
+      "natural",
+      "peanut butter",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Alpino",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 625,
+      "protein": 30.0,
+      "carbs": 18.0,
+      "fat": 49.0,
+      "fiber": 9.0,
+      "sodium": 25,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri",
+      "ekadashi"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-sundrop-crunchy",
+    "name": "Sundrop Peanut Butter (Crunchy)",
+    "nameAlt": [
+      "sundrop regular peanut butter"
+    ],
+    "hindiName": "सनड्रॉप पीनट बटर (क्रंची)",
+    "searchTerms": [
+      "sundrop",
+      "peanut butter",
+      "crunchy",
+      "sweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Sundrop",
+    "allergens": [
+      "peanuts",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 600,
+      "protein": 26.0,
+      "carbs": 20.0,
+      "fat": 45.0,
+      "fiber": 6.0,
+      "sodium": 320,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 35
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-fat",
+      "high-calorie"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 28,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-muscleblaze-high-protein-dark-choco",
+    "name": "MuscleBlaze High Protein Peanut Butter (Dark Choco)",
+    "nameAlt": [
+      "mb peanut butter"
+    ],
+    "hindiName": "मसलब्लेज़ हाई प्रोटीन पीनट बटर",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "high protein",
+      "peanut butter",
+      "dark chocolate"
+    ],
+    "category": "supplement",
+    "subcategory": "peanut-butter",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "peanuts",
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 590,
+      "protein": 30.0,
+      "carbs": 25.0,
+      "fat": 42.0,
+      "fiber": 5.0,
+      "sodium": 100,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 30,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-yogabar-natural",
+    "name": "Yoga Bar 100% Peanut Butter",
+    "nameAlt": [
+      "yogabar natural PB"
+    ],
+    "hindiName": "योगा बार पीनट बटर",
+    "searchTerms": [
+      "yogabar",
+      "yoga bar",
+      "peanut butter",
+      "natural",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Yoga Bar",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 646,
+      "protein": 31.0,
+      "carbs": 14.0,
+      "fat": 51.5,
+      "fiber": 6.2,
+      "sodium": 20,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-twt-natural-100peanut",
+    "name": "The Whole Truth Peanut Butter (Natural)",
+    "nameAlt": [
+      "twt 100% peanut butter"
+    ],
+    "hindiName": "द होल ट्रुथ पीनट बटर",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "peanut butter",
+      "natural",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 651.4,
+      "protein": 25.0,
+      "carbs": 17.7,
+      "fat": 53.4,
+      "fiber": 8.7,
+      "sodium": 26,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.1,
+      "calcium": 35
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fat",
+      "no-added-sugar",
+      "clean-label"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-happilo-natural",
+    "name": "Happilo All Natural Peanut Butter",
+    "nameAlt": [
+      "happilo unsweetened pb"
+    ],
+    "hindiName": "हैपिलो नेचुरल पीनट बटर",
+    "searchTerms": [
+      "happilo",
+      "natural",
+      "peanut butter",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Happilo",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 646,
+      "protein": 29.0,
+      "carbs": 20.0,
+      "fat": 50.0,
+      "fiber": 6.0,
+      "sodium": 30,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.2,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-saffola-fittify-plant-protein-creamy",
+    "name": "Saffola FITTIFY Plant Protein Peanut Butter",
+    "nameAlt": [
+      "saffola peanut butter fittify"
+    ],
+    "hindiName": "सफोला फिट्टीफाई प्लांट प्रोटीन पीनट बटर",
+    "searchTerms": [
+      "saffola",
+      "fittify",
+      "plant protein",
+      "peanut butter",
+      "creamy"
+    ],
+    "category": "supplement",
+    "subcategory": "peanut-butter",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Saffola FITTIFY",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 634,
+      "protein": 34.5,
+      "carbs": 12.3,
+      "fat": 49.6,
+      "fiber": 6.3,
+      "sodium": 112,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 45
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "very-high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 18,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-droetker-funfoods-crunchy",
+    "name": "Dr. Oetker FunFoods Crunchy Peanut Butter",
+    "nameAlt": [
+      "funfoods peanut butter"
+    ],
+    "hindiName": "डॉ ओटेकर फनफूड्स पीनट बटर",
+    "searchTerms": [
+      "dr oetker",
+      "funfoods",
+      "peanut butter",
+      "crunchy"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Dr. Oetker FunFoods",
+    "allergens": [
+      "peanuts",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 636,
+      "protein": 25.6,
+      "carbs": 20.3,
+      "fat": 50.3,
+      "fiber": 6.5,
+      "sodium": 345,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.1,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-fat",
+      "high-calorie"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 28,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B1 - Nut Butters (Pass 2)
+  // ==========================================
+  {
+    "id": "pb-disano-natural",
+    "name": "DiSano Natural Peanut Butter (Unsweetened)",
+    "nameAlt": [
+      "disano unsweetened pb"
+    ],
+    "hindiName": "दिसानो नेचुरल पीनट बटर",
+    "searchTerms": [
+      "disano",
+      "natural",
+      "peanut butter",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "DiSano",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 639,
+      "protein": 30.0,
+      "carbs": 18.0,
+      "fat": 49.0,
+      "fiber": 9.0,
+      "sodium": 19,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-bagrrys-natural",
+    "name": "Bagrry's Natural Peanut Butter",
+    "nameAlt": [
+      "bagrrys unsweetened pb"
+    ],
+    "hindiName": "बॅगरीज नेचुरल पीनट बटर",
+    "searchTerms": [
+      "bagrrys",
+      "bagrry",
+      "natural",
+      "peanut butter",
+      "unsweetened"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Bagrry's",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 640,
+      "protein": 30.0,
+      "carbs": 18.0,
+      "fat": 50.0,
+      "fiber": 9.0,
+      "sodium": 20,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "pb-nutralite-protein",
+    "name": "Nutralite Activ Protein Peanut Butter Crunchy",
+    "nameAlt": [
+      "nutralite peanut butter"
+    ],
+    "hindiName": "न्यूट्रालाइट प्रोटीन पीनट बटर",
+    "searchTerms": [
+      "nutralite",
+      "activ",
+      "protein",
+      "peanut butter"
+    ],
+    "category": "supplement",
+    "subcategory": "peanut-butter",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Nutralite",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 600,
+      "protein": 26.0,
+      "carbs": 20.0,
+      "fat": 45.0,
+      "fiber": 6.0,
+      "sodium": 200,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "pb-ritebite-max-protein",
+    "name": "RiteBite Max Protein Peanut Butter",
+    "nameAlt": [
+      "max protein pb"
+    ],
+    "hindiName": "रइटबाइट मैक्स प्रोटीन पीनट बटर",
+    "searchTerms": [
+      "ritebite",
+      "max protein",
+      "peanut butter"
+    ],
+    "category": "supplement",
+    "subcategory": "peanut-butter",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "RiteBite",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 600,
+      "protein": 26.0,
+      "carbs": 20.0,
+      "fat": 45.0,
+      "fiber": 6.0,
+      "sodium": 150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "pb-jusamazin-crunchy-organic",
+    "name": "Jus Amazin Organic Peanut Butter (Crunchy)",
+    "nameAlt": [
+      "jus amazin pb unsweetened"
+    ],
+    "hindiName": "जस अमेज़िन ऑर्गेनिक पीनट बटर",
+    "searchTerms": [
+      "jus amazin",
+      "organic",
+      "peanut butter",
+      "unsweetened",
+      "crunchy"
+    ],
+    "category": "oil-fat",
+    "subcategory": "peanut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Jus Amazin",
+    "allergens": [
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 576.4,
+      "protein": 27.8,
+      "carbs": 29.3,
+      "fat": 38.6,
+      "fiber": 14.2,
+      "sodium": 15,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "organic",
+      "no-added-sugar",
+      "clean-label"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 14,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "nb-pintola-almond-unsweetened",
+    "name": "Pintola Almond Butter (Unsweetened)",
+    "nameAlt": [
+      "pintola natural almond butter"
+    ],
+    "hindiName": "पिनटोला बादाम मक्खन",
+    "searchTerms": [
+      "pintola",
+      "almond butter",
+      "unsweetened",
+      "natural"
+    ],
+    "category": "oil-fat",
+    "subcategory": "nut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Pintola",
+    "allergens": [
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 582,
+      "protein": 24.0,
+      "carbs": 22.0,
+      "fat": 49.0,
+      "fiber": 12.0,
+      "sodium": 1,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.7,
+      "calcium": 269
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fat",
+      "no-added-sugar",
+      "keto-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri",
+      "ekadashi"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 10,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "nb-happilo-almond-unsweetened",
+    "name": "Happilo All Natural Almond Butter",
+    "nameAlt": [
+      "happilo unsweetened almond butter"
+    ],
+    "hindiName": "हैपिलो बादाम मक्खन",
+    "searchTerms": [
+      "happilo",
+      "almond butter",
+      "unsweetened",
+      "natural"
+    ],
+    "category": "oil-fat",
+    "subcategory": "nut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "Happilo",
+    "allergens": [
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 600,
+      "protein": 22.0,
+      "carbs": 20.0,
+      "fat": 50.0,
+      "fiber": 12.0,
+      "sodium": 5,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.5,
+      "calcium": 260
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fat",
+      "no-added-sugar",
+      "keto-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri",
+      "ekadashi"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 10,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "nb-twt-almond-unsweetened",
+    "name": "The Whole Truth Almond Butter",
+    "nameAlt": [
+      "twt 100% almond butter"
+    ],
+    "hindiName": "द होल ट्रुथ बादाम मक्खन",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "almond butter",
+      "unsweetened",
+      "100%"
+    ],
+    "category": "oil-fat",
+    "subcategory": "nut-butter",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 32,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 620,
+      "protein": 21.0,
+      "carbs": 18.0,
+      "fat": 52.0,
+      "fiber": 11.0,
+      "sodium": 5,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.4,
+      "calcium": 265
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp",
+        "grams": 15
+      },
+      {
+        "id": "tbsp-2",
+        "label": "2 Tbsp (Standard)",
+        "grams": 32
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fat",
+      "no-added-sugar",
+      "clean-label",
+      "keto-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri",
+      "ekadashi"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 10,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B2 - Protein & Energy Bars
+  // ==========================================
+  {
+    "id": "bar-ritebite-max-10g-chocoalmond",
+    "name": "RiteBite Max Protein Daily Bar (10g Protein)",
+    "nameAlt": [
+      "max protein 10g bar",
+      "ritebite daily"
+    ],
+    "hindiName": "रइटबाइट मैक्स प्रोटीन बार 10g",
+    "searchTerms": [
+      "ritebite",
+      "max protein",
+      "10g",
+      "choco almond",
+      "daily bar"
+    ],
+    "category": "supplement",
+    "subcategory": "energy-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 50,
+    "brand": "RiteBite Max Protein",
+    "allergens": [
+      "soy",
+      "milk",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 420,
+      "protein": 20.0,
+      "carbs": 50.0,
+      "fat": 15.0,
+      "fiber": 10.0,
+      "sodium": 200,
+      "vitaminB12": 1.0,
+      "vitaminD": 2.5,
+      "iron": 3.0,
+      "calcium": 100
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (50g)",
+        "grams": 50
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "moderate-protein",
+      "snack"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bar-ritebite-max-20g-chocobadamm",
+    "name": "RiteBite Max Protein Active Bar (20g Protein)",
+    "nameAlt": [
+      "max protein 20g bar",
+      "ritebite active choco"
+    ],
+    "hindiName": "रइटबाइट मैक्स प्रोटीन बार 20g",
+    "searchTerms": [
+      "ritebite",
+      "max protein",
+      "20g",
+      "choco badam",
+      "active bar"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 67,
+    "brand": "RiteBite Max Protein",
+    "allergens": [
+      "soy",
+      "milk",
+      "tree-nuts",
+      "peanuts"
+    ],
+    "per100g": {
+      "calories": 467,
+      "protein": 29.8,
+      "carbs": 44.8,
+      "fat": 17.9,
+      "fiber": 10.4,
+      "sodium": 224,
+      "vitaminB12": 1.5,
+      "vitaminD": 5.0,
+      "iron": 4.5,
+      "calcium": 200
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (67g)",
+        "grams": 67
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high",
+    "notes": "Zero added sugar, contains sugar alcohols."
+  },
+  {
+    "id": "bar-ritebite-max-30g-chocoberry",
+    "name": "RiteBite Max Protein Ultimate Bar (30g Protein)",
+    "nameAlt": [
+      "max protein 30g bar",
+      "ritebite ultimate"
+    ],
+    "hindiName": "रइटबाइट मैक्स प्रोटीन 30g अल्टीमेट",
+    "searchTerms": [
+      "ritebite",
+      "max protein",
+      "30g",
+      "choco berry",
+      "ultimate bar"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 100,
+    "brand": "RiteBite Max Protein",
+    "allergens": [
+      "soy",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 401,
+      "protein": 30.0,
+      "carbs": 40.0,
+      "fat": 12.0,
+      "fiber": 10.0,
+      "sodium": 350,
+      "vitaminB12": 2.0,
+      "vitaminD": 5.0,
+      "iron": 5.0,
+      "calcium": 250
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (100g)",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-protein",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 30,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bar-twt-protein-20g-double-cocoa",
+    "name": "The Whole Truth 20g Protein Bar (Double Cocoa)",
+    "nameAlt": [
+      "twt 20g protein bar",
+      "whole truth bar"
+    ],
+    "hindiName": "द होल ट्रुथ 20g प्रोटीन बार",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "20g",
+      "protein bar",
+      "double cocoa"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 67,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "milk",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 502,
+      "protein": 30.3,
+      "carbs": 31.9,
+      "fat": 28.0,
+      "fiber": 8.6,
+      "sodium": 213,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (67g)",
+        "grams": 67
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "clean-label",
+      "no-added-sugar",
+      "no-artificial-sweetener"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bar-twt-energy-choco-fruit-nut",
+    "name": "The Whole Truth Energy Bar (Choco Fruit & Nut)",
+    "nameAlt": [
+      "twt energy bar"
+    ],
+    "hindiName": "द होल ट्रुथ एनर्जी बार",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "energy bar",
+      "choco fruit nut"
+    ],
+    "category": "supplement",
+    "subcategory": "energy-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 425,
+      "protein": 10.0,
+      "carbs": 55.0,
+      "fat": 20.0,
+      "fiber": 9.0,
+      "sodium": 15,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "high-fiber",
+      "clean-label",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 45,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-yogabar-protein-20g-chocobrownie",
+    "name": "Yogabar 20g Protein Bar (Choco Brownie)",
+    "nameAlt": [
+      "yogabar protein bar"
+    ],
+    "hindiName": "योगा बार 20g प्रोटीन बार",
+    "searchTerms": [
+      "yogabar",
+      "20g",
+      "protein bar",
+      "choco brownie"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 60,
+    "brand": "Yogabar",
+    "allergens": [
+      "milk",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 533,
+      "protein": 33.3,
+      "carbs": 43.3,
+      "fat": 25.0,
+      "fiber": 15.0,
+      "sodium": 166,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 100
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fiber",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bar-yogabar-energy-chocolate-chunk",
+    "name": "Yogabar Multigrain Energy Bar (Chocolate Chunk)",
+    "nameAlt": [
+      "yogabar energy bar"
+    ],
+    "hindiName": "योगा बार एनर्जी बार",
+    "searchTerms": [
+      "yogabar",
+      "energy bar",
+      "multigrain",
+      "chocolate chunk"
+    ],
+    "category": "supplement",
+    "subcategory": "energy-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 38,
+    "brand": "Yogabar",
+    "allergens": [
+      "tree-nuts",
+      "milk",
+      "oats"
+    ],
+    "per100g": {
+      "calories": 420,
+      "protein": 11.0,
+      "carbs": 58.0,
+      "fat": 15.0,
+      "fiber": 10.0,
+      "sodium": 120,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (38g)",
+        "grams": 38
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-fiber",
+      "snack"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 50,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-phab-protein-20g-chocoalmond",
+    "name": "Phab Protein Bar (20g, Choco Almond)",
+    "nameAlt": [
+      "phab 20g bar"
+    ],
+    "hindiName": "फैब 20g प्रोटीन बार",
+    "searchTerms": [
+      "phab",
+      "20g",
+      "protein bar",
+      "choco almond"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 65,
+    "brand": "Phab",
+    "allergens": [
+      "milk",
+      "soy",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 380,
+      "protein": 30.7,
+      "carbs": 40.0,
+      "fat": 12.0,
+      "fiber": 8.0,
+      "sodium": 180,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 80
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (65g)",
+        "grams": 65
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-muscleblaze-protein-20g-cookiescream",
+    "name": "MuscleBlaze Protein Bar (20g, Cookies & Cream)",
+    "nameAlt": [
+      "mb protein bar cookies and cream"
+    ],
+    "hindiName": "मसलब्लेज़ 20g प्रोटीन बार",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "20g",
+      "protein bar",
+      "cookies cream"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 65,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 372,
+      "protein": 30.7,
+      "carbs": 38.0,
+      "fat": 13.0,
+      "fiber": 6.0,
+      "sodium": 200,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 100
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (65g)",
+        "grams": 65
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 42,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bar-hyp-lean-20g-darkchoco",
+    "name": "HYP Lean Protein Bar (20g, Dark Choco)",
+    "nameAlt": [
+      "hyp lean bar"
+    ],
+    "hindiName": "हाइप लीन प्रोटीन बार",
+    "searchTerms": [
+      "hyp",
+      "lean",
+      "20g",
+      "protein bar",
+      "dark choco"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 60,
+    "brand": "HYP",
+    "allergens": [
+      "milk",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 360,
+      "protein": 33.3,
+      "carbs": 33.0,
+      "fat": 11.0,
+      "fiber": 12.0,
+      "sodium": 110,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 120
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "no-added-sugar",
+      "clean-label"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 30,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-eatanytime-protein-10g-cranberry",
+    "name": "Eat Anytime Protein Bar (10g, Cranberry)",
+    "nameAlt": [
+      "eat anytime bar"
+    ],
+    "hindiName": "ईट एनीटाइम प्रोटीन बार",
+    "searchTerms": [
+      "eat anytime",
+      "10g",
+      "protein bar",
+      "cranberry"
+    ],
+    "category": "supplement",
+    "subcategory": "energy-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Eat Anytime",
+    "allergens": [
+      "soy",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 410,
+      "protein": 25.0,
+      "carbs": 55.0,
+      "fat": 12.0,
+      "fiber": 8.0,
+      "sodium": 150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "moderate-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 45,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-opensecret-protein-chocochip",
+    "name": "Open Secret Protein Bar (Choco Chip)",
+    "nameAlt": [
+      "open secret bar"
+    ],
+    "hindiName": "ओपन सीक्रेट प्रोटीन बार",
+    "searchTerms": [
+      "open secret",
+      "protein bar",
+      "choco chip",
+      "un-junked"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Open Secret",
+    "allergens": [
+      "milk",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 450,
+      "protein": 25.0,
+      "carbs": 45.0,
+      "fat": 18.0,
+      "fiber": 7.0,
+      "sodium": 100,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "moderate-protein",
+      "clean-label",
+      "no-artificial-sweetener"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bar-grenade-carb-killa-white-choco",
+    "name": "Grenade Carb Killa Protein Bar (White Choco)",
+    "nameAlt": [
+      "carb killa bar grenade"
+    ],
+    "hindiName": "ग्रेनेड कार्ब किला प्रोटीन बार",
+    "searchTerms": [
+      "grenade",
+      "carb killa",
+      "protein bar",
+      "white choco",
+      "import"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-bar",
+    "itemType": "supplement",
+    "state": "raw",
+    "region": "imported",
+    "defaultServingGrams": 60,
+    "brand": "Grenade",
+    "allergens": [
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 386,
+      "protein": 36.6,
+      "carbs": 33.3,
+      "fat": 16.6,
+      "fiber": 8.3,
+      "sodium": 233,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 150
+    },
+    "servings": [
+      {
+        "id": "bar-1",
+        "label": "1 Bar (60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "low-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high",
+    "notes": "Imported product. Sweetened with maltitol."
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B3 - Oats, Muesli, Granola
+  // ==========================================
+  {
+    "id": "oats-quaker-rolled",
+    "name": "Quaker Rolled Oats",
+    "nameAlt": [
+      "quaker plain oats"
+    ],
+    "hindiName": "क्वेकर रोल्ड ओट्स",
+    "searchTerms": [
+      "quaker",
+      "oats",
+      "rolled",
+      "plain",
+      "breakfast"
+    ],
+    "category": "grain-cereal",
+    "subcategory": "breakfast-oats",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Quaker",
+    "allergens": [
+      "oats"
+    ],
+    "per100g": {
+      "calories": 380,
+      "protein": 13.0,
+      "carbs": 68.0,
+      "fat": 6.5,
+      "fiber": 10.0,
+      "sodium": 5,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 4.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "cup-half",
+        "label": "1/2 cup (dry)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fiber"
+    ],
+    "isProcessed": false,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [
+      "porridge"
+    ],
+    "consistencyMultipliers": {
+      "porridge": 0.25
+    },
+    "gi": 55,
+    "cookingOilNote": "Use milk or water to boil.",
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  },
+  {
+    "id": "oats-bagrrys-rolled",
+    "name": "Bagrry's White Oats (Rolled)",
+    "nameAlt": [
+      "bagrrys plain oats"
+    ],
+    "hindiName": "बॅगरीज व्हाइट ओट्स",
+    "searchTerms": [
+      "bagrrys",
+      "bagrry",
+      "oats",
+      "white",
+      "plain"
+    ],
+    "category": "grain-cereal",
+    "subcategory": "breakfast-oats",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Bagrry's",
+    "allergens": [
+      "oats"
+    ],
+    "per100g": {
+      "calories": 380,
+      "protein": 14.0,
+      "carbs": 66.0,
+      "fat": 8.0,
+      "fiber": 10.5,
+      "sodium": 5,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 4.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "cup-half",
+        "label": "1/2 cup (dry)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-fiber",
+      "clean-label"
+    ],
+    "isProcessed": false,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [
+      "porridge"
+    ],
+    "consistencyMultipliers": {
+      "porridge": 0.25
+    },
+    "gi": 55,
+    "cookingOilNote": "Use milk or water to boil.",
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  },
+  {
+    "id": "oats-saffola-masala-classic",
+    "name": "Saffola Masala Oats (Classic Masala)",
+    "nameAlt": [
+      "saffola masala oats"
+    ],
+    "hindiName": "सफोला मसाला ओट्स",
+    "searchTerms": [
+      "saffola",
+      "masala oats",
+      "classic masala",
+      "savoury"
+    ],
+    "category": "grain-cereal",
+    "subcategory": "breakfast-oats",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Saffola",
+    "allergens": [
+      "oats",
+      "soy",
+      "gluten"
+    ],
+    "per100g": {
+      "calories": 380,
+      "protein": 10.0,
+      "carbs": 65.0,
+      "fat": 8.0,
+      "fiber": 10.0,
+      "sodium": 1100,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "pouch-1",
+        "label": "1 Small Pouch (40g dry)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-sodium",
+      "savoury"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [
+      "cooked"
+    ],
+    "consistencyMultipliers": {
+      "cooked": 0.3
+    },
+    "gi": 60,
+    "cookingOilNote": "Cooked with water.",
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "muesli-bagrrys-no-added-sugar",
+    "name": "Bagrry's Muesli (No Added Sugar)",
+    "nameAlt": [
+      "bagrrys diet muesli"
+    ],
+    "hindiName": "बॅगरीज मूसली नो एडेड शुगर",
+    "searchTerms": [
+      "bagrrys",
+      "bagrry",
+      "muesli",
+      "no added sugar",
+      "nas"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Bagrry's",
+    "allergens": [
+      "gluten",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 383,
+      "protein": 10.0,
+      "carbs": 75.0,
+      "fat": 5.0,
+      "fiber": 10.0,
+      "sodium": 50,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "no-added-sugar",
+      "high-fiber"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 50,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "muesli-yogabar-protein-chocoalmond",
+    "name": "Yogabar High Protein Muesli (Choco Almond)",
+    "nameAlt": [
+      "yogabar protein muesli"
+    ],
+    "hindiName": "योगा बार प्रोटीन मूसली",
+    "searchTerms": [
+      "yogabar",
+      "muesli",
+      "high protein",
+      "choco almond"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 50,
+    "brand": "Yogabar",
+    "allergens": [
+      "soy",
+      "tree-nuts",
+      "milk",
+      "gluten"
+    ],
+    "per100g": {
+      "calories": 430,
+      "protein": 25.0,
+      "carbs": 55.0,
+      "fat": 11.4,
+      "fiber": 9.0,
+      "sodium": 150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.5,
+      "calcium": 80
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (50g)",
+        "grams": 50
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "granola-trueelements-dark-choc",
+    "name": "True Elements Baked Granola (Dark Chocolate)",
+    "nameAlt": [
+      "true elements granola"
+    ],
+    "hindiName": "ट्रू एलीमेंट्स बेक्ड ग्रेनोला",
+    "searchTerms": [
+      "true elements",
+      "granola",
+      "baked",
+      "dark chocolate"
+    ],
+    "category": "breakfast",
+    "subcategory": "granola",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "True Elements",
+    "allergens": [
+      "tree-nuts",
+      "oats"
+    ],
+    "per100g": {
+      "calories": 431,
+      "protein": 11.8,
+      "carbs": 71.2,
+      "fat": 11.0,
+      "fiber": 10.0,
+      "sodium": 19,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-fiber"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "muesli-muscleblaze-dark-choco-cranberry",
+    "name": "MuscleBlaze Protein Muesli (Dark Choco Cranberry)",
+    "nameAlt": [
+      "mb muesli"
+    ],
+    "hindiName": "मसलब्लेज़ प्रोटीन मूसली",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "muesli",
+      "protein",
+      "dark choco",
+      "cranberry"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 50,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "soy",
+      "gluten",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 410,
+      "protein": 22.0,
+      "carbs": 58.0,
+      "fat": 10.0,
+      "fiber": 7.0,
+      "sodium": 160,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 80
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (50g)",
+        "grams": 50
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "muesli-soulfull-millet-muesli-crunchy",
+    "name": "Tata Soulfull Millet Muesli (Crunchy)",
+    "nameAlt": [
+      "tata soulfull muesli",
+      "millet muesli"
+    ],
+    "hindiName": "टाटा सोलफुल मिलेट मूसली",
+    "searchTerms": [
+      "tata",
+      "soulfull",
+      "millet",
+      "muesli",
+      "crunchy"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "TATA Soulfull",
+    "allergens": [
+      "tree-nuts",
+      "gluten"
+    ],
+    "per100g": {
+      "calories": 390,
+      "protein": 9.0,
+      "carbs": 75.0,
+      "fat": 5.7,
+      "fiber": 8.0,
+      "sodium": 185,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 70
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "millet-based"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "muesli-kelloggs-fruit-nut",
+    "name": "Kellogg's Muesli (Fruit Nut & Seeds)",
+    "nameAlt": [
+      "kelloggs muesli fruit & nut"
+    ],
+    "hindiName": "केलॉग्स मूसली फ्रूट एंड नट",
+    "searchTerms": [
+      "kelloggs",
+      "muesli",
+      "fruit nut",
+      "seeds"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "Kellogg's",
+    "allergens": [
+      "gluten",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 396,
+      "protein": 9.0,
+      "carbs": 75.0,
+      "fat": 6.5,
+      "fiber": 5.0,
+      "sodium": 120,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 60,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "muesli-twt-no-added-sugar",
+    "name": "The Whole Truth Muesli (No Added Sugar)",
+    "nameAlt": [
+      "twt muesli"
+    ],
+    "hindiName": "द होल ट्रुथ मूसली",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "muesli",
+      "no added sugar",
+      "nas"
+    ],
+    "category": "breakfast",
+    "subcategory": "muesli",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "tree-nuts",
+      "oats"
+    ],
+    "per100g": {
+      "calories": 400,
+      "protein": 12.0,
+      "carbs": 60.0,
+      "fat": 12.0,
+      "fiber": 10.0,
+      "sodium": 50,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bowl-1",
+        "label": "1 Bowl (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "no-added-sugar",
+      "clean-label",
+      "high-fiber"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 50,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B4 - RTD Shakes & Bread
+  // ==========================================
+  {
+    "id": "drink-amul-highprotein-milk-250ml",
+    "name": "Amul High Protein Milk (Lactose Free)",
+    "nameAlt": [
+      "amul protein milk 35g"
+    ],
+    "hindiName": "अमूल हाई प्रोटीन मिल्क",
+    "searchTerms": [
+      "amul",
+      "high protein milk",
+      "35g",
+      "lactose free"
+    ],
+    "category": "drink",
+    "subcategory": "high-protein-milk",
+    "itemType": "drink",
+    "state": "ready-to-drink",
+    "region": "pan-indian",
+    "defaultServingGrams": 250,
+    "brand": "Amul",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 90,
+      "protein": 14.0,
+      "carbs": 8.0,
+      "fat": 0.2,
+      "fiber": 0,
+      "sodium": 60,
+      "vitaminB12": 0.5,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 150
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Pack (250ml)",
+        "grams": 250
+      },
+      {
+        "id": "g100",
+        "label": "100ml",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-protein",
+      "lactose-free",
+      "low-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "drink-epigamia-proteinshake-chocolate",
+    "name": "Epigamia Turbo Chocolate Protein Shake",
+    "nameAlt": [
+      "epigamia 25g protein shake"
+    ],
+    "hindiName": "एपिगेमिया टर्बो प्रोटीन शेक",
+    "searchTerms": [
+      "epigamia",
+      "turbo",
+      "protein shake",
+      "chocolate",
+      "25g"
+    ],
+    "category": "drink",
+    "subcategory": "protein-shake-rtd",
+    "itemType": "drink",
+    "state": "ready-to-drink",
+    "region": "pan-indian",
+    "defaultServingGrams": 250,
+    "brand": "Epigamia",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 54,
+      "protein": 10.0,
+      "carbs": 3.6,
+      "fat": 0.4,
+      "fiber": 0,
+      "sodium": 50,
+      "vitaminB12": 0.2,
+      "vitaminD": 0,
+      "iron": 0.5,
+      "calcium": 120
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Bottle (250ml)",
+        "grams": 250
+      },
+      {
+        "id": "g100",
+        "label": "100ml",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "no-added-sugar",
+      "low-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "drink-muscleblaze-proteinshake-chocolate",
+    "name": "MuscleBlaze Protein Shake (Chocolate)",
+    "nameAlt": [
+      "mb shake 18g"
+    ],
+    "hindiName": "मसलब्लेज़ प्रोटीन शेक",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "protein shake",
+      "chocolate",
+      "rtd"
+    ],
+    "category": "drink",
+    "subcategory": "protein-shake-rtd",
+    "itemType": "drink",
+    "state": "ready-to-drink",
+    "region": "pan-indian",
+    "defaultServingGrams": 200,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 65,
+      "protein": 9.0,
+      "carbs": 5.0,
+      "fat": 1.0,
+      "fiber": 0.5,
+      "sodium": 60,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 0.5,
+      "calcium": 100
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Bottle (200ml)",
+        "grams": 200
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "bread-britannia-white-slice",
+    "name": "Britannia White Bread",
+    "nameAlt": [
+      "white bread slice"
+    ],
+    "hindiName": "ब्रिटानिया वाइट ब्रेड",
+    "searchTerms": [
+      "britannia",
+      "white bread",
+      "maida bread",
+      "slice"
+    ],
+    "category": "roti-bread",
+    "subcategory": "packaged-bread",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 25,
+    "brand": "Britannia",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 250,
+      "protein": 7.0,
+      "carbs": 50.0,
+      "fat": 2.0,
+      "fiber": 2.0,
+      "sodium": 350,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "slice-1",
+        "label": "1 Slice (25g)",
+        "grams": 25
+      },
+      {
+        "id": "slice-2",
+        "label": "2 Slices (50g)",
+        "grams": 50
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "high-carb"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 75,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bread-britannia-brown-slice",
+    "name": "Britannia Brown Bread",
+    "nameAlt": [
+      "brown bread slice"
+    ],
+    "hindiName": "ब्रिटानिया ब्राउन ब्रेड",
+    "searchTerms": [
+      "britannia",
+      "brown bread",
+      "slice",
+      "wheat bread"
+    ],
+    "category": "roti-bread",
+    "subcategory": "packaged-bread",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 25,
+    "brand": "Britannia",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 252,
+      "protein": 8.0,
+      "carbs": 48.0,
+      "fat": 2.5,
+      "fiber": 4.0,
+      "sodium": 360,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "slice-1",
+        "label": "1 Slice (25g)",
+        "grams": 25
+      },
+      {
+        "id": "slice-2",
+        "label": "2 Slices (50g)",
+        "grams": 50
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "moderate-fiber"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high",
+    "notes": "Blend of refined and whole wheat flour."
+  },
+  {
+    "id": "bread-englishoven-100ww-slice",
+    "name": "English Oven 100% Whole Wheat Bread",
+    "nameAlt": [
+      "english oven whole wheat"
+    ],
+    "hindiName": "इंग्लिश ओवन 100% व्होल वीट ब्रेड",
+    "searchTerms": [
+      "english oven",
+      "100% whole wheat",
+      "zero maida",
+      "brown bread",
+      "slice"
+    ],
+    "category": "roti-bread",
+    "subcategory": "high-protein-bread",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "English Oven",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 281,
+      "protein": 10.6,
+      "carbs": 50.1,
+      "fat": 2.0,
+      "fiber": 10.0,
+      "sodium": 474,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 70
+    },
+    "servings": [
+      {
+        "id": "slice-1",
+        "label": "1 Slice (~30g)",
+        "grams": 30
+      },
+      {
+        "id": "slice-2",
+        "label": "2 Slices (~60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "high-fiber",
+      "clean-label",
+      "zero-maida"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 50,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "bread-harvestgold-white-slice",
+    "name": "Harvest Gold White Bread",
+    "nameAlt": [
+      "harvest gold white"
+    ],
+    "hindiName": "हार्वेस्ट गोल्ड वाइट ब्रेड",
+    "searchTerms": [
+      "harvest gold",
+      "white bread",
+      "maida",
+      "slice"
+    ],
+    "category": "roti-bread",
+    "subcategory": "packaged-bread",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Harvest Gold",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 255,
+      "protein": 7.5,
+      "carbs": 52.0,
+      "fat": 1.5,
+      "fiber": 1.5,
+      "sodium": 400,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 45
+    },
+    "servings": [
+      {
+        "id": "slice-1",
+        "label": "1 Slice (~30g)",
+        "grams": 30
+      },
+      {
+        "id": "slice-2",
+        "label": "2 Slices (~60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg"
+    ],
+    "tags": [
+      "high-carb"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 75,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B5 - Snacks & Trail Mixes
+  // ==========================================
+  {
+    "id": "snack-trueelements-seedsmix-roasted",
+    "name": "True Elements Roasted Seeds Mix",
+    "nameAlt": [
+      "true elements seed mix",
+      "sunflower pumpkin flax"
+    ],
+    "hindiName": "ट्रू एलीमेंट्स रोस्टेड सीड्स मिक्स",
+    "searchTerms": [
+      "true elements",
+      "seeds",
+      "roasted",
+      "mix",
+      "sunflower",
+      "pumpkin",
+      "flax"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "True Elements",
+    "allergens": [
+      "seeds",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 648,
+      "protein": 27.7,
+      "carbs": 45.1,
+      "fat": 56.4,
+      "fiber": 9.8,
+      "sodium": 16,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 4.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp (15g)",
+        "grams": 15
+      },
+      {
+        "id": "handful",
+        "label": "Small Handful (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "keto",
+      "jain"
+    ],
+    "tags": [
+      "high-fat",
+      "high-protein",
+      "keto-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 20,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "snack-farmley-seeds-pumpkin-roasted",
+    "name": "Farmley Roasted Pumpkin Seeds",
+    "nameAlt": [
+      "roasted pumpkin seeds farmley"
+    ],
+    "hindiName": "रोस्टेड कद्दू के बीज",
+    "searchTerms": [
+      "farmley",
+      "pumpkin seeds",
+      "roasted",
+      "kaddu beej"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Farmley",
+    "allergens": [
+      "seeds"
+    ],
+    "per100g": {
+      "calories": 569,
+      "protein": 30.8,
+      "carbs": 11.5,
+      "fat": 44.4,
+      "fiber": 6.4,
+      "sodium": 305,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 8.8,
+      "calcium": 45
+    },
+    "servings": [
+      {
+        "id": "tbsp-1",
+        "label": "1 Tbsp (15g)",
+        "grams": 15
+      },
+      {
+        "id": "handful",
+        "label": "Small Handful (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "keto",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "high-fat",
+      "keto-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 15,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "snack-happilo-trailmix-seeds-berries",
+    "name": "Happilo Premium Trail Mix (Seeds & Berries)",
+    "nameAlt": [
+      "happilo trail mix"
+    ],
+    "hindiName": "हैप्पीलो प्रीमियम ट्रेल मिक्स",
+    "searchTerms": [
+      "happilo",
+      "trail mix",
+      "seeds",
+      "berries",
+      "premium"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Happilo",
+    "allergens": [
+      "seeds",
+      "tree-nuts"
+    ],
+    "per100g": {
+      "calories": 480,
+      "protein": 14.0,
+      "carbs": 42.0,
+      "fat": 30.0,
+      "fiber": 8.0,
+      "sodium": 15,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "handful",
+        "label": "Small Handful (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "nutrient-dense",
+      "snack"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "snack-yogabar-trailmix-fruits-nuts",
+    "name": "Yogabar Trail Mix (Fruits & Nuts)",
+    "nameAlt": [
+      "yogabar trail mix"
+    ],
+    "hindiName": "योगा बार ट्रेल मिक्स",
+    "searchTerms": [
+      "yogabar",
+      "trail mix",
+      "fruits",
+      "nuts"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 30,
+    "brand": "Yogabar",
+    "allergens": [
+      "tree-nuts",
+      "seeds"
+    ],
+    "per100g": {
+      "calories": 450,
+      "protein": 12.0,
+      "carbs": 50.0,
+      "fat": 25.0,
+      "fiber": 7.0,
+      "sodium": 50,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "handful",
+        "label": "Small Handful (30g)",
+        "grams": 30
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "vegan",
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "sweet-snack",
+      "nutrient-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 45,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "snack-opensecret-cookie-choco-almond",
+    "name": "Open Secret Nutty Cookies (Choco Almond)",
+    "nameAlt": [
+      "open secret cookies"
+    ],
+    "hindiName": "ओपन सीक्रेट चोको बादाम कुकीज़",
+    "searchTerms": [
+      "open secret",
+      "cookie",
+      "choco almond",
+      "nutty",
+      "un-junked"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 25,
+    "brand": "Open Secret",
+    "allergens": [
+      "tree-nuts",
+      "milk",
+      "soy",
+      "gluten"
+    ],
+    "per100g": {
+      "calories": 417,
+      "protein": 10.5,
+      "carbs": 42.0,
+      "fat": 23.0,
+      "fiber": 4.0,
+      "sodium": 110,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "cookie-1",
+        "label": "1 Cookie (25g)",
+        "grams": 25
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "sweet-snack",
+      "high-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "snack-muscleblaze-protein-makhana-peri-peri",
+    "name": "MuscleBlaze Protein Makhana (Peri Peri)",
+    "nameAlt": [
+      "mb makhana"
+    ],
+    "hindiName": "मसलब्लेज़ प्रोटीन मखाना पेरी पेरी",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "protein",
+      "makhana",
+      "fox nuts",
+      "peri peri"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 40,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 390,
+      "protein": 20.0,
+      "carbs": 60.0,
+      "fat": 10.0,
+      "fiber": 5.0,
+      "sodium": 650,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 250
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Pack (40g)",
+        "grams": 40
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "savoury",
+      "high-sodium"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 45,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "snack-twt-minibar-cocoa-almond",
+    "name": "The Whole Truth Mini Bar (Cocoa Almond)",
+    "nameAlt": [
+      "twt mini bar"
+    ],
+    "hindiName": "द होल ट्रुथ मिनी बार",
+    "searchTerms": [
+      "twt",
+      "the whole truth",
+      "mini bar",
+      "cocoa almond",
+      "bite sized"
+    ],
+    "category": "snack-street",
+    "subcategory": "health-snack-packaged",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 27,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "tree-nuts",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 481,
+      "protein": 22.0,
+      "carbs": 44.0,
+      "fat": 25.0,
+      "fiber": 8.0,
+      "sodium": 150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "bar-mini",
+        "label": "1 Mini Bar (27g)",
+        "grams": 27
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "clean-label",
+      "snack"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B6 - Greek Yogurt & Dairy
+  // ==========================================
+  {
+    "id": "dairy-epigamia-greek-plain-90g",
+    "name": "Epigamia Greek Yogurt (Plain)",
+    "nameAlt": [
+      "epigamia natural",
+      "epigamia plain greek"
+    ],
+    "hindiName": "एपिगेमिया ग्रीक दही (प्लेन)",
+    "searchTerms": [
+      "epigamia",
+      "greek yogurt",
+      "plain",
+      "natural",
+      "dahi"
+    ],
+    "category": "dairy",
+    "subcategory": "greek-yogurt",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 90,
+    "brand": "Epigamia",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 76.6,
+      "protein": 8.0,
+      "carbs": 6.2,
+      "fat": 2.2,
+      "fiber": 0,
+      "sodium": 55,
+      "vitaminB12": 0.5,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 175.5
+    },
+    "servings": [
+      {
+        "id": "cup-90",
+        "label": "1 Cup (90g)",
+        "grams": 90
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "keto",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "low-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 15,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "dairy-epigamia-greek-strawberry-85g",
+    "name": "Epigamia Greek Yogurt (Strawberry)",
+    "nameAlt": [
+      "epigamia strawberry"
+    ],
+    "hindiName": "एपिगेमिया ग्रीक दही (स्ट्रॉबेरी)",
+    "searchTerms": [
+      "epigamia",
+      "greek yogurt",
+      "strawberry",
+      "flavoured"
+    ],
+    "category": "dairy",
+    "subcategory": "greek-yogurt",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 85,
+    "brand": "Epigamia",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 98.0,
+      "protein": 6.6,
+      "carbs": 13.7,
+      "fat": 1.8,
+      "fiber": 0.5,
+      "sodium": 45,
+      "vitaminB12": 0.2,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 145.7
+    },
+    "servings": [
+      {
+        "id": "cup-85",
+        "label": "1 Cup (85g)",
+        "grams": 85
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "sweet-snack",
+      "moderate-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "dairy-epigamia-turbo-coffee-200ml",
+    "name": "Epigamia Turbo Yogurt Drink (Coffee)",
+    "nameAlt": [
+      "epigamia turbo coffee"
+    ],
+    "hindiName": "एपिगेमिया टर्बो कॉफी",
+    "searchTerms": [
+      "epigamia",
+      "turbo",
+      "coffee",
+      "yogurt drink",
+      "high protein"
+    ],
+    "category": "dairy",
+    "subcategory": "greek-yogurt",
+    "itemType": "drink",
+    "state": "ready-to-drink",
+    "region": "pan-indian",
+    "defaultServingGrams": 200,
+    "brand": "Epigamia",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 60.0,
+      "protein": 8.5,
+      "carbs": 5.0,
+      "fat": 1.5,
+      "fiber": 0,
+      "sodium": 40,
+      "vitaminB12": 0.3,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 130
+    },
+    "servings": [
+      {
+        "id": "bottle",
+        "label": "1 Bottle (200ml)",
+        "grams": 200
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-protein",
+      "post-workout"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 25,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "dairy-milkymist-skyr-plain-150g",
+    "name": "Milky Mist Skyr (Plain)",
+    "nameAlt": [
+      "milky mist skyr plain",
+      "icelandic yogurt"
+    ],
+    "hindiName": "मिल्की मिस्ट स्काईर (प्लेन)",
+    "searchTerms": [
+      "milky mist",
+      "skyr",
+      "plain",
+      "icelandic",
+      "thick yogurt"
+    ],
+    "category": "dairy",
+    "subcategory": "greek-yogurt",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 150,
+    "brand": "Milky Mist",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 70.0,
+      "protein": 12.0,
+      "carbs": 10.0,
+      "fat": 1.5,
+      "fiber": 0,
+      "sodium": 60,
+      "vitaminB12": 0.4,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 200
+    },
+    "servings": [
+      {
+        "id": "cup-150",
+        "label": "1 Cup (150g)",
+        "grams": 150
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "very-high-protein",
+      "low-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 15,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "dairy-milkymist-greek-plain-100g",
+    "name": "Milky Mist Greek Yogurt (Plain)",
+    "nameAlt": [
+      "milky mist greek"
+    ],
+    "hindiName": "मिल्की मिस्ट ग्रीक दही",
+    "searchTerms": [
+      "milky mist",
+      "greek yogurt",
+      "plain"
+    ],
+    "category": "dairy",
+    "subcategory": "greek-yogurt",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 100,
+    "brand": "Milky Mist",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 85.0,
+      "protein": 8.0,
+      "carbs": 6.5,
+      "fat": 3.0,
+      "fiber": 0,
+      "sodium": 50,
+      "vitaminB12": 0.3,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 150
+    },
+    "servings": [
+      {
+        "id": "cup-100",
+        "label": "1 Cup (100g)",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 15,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "dairy-amul-highprotein-curd-400g",
+    "name": "Amul High Protein Dahi",
+    "nameAlt": [
+      "amul protein curd"
+    ],
+    "hindiName": "अमूल हाई प्रोटीन दही",
+    "searchTerms": [
+      "amul",
+      "high protein dahi",
+      "curd",
+      "protein curd",
+      "25g"
+    ],
+    "category": "dairy",
+    "subcategory": "high-protein-curd",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 100,
+    "brand": "Amul",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 68.0,
+      "protein": 6.3,
+      "carbs": 10.0,
+      "fat": 0.1,
+      "fiber": 0,
+      "sodium": 60,
+      "vitaminB12": 0.3,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 140
+    },
+    "servings": [
+      {
+        "id": "cup-100",
+        "label": "Small Bowl (100g)",
+        "grams": 100
+      },
+      {
+        "id": "pack-400",
+        "label": "Full Pack (400g)",
+        "grams": 400
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "fat-free"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 20,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high",
+    "notes": "25g protein per 400g pack."
+  },
+  {
+    "id": "dairy-motherdairy-protein-curd-400g",
+    "name": "Mother Dairy High Protein Curd",
+    "nameAlt": [
+      "mother dairy protein curd",
+      "protein dahi"
+    ],
+    "hindiName": "मदर डेयरी हाई प्रोटीन दही",
+    "searchTerms": [
+      "mother dairy",
+      "high protein curd",
+      "dahi"
+    ],
+    "category": "dairy",
+    "subcategory": "high-protein-curd",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 100,
+    "brand": "Mother Dairy",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 65.0,
+      "protein": 8.0,
+      "carbs": 5.0,
+      "fat": 1.0,
+      "fiber": 0,
+      "sodium": 55,
+      "vitaminB12": 0.3,
+      "vitaminD": 0,
+      "iron": 0.1,
+      "calcium": 150
+    },
+    "servings": [
+      {
+        "id": "cup-100",
+        "label": "Small Bowl (100g)",
+        "grams": 100
+      },
+      {
+        "id": "pack-400",
+        "label": "Full Tub (400g)",
+        "grams": 400
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-protein",
+      "low-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": true,
+    "fastingTypes": [
+      "navratri"
+    ],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 20,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B7 - Cookies, Chips, Biscuits
+  // ==========================================
+  {
+    "id": "cookie-muscleblaze-protein-20g-doublechoco",
+    "name": "MuscleBlaze Protein Cookie (Double Choco)",
+    "nameAlt": [
+      "mb protein cookie 20g"
+    ],
+    "hindiName": "मसलब्लेज़ प्रोटीन कुकी",
+    "searchTerms": [
+      "muscleblaze",
+      "mb",
+      "protein cookie",
+      "double choco",
+      "20g"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-cookie",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 60,
+    "brand": "MuscleBlaze",
+    "allergens": [
+      "gluten",
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 400.0,
+      "protein": 33.3,
+      "carbs": 40.0,
+      "fat": 15.0,
+      "fiber": 5.0,
+      "sodium": 150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 100
+    },
+    "servings": [
+      {
+        "id": "cookie-1",
+        "label": "1 Cookie (60g)",
+        "grams": 60
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 45,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "cookie-twt-protein-15g-choco-chip",
+    "name": "The Whole Truth Protein Cookie (Choco Chip)",
+    "nameAlt": [
+      "twt protein cookie"
+    ],
+    "hindiName": "द होल ट्रुथ प्रोटीन कुकी",
+    "searchTerms": [
+      "the whole truth",
+      "twt",
+      "protein cookie",
+      "15g",
+      "choco chip"
+    ],
+    "category": "supplement",
+    "subcategory": "protein-cookie",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 50,
+    "brand": "The Whole Truth",
+    "allergens": [
+      "tree-nuts",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 420.0,
+      "protein": 30.0,
+      "carbs": 35.0,
+      "fat": 20.0,
+      "fiber": 8.0,
+      "sodium": 80,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 80
+    },
+    "servings": [
+      {
+        "id": "cookie-1",
+        "label": "1 Cookie (50g)",
+        "grams": 50
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-protein",
+      "clean-label",
+      "no-added-sugar"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  },
+  {
+    "id": "chip-ritebite-protein-chips-cheese-jalapeno",
+    "name": "RiteBite Max Protein Chips (Cheese Jalapeno)",
+    "nameAlt": [
+      "max protein chips"
+    ],
+    "hindiName": "रइटबाइट मैक्स प्रोटीन चिप्स",
+    "searchTerms": [
+      "ritebite",
+      "max protein",
+      "chips",
+      "cheese jalapeno",
+      "baked"
+    ],
+    "category": "snack-street",
+    "subcategory": "protein-chip",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 60,
+    "brand": "RiteBite Max Protein",
+    "allergens": [
+      "soy",
+      "gluten",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 420.0,
+      "protein": 20.0,
+      "carbs": 60.0,
+      "fat": 11.0,
+      "fiber": 10.0,
+      "sodium": 650,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Pack (60g)",
+        "grams": 60
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-sodium",
+      "high-protein",
+      "baked"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "chip-tooyumm-protein-puff-herbs-cheese",
+    "name": "Too Yumm! Protein Puffs (Herbs & Cheese)",
+    "nameAlt": [
+      "too yumm protein puffs"
+    ],
+    "hindiName": "टू यम प्रोटीन पफ्स",
+    "searchTerms": [
+      "too yumm",
+      "protein puffs",
+      "herbs cheese",
+      "baked"
+    ],
+    "category": "snack-street",
+    "subcategory": "protein-chip",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 28,
+    "brand": "Too Yumm",
+    "allergens": [
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 469.0,
+      "protein": 10.0,
+      "carbs": 68.0,
+      "fat": 17.7,
+      "fiber": 4.0,
+      "sodium": 760,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 60
+    },
+    "servings": [
+      {
+        "id": "pack-1",
+        "label": "1 Pack (28g)",
+        "grams": 28
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "baked",
+      "high-sodium"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 50,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "biscuit-parle-g-original",
+    "name": "Parle-G Glucose Biscuit",
+    "nameAlt": [
+      "parle g"
+    ],
+    "hindiName": "पारले-जी बिस्कुट",
+    "searchTerms": [
+      "parle",
+      "parle-g",
+      "glucose",
+      "biscuit",
+      "chai"
+    ],
+    "category": "snack-street",
+    "subcategory": "packaged-biscuit",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 15,
+    "brand": "Parle-G",
+    "allergens": [
+      "gluten",
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 450.0,
+      "protein": 7.0,
+      "carbs": 77.0,
+      "fat": 13.0,
+      "fiber": 1.5,
+      "sodium": 280,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.0,
+      "calcium": 30
+    },
+    "servings": [
+      {
+        "id": "biscuit-3",
+        "label": "3 Biscuits (~15g)",
+        "grams": 15
+      },
+      {
+        "id": "pack-small",
+        "label": "1 Small Pack (75g)",
+        "grams": 75
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-carb",
+      "high-sugar",
+      "calorie-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 70,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "biscuit-britannia-nutrichoice-digestive",
+    "name": "Britannia NutriChoice High Fibre Digestive",
+    "nameAlt": [
+      "nutrichoice digestive"
+    ],
+    "hindiName": "ब्रिटानिया न्यूट्रीचॉइस",
+    "searchTerms": [
+      "britannia",
+      "nutrichoice",
+      "digestive",
+      "high fibre",
+      "biscuit"
+    ],
+    "category": "snack-street",
+    "subcategory": "packaged-biscuit",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 20,
+    "brand": "Britannia NutriChoice",
+    "allergens": [
+      "gluten"
+    ],
+    "per100g": {
+      "calories": 493.0,
+      "protein": 8.0,
+      "carbs": 68.0,
+      "fat": 21.0,
+      "fiber": 6.0,
+      "sodium": 400,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 45
+    },
+    "servings": [
+      {
+        "id": "biscuit-2",
+        "label": "2 Biscuits (~20g)",
+        "grams": 20
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-fat",
+      "moderate-fiber",
+      "calorie-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "biscuit-britannia-marie-gold",
+    "name": "Britannia Marie Gold Biscuit",
+    "nameAlt": [
+      "marie gold"
+    ],
+    "hindiName": "मरी गोल्ड बिस्कुट",
+    "searchTerms": [
+      "britannia",
+      "marie",
+      "gold",
+      "biscuit",
+      "tea time"
+    ],
+    "category": "snack-street",
+    "subcategory": "packaged-biscuit",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 20,
+    "brand": "Britannia Marie Gold",
+    "allergens": [
+      "gluten",
+      "milk"
+    ],
+    "per100g": {
+      "calories": 440.0,
+      "protein": 8.0,
+      "carbs": 76.0,
+      "fat": 11.5,
+      "fiber": 2.0,
+      "sodium": 350,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "biscuit-4",
+        "label": "4 Biscuits (~20g)",
+        "grams": 20
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-carb",
+      "calorie-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "biscuit-sunfeast-darkfantasy-choco-fills",
+    "name": "Sunfeast Dark Fantasy (Choco Fills)",
+    "nameAlt": [
+      "dark fantasy biscuit"
+    ],
+    "hindiName": "डार्क फैंटेसी चोको फिल्स",
+    "searchTerms": [
+      "sunfeast",
+      "dark fantasy",
+      "choco fills",
+      "chocolate biscuit"
+    ],
+    "category": "snack-street",
+    "subcategory": "packaged-biscuit",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 25,
+    "brand": "Sunfeast Dark Fantasy",
+    "allergens": [
+      "gluten",
+      "milk",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 530.0,
+      "protein": 5.0,
+      "carbs": 65.0,
+      "fat": 28.0,
+      "fiber": 2.0,
+      "sodium": 180,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "biscuit-2",
+        "label": "2 Biscuits (~25g)",
+        "grams": 25
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "very-high-fat",
+      "high-sugar",
+      "calorie-dense",
+      "sweet-snack"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  }
+
+  // ==========================================
+  // BRAND FOODS: BATCH B8 - Noodles & RTE
+  // ==========================================
+  {
+    "id": "noodle-maggi-2min-masala-70g",
+    "name": "Maggi 2-Minute Noodles (Masala)",
+    "nameAlt": [
+      "maggi masala",
+      "maggi noodles"
+    ],
+    "hindiName": "मैगी 2-मिनट नूडल्स (मसाला)",
+    "searchTerms": [
+      "maggi",
+      "2 minute",
+      "masala noodles",
+      "nestle"
+    ],
+    "category": "packaged-food",
+    "subcategory": "instant-noodle",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 70,
+    "brand": "Maggi",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 442.0,
+      "protein": 10.0,
+      "carbs": 60.0,
+      "fat": 18.0,
+      "fiber": 2.0,
+      "sodium": 1200,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "pack-70",
+        "label": "1 Single Pack (70g)",
+        "grams": 70
+      },
+      {
+        "id": "pack-140",
+        "label": "1 Double Pack (140g)",
+        "grams": 140
+      },
+      {
+        "id": "g100",
+        "label": "100g (Dry weight)",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-carb",
+      "high-sodium",
+      "calorie-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "noodle-maggi-atta-masala-70g",
+    "name": "Maggi Atta Noodles (Masala)",
+    "nameAlt": [
+      "maggi atta",
+      "whole wheat maggi"
+    ],
+    "hindiName": "मैगी आटा नूडल्स",
+    "searchTerms": [
+      "maggi",
+      "atta",
+      "whole wheat",
+      "masala noodles"
+    ],
+    "category": "packaged-food",
+    "subcategory": "instant-noodle",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 70,
+    "brand": "Maggi",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 440.0,
+      "protein": 10.5,
+      "carbs": 58.0,
+      "fat": 17.0,
+      "fiber": 5.0,
+      "sodium": 1150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 3.0,
+      "calcium": 55
+    },
+    "servings": [
+      {
+        "id": "pack-70",
+        "label": "1 Pack (70g)",
+        "grams": 70
+      },
+      {
+        "id": "g100",
+        "label": "100g (Dry weight)",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-carb",
+      "high-sodium",
+      "moderate-fiber"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 55,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "noodle-maggi-no-onion-garlic-70g",
+    "name": "Maggi 2-Minute Noodles (No Onion No Garlic)",
+    "nameAlt": [
+      "maggi jain",
+      "maggi nong"
+    ],
+    "hindiName": "मैगी नो अनियन नो गार्लिक",
+    "searchTerms": [
+      "maggi",
+      "jain maggi",
+      "nong",
+      "no onion garlic"
+    ],
+    "category": "packaged-food",
+    "subcategory": "instant-noodle",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 70,
+    "brand": "Maggi",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 442.0,
+      "protein": 10.0,
+      "carbs": 60.0,
+      "fat": 18.0,
+      "fiber": 2.0,
+      "sodium": 1100,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.5,
+      "calcium": 50
+    },
+    "servings": [
+      {
+        "id": "pack-70",
+        "label": "1 Pack (70g)",
+        "grams": 70
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg",
+      "jain"
+    ],
+    "tags": [
+      "high-carb",
+      "high-sodium",
+      "jain-friendly"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": false,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "high"
+  },
+  {
+    "id": "noodle-yippee-magic-masala-70g",
+    "name": "YiPPee! Magic Masala Noodles",
+    "nameAlt": [
+      "yippee noodles"
+    ],
+    "hindiName": "यीप्पी मैजिक मसाला नूडल्स",
+    "searchTerms": [
+      "yippee",
+      "magic masala",
+      "itc noodles",
+      "round block"
+    ],
+    "category": "packaged-food",
+    "subcategory": "instant-noodle",
+    "itemType": "base-food",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 70,
+    "brand": "ITC YiPPee!",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 428.0,
+      "protein": 9.5,
+      "carbs": 62.0,
+      "fat": 16.5,
+      "fiber": 2.5,
+      "sodium": 1150,
+      "vitaminB12": 0,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "pack-70",
+        "label": "1 Single Pack (70g)",
+        "grams": 70
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "high-carb",
+      "high-sodium"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "curated-estimate",
+    "confidence": "medium"
+  },
+  {
+    "id": "noodle-waiwai-chicken-75g",
+    "name": "Wai Wai Chicken Noodles",
+    "nameAlt": [
+      "wai wai brown"
+    ],
+    "hindiName": "वाई वाई चिकन नूडल्स",
+    "searchTerms": [
+      "wai wai",
+      "chicken noodles",
+      "nepali noodles",
+      "instant chicken"
+    ],
+    "category": "packaged-food",
+    "subcategory": "instant-noodle",
+    "itemType": "snack",
+    "state": "raw",
+    "region": "pan-indian",
+    "defaultServingGrams": 75,
+    "brand": "Wai Wai",
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "per100g": {
+      "calories": 471.0,
+      "protein": 10.0,
+      "carbs": 61.0,
+      "fat": 21.0,
+      "fiber": 2.0,
+      "sodium": 1300,
+      "vitaminB12": 0.5,
+      "vitaminD": 0,
+      "iron": 2.0,
+      "calcium": 30
+    },
+    "servings": [
+      {
+        "id": "pack-75",
+        "label": "1 Pack (75g)",
+        "grams": 75
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "non-veg"
+    ],
+    "tags": [
+      "high-sodium",
+      "high-fat",
+      "calorie-dense"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": false,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 65,
+    "cookingOilNote": null,
+    "estimatedOilG": 0,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "rte-mtr-dal-makhani-300g",
+    "name": "MTR Ready-To-Eat Dal Makhani",
+    "nameAlt": [
+      "mtr dal makhni rte"
+    ],
+    "hindiName": "एमटीआर दाल मखनी (RTE)",
+    "searchTerms": [
+      "mtr",
+      "dal makhani",
+      "rte",
+      "ready to eat",
+      "pouch dal"
+    ],
+    "category": "curry",
+    "subcategory": "dal-lentils",
+    "itemType": "base-food",
+    "state": "cooked",
+    "region": "north-indian",
+    "defaultServingGrams": 150,
+    "brand": "MTR",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 86.0,
+      "protein": 3.3,
+      "carbs": 6.6,
+      "fat": 5.3,
+      "fiber": 3.3,
+      "sodium": 233,
+      "vitaminB12": 0.2,
+      "vitaminD": 0,
+      "iron": 1.5,
+      "calcium": 40
+    },
+    "servings": [
+      {
+        "id": "half-pack",
+        "label": "Half Pouch (150g)",
+        "grams": 150
+      },
+      {
+        "id": "pack-300",
+        "label": "Full Pouch (300g)",
+        "grams": 300
+      },
+      {
+        "id": "bowl",
+        "label": "1 Bowl (200g)",
+        "grams": 200
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "convenience",
+      "moderate-fat"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 35,
+    "cookingOilNote": "Includes butter/cream in product matrix",
+    "estimatedOilG": 4,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  },
+  {
+    "id": "rte-itc-koi-dal-bukhara-285g",
+    "name": "Kitchens of India Dal Bukhara (RTE)",
+    "nameAlt": [
+      "itc dal bukhara"
+    ],
+    "hindiName": "किचन्स ऑफ इंडिया दाल बुखारा",
+    "searchTerms": [
+      "itc",
+      "kitchens of india",
+      "dal bukhara",
+      "rte",
+      "premium dal"
+    ],
+    "category": "curry",
+    "subcategory": "dal-lentils",
+    "itemType": "base-food",
+    "state": "cooked",
+    "region": "north-indian",
+    "defaultServingGrams": 142,
+    "brand": "ITC Kitchens of India",
+    "allergens": [
+      "milk"
+    ],
+    "per100g": {
+      "calories": 115.0,
+      "protein": 4.0,
+      "carbs": 12.0,
+      "fat": 5.5,
+      "fiber": 3.0,
+      "sodium": 480,
+      "vitaminB12": 0.3,
+      "vitaminD": 0,
+      "iron": 1.2,
+      "calcium": 30
+    },
+    "servings": [
+      {
+        "id": "half-pack",
+        "label": "Half Pouch (~142g)",
+        "grams": 142
+      },
+      {
+        "id": "pack-285",
+        "label": "Full Pouch (285g)",
+        "grams": 285
+      },
+      {
+        "id": "g100",
+        "label": "100g",
+        "grams": 100
+      }
+    ],
+    "dietTypes": [
+      "veg"
+    ],
+    "tags": [
+      "restaurant-style",
+      "high-sodium",
+      "convenience"
+    ],
+    "isProcessed": true,
+    "isFastingFood": false,
+    "fastingTypes": [],
+    "isGlutenFree": true,
+    "isRecipe": false,
+    "containsRootVeg": true,
+    "hasBeverageModifiers": false,
+    "supportedConsistencyTypes": [],
+    "consistencyMultipliers": {},
+    "gi": 40,
+    "cookingOilNote": "Includes butter/cream",
+    "estimatedOilG": 5,
+    "source": "FSSAI-label",
+    "confidence": "high"
+  }
 ];

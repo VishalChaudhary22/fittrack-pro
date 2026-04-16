@@ -763,6 +763,14 @@ Several rounds of mobile UX fixes on the food search modal:
 ### Supabase Upsert Debug Logging (Added 2026-04-09)
 `createSyncSetter` now emits `[CloudSync] ✅ Upserted N row(s) to <table>` on success and `[CloudSync] ❌ Upsert FAILED for <table>: <message>` on error, making it trivial to confirm from browser DevTools whether data is actually reaching the cloud.
 
+### Workout Page Optimization & Swap Upgrades (Applied 2026-04-16)
+**Fixes Applied:**
+- **Swapper Mechanism Refactor:** Substituted bottom-sheet swap design for a fixed-viewport centered `Portal` modal that displays directly over the focused element. Adopted `ex.sv` to locally persist swapped variants without poisoning the global split array. Upgraded the generic refresh icon to an explicit `ArrowRightLeft` boxed pill UI.
+- **Data Fallback Model:** Updated `WorkoutHistoryPage` and `ProgressPage` to read muscle targets and focus groups directly from the logged exercises before falling back to static split definitions (Log-First attribution). Handles all custom swap permutations perfectly in analytics.
+- **Volume & Programming Tweaks:** Reduced default working sets across all predefined splits from 4 down to 3. Injected isolated 2-set finishers (Bicep/Tricep) into `mkUpperA` / `mkUpperB` factory functions.
+- **Granular Weight Steps:** Redefined `mkWtItems` default step to `0.1kg` allowing micro-tracking of body weight across Dashboard and Profile pickers. Barbell and dumbbell entries in `/workout` explicitly retain standard `0.5kg` / integer increments.
+- **Dynamic Protein Scaling:** Re-calibrated `protTarget` rules synchronously in `DashboardPage` and `DietPage`. Now securely defaults to `1.8g/kg`, but selectively bumps to `2.0g/kg` for athletes on an active cut (`loss`) while training `5+` days heavily per week.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work

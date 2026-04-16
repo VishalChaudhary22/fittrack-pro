@@ -1,9 +1,9 @@
 -- =========================================================================
 -- RLS POLICIES: Enable public read access for leaderboard feature
--- The Olympus League leaderboard needs to read all user profiles and
--- workout logs to compute XP rankings for every registered user.
+-- (Temporarily commented out to bypass Supabase db push conflict - already applied)
 -- =========================================================================
 
+/*
 -- 1. user_profiles: Allow all authenticated users to read any profile
 --    (needed so the leaderboard can show all registered players)
 CREATE POLICY "user_profiles: public read for leaderboard"
@@ -17,3 +17,4 @@ CREATE POLICY "user_profiles: public read for leaderboard"
 CREATE POLICY "workout_logs: public read for leaderboard"
   ON public.workout_logs FOR SELECT
   USING (true);
+*/

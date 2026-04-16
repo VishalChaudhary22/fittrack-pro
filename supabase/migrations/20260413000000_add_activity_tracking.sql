@@ -37,9 +37,12 @@ ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS step_goal integer DEFA
 
 -- RLS: users own their own data
 ALTER TABLE public.step_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wearable_connections ENABLE ROW LEVEL SECURITY;
+
+/*
 CREATE POLICY "step_logs: own data" ON public.step_logs
   FOR ALL USING (auth.uid() = user_id);
 
-ALTER TABLE public.wearable_connections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "wearable_connections: own data" ON public.wearable_connections
   FOR ALL USING (auth.uid() = user_id);
+*/

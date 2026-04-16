@@ -23,10 +23,6 @@ const formatArray = (arr, isEnum = false) => {
   if (!arr || arr.length === 0) return "'{}'";
   
   if (isEnum) {
-    // For enums, the syntax ARRAY['item1', 'item2']::enum_type[] works better than curly syntax
-    // Wait, curly braces string '{veg, vegan}' works universally in Postgres Text array parsing
-    // but requires quotes around enum items if they have special characters. 
-    // Best standard way: "'{" + arr.join(',') + "}'"
     return `'{"${arr.join('","')}"}'`;
   }
   
@@ -34,16 +30,12 @@ const formatArray = (arr, isEnum = false) => {
   return `ARRAY[${arr.map(a => escapeSql(a)).join(', ')}]::TEXT[]`;
 };
 
-// Start building SQL
-let sql = `-- =========================================================================\n`;
-sql += `-- SEED DATA: INDIAN FOOD DB\n`;
-sql += `-- Generated automatically by scripts/generate_seed.js\n`;
-sql += `-- =========================================================================\n\n`;
+// =========================================================================
+// FILE 1: Enum extensions (separate transaction — PG requirement)
+// =========================================================================
+let enumSql = `-- Extend enums with values used by food items\n`;
+enumSql += `-- Must be in a separate migration so values are committed before use\n\n`;
 
-// 0. Extend enums with any missing values used by foods
-sql += `-- =================== EXTEND ENUMS ===================\n`;
-
-// Dynamically collect all unique enum values from foods
 const usedItemTypes = new Set();
 const usedStates = new Set();
 const usedRegions = new Set();
@@ -67,13 +59,27 @@ const knownDietTypes = new Set(['vegan', 'veg', 'jain', 'egg', 'nonveg']);
 const knownSources = new Set(['IFCT-2017', 'FSSAI-label', 'USDA', 'healthifyme', 'curated-estimate']);
 const knownConfidences = new Set(['high', 'medium', 'low']);
 
-usedItemTypes.forEach(v => { if (!knownItemTypes.has(v)) sql += `ALTER TYPE public.item_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-usedStates.forEach(v => { if (!knownStates.has(v)) sql += `ALTER TYPE public.food_state_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-usedRegions.forEach(v => { if (!knownRegions.has(v)) sql += `ALTER TYPE public.region_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-usedDietTypes.forEach(v => { if (!knownDietTypes.has(v)) sql += `ALTER TYPE public.diet_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-usedSources.forEach(v => { if (!knownSources.has(v)) sql += `ALTER TYPE public.source_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-usedConfidences.forEach(v => { if (!knownConfidences.has(v)) sql += `ALTER TYPE public.confidence_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
-sql += `\n`;
+usedItemTypes.forEach(v => { if (!knownItemTypes.has(v)) enumSql += `ALTER TYPE public.item_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedStates.forEach(v => { if (!knownStates.has(v)) enumSql += `ALTER TYPE public.food_state_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedRegions.forEach(v => { if (!knownRegions.has(v)) enumSql += `ALTER TYPE public.region_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedDietTypes.forEach(v => { if (!knownDietTypes.has(v)) enumSql += `ALTER TYPE public.diet_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedSources.forEach(v => { if (!knownSources.has(v)) enumSql += `ALTER TYPE public.source_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedConfidences.forEach(v => { if (!knownConfidences.has(v)) enumSql += `ALTER TYPE public.confidence_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+
+// Write enum file with timestamp 1 minute BEFORE seed file
+const enumTimestamp = new Date(Date.now() - 60000).toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+const enumFilename = `${enumTimestamp}_extend_enums.sql`;
+const enumOutputPath = path.join(MIGRATIONS_DIR, enumFilename);
+fs.writeFileSync(enumOutputPath, enumSql);
+console.log(`✅ Generated enum migration: supabase/migrations/${enumFilename}`);
+
+// =========================================================================
+// FILE 2: Main seed data (categories, servings, foods, food_servings)
+// =========================================================================
+let sql = `-- =========================================================================\n`;
+sql += `-- SEED DATA: INDIAN FOOD DB\n`;
+sql += `-- Generated automatically by scripts/generate_seed.js\n`;
+sql += `-- =========================================================================\n\n`;
 
 // 1. Insert Categories
 sql += `-- =================== FOOD CATEGORIES ===================\n`;
@@ -114,7 +120,6 @@ sql += `-- =================== CORE FOOD DATA ===================\n`;
 indianFoods.forEach(food => {
   const p = food.per100g;
   
-  // Convert JSON to string safely
   const multipliersJson = Object.keys(food.consistencyMultipliers).length > 0 
     ? escapeSql(JSON.stringify(food.consistencyMultipliers)) + '::jsonb'
     : "'{}'::jsonb";
@@ -179,7 +184,6 @@ INSERT INTO public.foods (
   // 4. Insert specific Servings for this food
   if (food.servings && food.servings.length > 0) {
     sql += `\n  -- Servings for ${food.id}\n`;
-    // We clear old servings in case they were updated
     sql += `  DELETE FROM public.food_servings WHERE food_id = ${escapeSql(food.id)};\n`;
     food.servings.forEach(srv => {
       sql += `  INSERT INTO public.food_servings (food_id, serving_id, label, grams) VALUES (${escapeSql(food.id)}, ${escapeSql(srv.id)}, ${escapeSql(srv.label)}, ${srv.grams});\n`;
@@ -189,10 +193,10 @@ INSERT INTO public.foods (
 
 });
 
-// Determine next migration file timestamp
+// Write seed migration file
 const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
 const filename = `${timestamp}_seed_indian_food_batch_7.sql`;
 const outputPath = path.join(MIGRATIONS_DIR, filename);
 
 fs.writeFileSync(outputPath, sql);
-console.log(`✅ Successfully generated seed migration at: supabase/migrations/${filename}`);
+console.log(`✅ Generated seed migration: supabase/migrations/${filename}`);

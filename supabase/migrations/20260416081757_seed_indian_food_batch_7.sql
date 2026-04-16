@@ -3,15 +3,6 @@
 -- Generated automatically by scripts/generate_seed.js
 -- =========================================================================
 
--- =================== EXTEND ENUMS ===================
-ALTER TYPE public.item_type_enum ADD VALUE IF NOT EXISTS 'condiment';
-ALTER TYPE public.food_state_enum ADD VALUE IF NOT EXISTS 'ready-to-drink';
-ALTER TYPE public.region_enum ADD VALUE IF NOT EXISTS 'imported';
-ALTER TYPE public.region_enum ADD VALUE IF NOT EXISTS 'north-indian';
-ALTER TYPE public.diet_type_enum ADD VALUE IF NOT EXISTS 'keto';
-ALTER TYPE public.diet_type_enum ADD VALUE IF NOT EXISTS 'non-veg';
-ALTER TYPE public.source_enum ADD VALUE IF NOT EXISTS 'brand-nutrition';
-
 -- =================== FOOD CATEGORIES ===================
 INSERT INTO public.food_categories (id, label) VALUES ('grain-cereal', 'Grains & Cereals') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.food_categories (id, label) VALUES ('roti-bread', 'Roti & Breads') ON CONFLICT (id) DO NOTHING;

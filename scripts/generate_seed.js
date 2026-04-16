@@ -40,6 +40,41 @@ sql += `-- SEED DATA: INDIAN FOOD DB\n`;
 sql += `-- Generated automatically by scripts/generate_seed.js\n`;
 sql += `-- =========================================================================\n\n`;
 
+// 0. Extend enums with any missing values used by foods
+sql += `-- =================== EXTEND ENUMS ===================\n`;
+
+// Dynamically collect all unique enum values from foods
+const usedItemTypes = new Set();
+const usedStates = new Set();
+const usedRegions = new Set();
+const usedDietTypes = new Set();
+const usedSources = new Set();
+const usedConfidences = new Set();
+
+indianFoods.forEach(food => {
+  if (food.itemType) usedItemTypes.add(food.itemType);
+  if (food.state) usedStates.add(food.state);
+  if (food.region) usedRegions.add(food.region);
+  if (food.source) usedSources.add(food.source);
+  if (food.confidence) usedConfidences.add(food.confidence);
+  if (food.dietTypes) food.dietTypes.forEach(d => usedDietTypes.add(d));
+});
+
+const knownItemTypes = new Set(['base-food', 'dish', 'drink', 'supplement', 'snack', 'packaged-food']);
+const knownStates = new Set(['raw', 'cooked', 'fried', 'baked', 'steamed', 'roasted']);
+const knownRegions = new Set(['pan-indian', 'north', 'south', 'east', 'west']);
+const knownDietTypes = new Set(['vegan', 'veg', 'jain', 'egg', 'nonveg']);
+const knownSources = new Set(['IFCT-2017', 'FSSAI-label', 'USDA', 'healthifyme', 'curated-estimate']);
+const knownConfidences = new Set(['high', 'medium', 'low']);
+
+usedItemTypes.forEach(v => { if (!knownItemTypes.has(v)) sql += `ALTER TYPE public.item_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedStates.forEach(v => { if (!knownStates.has(v)) sql += `ALTER TYPE public.food_state_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedRegions.forEach(v => { if (!knownRegions.has(v)) sql += `ALTER TYPE public.region_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedDietTypes.forEach(v => { if (!knownDietTypes.has(v)) sql += `ALTER TYPE public.diet_type_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedSources.forEach(v => { if (!knownSources.has(v)) sql += `ALTER TYPE public.source_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+usedConfidences.forEach(v => { if (!knownConfidences.has(v)) sql += `ALTER TYPE public.confidence_enum ADD VALUE IF NOT EXISTS '${v}';\n`; });
+sql += `\n`;
+
 // 1. Insert Categories
 sql += `-- =================== FOOD CATEGORIES ===================\n`;
 foodCategories.forEach(cat => {

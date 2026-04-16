@@ -86,6 +86,22 @@ sql += `-- =================== FOOD CATEGORIES ===================\n`;
 foodCategories.forEach(cat => {
   sql += `INSERT INTO public.food_categories (id, label) VALUES (${escapeSql(cat.id)}, ${escapeSql(cat.label)}) ON CONFLICT (id) DO NOTHING;\n`;
 });
+
+// 1b. Dynamically collect ALL category IDs used by foods and insert any missing ones
+const knownCatIds = new Set(foodCategories.map(c => c.id));
+const missingCats = new Set();
+indianFoods.forEach(food => {
+  if (food.category && !knownCatIds.has(food.category)) {
+    missingCats.add(food.category);
+  }
+});
+if (missingCats.size > 0) {
+  sql += `\n-- =================== DYNAMIC CATEGORIES (from food items) ===================\n`;
+  missingCats.forEach(catId => {
+    const label = catId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    sql += `INSERT INTO public.food_categories (id, label) VALUES (${escapeSql(catId)}, ${escapeSql(label)}) ON CONFLICT (id) DO NOTHING;\n`;
+  });
+}
 sql += `\n`;
 
 // 2. Insert Standard Servings

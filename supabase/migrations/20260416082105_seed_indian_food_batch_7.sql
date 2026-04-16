@@ -25,6 +25,9 @@ INSERT INTO public.food_categories (id, label) VALUES ('millet', 'Millets & Anci
 INSERT INTO public.food_categories (id, label) VALUES ('sprout-soy', 'Sprouts & Plant Protein') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.food_categories (id, label) VALUES ('fasting-food', 'Fasting & Vrat Foods') ON CONFLICT (id) DO NOTHING;
 
+-- =================== DYNAMIC CATEGORIES (from food items) ===================
+INSERT INTO public.food_categories (id, label) VALUES ('curry', 'Curry') ON CONFLICT (id) DO NOTHING;
+
 -- =================== STANDARD SERVINGS ===================
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('roti', '1 roti/chapati', 35, 'Roti, chapati, phulka') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('paratha', '1 paratha', 60, 'Aloo/gobi/plain paratha') ON CONFLICT (id) DO NOTHING;

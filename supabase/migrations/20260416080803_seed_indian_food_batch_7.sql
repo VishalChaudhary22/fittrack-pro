@@ -165,6 +165,64 @@ INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('fish-curry', 'fish-curry (auto)', 50, 'Auto-extracted') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pongal', 'pongal (auto)', 50, 'Auto-extracted') ON CONFLICT (id) DO NOTHING;
 
+-- =================== DYNAMIC SERVING IDS (from food items) ===================
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('can-half', 'Half can', 200, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar', '1 bar', 67, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('portion', '1 medium portion', 117, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-medium', '1 medium cup (500ml)', 500, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('box', '1 meal box', 500, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('sub-6inch', '1 6-inch sub', 235, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('sub-6inch', '1 6-inch sub', 225, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('kulhad', '1 regular kulhad (200ml)', 200, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('tall', '1 Tall (354ml)', 350, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('regular', '1 Regular Cup (350ml)', 350, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pint', '1 Pint (330ml)', 330, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('peg-small', '1 Small Peg (30ml)', 30, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('wrap', '1 wrap', 200, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bowl-large', '1 large bowl', 500, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('link', '1 sausage link', 85, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('tbsp-1', '1 Tbsp', 15, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (50g)', 50, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (67g)', 67, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (100g)', 100, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (40g)', 40, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (60g)', 60, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (38g)', 38, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-1', '1 Bar (65g)', 65, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-half', '1/2 cup (dry)', 40, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pouch-1', '1 Small Pouch (40g dry)', 40, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bowl-1', '1 Bowl (30g)', 30, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bowl-1', '1 Bowl (50g)', 50, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bowl-1', '1 Bowl (40g)', 40, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Pack (250ml)', 250, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Bottle (250ml)', 250, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Bottle (200ml)', 200, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('slice-1', '1 Slice (25g)', 25, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('slice-1', '1 Slice (~30g)', 30, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('tbsp-1', '1 Tbsp (15g)', 15, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cookie-1', '1 Cookie (25g)', 25, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Pack (40g)', 40, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bar-mini', '1 Mini Bar (27g)', 27, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-90', '1 Cup (90g)', 90, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-85', '1 Cup (85g)', 85, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('bottle', '1 Bottle (200ml)', 200, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-150', '1 Cup (150g)', 150, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-100', '1 Cup (100g)', 100, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cup-100', 'Small Bowl (100g)', 100, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cookie-1', '1 Cookie (60g)', 60, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('cookie-1', '1 Cookie (50g)', 50, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Pack (60g)', 60, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-1', '1 Pack (28g)', 28, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('biscuit-3', '3 Biscuits (~15g)', 15, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('biscuit-2', '2 Biscuits (~20g)', 20, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('biscuit-4', '4 Biscuits (~20g)', 20, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('biscuit-2', '2 Biscuits (~25g)', 25, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-70', '1 Single Pack (70g)', 70, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-70', '1 Pack (70g)', 70, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('pack-75', '1 Pack (75g)', 75, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('half-pack', 'Half Pouch (150g)', 150, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES ('half-pack', 'Half Pouch (~142g)', 142, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;
+
 -- =================== CORE FOOD DATA ===================
 
 INSERT INTO public.foods (

@@ -52,6 +52,26 @@ sql += `-- =================== STANDARD SERVINGS ===================\n`;
 servingTypes.forEach(srv => {
   sql += `INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES (${escapeSql(srv.id)}, ${escapeSql(srv.label)}, ${srv.defaultGrams}, ${escapeSql(srv.usedFor)}) ON CONFLICT (id) DO NOTHING;\n`;
 });
+
+// 2b. Dynamically collect ALL serving IDs used by foods and insert any missing ones
+const knownServingIds = new Set(servingTypes.map(s => s.id));
+const foodServingIds = new Set();
+indianFoods.forEach(food => {
+  if (food.servings) {
+    food.servings.forEach(srv => {
+      if (!knownServingIds.has(srv.id)) {
+        foodServingIds.add(JSON.stringify({ id: srv.id, label: srv.label, grams: srv.grams }));
+      }
+    });
+  }
+});
+if (foodServingIds.size > 0) {
+  sql += `\n-- =================== DYNAMIC SERVING IDS (from food items) ===================\n`;
+  foodServingIds.forEach(raw => {
+    const srv = JSON.parse(raw);
+    sql += `INSERT INTO public.standard_servings (id, label, default_grams, used_for) VALUES (${escapeSql(srv.id)}, ${escapeSql(srv.label)}, ${srv.grams}, 'Auto-extracted from food item') ON CONFLICT (id) DO NOTHING;\n`;
+  });
+}
 sql += `\n`;
 
 // 3. Insert Foods

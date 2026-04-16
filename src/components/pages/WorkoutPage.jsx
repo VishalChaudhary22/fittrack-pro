@@ -388,32 +388,28 @@ function ExerciseSwapModal({ exerciseName, onSwap, onClose }) {
         position: 'fixed', inset: 0, zIndex: 500,
         background: 'var(--glass-bg-heavy, rgba(0,0,0,0.7))',
         backdropFilter: 'var(--glass-blur-sm, blur(8px))',
-        display: 'flex', alignItems: 'flex-end',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
       }}
       onClick={onClose}
     >
       <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0.8; }
-          to   { transform: translateY(0); opacity: 1; }
+        @keyframes popIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to   { transform: scale(1); opacity: 1; }
         }
       `}</style>
       <div
         style={{
-          width: '100%',
+          width: '100%', maxWidth: '400px',
           background: 'var(--surface-container-low)',
-          borderRadius: '24px 24px 0 0',
-          padding: '20px 20px 32px',
-          maxHeight: '60vh', overflowY: 'auto',
-          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          borderRadius: '24px',
+          padding: '24px',
+          maxHeight: '80vh', overflowY: 'auto',
+          animation: 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: 'var(--shadow-ambient)',
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{
-          width: 40, height: 4,
-          background: 'var(--surface-container-highest)',
-          borderRadius: 2, margin: '0 auto 20px',
-        }} />
         <div style={{
           fontFamily: "'Space Grotesk', sans-serif",
           fontSize: 10, fontWeight: 700,
@@ -1036,11 +1032,13 @@ export default function WorkoutPage() {
         onCancel={() => setConfirmFinish(false)}
       />
       {swapTarget && (
-        <ExerciseSwapModal
-          exerciseName={swapTarget.name}
-          onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
-          onClose={() => setSwapTarget(null)}
-        />
+        <Portal>
+          <ExerciseSwapModal
+            exerciseName={swapTarget.name}
+            onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
+            onClose={() => setSwapTarget(null)}
+          />
+        </Portal>
       )}
     </div>
   );

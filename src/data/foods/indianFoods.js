@@ -6533,7 +6533,7 @@ export const indianFoods = [
     estimatedOilG: 20,
     source: 'curated-estimate',
     confidence: 'medium'
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B1 - Peanut Butters (Pass 1)
@@ -7541,7 +7541,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "FSSAI-label",
     "confidence": "high"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B1 - Nut Butters (Pass 2)
@@ -8174,7 +8174,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "medium"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B2 - Protein & Energy Bars
@@ -9108,7 +9108,7 @@ export const indianFoods = [
     "source": "FSSAI-label",
     "confidence": "high",
     "notes": "Imported product. Sweetened with maltitol."
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B3 - Oats, Muesli, Granola
@@ -9835,7 +9835,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "medium"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B4 - RTD Shakes & Bread
@@ -10348,7 +10348,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "medium"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B5 - Snacks & Trail Mixes
@@ -10883,7 +10883,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "high"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B6 - Greek Yogurt & Dairy
@@ -11381,7 +11381,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "medium"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B7 - Cookies, Chips, Biscuits
@@ -11954,7 +11954,7 @@ export const indianFoods = [
     "estimatedOilG": 0,
     "source": "curated-estimate",
     "confidence": "high"
-  }
+  },
 
   // ==========================================
   // BRAND FOODS: BATCH B8 - Noodles & RTE

@@ -139,8 +139,10 @@ export default function DietPage() {
   const goalKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
   
   const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
-  const protMultiplier = goal === 'loss' ? 2.2 : goal === 'gain' ? 2.0 : 1.8;
-  const protTarget = goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8);
+  
+  const isHeavyCut = user.workoutDays >= 5 && goal === 'loss';
+  const protMultiplier = isHeavyCut ? 2.0 : 1.8;
+  const protTarget = Math.round(baseWeightForProtein * protMultiplier);
   const carbsTarget = Math.round((goalKcal * (goal === 'loss' ? .38 : .44)) / 4);
   const fatTarget = Math.round((goalKcal * .26) / 9);
   

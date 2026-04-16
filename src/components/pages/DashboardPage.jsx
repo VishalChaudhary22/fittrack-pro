@@ -291,9 +291,12 @@ export default function DashboardPage() {
 
     const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
     
+    const isHeavyCut = user.workoutDays >= 5 && goal === 'loss';
+    const proteinMultiplier = isHeavyCut ? 2.0 : 1.8;
+
     return {
       goalKcal: Math.round(k),
-      protTarget: goal === 'loss' ? Math.round(baseWeightForProtein * 2.2) : goal === 'gain' ? Math.round(user.weight * 2.0) : Math.round(user.weight * 1.8),
+      protTarget: Math.round(baseWeightForProtein * proteinMultiplier),
       carbTarget: Math.round((k * (goal === 'loss' ? .38 : .44)) / 4),
       fatTarget: Math.round((k * .26) / 9),
     };
@@ -318,7 +321,7 @@ export default function DashboardPage() {
     addToast('Weight goal updated!', 'success');
   };
 
-  const wtItems = isImpWeight ? mkWtItemsImperial(66, 440, 1) : mkWtItems(30, 200, 0.5);
+  const wtItems = isImpWeight ? mkWtItemsImperial(66, 440, 1) : mkWtItems(30, 200, 0.1);
   const wkItems = mkIntItems(1, 52);
 
   if (!loaded) return (

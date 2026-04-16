@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X, Check, Play, Pause, Square, RefreshCcw } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
@@ -872,26 +872,29 @@ export default function WorkoutPage() {
               {/* Exercise Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
                 <div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {ex.sv || ex.name}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, flex: 1, lineHeight: 1.1 }}>
+                      {ex.sv || ex.name}
+                    </h3>
                     {(EXERCISE_ALTERNATIVES[ex.name] !== undefined && !ex.variants) && (
                       <button
                         onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.name })}
                         aria-label={`Swap ${ex.name}`}
                         style={{
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          padding: '6px', borderRadius: 8,
-                          color: 'var(--on-surface-dim)',
-                          display: 'flex', alignItems: 'center',
-                          transition: 'color 0.15s',
+                          background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
+                          cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
+                          color: 'var(--on-surface-variant)',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                          transition: 'all 0.2s', flexShrink: 0
                         }}
-                        onMouseOver={e => e.currentTarget.style.color = 'var(--primary)'}
-                        onMouseOut={e => e.currentTarget.style.color = 'var(--on-surface-dim)'}
+                        onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
+                        onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
                       >
-                        <RefreshCcw size={15} />
+                        <ArrowRightLeft size={16} />
+                        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
                       </button>
                     )}
-                  </h3>
+                  </div>
                   {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 0, marginBottom: 4, fontSize: 11, padding: '2px 8px', width: 'auto', borderRadius: 6, background: 'var(--surface-container)', border: 'none' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
                   <p className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     {ex.muscle || 'Full Body'} • {focusType}

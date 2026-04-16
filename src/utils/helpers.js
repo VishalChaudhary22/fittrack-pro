@@ -13,7 +13,7 @@ export const wkLbl = d => {
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // Weight / height picker item generators
-export const mkWtItems = (lo = 30, hi = 200, step = 0.5) => {
+export const mkWtItems = (lo = 30, hi = 200, step = 0.1) => {
   const a = [];
   for (let v = lo; v <= hi; v = parseFloat((v + step).toFixed(1))) a.push(v);
   return a;

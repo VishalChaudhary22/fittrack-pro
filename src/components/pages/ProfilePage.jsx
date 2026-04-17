@@ -182,10 +182,7 @@ export default function ProfilePage() {
   const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
   const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
 
-  // Body Fat derived
-  const userBFLog = useMemo(() => bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date)), [bodyFatLog, user?.id]);
-  const latestBF = userBFLog[0] || null;
-  const bfCat = latestBF ? getBFCategory(latestBF.percentage, user?.gender) : null;
+
 
   // Muscle Mastery Data
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);

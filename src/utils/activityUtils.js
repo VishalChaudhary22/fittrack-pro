@@ -22,7 +22,7 @@ export const getDisplayStepLog = (stepLogs, date) => {
   const todayLogs = stepLogs.filter(l => l.date === date);
   if (todayLogs.length === 0) return null;
   // Sort by source priority, then pick the first (highest priority)
-  return todayLogs.sort((a, b) => 
+  return todayLogs.sort((a, b) =>
     SOURCE_PRIORITY.indexOf(a.source) - SOURCE_PRIORITY.indexOf(b.source)
   )[0];
 };

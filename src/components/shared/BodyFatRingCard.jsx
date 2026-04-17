@@ -300,7 +300,7 @@ export default function BodyFatRingCard() {
                   background: 'var(--surface-container-lowest)', borderRadius: 10,
                 }}>
                   <Activity size={20} color="var(--primary)" style={{ opacity: 0.6, marginBottom: 6 }} />
-                  <div style={{ fontSize: 11 }}>Log 2+ readings to see your trend</div>
+                  <div style={{ fontSize: 11 }}>Log for at least two days to see your trend</div>
                 </div>
               )}
 

@@ -224,7 +224,7 @@ Rebuilt around the Kinetic Elite aesthetic. Key sections:
 - **Welcome header**: editorial-style headline in Space Grotesk with ember text-gradient on the first name. Greeting is now user-aware: first-time accounts see `"WELCOME, [NAME]"` once, then subsequent visits show `"WELCOME BACK, [NAME]"`. Theme toggle pill lives here. Includes a dynamic cycle-phase badge for female athletes and celebratory banners on Indian holidays / festivals.
 - **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet only if no completed check-in exists for today. Dashboard waits for `dataLoaded` before deciding whether to re-open the questionnaire, preventing false re-prompts during auth/cloud rehydration. Readiness card uses the saved subjective score when present and falls back to the objective training-only score otherwise.
 - **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. BMI card has a concentric CSS ring with ember glow + per-range insight text.
-- **Sessions / Streak**: 2-col glass card row with current-week session count, all-time total, and current/longest streak.
+- **Sessions / Streak**: 2-col layout converted into a 4-item responsive grid (`var(--surface-container-lowest)` tiles). Displays current-week session count, all-time total, and current/longest streak with a Zap icon for active streaks.
 - **Placeholder activity cards**: Steps, Calories Burned — show `—` with a `PulseIndicator + "Coming Soon"` label. Water intake is wired to the global hydration tracker.
 - **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
 - **Weight Trend chart**: `AreaChart` (Recharts) with `GlassTooltip` and an optional goal reference line.
@@ -780,6 +780,18 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Volume & Programming Tweaks:** Reduced default working sets across all predefined splits from 4 down to 3. Injected isolated 2-set finishers (Bicep/Tricep) into `mkUpperA` / `mkUpperB` factory functions.
 - **Granular Weight Steps:** Redefined `mkWtItems` default step to `0.1kg` allowing micro-tracking of body weight across Dashboard and Profile pickers. Barbell and dumbbell entries in `/workout` explicitly retain standard `0.5kg` / integer increments.
 - **Dynamic Protein Scaling:** Re-calibrated `protTarget` rules synchronously in `DashboardPage` and `DietPage`. Now securely defaults to `1.8g/kg`, but selectively bumps to `2.0g/kg` for athletes on an active cut (`loss`) while training `5+` days heavily per week.
+
+### Body Fat Tracking Redesign & Sync Fix (Applied 2026-04-17)
+**Symptoms:** 
+- The Body Composition card's original SVG "ring" visual was not accurately conveying trend information over time. 
+- The UI occupied too much vertical real estate alongside the Weight Trend card natively, and the previous/latest trend logic caused screen flickering. 
+- Fast cloud refreshes overwrote unsynced local body fat entries before Supabase UPSERTs finalized, causing dropped entries.
+
+**Fixes Applied:**
+- **UI/UX Overhaul (`BodyFatRingCard.jsx`)**: Ripped out the circle SVG and replaced it with a `Recharts` Area chart that perfectly mimics the app's Weight Trend styling (ember-gradient fill, dash-array dashed reference lines for Goals). 
+- **Layout Tweaks**: Shrunk the overarching weight-goal column by 25% to optimize card symmetry. Decoupled the "Log Body Fat" button from its full-width treatment—redesigning it as an isolated, compact pill strictly matching the dashboard header's `+ Log Weight` visual signature (padding: 7px 13px, border-radius: 100px).
+- **Data Display**: Refactored the stat row above the chart to simultaneously inline Current %, Previous %, and Target Goal %, rendering them instantly stable across component mounts. Null states instruct the user to "Log for at least two days to see your trend," acknowledging the system's strict 1-log-per-day restriction.
+- **Cloud Sync Loss Bug (`AppContext.jsx`)**: Restructured `.loadCloudData` to stop natively overwriting the state with raw `cloudBF`. Integrated an ID-mapped merger function alongside a fresh `bodyFatLogRef` hook to deterministically merge fast-path local unsynced entries against the backend row load. Eliminates the data disappearing act previously observed midway through logging a new state update.
 
 ---
 

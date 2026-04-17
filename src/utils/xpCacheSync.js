@@ -15,6 +15,7 @@ export const getCurrentMonth = () => {
  * then upsert into monthly_xp_cache.
  *
  * Called after every workout finish. Non-blocking (fire-and-forget).
+ * Keeps the cache warm so future leaderboard fetches are faster.
  *
  * @param {{ workoutLogs, splits, user }} appState
  * @returns {Promise<void>}
@@ -65,67 +66,74 @@ export const syncUserXPToCache = async ({ workoutLogs, splits, user }) => {
 };
 
 /**
- * Fetch the leaderboard by merging ALL registered users with their cached XP.
+ * Fetch the leaderboard by computing XP from actual workout_logs in Supabase.
  *
- * Strategy:
- * 1. Fetch every row from `user_profiles` (the source of truth for who exists)
- * 2. Fetch this month's `monthly_xp_cache` entries
- * 3. Merge: users with cache entries get their XP; users without get 0 XP
+ * Architecture:
+ * 1. Fetch ALL registered users from `user_profiles`
+ * 2. Fetch ALL `workout_logs` for the current month (RLS allows public read)
+ * 3. Compute XP for each user client-side using `calcAllMuscleXP`
  *
- * This guarantees every registered user appears on every user's leaderboard.
+ * This is the source of truth — every user's real XP is computed from their
+ * actual workout data in the cloud DB. No cache dependency. If User A logs a
+ * workout, User B sees the updated XP immediately on their next page load.
  *
+ * @param {Array} splits - the splits array (needed for exercise→muscle mapping)
  * @returns {Promise<Array>}
  */
-export const fetchLeaderboard = async () => {
-  const month = getCurrentMonth();
-
+export const fetchLeaderboard = async (splits) => {
   // 1. Fetch all registered users
   const { data: users, error: usersErr } = await supabase
     .from('user_profiles')
     .select('id, name, avatar');
 
   if (usersErr || !users) {
-    console.warn('[XPCache] Failed to fetch user_profiles:', usersErr?.message);
+    console.warn('[Leaderboard] Failed to fetch user_profiles:', usersErr?.message);
     return [];
   }
 
-  // 2. Fetch this month's XP cache entries
-  const { data: xpRows, error: xpErr } = await supabase
-    .from('monthly_xp_cache')
-    .select('*')
-    .eq('month', month);
+  // 2. Fetch this month's workout_logs for ALL users
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+  const monthStart = startOfMonth.toISOString().split('T')[0]; // 'YYYY-MM-01'
 
-  if (xpErr) console.warn('[XPCache] Failed to fetch monthly_xp_cache:', xpErr.message);
+  const { data: allLogs, error: logsErr } = await supabase
+    .from('workout_logs')
+    .select('id, user_id, split_id, day_id, day_name, date, exercises, duration_minutes')
+    .gte('date', monthStart);
 
-  // Index cache entries by user_id for O(1) lookup
-  const xpMap = new Map();
-  if (xpRows) {
-    for (const row of xpRows) {
-      xpMap.set(row.user_id, row);
-    }
+  if (logsErr) {
+    console.warn('[Leaderboard] Failed to fetch workout_logs:', logsErr.message);
   }
 
-  const ZERO_MUSCLES = {
-    chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0, traps: 0,
-    quads: 0, hamstrings: 0, glutes: 0, calves: 0, abs: 0, forearms: 0,
-  };
+  const logs = allLogs || [];
+  console.log(`[Leaderboard] Fetched ${users.length} users, ${logs.length} workout logs this month`);
 
-  // 3. Merge: every registered user gets a leaderboard entry
+  // 3. Compute XP for each user from their actual cloud workout data
   return users.map(u => {
-    const cached = xpMap.get(u.id);
+    // Map Supabase rows to the format calcAllMuscleXP expects
+    const userLogs = logs
+      .filter(l => l.user_id === u.id)
+      .map(l => ({
+        ...l,
+        userId: l.user_id,
+        splitId: l.split_id,
+        dayId: l.day_id,
+        dayName: l.day_name,
+        durationMinutes: l.duration_minutes,
+      }));
+
+    const muscleXP = calcAllMuscleXP(userLogs, splits, u.id);
+    const overall = getOverallRank(muscleXP);
+
     return {
       id: u.id,
-      name: cached?.display_name || u.name || 'Athlete',
-      initials: cached?.avatar || u.avatar || (u.name || 'U').slice(0, 2).toUpperCase(),
-      tier: cached?.tier_name || 'Untrained',
-      totalXP: cached?.total_xp || 0,
+      name: u.name || 'Athlete',
+      initials: u.avatar || (u.name || 'U').slice(0, 2).toUpperCase(),
+      tier: overall.name,
+      totalXP: overall.totalXP,
       color: '#FFB59B',
-      muscleXP: cached ? {
-        chest: cached.chest_xp, back: cached.back_xp, shoulders: cached.shoulders_xp,
-        biceps: cached.biceps_xp, triceps: cached.triceps_xp, traps: cached.traps_xp,
-        quads: cached.quads_xp, hamstrings: cached.hamstrings_xp, glutes: cached.glutes_xp,
-        calves: cached.calves_xp, abs: cached.abs_xp, forearms: cached.forearms_xp,
-      } : { ...ZERO_MUSCLES },
+      muscleXP,
     };
   }).sort((a, b) => b.totalXP - a.totalXP);
 };

@@ -107,17 +107,16 @@ export default function MuscleMapPage() {
     setLeaderboardLoading(true);
     setLeaderboardError(null);
 
-    // First: ensure our own XP is up to date in the cache
-    await syncUserXPToCache({ workoutLogs, splits, user }).catch(e => console.warn(e));
-
-    // Then: fetch the full leaderboard
-    const data = await fetchLeaderboard();
-    // An empty array is valid during first boot (cache not yet populated)
+    // Fetch the leaderboard — computes XP from actual workout_logs for all users
+    const data = await fetchLeaderboard(splits);
     setLeaderboardData(data);
     if (data.length === 0) {
-      console.log('[Olympus] No cached XP entries yet — only the current user will show.');
+      console.log('[Olympus] No users found.');
     }
     setLeaderboardLoading(false);
+
+    // Background: keep our own cache row warm (for realtime subscription optimisation)
+    syncUserXPToCache({ workoutLogs, splits, user }).catch(console.warn);
   };
 
   useEffect(() => {
@@ -125,7 +124,7 @@ export default function MuscleMapPage() {
     loadLeaderboard();
   }, [activeTab]); // only re-run when tab switches to leaderboard
 
-  // Realtime subscription
+  // Realtime subscription — refresh when ANY user logs a workout
   useEffect(() => {
     if (activeTab !== 'leaderboard') return;
 
@@ -134,10 +133,16 @@ export default function MuscleMapPage() {
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
+        table: 'workout_logs',
+      }, () => {
+        setTimeout(() => loadLeaderboard(), 2000);
+      })
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
         table: 'monthly_xp_cache',
       }, () => {
-        const timer = setTimeout(() => loadLeaderboard(), 2000);
-        return () => clearTimeout(timer);
+        setTimeout(() => loadLeaderboard(), 2000);
       })
       .on('postgres_changes', {
         event: 'UPDATE',

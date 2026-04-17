@@ -55,7 +55,7 @@ const CONSTANTS = {
 };
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   
   const [diet, setDiet] = useState('nonveg');
@@ -137,6 +137,7 @@ export default function DietPage() {
   const goal = deficitInfo.goal;
   const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
   const goalKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+  const latestBF = bodyFatLog?.filter(e => e.userId === user?.id)?.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   
   const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
   
@@ -438,6 +439,7 @@ export default function DietPage() {
           {[{ l: 'Weight', v: user?.weight ? (isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`) : '—', i: Scale },
             { l: 'Height', v: user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`) : '—', i: Ruler },
             { l: 'BMI Score', v: (!bmi || isNaN(bmi) || bmi === 0) ? '—' : bmi, i: Calculator },
+            { l: 'Body Fat', v: latestBF ? `${latestBF.percentage}%` : '—', i: ActivityIcon },
             { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal`, i: Zap },
             { l: 'Activity', v: (user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
             const Icon = s.i;

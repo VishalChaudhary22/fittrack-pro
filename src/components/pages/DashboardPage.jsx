@@ -23,6 +23,7 @@ import ReadinessCheckIn from '../shared/ReadinessCheckIn';
 import { calcWorkoutCalories, calcCardioCalories } from '../../data/metValues';
 import { getStepGoalPercent, formatSteps, getDisplayStepLog, getSourceLabel } from '../../utils/activityUtils';
 import { usePedometer } from '../../hooks/usePedometer';
+import BodyFatRingCard from '../shared/BodyFatRingCard';
 
 const getBMIInsight = (bmi) => {
   if (!bmi) return '';
@@ -439,86 +440,69 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Metabolic Index */}
-          <div className="glass-card" style={{ padding: 24, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', border: 'none' }}>
-            <Activity size={28} style={{ position: 'absolute', top: 16, right: 16, opacity: 0.15, color: 'var(--on-surface)' }} />
-            <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 16 }}>METABOLIC INDEX</div>
-            
-            {bmi && !isNaN(bmi) ? (<>
-              <div style={{ position: 'relative', width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
-                <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi}</span>
-                  <span style={{ fontSize: 10, color: 'var(--primary-container)', marginTop: 4, fontWeight: 700 }}>{bmiCat.label}</span>
+          {/* Metabolic Index & Body Fat Stack */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="glass-card" style={{ padding: 16, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', border: 'none' }}>
+              <Activity size={24} style={{ position: 'absolute', top: 12, right: 12, opacity: 0.15, color: 'var(--on-surface)' }} />
+              <div style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 12 }}>METABOLIC INDEX</div>
+              
+              {Math.round(bmi) && !isNaN(bmi) ? (<>
+                <div style={{ position: 'relative', width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                  <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+                  <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span className="headline-lg" style={{ fontSize: '2rem', color: 'var(--on-surface)' }}>{bmi}</span>
+                  </div>
                 </div>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', textAlign: 'center', padding: '0 8px', lineHeight: 1.4, marginTop: 12, marginBottom: 12 }}>
-                {getBMIInsight(bmi)}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
-                {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
-                  const isActive = bmiCat.label.startsWith(s.l);
-                  return (
-                    <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
-                      <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
-                      <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>) : (
-              <div style={{ fontSize: 12, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '24px 16px' }}>
-                Add weight & height in Profile to see BMI
-              </div>
-            )}
-            {latestBF && (
-              <div style={{ marginTop: 12, padding: '6px 10px', borderRadius: 8, background: 'var(--surface-container-lowest)', border: '1px solid var(--surface-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: bfCat?.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--on-surface)' }}>{latestBF.percentage.toFixed(1)}%</span>
-                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>BF · {bfCat?.label}</span>
-              </div>
-            )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
+                  {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
+                    const isActive = bmiCat.label.startsWith(s.l);
+                    return (
+                      <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
+                        <div style={{ fontSize: 9, fontWeight: 700 }}>{s.l}</div>
+                        <div style={{ fontSize: 8, opacity: 0.7 }}>{s.r}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>) : (
+                <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '16px' }}>
+                  Add weight & height
+                </div>
+              )}
+            </div>
+            
+            <BodyFatRingCard />
           </div>
         </div>
 
-        {/* Sessions + Streak Row (1fr 1fr) */}
-        <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-          {/* Sessions */}
-          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <div>
-                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>Sessions / Week</div>
-                 <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
-               </div>
-               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Flame size={20} color="var(--primary)" /></div>
-             </div>
-             
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <div>
-                 <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>All Time Sessions</div>
-                 <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
-               </div>
-               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trophy size={20} color="var(--on-surface)" /></div>
-             </div>
-          </div>
-
-          {/* Streak */}
-          <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 14, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}><Flame size={24} color="var(--primary)" /></div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', gap: 20, alignItems: 'baseline', marginBottom: 6 }}>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
-                  <div className="headline-lg" style={{ color: 'var(--primary)' }}>{streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
-                  <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>days</span></div>
-                </div>
-              </div>
-              {streak.current >= 3 && <span className="tag" style={{ fontSize: 10, margin: 0 }}><Zap size={10} /> On Fire!</span>}
+        {/* Combined Sessions + Streak Card */}
+        <div className="glass-card g2" style={{ padding: 20, borderRadius: 16, border: 'none', marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div>
+              <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>Sessions/Wk</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
             </div>
+            <div>
+              <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>All Time</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
+            </div>
+          </div>
+          <div style={{ width: 1, background: 'var(--surface-container-highest)' }} className="hide-on-mobile" />
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)', display: 'flex', alignItems: 'baseline' }}>
+                {streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'baseline' }}>
+                {streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+              </div>
+            </div>
+            {streak.current >= 3 && <div style={{ background: 'rgba(248,95,27,0.1)', color: 'var(--primary)', padding: '6px', borderRadius: '50%' }}><Zap size={16} /></div>}
           </div>
         </div>
 
@@ -683,76 +667,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Body Composition Card */}
-        {latestBF ? (
-          <div className="glass-card bf-card-grid" style={{ padding: 24, borderRadius: 16, marginBottom: 16, display: 'grid', gridTemplateColumns: '1fr 1.6fr 0.9fr', gap: 20, alignItems: 'center' }}>
-            {/* LEFT: Current BF% */}
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--on-surface-variant)', marginBottom: 4 }}>Body Fat</div>
-              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 2.5rem)', color: 'var(--on-surface)', lineHeight: 1, letterSpacing: '-0.04em' }}>
-                {latestBF.percentage.toFixed(1)}<span style={{ fontSize: '1rem', color: 'var(--on-surface-variant)', marginLeft: 2, fontWeight: 700 }}>%</span>
-              </div>
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: bfCat?.color }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: bfCat?.color }}>{bfCat?.label}</span>
-              </div>
-              {bfDelta !== null && (
-                <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: bfDelta < 0 ? '#51CF66' : bfDelta > 0 ? '#FF6B6B' : 'var(--on-surface-dim)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  {bfDelta < 0 ? <TrendingDown size={12} /> : bfDelta > 0 ? <TrendingUp size={12} /> : null}
-                  {bfDelta === 0 ? 'No change' : `${bfDelta > 0 ? '+' : ''}${bfDelta}% vs prev`}
-                </div>
-              )}
-              <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 4 }}>{fmt(latestBF.date)} · {BF_METHODS.find(m => m.id === latestBF.method)?.label || latestBF.method}</div>
-            </div>
 
-            {/* CENTER: Trend mini-chart */}
-            <div className="bf-card-chart">
-              {bfChartData.length >= 1 ? (
-                <ResponsiveContainer width="100%" height={80}>
-                  <AreaChart data={bfChartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="bf-gradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0.35} />
-                        <stop offset="95%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <Tooltip cursor={false} contentStyle={{ background: 'var(--surface-container)', backdropFilter: 'blur(12px)', border: '1px solid var(--surface-container-highest)', borderRadius: 10, fontSize: 11, color: 'var(--on-surface)', fontWeight: 700, boxShadow: 'var(--elevation-2)' }} formatter={(val) => [`${val}%`, 'Body Fat']} />
-                    {bfGoal && <ReferenceLine y={bfGoal} stroke="var(--primary)" strokeDasharray="4 4" label={{ value: `Goal ${bfGoal}%`, fill: 'var(--primary)', fontSize: 9, position: 'insideTopRight' }} />}
-                    <Area type="monotone" dataKey="pct" stroke={bfCat?.color || 'var(--primary-container)'} strokeWidth={2} fill="url(#bf-gradient)" dot={{ fill: bfCat?.color || 'var(--primary)', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: bfCat?.color || 'var(--primary)', strokeWidth: 0 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--on-surface-dim)' }}>Log a reading to see your trend</div>
-              )}
-            </div>
-
-            {/* RIGHT: Goal */}
-            <div style={{ textAlign: 'right' }}>
-              {bfGoal ? (<>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Goal</div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 22, color: 'var(--primary)', lineHeight: 1 }}>{bfGoal}%</div>
-                <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 6 }}>
-                  {latestBF.percentage > bfGoal
-                    ? <span style={{ color: '#51CF66', fontWeight: 700 }}>{(latestBF.percentage - bfGoal).toFixed(1)}% to go</span>
-                    : <span style={{ color: '#51CF66', fontWeight: 700 }}>✓ Goal reached!</span>}
-                </div>
-                <div style={{ marginTop: 10, height: 4, borderRadius: 2, background: 'var(--surface-container-highest)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${bfCat?.color || 'var(--primary)'}, var(--primary))`, width: `${Math.min(100, Math.max(0, latestBF.percentage <= bfGoal ? 100 : ((userBFLog[userBFLog.length - 1]?.percentage - latestBF.percentage) / (userBFLog[userBFLog.length - 1]?.percentage - bfGoal)) * 100))}%`, transition: 'width .3s var(--ease-smooth)' }} />
-                </div>
-              </>) : (
-                <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontStyle: 'italic', lineHeight: 1.5 }}>Set a goal on your profile</div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="glass-card" style={{ padding: '20px 24px', borderRadius: 16, marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Body Fat %</div>
-              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', lineHeight: 1.5 }}>Track your body composition journey.<br />Log your first reading from an InBody,<br />DEXA, or smart scale scan.</div>
-            </div>
-            <button className="btn-p" onClick={() => navigate('/profile')} style={{ flexShrink: 0, padding: '10px 18px', fontSize: 12, borderRadius: 12 }}>Log BF% →</button>
-          </div>
-        )}
 
         {/* Live Suggestion Banner */}
         <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 180, marginBottom: 16 }}>

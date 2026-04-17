@@ -444,4 +444,6 @@ export default function ProfilePage() {
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
     <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
-
+  </>
+  );
+}

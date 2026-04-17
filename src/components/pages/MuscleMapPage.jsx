@@ -158,46 +158,6 @@ export default function MuscleMapPage() {
 
   const overall = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
 
-  const [globalPlayers, setGlobalPlayers] = useState([]);
-
-  useEffect(() => {
-    async function fetchPlayers() {
-      const { data: users, error: usersErr } = await supabase.from('user_profiles').select('id, name, avatar');
-      if (usersErr) console.error('[Olympus] Failed to fetch user_profiles:', usersErr.message);
-      if (!users || users.length === 0) {
-        console.warn('[Olympus] No users returned from user_profiles — check RLS policies');
-        return;
-      }
-      console.log(`[Olympus] Fetched ${users.length} user profiles from Supabase`);
-
-      let allLogs = [];
-      const { data: logs, error: logsErr } = await supabase.from('workout_logs').select('user_id, exercises');
-      if (logsErr) console.error('[Olympus] Failed to fetch workout_logs:', logsErr.message);
-      if (logs) allLogs = logs;
-
-      const players = users.map(u => {
-        if (u.id === user?.id) return null;
-        
-        const uLogs = allLogs.filter(l => l.user_id === u.id);
-        const mxp = calcAllMuscleXP(uLogs, splits, u.id);
-        const uOverall = getOverallRank(mxp);
-
-        return {
-          id: u.id,
-          name: u.name || 'Athlete',
-          isMe: false,
-          totalXP: uOverall.totalXP,
-          tier: uOverall.name,
-          initials: u.avatar || 'U',
-          color: '#343A40',
-          muscleXP: mxp,
-        };
-      }).filter(Boolean);
-
-      setGlobalPlayers(players);
-    }
-    fetchPlayers();
-  }, [user?.id, splits]);
 
   // Build and sort the full leaderboard including the real user and global players
   const fullLeaderboard = useMemo(() => {

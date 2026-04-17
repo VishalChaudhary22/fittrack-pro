@@ -65,50 +65,67 @@ export const syncUserXPToCache = async ({ workoutLogs, splits, user }) => {
 };
 
 /**
- * Fetch the current month's XP leaderboard for all users.
- * Returns an array sorted by total_xp descending.
- * Replaces MOCK_LEADERBOARD in MuscleMapPage.jsx.
+ * Fetch the leaderboard by merging ALL registered users with their cached XP.
+ *
+ * Strategy:
+ * 1. Fetch every row from `user_profiles` (the source of truth for who exists)
+ * 2. Fetch this month's `monthly_xp_cache` entries
+ * 3. Merge: users with cache entries get their XP; users without get 0 XP
+ *
+ * This guarantees every registered user appears on every user's leaderboard.
  *
  * @returns {Promise<Array>}
  */
 export const fetchLeaderboard = async () => {
   const month = getCurrentMonth();
-  const { data, error } = await supabase
+
+  // 1. Fetch all registered users
+  const { data: users, error: usersErr } = await supabase
+    .from('user_profiles')
+    .select('id, name, avatar');
+
+  if (usersErr || !users) {
+    console.warn('[XPCache] Failed to fetch user_profiles:', usersErr?.message);
+    return [];
+  }
+
+  // 2. Fetch this month's XP cache entries
+  const { data: xpRows, error: xpErr } = await supabase
     .from('monthly_xp_cache')
     .select('*')
-    .eq('month', month)
-    .order('total_xp', { ascending: false })
-    .limit(50); // top 50 is more than enough
+    .eq('month', month);
 
-  if (error || !data) {
-    if (error) console.warn('[XPCache] Fetch failed:', error.message);
-    return [];
-  }
-  if (data.length === 0) {
-    console.log('[XPCache] monthly_xp_cache is empty for this month — no cached entries yet.');
-    return [];
+  if (xpErr) console.warn('[XPCache] Failed to fetch monthly_xp_cache:', xpErr.message);
+
+  // Index cache entries by user_id for O(1) lookup
+  const xpMap = new Map();
+  if (xpRows) {
+    for (const row of xpRows) {
+      xpMap.set(row.user_id, row);
+    }
   }
 
-  return data.map(row => ({
-    id: row.user_id,
-    name: row.display_name,
-    initials: row.avatar,
-    tier: row.tier_name,
-    totalXP: row.total_xp,
-    color: '#FFB59B', // will be overridden by tier color in MuscleMapPage
-    muscleXP: {
-      chest: row.chest_xp,
-      back: row.back_xp,
-      shoulders: row.shoulders_xp,
-      biceps: row.biceps_xp,
-      triceps: row.triceps_xp,
-      traps: row.traps_xp,
-      quads: row.quads_xp,
-      hamstrings: row.hamstrings_xp,
-      glutes: row.glutes_xp,
-      calves: row.calves_xp,
-      abs: row.abs_xp,
-      forearms: row.forearms_xp,
-    },
-  }));
+  const ZERO_MUSCLES = {
+    chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0, traps: 0,
+    quads: 0, hamstrings: 0, glutes: 0, calves: 0, abs: 0, forearms: 0,
+  };
+
+  // 3. Merge: every registered user gets a leaderboard entry
+  return users.map(u => {
+    const cached = xpMap.get(u.id);
+    return {
+      id: u.id,
+      name: cached?.display_name || u.name || 'Athlete',
+      initials: cached?.avatar || u.avatar || (u.name || 'U').slice(0, 2).toUpperCase(),
+      tier: cached?.tier_name || 'Untrained',
+      totalXP: cached?.total_xp || 0,
+      color: '#FFB59B',
+      muscleXP: cached ? {
+        chest: cached.chest_xp, back: cached.back_xp, shoulders: cached.shoulders_xp,
+        biceps: cached.biceps_xp, triceps: cached.triceps_xp, traps: cached.traps_xp,
+        quads: cached.quads_xp, hamstrings: cached.hamstrings_xp, glutes: cached.glutes_xp,
+        calves: cached.calves_xp, abs: cached.abs_xp, forearms: cached.forearms_xp,
+      } : { ...ZERO_MUSCLES },
+    };
+  }).sort((a, b) => b.totalXP - a.totalXP);
 };

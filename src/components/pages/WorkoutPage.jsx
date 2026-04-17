@@ -6,6 +6,7 @@ import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '.
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
+import { syncUserXPToCache } from '../../utils/xpCacheSync';
 
 // ─── AUDIO & PERSISTENCE HELPERS ────────────────────────────────────────────────
 let _audioCtx = null;
@@ -888,7 +889,12 @@ export default function WorkoutPage() {
         sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 }))
       })).filter(ex => ex.sets.length > 0),
     };
-    setWorkoutLogs(p => [...p, log]); setDone(log); skipRestTimer();
+    setWorkoutLogs(p => {
+      const newLogs = [...p, log];
+      syncUserXPToCache({ workoutLogs: newLogs, splits, user }).catch(console.warn);
+      return newLogs;
+    }); 
+    setDone(log); skipRestTimer();
     addToast('Workout saved!', 'success');
   };
 
@@ -961,7 +967,11 @@ export default function WorkoutPage() {
             sets: [{ reps: ex.sets || 1, weight: 0 }],
           })),
         };
-        setWorkoutLogs(p => [...p, log]);
+        setWorkoutLogs(p => {
+          const newLogs = [...p, log];
+          syncUserXPToCache({ workoutLogs: newLogs, splits, user }).catch(console.warn);
+          return newLogs;
+        });
         addToast('Yoga session logged! 🧘', 'success');
       };
       return <YogaSessionView day={session.day} onBack={() => { setSession(null); setDone(null); }} onComplete={handleYogaComplete} />;
@@ -1228,7 +1238,7 @@ export default function WorkoutPage() {
             const last = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             return (
               <div key={day.id} className="card stripe" style={{ padding: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9 }}>{day.type}</span>{last && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Last: {fmt(last.date)}</span>}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9, minWidth: 'fit-content' }}>{(day.subtype || day.type).toUpperCase()}</span>{last && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Last: {fmt(last.date)}</span>}</div>
                 <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 8 }}>{day.name}</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {day.exercises.slice(0, 4).map(ex => <div key={ex.id} className="tonal-break" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--on-surface-variant)', padding: '6px 8px', background: 'var(--surface-container-lowest)', borderRadius: 8 }}><span>{ex.name}</span><span style={{ color: 'var(--on-surface-dim)' }}>{ex.sets}×{ex.repsRange}</span></div>)}

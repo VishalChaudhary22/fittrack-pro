@@ -77,8 +77,13 @@ const TIER_STYLES = [
   { name: 'Platinum',   color: '#40E0D0',  bg: 'rgba(64,224,208,.15)' },
   { name: 'Diamond',    color: '#B9F2FF',  bg: 'rgba(185,242,255,.15)' },
   { name: 'Master',     color: '#FF69B4',  bg: 'rgba(255,105,180,.15)' },
-  { name: 'Legend',     color: '#FFD700',  bg: 'linear-gradient(135deg,rgba(255,215,0,.2),rgba(232,84,13,.2))' },
+  { name: 'Legend',     color: '#FFB59B',  bg: 'linear-gradient(135deg,rgba(255,215,0,.2),rgba(232,84,13,.2))' },
 ];
+
+export const getTierColor = (tierName) => {
+  const tier = TIER_STYLES.find(t => t.name === tierName);
+  return tier ? tier.color : '#FFB59B';
+};
 
 const MUSCLE_XPS = [0, 200, 600, 1200, 2000, 3000, 4500, 6500, 9000, 12000, 16000, 22000, 30000, 40000];
 const OVERALL_XPS = [0, 2000, 5000, 10000, 20000, 35000, 50000, 70000, 95000, 125000, 160000, 200000, 250000, 320000];

@@ -46,6 +46,7 @@ const mkUpperB = () => [
 export const INIT_SPLITS = [
   {
     id: 'ppl', name: 'Push Pull Legs', icon: 'Repeat', description: '6 days/week — Push Pull Legs × 2', color: '#E8540D',
+    tier: 'intermediate', isRecommended: true, tierDescription: 'The gold standard for muscle growth. Hits every muscle twice per week while allowing ample recovery. Recommended for athletes with consistent training habits.',
     schedule: ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs', 'Rest'],
     days: [
       { id: 'ppl-pa', name: 'Push Day A', type: 'push', exercises: [{ id: gId(), name: 'Flat Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'Incline Dumbbell Press', sets: 3, repsRange: '10-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'], notes: '' }, { id: gId(), name: 'Overhead Press', sets: 3, repsRange: '8-10', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Lateral Raises', sets: 3, repsRange: '15-20', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Tricep Pushdowns', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Overhead Tricep Extension', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
@@ -59,6 +60,7 @@ export const INIT_SPLITS = [
   },
   {
     id: 'ul4', name: 'Upper Lower (4 Day)', icon: 'Zap', description: '4 days — U L Rest U L Rest Rest', color: '#E8540D',
+    tier: 'beginner', tierDescription: 'Simple and effective. Focuses on foundational movements and prevents overtraining. Great for starting your strength journey.',
     schedule: ['Upper', 'Lower', 'Rest', 'Upper', 'Lower', 'Rest', 'Rest'],
     days: [
       { id: 'ul4-ua', name: 'Upper A', type: 'upper', exercises: mkUpperA() },
@@ -72,19 +74,21 @@ export const INIT_SPLITS = [
   },
   {
     id: 'fb3', name: 'Full Body (3 Day)', icon: 'Target', description: 'Full Body – Rest – Repeat', color: '#E8540D',
+    tier: 'beginner', isRecommended: true, tierDescription: 'The perfect foundation. Hits every muscle group 3x/week with simple exercises. Rest days ensure proper recovery to keep you growing without burning out.',
     schedule: ['Full Body', 'Rest', 'Full Body', 'Rest', 'Full Body', 'Rest', 'Rest'],
     days: [
-      { id: 'fb3-a', name: 'Full Body A', type: 'full', exercises: [{ id: gId(), name: 'Squats', sets: 3, repsRange: '6-8', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Flat Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'Wide Grip Lat Pulldowns', sets: 3, repsRange: '10-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Leg Extension', sets: 3, repsRange: '12-15', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Overhead Press', sets: 3, repsRange: '10-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Biceps Cable Curls', sets: 2, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Single Hand Tricep Pushdowns', sets: 2, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
+      { id: 'fb3-a', name: 'Full Body A', type: 'full', exercises: [{ id: gId(), name: 'Squats', sets: 3, repsRange: '8-12', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Flat Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'Wide Grip Lat Pulldowns', sets: 3, repsRange: '8-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Leg Extension', sets: 3, repsRange: '8-12', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Overhead Press', sets: 3, repsRange: '8-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Biceps Cable Curls', sets: 3, repsRange: '8-12', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Single Hand Tricep Pushdowns', sets: 3, repsRange: '8-12', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
       { id: 'fb3-r1', name: 'Rest Day', type: 'rest', exercises: [] },
-      { id: 'fb3-b', name: 'Full Body B', type: 'full', exercises: [{ id: gId(), name: 'Leg Press', sets: 3, repsRange: '8-12', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '', variants: ['Leg Press', 'Pendulum Squats'] }, { id: gId(), name: 'Incline Dumbbell Press', sets: 3, repsRange: '10-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'], notes: '' }, { id: gId(), name: 'Seated Horizontal Row', sets: 3, repsRange: '10-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Leg Curls', sets: 3, repsRange: '12-15', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: [], notes: '', variants: ['Seated Leg Curls', 'Lying Leg Curls'] }, { id: gId(), name: 'Lateral Raises', sets: 3, repsRange: '15-20', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Hammer Curls', sets: 2, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Single Hand Overhead Tricep Extension', sets: 2, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
+      { id: 'fb3-b', name: 'Full Body B', type: 'full', exercises: [{ id: gId(), name: 'Leg Press', sets: 3, repsRange: '8-12', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '', variants: ['Leg Press', 'Pendulum Squats'] }, { id: gId(), name: 'Incline Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'], notes: '' }, { id: gId(), name: 'Seated Horizontal Row', sets: 3, repsRange: '8-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Leg Curls', sets: 3, repsRange: '8-12', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: [], notes: '', variants: ['Seated Leg Curls', 'Lying Leg Curls'] }, { id: gId(), name: 'Lateral Raises', sets: 3, repsRange: '8-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Hammer Curls', sets: 3, repsRange: '8-12', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Single Hand Overhead Tricep Extension', sets: 3, repsRange: '8-12', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
       { id: 'fb3-r2', name: 'Rest Day', type: 'rest', exercises: [] },
-      { id: 'fb3-c', name: 'Full Body C', type: 'full', exercises: [{ id: gId(), name: 'Romanian Deadlift', sets: 3, repsRange: '10-12', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes', 'back'], notes: '' }, { id: gId(), name: 'Chest Machine Press', sets: 3, repsRange: '10-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'T-Bar Rows', sets: 3, repsRange: '10-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['traps', 'biceps'], notes: '' }, { id: gId(), name: 'Leg Abductor Machine', sets: 3, repsRange: '15-20', muscle: 'Abductors', primaryMuscle: 'glutes', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Rear Delt Flyes', sets: 3, repsRange: '15-20', muscle: 'Rear Delts', primaryMuscle: 'traps', secondaryMuscles: ['shoulders'], notes: '' }, { id: gId(), name: 'Incline Bench Bicep Curls', sets: 2, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Close Grip Lat Pulldowns', sets: 2, repsRange: '12-15', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }] },
+      { id: 'fb3-c', name: 'Full Body C', type: 'full', exercises: [{ id: gId(), name: 'Romanian Deadlift', sets: 3, repsRange: '8-12', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes', 'back'], notes: '' }, { id: gId(), name: 'Chest Machine Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'T-Bar Rows', sets: 3, repsRange: '8-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['traps', 'biceps'], notes: '' }, { id: gId(), name: 'Leg Abductor Machine', sets: 3, repsRange: '8-12', muscle: 'Abductors', primaryMuscle: 'glutes', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Rear Delt Flyes', sets: 3, repsRange: '8-12', muscle: 'Rear Delts', primaryMuscle: 'traps', secondaryMuscles: ['shoulders'], notes: '' }, { id: gId(), name: 'Incline Bench Bicep Curls', sets: 3, repsRange: '8-12', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Close Grip Lat Pulldowns', sets: 3, repsRange: '8-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }] },
       { id: 'fb3-r3', name: 'Rest Day', type: 'rest', exercises: [] },
       { id: 'fb3-r4', name: 'Rest Day', type: 'rest', exercises: [] },
     ]
   },
   {
     id: 'ula', name: 'Upper Lower + Arms', icon: 'Dumbbell', description: 'U L Rest U L Arms Rest', color: '#E8540D',
+    tier: 'intermediate', tierDescription: 'Heavy compound focus on U/L days with a dedicated isolation arm day to bring up lagging body parts.',
     schedule: ['Upper', 'Lower', 'Rest', 'Upper', 'Lower', 'Arms', 'Rest'],
     days: [
       { id: 'ula-ua', name: 'Upper A', type: 'upper', exercises: mkUpperA() },
@@ -92,25 +96,88 @@ export const INIT_SPLITS = [
       { id: 'ula-r1', name: 'Rest Day', type: 'rest', exercises: [] },
       { id: 'ula-ub', name: 'Upper B', type: 'upper', exercises: mkUpperB() },
       { id: 'ula-lb', name: 'Lower B', type: 'lower', exercises: mkLowerB() },
-      { id: 'ula-arms', name: 'Arms Day', type: 'arms', exercises: [{ id: gId(), name: 'Shoulder Press', sets: 3, repsRange: '10-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Lateral Raises', sets: 3, repsRange: '15-20', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Single Hand Tricep Pushdowns', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Single Hand Overhead Tricep Extensions', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Biceps Cable Curls', sets: 3, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Incline Bench Bicep Curls', sets: 3, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: [], notes: '' }] },
+      { id: 'ula-arms', name: 'Arms & Delts', type: 'arms', exercises: [{ id: gId(), name: 'Shoulder Press', sets: 3, repsRange: '10-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Lateral Raises', sets: 3, repsRange: '15-20', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Face Pull', sets: 3, repsRange: '12-15', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['traps'], notes: '' }, { id: gId(), name: 'Cable Fly', sets: 3, repsRange: '12-15', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Single Hand Tricep Pushdowns', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Overhead Triceps Extension', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Biceps Cable Curls', sets: 3, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Incline Bench Bicep Curls', sets: 3, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: [], notes: '' }] },
       { id: 'ula-r2', name: 'Rest Day', type: 'rest', exercises: [] },
     ]
   },
   {
-    id: 'ul6', name: 'Upper Lower (6 Day)', icon: 'Trophy', description: 'U L U L U L Rest — High Frequency', color: '#E8540D',
-    schedule: ['Upper', 'Lower', 'Upper', 'Lower', 'Upper', 'Lower', 'Rest'],
+    id: 'ul6', name: 'Upper Lower (6 Day)', icon: 'Trophy', description: 'Heavy/Hyp/Pump periodization', color: '#E8540D',
+    tier: 'advanced', tierDescription: 'High frequency structure incorporating DUP (Daily Undulating Periodization). Alternates between heavy strength, hypertrophy, and pump days.',
+    schedule: ['Upper Heavy', 'Lower Heavy', 'Upper Hyp', 'Lower Hyp', 'Upper Pump', 'Lower Pump', 'Rest'],
     days: [
-      { id: 'ul6-ua1', name: 'Upper A', type: 'upper', exercises: mkUpperA() },
-      { id: 'ul6-la1', name: 'Lower A', type: 'lower', exercises: mkLowerA() },
-      { id: 'ul6-ub', name: 'Upper B', type: 'upper', exercises: mkUpperB() },
-      { id: 'ul6-lb', name: 'Lower B', type: 'lower', exercises: mkLowerB() },
-      { id: 'ul6-ua2', name: 'Upper A (Repeat)', type: 'upper', exercises: mkUpperA() },
-      { id: 'ul6-la2', name: 'Lower A (Repeat)', type: 'lower', exercises: mkLowerA() },
+      { id: 'ul6-ua1', name: 'Upper Heavy', type: 'upper', subtype: 'Strength', exercises: [{ id: gId(), name: 'Barbell Bench Press', sets: 4, repsRange: '5-8', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'], notes: '' }, { id: gId(), name: 'Bent-Over Barbell Row', sets: 4, repsRange: '5-8', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Standing Barbell Overhead Press', sets: 4, repsRange: '5-8', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Chin-Up', sets: 3, repsRange: '5-8', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps'], notes: '' }] },
+      { id: 'ul6-la1', name: 'Lower Heavy', type: 'lower', subtype: 'Strength', exercises: [{ id: gId(), name: 'Barbell Back Squat', sets: 4, repsRange: '3-6', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Conventional Deadlift', sets: 3, repsRange: '3-6', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['hamstrings', 'glutes', 'traps'], notes: '' }, { id: gId(), name: 'Leg Press', sets: 4, repsRange: '6-8', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }] },
+      { id: 'ul6-ub', name: 'Upper Hypertrophy', type: 'upper', subtype: 'Hypertrophy', exercises: [{ id: gId(), name: 'Flat Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'Incline Dumbbell Press', sets: 3, repsRange: '8-12', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'], notes: '' }, { id: gId(), name: 'Seated Cable Row', sets: 3, repsRange: '8-12', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Lateral Raise', sets: 3, repsRange: '8-12', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }] },
+      { id: 'ul6-lb', name: 'Lower Hypertrophy', type: 'lower', subtype: 'Hypertrophy', exercises: [{ id: gId(), name: 'Romanian Deadlift', sets: 3, repsRange: '8-12', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes', 'back'], notes: '' }, { id: gId(), name: 'Leg Press', sets: 3, repsRange: '8-12', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Leg Curls', sets: 3, repsRange: '8-12', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Barbell Hip Thrust', sets: 3, repsRange: '8-12', muscle: 'Glutes', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'], notes: '' }] },
+      { id: 'ul6-ua2', name: 'Upper Pump', type: 'upper', subtype: 'Volume', exercises: [{ id: gId(), name: 'Pec-Deck Fly', sets: 3, repsRange: '10-15', muscle: 'Chest', primaryMuscle: 'chest', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Lat Pulldown', sets: 3, repsRange: '10-15', muscle: 'Back', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'], notes: '' }, { id: gId(), name: 'Lateral Raise', sets: 3, repsRange: '15-20', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Biceps Cable Curls', sets: 3, repsRange: '10-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Cable Triceps Pushdown', sets: 3, repsRange: '10-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
+      { id: 'ul6-la2', name: 'Lower Pump + Arms', type: 'lower', subtype: 'Volume', exercises: [{ id: gId(), name: 'Leg Extension', sets: 3, repsRange: '15-20', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Leg Curls', sets: 3, repsRange: '15-20', muscle: 'Hamstrings', primaryMuscle: 'hamstrings', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Standing Calf Raise', sets: 3, repsRange: '15-20', muscle: 'Calves', primaryMuscle: 'calves', secondaryMuscles: [], notes: '' }, { id: gId(), name: 'Hammer Curl', sets: 3, repsRange: '12-15', muscle: 'Biceps', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'], notes: '' }, { id: gId(), name: 'Overhead Triceps Extension', sets: 3, repsRange: '12-15', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: [], notes: '' }] },
       { id: 'ul6-r', name: 'Rest Day', type: 'rest', exercises: [] },
     ]
   },
   {
+    id: 'fb6', name: 'Full Body 6-Day', icon: 'Activity', description: 'Advanced full body split 6x/week', color: '#E8540D',
+    tier: 'advanced', isRecommended: true, tierDescription: 'Full body training 6 days/week — each session targets all muscle groups from a different angle. Ideal for advanced athletes wanting maximum frequency.',
+    schedule: ['Full Body Push', 'Full Body Pull', 'Full Body Lower', 'Full Body Push Hyp', 'Full Body Pull Hyp', 'Lower + Arms', 'Rest'],
+    days: [
+      { id: 'fb6-d1', name: 'Day 1 — Heavy Push', type: 'fullbody', subtype: 'Push Emphasis', exercises: [
+        { id: gId(), name: 'Barbell Back Squat', sets: 3, repsRange: '5-8', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'] },
+        { id: gId(), name: 'Barbell Bench Press', sets: 4, repsRange: '6-8', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'] },
+        { id: gId(), name: 'Bent-Over Barbell Row', sets: 3, repsRange: '6-8', primaryMuscle: 'back', secondaryMuscles: ['traps', 'biceps'] },
+        { id: gId(), name: 'Dumbbell Shoulder Press', sets: 3, repsRange: '8-10', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'] },
+        { id: gId(), name: 'Romanian Deadlift', sets: 2, repsRange: '8-10', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes', 'back'] },
+        { id: gId(), name: 'Cable Triceps Pushdown', sets: 3, repsRange: '10-12', primaryMuscle: 'triceps', secondaryMuscles: [] },
+        { id: gId(), name: 'Standing Calf Raise', sets: 3, repsRange: '10-15', primaryMuscle: 'calves', secondaryMuscles: [] },
+      ] },
+      { id: 'fb6-d2', name: 'Day 2 — Heavy Pull', type: 'fullbody', subtype: 'Pull Emphasis', exercises: [
+        { id: gId(), name: 'Conventional Deadlift', sets: 3, repsRange: '3-6', primaryMuscle: 'back', secondaryMuscles: ['hamstrings', 'glutes', 'traps'] },
+        { id: gId(), name: 'Lat Pulldown', sets: 3, repsRange: '6-8', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'] },
+        { id: gId(), name: 'Incline Barbell Bench Press', sets: 3, repsRange: '6-8', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'] },
+        { id: gId(), name: 'Seated Cable Row', sets: 3, repsRange: '8-10', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'] },
+        { id: gId(), name: 'Leg Press', sets: 3, repsRange: '8-10', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'] },
+        { id: gId(), name: 'Barbell Curl', sets: 3, repsRange: '8-12', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'] },
+        { id: gId(), name: 'Seated Calf Raise', sets: 3, repsRange: '10-15', primaryMuscle: 'calves', secondaryMuscles: [] },
+      ] },
+      { id: 'fb6-d3', name: 'Day 3 — Lower Emphasis', type: 'fullbody', subtype: 'Lower Emphasis', exercises: [
+        { id: gId(), name: 'Front Squat', sets: 4, repsRange: '6-8', primaryMuscle: 'quads', secondaryMuscles: ['glutes'] },
+        { id: gId(), name: 'Romanian Deadlift', sets: 3, repsRange: '8-10', primaryMuscle: 'hamstrings', secondaryMuscles: ['glutes', 'back'] },
+        { id: gId(), name: 'Walking Dumbbell Lunge', sets: 3, repsRange: '8-10', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'] },
+        { id: gId(), name: 'Leg Curl', sets: 3, repsRange: '10-12', primaryMuscle: 'hamstrings', secondaryMuscles: [] },
+        { id: gId(), name: 'Standing Barbell Overhead Press', sets: 3, repsRange: '6-8', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'] },
+        { id: gId(), name: 'Chin-Up', sets: 3, repsRange: '8-10', primaryMuscle: 'back', secondaryMuscles: ['biceps'] },
+      ] },
+      { id: 'fb6-d4', name: 'Day 4 — Push Hypertrophy', type: 'fullbody', subtype: 'Push Hypertrophy', exercises: [
+        { id: gId(), name: 'Flat Dumbbell Press', sets: 3, repsRange: '8-10', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'] },
+        { id: gId(), name: 'Incline Dumbbell Press', sets: 3, repsRange: '8-12', primaryMuscle: 'chest', secondaryMuscles: ['shoulders', 'triceps'] },
+        { id: gId(), name: 'Machine Shoulder Press', sets: 3, repsRange: '8-12', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'] },
+        { id: gId(), name: 'Lateral Raise', sets: 3, repsRange: '12-15', primaryMuscle: 'shoulders', secondaryMuscles: [] },
+        { id: gId(), name: 'Pec-Deck Fly', sets: 3, repsRange: '12-15', primaryMuscle: 'chest', secondaryMuscles: [] },
+        { id: gId(), name: 'Overhead Triceps Extension', sets: 3, repsRange: '10-12', primaryMuscle: 'triceps', secondaryMuscles: [] },
+        { id: gId(), name: 'Leg Extension', sets: 3, repsRange: '10-15', primaryMuscle: 'quads', secondaryMuscles: [] },
+      ] },
+      { id: 'fb6-d5', name: 'Day 5 — Pull Hypertrophy', type: 'fullbody', subtype: 'Pull Hypertrophy', exercises: [
+        { id: gId(), name: 'Chest-Supported Row', sets: 3, repsRange: '8-10', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'] },
+        { id: gId(), name: 'Lat Pulldown', sets: 3, repsRange: '8-12', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'] },
+        { id: gId(), name: 'One-Arm Dumbbell Row', sets: 3, repsRange: '8-12', primaryMuscle: 'back', secondaryMuscles: ['biceps', 'traps'] },
+        { id: gId(), name: 'Face Pull', sets: 3, repsRange: '12-15', primaryMuscle: 'shoulders', secondaryMuscles: ['traps'] },
+        { id: gId(), name: 'Hammer Curl', sets: 3, repsRange: '10-12', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'] },
+        { id: gId(), name: 'EZ-Bar Curl', sets: 3, repsRange: '10-12', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'] },
+        { id: gId(), name: 'Barbell Hip Thrust', sets: 3, repsRange: '8-12', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'] },
+      ] },
+      { id: 'fb6-d6', name: 'Day 6 — Lower & Arms', type: 'fullbody', subtype: 'Lower + Arms/Delts', exercises: [
+        { id: gId(), name: 'Barbell Back Squat', sets: 3, repsRange: '6-10', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'] },
+        { id: gId(), name: 'Bulgarian Split Squat', sets: 3, repsRange: '8-12', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'] },
+        { id: gId(), name: 'Leg Curl', sets: 3, repsRange: '10-12', primaryMuscle: 'hamstrings', secondaryMuscles: [] },
+        { id: gId(), name: 'Standing Calf Raise', sets: 3, repsRange: '10-15', primaryMuscle: 'calves', secondaryMuscles: [] },
+        { id: gId(), name: 'Seated Dumbbell Lateral Raise', sets: 3, repsRange: '12-15', primaryMuscle: 'shoulders', secondaryMuscles: [] },
+        { id: gId(), name: 'Cable Triceps Pushdown', sets: 3, repsRange: '10-12', primaryMuscle: 'triceps', secondaryMuscles: [] },
+        { id: gId(), name: 'Alternating Dumbbell Curl', sets: 3, repsRange: '10-12', primaryMuscle: 'biceps', secondaryMuscles: ['forearms'] },
+      ] },
+      { id: 'fb6-r', name: 'Rest Day', type: 'rest', exercises: [] },
+    ]
+  },
+  {
     id: 'home', name: 'Home Workouts', icon: 'Home', description: 'Bodyweight + Yoga — no gym needed', color: '#E8540D',
+    tier: 'specialty', tierDescription: 'Specialty splits designed for home environments, combining bodyweight routines, mobility work, and yoga flows without requiring any gym equipment.',
     schedule: ['Beginner', 'Yoga', 'Intermediate', 'Yoga', 'Beginner', 'Rest', 'Rest'],
     days: [
       { id: 'home-beg', name: 'Beginner Bodyweight', type: 'home', exercises: [{ id: gId(), name: 'Push-ups', sets: 3, repsRange: 'max', muscle: 'Chest/Triceps', primaryMuscle: 'chest', secondaryMuscles: ['triceps', 'shoulders'], notes: '' }, { id: gId(), name: 'Pike Push-ups', sets: 3, repsRange: '10-15', muscle: 'Shoulders', primaryMuscle: 'shoulders', secondaryMuscles: ['triceps'], notes: '' }, { id: gId(), name: 'Tricep Dips (Chair)', sets: 3, repsRange: '10-12', muscle: 'Triceps', primaryMuscle: 'triceps', secondaryMuscles: ['chest', 'shoulders'], notes: '' }, { id: gId(), name: 'Australian Pull-ups', sets: 3, repsRange: '8-12', muscle: 'Back/Biceps', primaryMuscle: 'back', secondaryMuscles: ['biceps'], notes: '' }, { id: gId(), name: 'Bodyweight Squats', sets: 3, repsRange: '20-25', muscle: 'Quads', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Walking Lunges', sets: 3, repsRange: '12 each', muscle: 'Quads/Glutes', primaryMuscle: 'quads', secondaryMuscles: ['glutes', 'hamstrings'], notes: '' }, { id: gId(), name: 'Glute Bridges', sets: 3, repsRange: '15-20', muscle: 'Glutes', primaryMuscle: 'glutes', secondaryMuscles: ['hamstrings'], notes: '' }, { id: gId(), name: 'Plank', sets: 3, repsRange: '30-45s', muscle: 'Core', primaryMuscle: 'abs', secondaryMuscles: ['shoulders'], notes: '' }, { id: gId(), name: 'Mountain Climbers', sets: 3, repsRange: '20 each', muscle: 'Core/Cardio', primaryMuscle: 'abs', secondaryMuscles: [], notes: '' }] },
@@ -122,6 +189,7 @@ export const INIT_SPLITS = [
   },
   {
     id: 'pl', name: 'Powerlifting', icon: 'Award', description: 'Squat · Bench · Deadlift programming', color: '#E8540D',
+    tier: 'specialty', tierDescription: 'Heavy singles, doubles, and triples. Focuses strictly on maximizing the Big 3 lifts for powerlifting competition.',
     comingSoon: true, schedule: [], days: [{ id: 'pl-cs', name: 'Coming Soon', type: 'rest', exercises: [] }]
   },
 ];

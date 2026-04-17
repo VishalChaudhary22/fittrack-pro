@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useEffect, useState, useRef } from 'react';
+import { createContext, useContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
 import { useToast } from '../hooks/useToast';
@@ -9,6 +9,9 @@ import { INIT_SPLITS } from '../data/splits';
 import { supabase } from '../lib/supabaseClient';
 import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, uploadLocalDataToCloud } from '../utils/authMigration';
 import { calcStepsCalories } from '../utils/activityUtils';
+import { syncUserXPToCache } from '../utils/xpCacheSync';
+import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros } from '../utils/adaptiveCalories';
+import { calcBMR, calcTDEE, calcDeficit } from '../utils/calculations';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -339,6 +342,7 @@ export function AppProvider({ children }) {
   const [supplementLog, setSupplementLog] = useLocalStorage('fittrack_supplementLog', []);
   const [supplementConfig, setSupplementConfig] = useLocalStorage('fittrack_supplementConfig', []);
   const [cycleConfig, setCycleConfig] = useLocalStorage('fp_cycle_config', { startDate: '', cycleLength: 28 });
+  const [lastSuggestionDate, setLastSuggestionDate] = useLocalStorage('fittrack_last_suggestion_date', null);
 
   const { theme, toggleTheme, initTheme } = useTheme();
   const { toasts, addToast, removeToast } = useToast();
@@ -638,7 +642,18 @@ export function AppProvider({ children }) {
     }
 
     // Spltis fallback to INIT_SPLITS if none exist
-    setSplits(sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
+    const mappedSplits = sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS;
+    setSplits(mappedSplits);
+
+    // Sync XP to leaderboard cache now that logs are loaded
+    if (userId && wl.length > 0) {
+      setTimeout(() => {
+        const mappedLogs = wl.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes }));
+        // user object is not fully reconstructed here, but we just need id, name, avatar
+        syncUserXPToCache({ workoutLogs: mappedLogs, splits: mappedSplits, user: { id: userId, name: 'Athlete' } }).catch(console.warn);
+      }, 2000);
+    }
+    
     setDataLoaded(true);
   }, [setFoodLog, setReadinessLog]);
 
@@ -721,6 +736,8 @@ export function AppProvider({ children }) {
       avatar: 'avatar', avatarType: 'avatar_type', avatarUrl: 'avatar_url',
       activeSplitId: 'active_split_id', isAdmin: 'is_admin', stepGoal: 'step_goal',
       bodyFatGoal: 'body_fat_goal',
+      customGoalKcal: 'custom_goal_kcal', customProteinG: 'custom_protein_g',
+      lastKcalSuggestionDate: 'last_kcal_suggestion_date',
     };
     const snakeUpdates = {};
     for (const [camel, snake] of Object.entries(keyMap)) {
@@ -774,6 +791,9 @@ export function AppProvider({ children }) {
     isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
     stepGoal: profile.step_goal || 10000,
     bodyFatGoal: profile.body_fat_goal || null,
+    customGoalKcal: profile.custom_goal_kcal || null,
+    customProteinG: profile.custom_protein_g || null,
+    lastKcalSuggestionDate: profile.last_kcal_suggestion_date || null,
   } : null;
 
   // --- Mutator Wrappers for Cloud Sync ---
@@ -960,6 +980,48 @@ export function AppProvider({ children }) {
     setFavoriteIds(prev => prev.includes(foodId) ? prev.filter(id => id !== foodId) : [...prev, foodId]);
   }, [setFavoriteIds]);
 
+  // --- Adaptive Diet Suggestion ---
+  const adaptiveSuggestion = useMemo(() => {
+    if (!user || !healthLogs || healthLogs.length < 5) return null;
+    if (!checkSuggestionCooldown(lastSuggestionDate).canSuggest) return null;
+    const userLogs = healthLogs.filter(l => l.userId === user.id && l.weight);
+    if (!hasSufficientData(userLogs)) return null;
+    const rateData = computeWeeklyRate(userLogs);
+
+    // Determine goal from deficit calculation
+    const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
+    const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
+    const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
+    const goal = deficitInfo.goal;
+    const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
+    const computedKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+    const goalKcal = user.customGoalKcal || computedKcal;
+
+    const scenario = classifyScenario(rateData, {
+      goal,
+      currentWeight: user.weight,
+      goalKcal,
+      gender: user.gender,
+    });
+    return { ...scenario, goalKcal, tdee, goal };
+  }, [user, healthLogs, lastSuggestionDate]);
+
+  const acceptSuggestion = useCallback(async (newKcal, newProtein) => {
+    const today = new Date().toISOString().split('T')[0];
+    await updateProfile({
+      customGoalKcal: newKcal,
+      customProteinG: newProtein || null,
+      lastKcalSuggestionDate: today,
+    });
+    setLastSuggestionDate(today);
+    addToast('Targets updated! 🎯', 'success');
+  }, [updateProfile, setLastSuggestionDate, addToast]);
+
+  const dismissSuggestion = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setLastSuggestionDate(today);
+  }, [setLastSuggestionDate]);
+
   const value = {
     user, authLoading, dataLoaded, updateProfile, logout, session,
     // Provide the Sync wrappers in place of the old setters
@@ -985,6 +1047,8 @@ export function AppProvider({ children }) {
     supplementLog, setSupplementLog,
     supplementConfig, setSupplementConfig,
     cycleConfig, setCycleConfig,
+    // Adaptive Diet
+    adaptiveSuggestion, acceptSuggestion, dismissSuggestion,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

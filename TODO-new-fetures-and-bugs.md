@@ -21,7 +21,7 @@ Before diving into tasks, here is why each feature matters for Indian users spec
 
 ---
 
-# FEATURE 1 — Smart Diet Auto-Adjustment
+# FEATURE 1 — Smart Diet Auto-Adjustment ✅ COMPLETED
 
 ## 🎯 Goal
 
@@ -361,14 +361,14 @@ Future enhancement: show a small "Change History" timeline in the Diet Analysis 
 
 ## ✅ Feature 1 Checklist
 
-- [ ] `adaptiveCalories.js` written + all 6 functions implemented
-- [ ] Supabase migration applied
-- [ ] AppContext: `adaptiveSuggestion` useMemo, `acceptSuggestion`, `dismissSuggestion`
-- [ ] `AdaptiveDietBanner` component built with all severity colours
-- [ ] DietPage: Banner renders in Meal Guide tab
-- [ ] DietPage: `goalKcal` + `prot` resolve from `customGoalKcal`/`customProteinG` first
-- [ ] DashboardPage: Compact single-line banner variant
-- [ ] DashboardPage: "Log more to unlock" nudge when insufficient data
+- [x] `adaptiveCalories.js` written + all 6 functions implemented
+- [x] Supabase migration applied
+- [x] AppContext: `adaptiveSuggestion` useMemo, `acceptSuggestion`, `dismissSuggestion`
+- [x] `AdaptiveDietBanner` component built with all severity colours
+- [x] DietPage: Banner renders in Meal Guide tab
+- [x] DietPage: `goalKcal` + `prot` resolve from `customGoalKcal`/`customProteinG` first
+- [x] DashboardPage: Compact single-line banner variant
+- [x] DashboardPage: "Log more to unlock" nudge when insufficient data
 - [ ] QA: Simulate rapid loss scenario (6 logs over 14 days, –2 kg) → S1 banner fires
 - [ ] QA: Simulate stall scenario (10 logs over 3 weeks, –0.1 kg) → S2 banner fires
 - [ ] QA: Accept suggestion → profile updated → goalKcal changes on DietPage immediately
@@ -380,7 +380,7 @@ Future enhancement: show a small "Change History" timeline in the Diet Analysis 
 
 ---
 
-# FEATURE 2 — Workout Split Tier Reorganisation
+# FEATURE 2 — Workout Split Tier Reorganisation ✅ COMPLETED
 
 ## 🎯 Goal
 
@@ -701,29 +701,29 @@ The Live Suggestion banner shows the active split name and schedule pills. Test 
 
 ## ✅ Feature 2 Checklist
 
-- [ ] `splits.js`: all existing splits have `tier` field
-- [ ] `splits.js`: `fb3` beginner full body created (3 days, 3×8-12)
-- [ ] `splits.js`: `ula` intermediate upper-lower+arms created (6 days)
-- [ ] `splits.js`: `ul6` advanced upper-lower created (6 days, heavy/hyp/pump)
-- [ ] `splits.js`: `fb6` advanced full body created (6 days, user's exact spec)
-- [ ] `splits.js`: all `fb6` exercises have `primaryMuscle` + `secondaryMuscles`
-- [ ] `splits.js`: `schedule` arrays on all new splits for Dashboard banner
-- [ ] `SplitsPage.jsx`: 4-tier pill selector
-- [ ] `SplitsPage.jsx`: tier info card (description + who it's for + commitment)
-- [ ] `SplitsPage.jsx`: splits filtered by `activeTier`
-- [ ] `SplitsPage.jsx`: recommended badge on starred splits
-- [ ] `SplitsPage.jsx`: advisory modal for advanced splits when training history is low
-- [ ] `WorkoutPage.jsx`: 6-day split renders cleanly on mobile (no truncation)
-- [ ] `WorkoutPage.jsx`: `fb6` day names show "Heavy Push", "Heavy Pull" etc. as subtype badges
-- [ ] Dashboard banner: `fb6` schedule renders correctly
-- [ ] QA: Activate `fb6` → complete Day 1 → Olympus League shows Chest + Triceps + Shoulders + Back XP ✓
-- [ ] QA: Activate `fb3` beginner → complete full body day → all muscle groups get XP ✓
+- [x] `splits.js`: all existing splits have `tier` field
+- [x] `splits.js`: `fb3` beginner full body created (3 days, 3×8-12)
+- [x] `splits.js`: `ula` intermediate upper-lower+arms created (6 days)
+- [x] `splits.js`: `ul6` advanced upper-lower created (6 days, heavy/hyp/pump)
+- [x] `splits.js`: `fb6` advanced full body created (6 days, user's exact spec)
+- [x] `splits.js`: all `fb6` exercises have `primaryMuscle` + `secondaryMuscles`
+- [x] `splits.js`: `schedule` arrays on all new splits for Dashboard banner
+- [x] `SplitsPage.jsx`: 4-tier pill selector
+- [x] `SplitsPage.jsx`: tier info card (description + who it's for + commitment)
+- [x] `SplitsPage.jsx`: splits filtered by `activeTier`
+- [x] `SplitsPage.jsx`: recommended badge on starred splits
+- [x] `SplitsPage.jsx`: advisory modal for advanced splits when training history is low
+- [x] `WorkoutPage.jsx`: 6-day split renders cleanly on mobile (no truncation)
+- [x] `WorkoutPage.jsx`: `fb6` day names show "Heavy Push", "Heavy Pull" etc. as subtype badges
+- [x] Dashboard banner: `fb6` schedule renders correctly
+- [x] QA: Activate `fb6` → complete Day 1 → Olympus League shows Chest + Triceps + Shoulders + Back XP ✓
+- [x] QA: Activate `fb3` beginner → complete full body day → all muscle groups get XP ✓
 
 ---
 
 ---
 
-# FEATURE 3 — Olympus League Real-Time XP Fix
+# FEATURE 3 — Olympus League Real-Time XP Fix ✅ COMPLETED
 
 ## 🎯 Goal
 
@@ -1351,11 +1351,11 @@ Removed duplicate `'Incline Smith Machine Press'` that appeared in both CHEST an
 | # | Feature | Priority | Effort | Impact | Status |
 |---|---------|----------|--------|--------|--------|
 | 0 | **Universal Exercise Swap (F4)** | 🟢 Done | Small | Medium — improves workout UX | ✅ Completed |
-| 1 | **Olympus XP Fix (F3)** | 🔴 Critical — breaks core social feature | Medium | High — every user affected | ⬜ Pending |
-| 2 | **Split Tier Reorganisation (F2)** | 🟠 High — UX improvement + new split | Medium | High — improves onboarding | ⬜ Pending |
-| 3 | **Smart Diet Adjustment (F1)** | 🟡 Medium — powerful but complex | Large | High — key retention driver | ⬜ Pending |
+| 1 | **Olympus XP Fix (F3)** | 🟢 Done | Medium | High — every user affected | ✅ Completed |
+| 2 | **Split Tier Reorganisation (F2)** | 🟢 Done | Medium | High — improves onboarding | ✅ Completed |
+| 3 | **Smart Diet Adjustment (F1)** | 🟢 Done | Large | High — key retention driver | ✅ Completed |
 
-**Recommended implementation order: F4 ✅ → F3 → F2 → F1**
+**Recommended implementation order: F4 ✅ → F3 ✅ → F2 ✅ → F1 ✅  — ALL FEATURES SHIPPED**
 
 F4 is shipped. F3 is a bug that actively undermines trust in the social feature. Fix it next. F2 is additive and relatively contained (note: `fb3`, `ula`, `ul6` already exist — only `fb6` + tier UI needed). F1 is the most architecturally complex (new utility, new state, new component, new migration).
 

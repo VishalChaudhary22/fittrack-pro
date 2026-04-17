@@ -6,9 +6,9 @@ import BodyMapSVG from '../shared/BodyMapSVG';
 import AvatarInitials from '../shared/AvatarInitials';
 import ErrorBoundary from '../shared/ErrorBoundary';
 import PlayerDetailModal from '../shared/PlayerDetailModal';
-import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank } from '../../data/muscleData';
+import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank, getTierColor } from '../../data/muscleData';
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
-import { MOCK_LEADERBOARD } from '../../data/leaderboardData';
+import { fetchLeaderboard, syncUserXPToCache } from '../../utils/xpCacheSync';
 import { supabase } from '../../lib/supabaseClient';
 
 // ─── RANK BADGE ──────────────────────────────────────────────────────────────
@@ -99,6 +99,58 @@ export default function MuscleMapPage() {
     setFilterOpen(false); // reset on tab change
   }, [activeTab]);
 
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [leaderboardError, setLeaderboardError] = useState(null);
+
+  const loadLeaderboard = async () => {
+    setLeaderboardLoading(true);
+    setLeaderboardError(null);
+
+    // First: ensure our own XP is up to date in the cache
+    await syncUserXPToCache({ workoutLogs, splits, user }).catch(e => console.warn(e));
+
+    // Then: fetch the full leaderboard
+    const data = await fetchLeaderboard();
+    if (data.length === 0) {
+      setLeaderboardError('Could not load leaderboard. Check your connection.');
+    } else {
+      setLeaderboardData(data);
+    }
+    setLeaderboardLoading(false);
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'leaderboard') return;
+    loadLeaderboard();
+  }, [activeTab]); // only re-run when tab switches to leaderboard
+
+  // Realtime subscription
+  useEffect(() => {
+    if (activeTab !== 'leaderboard') return;
+
+    const channel = supabase
+      .channel('leaderboard-updates')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'monthly_xp_cache',
+      }, () => {
+        const timer = setTimeout(() => loadLeaderboard(), 2000);
+        return () => clearTimeout(timer);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'monthly_xp_cache',
+      }, () => {
+        setTimeout(() => loadLeaderboard(), 2000);
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [activeTab]);
+
   const muscleXP = useMemo(
     () => calcAllMuscleXP(workoutLogs, splits, user?.id),
     [workoutLogs, splits, user?.id]
@@ -149,20 +201,37 @@ export default function MuscleMapPage() {
 
   // Build and sort the full leaderboard including the real user and global players
   const fullLeaderboard = useMemo(() => {
-    const meEntry = {
-      id: user?.id,
-      name: 'You',
-      isMe: true,
-      totalXP: overall.totalXP,
-      tier: overall.name,
-      initials: (user?.name || 'VC').slice(0, 2).toUpperCase(),
-      color: '#FFB59B',  // primary color
-      muscleXP: muscleXP,
-    };
-    return [...MOCK_LEADERBOARD, ...globalPlayers, meEntry]
+    if (leaderboardLoading || leaderboardData.length === 0) {
+      // While loading or empty, show just the current user's data
+      const meEntry = {
+        id: user?.id || 'me',
+        name: 'You',
+        isMe: true,
+        totalXP: overall.totalXP,
+        tier: overall.name,
+        initials: (user?.name || 'ME').slice(0, 2).toUpperCase(),
+        color: '#FFB59B',
+        muscleXP: muscleXP,
+      };
+      return [{ ...meEntry, rank: 1 }];
+    }
+
+    // Map leaderboard data: mark the current user, merge with their live muscleXP
+    const list = leaderboardData.map(player => ({
+      ...player,
+      isMe: player.id === user?.id,
+      // For the current user, always use live computed XP (not the cached snapshot)
+      muscleXP: player.id === user?.id ? muscleXP : player.muscleXP,
+      totalXP: player.id === user?.id ? overall.totalXP : player.totalXP,
+      tier: player.id === user?.id ? overall.name : player.tier,
+      name: player.id === user?.id ? 'You' : player.name,
+      color: getTierColor(player.id === user?.id ? overall.name : player.tier),
+    }));
+
+    return list
       .sort((a, b) => b.totalXP - a.totalXP)
       .map((p, i) => ({ ...p, rank: i + 1 }));
-  }, [overall.totalXP, overall.name, muscleXP, user, globalPlayers]);
+  }, [leaderboardData, leaderboardLoading, overall, muscleXP, user]);
 
   const filteredLeaderboard = useMemo(() => {
     if (muscleFilter === 'all') return fullLeaderboard;
@@ -411,81 +480,116 @@ export default function MuscleMapPage() {
           </div>
         </div>
 
+        {/* LOADING STATE */}
+        {leaderboardLoading && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 16px' }}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} style={{
+                height: 72, borderRadius: 16,
+                background: 'var(--surface-container-low)',
+                animation: 'shimmer 1.5s ease-in-out infinite',
+              }} />
+            ))}
+          </div>
+        )}
+
+        {/* ERROR STATE */}
+        {leaderboardError && !leaderboardLoading && (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--on-surface-variant)', fontSize: 13 }}>
+            <p style={{ marginBottom: 16 }}>{leaderboardError}</p>
+            <button className="btn-g" onClick={() => { setLeaderboardError(null); loadLeaderboard(); }}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* SCROLLABLE RANKED LIST */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filteredLeaderboard.map(player => {
-            const rowXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
-            return (
-            <div key={player.id}
-              onClick={() => setSelectedPlayer(player)}
-              className="glass-card"
-              style={{
-                padding: '12px 16px', borderRadius: 16,
-                display: 'flex', alignItems: 'center', gap: 16,
-                cursor: 'pointer', position: 'relative', overflow: 'hidden',
-              }}
-            >
-              {/* "You" Indicator Border */}
-              {player.isMe && (
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--primary)' }} />
-              )}
-              {player.isMe && (
-                <div style={{ position: 'absolute', right: -20, top: -20, width: 100, height: 100, background: 'var(--primary)', filter: 'blur(40px)', opacity: 0.1, pointerEvents: 'none' }} />
-              )}
-
-              <div style={{
-                width: 24, textAlign: 'center',
-                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
-                fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)'
-              }}>
-                {player.rank}
-              </div>
-
-              <AvatarInitials
-                initials={player.initials}
-                color={player.color}
-                size={40} borderWidth={1}
-              />
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 600,
-                    fontSize: 14, color: 'var(--on-surface)',
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-                  }}>
-                    {player.name}
-                  </div>
+        {!leaderboardLoading && !leaderboardError && (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {filteredLeaderboard.map(player => {
+                const rowXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
+                // Exclude 0 XP users entirely from the ranked list
+                if (rowXP === 0) return null;
+                return (
+                <div key={player.id}
+                  onClick={() => setSelectedPlayer(player)}
+                  className="glass-card"
+                  style={{
+                    padding: '12px 16px', borderRadius: 16,
+                    display: 'flex', alignItems: 'center', gap: 16,
+                    cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                  }}
+                >
+                  {/* "You" Indicator Border */}
                   {player.isMe && (
-                    <span style={{
-                      fontSize: 9, fontWeight: 700, color: 'var(--on-primary)',
-                      backgroundColor: 'var(--primary)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase'
-                    }}>MVP</span>
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--primary)' }} />
                   )}
-                </div>
-                <div style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 11,
-                  color: 'var(--on-surface-variant)', marginTop: 2
-                }}>
-                  {muscleFilter === 'all' ? player.tier : MUSCLE_GROUPS.find(m => m.key === muscleFilter)?.label}
-                </div>
-              </div>
+                  {player.isMe && (
+                    <div style={{ position: 'absolute', right: -20, top: -20, width: 100, height: 100, background: 'var(--primary)', filter: 'blur(40px)', opacity: 0.1, pointerEvents: 'none' }} />
+                  )}
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{
-                  fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
-                  fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface)'
-                }}>
-                  {rowXP >= 1000 ? `${(rowXP / 1000).toFixed(1)}K` : rowXP}
+                  <div style={{
+                    width: 24, textAlign: 'center',
+                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                    fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)'
+                  }}>
+                    {player.rank}
+                  </div>
+
+                  <AvatarInitials
+                    initials={player.initials}
+                    color={player.color}
+                    size={40} borderWidth={1}
+                  />
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{
+                        fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 600,
+                        fontSize: 14, color: 'var(--on-surface)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                      }}>
+                        {player.name}
+                      </div>
+                      {player.isMe && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, color: 'var(--on-primary)',
+                          backgroundColor: 'var(--primary)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase'
+                        }}>MVP</span>
+                      )}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 11,
+                      color: 'var(--on-surface-variant)', marginTop: 2
+                    }}>
+                      {muscleFilter === 'all' ? player.tier : MUSCLE_GROUPS.find(m => m.key === muscleFilter)?.label}
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{
+                      fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                      fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface)'
+                    }}>
+                      {rowXP >= 1000 ? `${(rowXP / 1000).toFixed(1)}K` : rowXP}
+                    </div>
+                    <div style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)', letterSpacing: '.08em' }}>
+                      XP
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: player.isMe ? 'var(--primary)' : 'var(--on-surface-dim)', letterSpacing: '.08em' }}>
-                  XP
-                </div>
-              </div>
+                );
+              })}
             </div>
-            );
-          })}
-        </div>
+            
+            {leaderboardData.length > 0 && (
+              <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--on-surface-dim)', marginTop: 16, paddingBottom: 20 }}>
+                Leaderboard updated · Tap a player to view their muscle breakdown
+              </div>
+            )}
+          </>
+        )}
       </>)}
 
       {/* ═══════════════════════════════════════════════════ */}

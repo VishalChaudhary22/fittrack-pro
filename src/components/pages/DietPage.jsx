@@ -3,6 +3,8 @@ import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, Chevro
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
+import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
+import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
 import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
@@ -55,7 +57,7 @@ const CONSTANTS = {
 };
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   
   const [diet, setDiet] = useState('nonveg');
@@ -136,14 +138,16 @@ export default function DietPage() {
   const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
   const goal = deficitInfo.goal;
   const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
-  const goalKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+  const computedGoalKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+  const goalKcal = user?.customGoalKcal || computedGoalKcal;
+  const isCustomTarget = !!user?.customGoalKcal;
   const latestBF = bodyFatLog?.filter(e => e.userId === user?.id)?.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   
   const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
   
   const isHeavyCut = user.workoutDays >= 5 && goal === 'loss';
   const protMultiplier = isHeavyCut ? 2.0 : 1.8;
-  const protTarget = Math.round(baseWeightForProtein * protMultiplier);
+  const protTarget = user?.customProteinG || Math.round(baseWeightForProtein * protMultiplier);
   const carbsTarget = Math.round((goalKcal * (goal === 'loss' ? .38 : .44)) / 4);
   const fatTarget = Math.round((goalKcal * .26) / 9);
   
@@ -480,7 +484,7 @@ export default function DietPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap', background: 'var(--surface-container-highest)', padding: '8px 16px', borderRadius: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🔥 </span>{goalKcal} kcal</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🔥 </span>{goalKcal} kcal{isCustomTarget ? ' ✦' : ''}</div>
             <span style={{ color: 'var(--outline)' }}>·</span>
             <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>💪 </span>{protTarget}g P</div>
             <span style={{ color: 'var(--outline)' }}>·</span>
@@ -519,6 +523,16 @@ export default function DietPage() {
               TRACK TODAY <ArrowDown size={14} color="var(--primary)" />
             </button>
           </div>
+          {isCustomTarget && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+              <button
+                onClick={() => updateProfile({ customGoalKcal: null, customProteinG: null })}
+                style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface-dim)', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+              >
+                ✦ Custom target active · <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Reset to calculated</span>
+              </button>
+            </div>
+          )}
           </>)}
         </div>
 
@@ -539,6 +553,37 @@ export default function DietPage() {
 
         {activeTab === 'guide' && (
           <div>
+            {/* ADAPTIVE DIET BANNER */}
+            {adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && adaptiveSuggestion.adjustKcal !== 0 && (() => {
+              const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
+              const newMacros = recomputeMacros({
+                goal: adaptiveSuggestion.goal,
+                currentWeight: user.weight,
+                goalWeight: user.weightGoal,
+                newKcal,
+                workoutDays: user.workoutDays,
+              });
+              return (
+                <AdaptiveDietBanner
+                  suggestion={adaptiveSuggestion}
+                  currentKcal={adaptiveSuggestion.goalKcal}
+                  newKcal={newKcal}
+                  newMacros={newMacros}
+                  onAccept={acceptSuggestion}
+                  onDismiss={dismissSuggestion}
+                />
+              );
+            })()}
+            {/* On-track banner */}
+            {adaptiveSuggestion && adaptiveSuggestion.scenario === 'S6' && (
+              <AdaptiveDietBanner
+                suggestion={adaptiveSuggestion}
+                currentKcal={goalKcal}
+                newKcal={goalKcal}
+                onAccept={acceptSuggestion}
+                onDismiss={dismissSuggestion}
+              />
+            )}
             {/* BLUEPRINT HEADER CARD */}
             <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, borderLeft: '4px solid var(--primary)', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>

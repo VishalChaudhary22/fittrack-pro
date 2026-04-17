@@ -1,3 +1,4 @@
+// Deprecated — used only as offline fallback if Supabase fetch fails
 export const MOCK_LEADERBOARD = [
   {
     id: 'marcus_k',

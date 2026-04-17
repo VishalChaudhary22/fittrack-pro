@@ -23,6 +23,8 @@ import { calcWorkoutCalories, calcCardioCalories } from '../../data/metValues';
 import { getStepGoalPercent, formatSteps, getDisplayStepLog, getSourceLabel } from '../../utils/activityUtils';
 import { usePedometer } from '../../hooks/usePedometer';
 import BodyFatRingCard from '../shared/BodyFatRingCard';
+import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
+import { hasSufficientData, computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 
 
 
@@ -93,7 +95,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog } = useApp();
+  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showStepModal, setShowStepModal] = useState(false);
   const [stepInputVal, setStepInputVal] = useState('');
@@ -687,6 +689,43 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* ADAPTIVE DIET — Compact Banner */}
+        {adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && (() => {
+          const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
+          const newMacros = adaptiveSuggestion.adjustKcal !== 0 ? recomputeMacros({
+            goal: adaptiveSuggestion.goal,
+            currentWeight: user.weight,
+            goalWeight: user.weightGoal,
+            newKcal,
+            workoutDays: user.workoutDays,
+          }) : null;
+          return (
+            <AdaptiveDietBanner
+              suggestion={adaptiveSuggestion}
+              currentKcal={adaptiveSuggestion.goalKcal}
+              newKcal={newKcal}
+              newMacros={newMacros}
+              onAccept={acceptSuggestion}
+              onDismiss={dismissSuggestion}
+              compact
+            />
+          );
+        })()}
+        {/* ADAPTIVE DIET — Insufficient Data Nudge */}
+        {(() => {
+          const userHealthLogs = (healthLogs || []).filter(l => l.userId === user?.id && l.weight);
+          const hasStarted = userHealthLogs.length >= 1;
+          const hasSufficient = hasSufficientData(userHealthLogs);
+          if (hasStarted && !hasSufficient) {
+            return (
+              <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '8px 12px', background: 'var(--surface-container-lowest)', borderRadius: 12, marginBottom: 12 }}>
+                💡 Log your weight for 2+ more weeks to unlock personalised calorie adjustments
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* ════════════════════════════════════════════════════════ */}
         {/* NEW DAILY READINESS WIDGET                               */}

@@ -420,69 +420,75 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Metabolic Index & Body Fat Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="glass-card" style={{ padding: 16, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', border: 'none' }}>
-              <Activity size={24} style={{ position: 'absolute', top: 12, right: 12, opacity: 0.15, color: 'var(--on-surface)' }} />
-              <div style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 12 }}>METABOLIC INDEX</div>
-              
-              {Math.round(bmi) && !isNaN(bmi) ? (<>
-                <div style={{ position: 'relative', width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
-                  <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span className="headline-lg" style={{ fontSize: '2rem', color: 'var(--on-surface)' }}>{bmi}</span>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
-                  {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
-                    const isActive = bmiCat.label.startsWith(s.l);
-                    return (
-                      <div key={s.l} style={{ textAlign: 'center', padding: '5px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
-                        <div style={{ fontSize: 9, fontWeight: 700 }}>{s.l}</div>
-                        <div style={{ fontSize: 8, opacity: 0.7 }}>{s.r}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>) : (
-                <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '16px' }}>
-                  Add weight & height
-                </div>
-              )}
-            </div>
+          {/* Metabolic Index */}
+          <div className="glass-card" style={{ padding: 16, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', border: 'none' }}>
+            <Activity size={24} style={{ position: 'absolute', top: 12, right: 12, opacity: 0.15, color: 'var(--on-surface)' }} />
+            <div style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 12 }}>METABOLIC INDEX</div>
             
-            <BodyFatRingCard />
+            {Math.round(bmi) && !isNaN(bmi) ? (<>
+              <div style={{ position: 'relative', width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+                <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi}</span>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
+                {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
+                  const isActive = bmiCat.label.startsWith(s.l);
+                  return (
+                    <div key={s.l} style={{ textAlign: 'center', padding: '6px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
+                      <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>) : (
+              <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '16px' }}>
+                Add weight & height
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Row 2: Body Composition */}
+        <div style={{ marginBottom: 16 }}>
+          <BodyFatRingCard />
+        </div>
+
         {/* Combined Sessions + Streak Card */}
-        <div className="glass-card g2" style={{ padding: 20, borderRadius: 16, border: 'none', marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div>
-              <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>Sessions/Wk</div>
-              <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700 }}>All Time</div>
-              <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
-            </div>
+        <div className="glass-card" style={{ padding: 24, borderRadius: 16, border: 'none', marginBottom: 16 }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 16 }}>
+            TRAINING OVERVIEW
           </div>
-          <div style={{ width: 1, background: 'var(--surface-container-highest)' }} className="hide-on-mobile" />
-          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
-              <div className="headline-lg" style={{ color: 'var(--primary)', display: 'flex', alignItems: 'baseline' }}>
-                {streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+          <div className="g2" style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 24 }}>
+              <div>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>Sessions/Wk</div>
+                <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>All Time</div>
+                <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
-              <div className="headline-lg" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'baseline' }}>
-                {streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+            <div style={{ width: 1, background: 'var(--surface-container-highest)' }} className="hide-on-mobile" />
+            <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
+                <div className="headline-lg" style={{ color: 'var(--primary)', display: 'flex', alignItems: 'baseline' }}>
+                  {streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+                </div>
               </div>
+              <div>
+                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
+                <div className="headline-lg" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'baseline' }}>
+                  {streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
+                </div>
+              </div>
+              {streak.current >= 3 && <div style={{ background: 'rgba(248,95,27,0.1)', color: 'var(--primary)', padding: '6px', borderRadius: '50%' }}><Zap size={16} /></div>}
             </div>
-            {streak.current >= 3 && <div style={{ background: 'rgba(248,95,27,0.1)', color: 'var(--primary)', padding: '6px', borderRadius: '50%' }}><Zap size={16} /></div>}
           </div>
         </div>
 
@@ -597,21 +603,13 @@ export default function DashboardPage() {
             <ChevronDown size={14} color="var(--on-surface-dim)" />
           </div>
           {user.weightGoal ? (<>
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 0 }}>
               {[{ l: 'Target', v: isImpWeight ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImpWeight ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
                 <div key={s.l} style={{ background: 'var(--surface-container-highest)', borderRadius: 10, padding: '10px 12px', border: 'none' }}>
                   <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 3 }}>{s.l}</div>
                   <div className="headline-md" style={{ color: 'var(--primary)' }}>{s.v}</div>
                 </div>
               ))}
-            </div>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <ProgressOrb progress={goalPct} size={80} label={`${goalPct}%`} subLabel="Done" />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 600 }}>
-                  <span>{isImpWeight ? kgToLbs(user.weightGoalStart) + ' lbs' : user.weightGoalStart + ' kg'} (start)</span><span>{isImpWeight ? kgToLbs(user.weightGoal) + ' lbs' : user.weightGoal + ' kg'} (goal)</span>
-                </div>
-              </div>
             </div>
           </>) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none' }}>

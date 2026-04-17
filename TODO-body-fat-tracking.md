@@ -920,71 +920,71 @@ import {
 ## ✅ Implementation Checklist
 
 ### Supabase
-- [ ] Run `supabase/migrations/20260417_body_fat_logs.sql` against your project
-- [ ] Verify `body_fat_goal` column added to `user_profiles`
-- [ ] Verify `body_fat_logs` table created with RLS enabled
+- [x] Run `supabase/migrations/20260417_body_fat_logs.sql` against your project
+- [x] Verify `body_fat_goal` column added to `user_profiles`
+- [x] Verify `body_fat_logs` table created with RLS enabled
 
 ### Constants (`src/data/constants.js`)
-- [ ] Add `BF_CATEGORIES` export (gender-aware ACE ranges with colors)
-- [ ] Add `BF_METHODS` export (6 measurement methods)
+- [x] Add `BF_CATEGORIES` export (gender-aware ACE ranges with colors)
+- [x] Add `BF_METHODS` export (6 measurement methods)
 
 ### Calculations (`src/utils/calculations.js`)
-- [ ] Add `getBFCategory(pct, gender)` helper function
-- [ ] Verify `calcBodyFat(gender, waist, neck, height, hips)` exists — add if missing
+- [x] Add `getBFCategory(pct, gender)` helper function
+- [x] Verify `calcBodyFat(gender, waist, neck, height, hips)` exists — add if missing
 
 ### AppContext (`src/context/AppContext.jsx`)
-- [ ] Add `bodyFatLogState` + `setBodyFatLogState` local state
-- [ ] Add `setBodyFatLog` via `createSyncSetter` (table: `body_fat_logs`)
-- [ ] Add `bodyFatGoal` → `body_fat_goal` to the `keyMap` inside `updateProfile`
-- [ ] Load `body_fat_logs` rows inside `loadCloudData`, map to camelCase shape
-- [ ] Expose `bodyFatLog` + `setBodyFatLog` in context value
-- [ ] Update `user` object to include `bodyFatGoal: profile.body_fat_goal`
+- [x] Add `bodyFatLogState` + `setBodyFatLogState` local state
+- [x] Add `setBodyFatLog` via `createSyncSetter` (table: `body_fat_logs`)
+- [x] Add `bodyFatGoal` → `body_fat_goal` to the `keyMap` inside `updateProfile`
+- [x] Load `body_fat_logs` rows inside `loadCloudData`, map to camelCase shape
+- [x] Expose `bodyFatLog` + `setBodyFatLog` in context value
+- [x] Update `user` object to include `bodyFatGoal: profile.body_fat_goal`
 
 ### ProfilePage (`src/components/pages/ProfilePage.jsx`)
-- [ ] Import `getBFCategory`, `calcBodyFat`, `BF_METHODS` from constants/calculations
-- [ ] Import `bodyFatLog`, `setBodyFatLog` from `useApp()`
-- [ ] Add `showBFLog`, `bfForm`, `showNavyCalc`, `navyMeasures` state
-- [ ] Derive `userBFLog`, `latestBF`, `bfCat` from the log + user gender
-- [ ] Add Body Composition card (before Muscle Mastery section)
-  - [ ] Header: current BF% + category badge + method + Log button + target
-  - [ ] Recent entries list (last 4, with delta vs previous)
-  - [ ] Empty state when no readings exist
-- [ ] Add Log BF% modal (Portal-based)
-  - [ ] Date input
-  - [ ] BF% number input with live category preview
-  - [ ] Method selector (6 pill buttons)
-  - [ ] Navy Method calculator (collapsible, fires when `method === 'navy'`)
-  - [ ] Notes input
-  - [ ] Save creates entry in `setBodyFatLog`
+- [x] Import `getBFCategory`, `calcBodyFat`, `BF_METHODS` from constants/calculations
+- [x] Import `bodyFatLog`, `setBodyFatLog` from `useApp()`
+- [x] Add `showBFLog`, `bfForm`, `showNavyCalc`, `navyMeasures` state
+- [x] Derive `userBFLog`, `latestBF`, `bfCat` from the log + user gender
+- [x] Add Body Composition card (before Muscle Mastery section)
+  - [x] Header: current BF% + category badge + method + Log button + target
+  - [x] Recent entries list (last 4, with delta vs previous)
+  - [x] Empty state when no readings exist
+- [x] Add Log BF% modal (Portal-based)
+  - [x] Date input
+  - [x] BF% number input with live category preview
+  - [x] Method selector (6 pill buttons)
+  - [x] Navy Method calculator (collapsible, fires when `method === 'navy'`)
+  - [x] Notes input
+  - [x] Save creates entry in `setBodyFatLog`
 
 ### DashboardPage (`src/components/pages/DashboardPage.jsx`)
-- [ ] Import `getBFCategory`, `BF_METHODS` 
-- [ ] Import `bodyFatLog` from `useApp()`
-- [ ] Add `userBFLog`, `latestBF`, `bfDelta`, `bfCat`, `bfGoal`, `bfChartData` derived values
-- [ ] Add Body Composition card (between Weight Trend and Weight Goal)
-  - [ ] 3-col grid: Left (current BF% + category + delta) · Center (mini trend chart) · Right (goal + progress)
-  - [ ] Empty state card with "Log BF% →" CTA that navigates to Profile page
-  - [ ] Goal reference line on chart when `bfGoal` is set
-  - [ ] Gradient fill color matches the current BF% category color
-- [ ] Add mobile-responsive CSS for `.bf-card-grid`
-- [ ] Verify `ReferenceLine` is in Recharts imports
+- [x] Import `getBFCategory`, `BF_METHODS` 
+- [x] Import `bodyFatLog` from `useApp()`
+- [x] Add `userBFLog`, `latestBF`, `bfDelta`, `bfCat`, `bfGoal`, `bfChartData` derived values
+- [x] Add Body Composition card (between Weight Trend and Weight Goal)
+  - [x] 3-col grid: Left (current BF% + category + delta) · Center (mini trend chart) · Right (goal + progress)
+  - [x] Empty state card with "Log BF% →" CTA that navigates to Profile page
+  - [x] Goal reference line on chart when `bfGoal` is set
+  - [x] Gradient fill color matches the current BF% category color
+- [x] Add mobile-responsive CSS for `.bf-card-grid`
+- [x] Verify `ReferenceLine` is in Recharts imports
 
 ### index.css
-- [ ] Add `.bf-card-grid` and `.bf-card-chart` responsive rules for `< 480px`
+- [x] Add `.bf-card-grid` and `.bf-card-chart` responsive rules for `< 480px`
 
 ### QA
-- [ ] Log first BF% entry from Profile → appears on Dashboard immediately
-- [ ] BF% category badge color changes correctly across ranges for both genders
-- [ ] Navy Method calculator pre-fills the BF% input correctly for male and female
-- [ ] Setting a body fat goal on Profile → goal appears on Dashboard chart as dashed reference line
-- [ ] Delta `▼ / ▲ X%` shows correct direction (green when going down, red when going up)
-- [ ] Empty state on Dashboard shows "Log BF% →" CTA, navigates to Profile
-- [ ] Chart data respects 90-day cutoff
-- [ ] Different measurement method label shown correctly per entry
-- [ ] Deduplication: logging the same date twice replaces the old entry (not duplicates)
-- [ ] Data syncs to Supabase `body_fat_logs` table — verify with browser DevTools
-- [ ] Refresh: BF% log persists after page reload (cloud rehydration works)
-- [ ] Mobile layout: card collapses cleanly, no horizontal overflow
+- [x] Log first BF% entry from Profile → appears on Dashboard immediately
+- [x] BF% category badge color changes correctly across ranges for both genders
+- [x] Navy Method calculator pre-fills the BF% input correctly for male and female
+- [x] Setting a body fat goal on Profile → goal appears on Dashboard chart as dashed reference line
+- [x] Delta `▼ / ▲ X%` shows correct direction (green when going down, red when going up)
+- [x] Empty state on Dashboard shows "Log BF% →" CTA, navigates to Profile
+- [x] Chart data respects 90-day cutoff
+- [x] Different measurement method label shown correctly per entry
+- [x] Deduplication: logging the same date twice replaces the old entry (not duplicates)
+- [x] Data syncs to Supabase `body_fat_logs` table — verify with browser DevTools
+- [x] Refresh: BF% log persists after page reload (cloud rehydration works)
+- [x] Mobile layout: card collapses cleanly, no horizontal overflow
 
 ---
 

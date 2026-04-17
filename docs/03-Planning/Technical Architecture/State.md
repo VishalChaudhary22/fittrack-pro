@@ -58,7 +58,8 @@ fittrack-pro/
 │       ├── 20260406213844_seed_indian_food_batch_7.sql  # Packaged Food, Fasting/Vrat Foods
 │       ├── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
 │       ├── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, measurements, readiness, splits sync
-│       └── 20260409_add_leaderboard_rls.sql             # Public SELECT policies for leaderboard reads on user_profiles + workout_logs
+│       ├── 20260409_add_leaderboard_rls.sql             # Public SELECT policies for leaderboard reads on user_profiles + workout_logs
+│       └── 20260417_body_fat_logs.sql                   # body_fat_logs table + body_fat_goal column on user_profiles + RLS
 ├── scripts/                     # Data population & validation scripts
 │   ├── generate_seed.js         # Generates SQL seed from JS food objects
 │   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
@@ -227,6 +228,8 @@ Rebuilt around the Kinetic Elite aesthetic. Key sections:
 - **Placeholder activity cards**: Steps, Calories Burned — show `—` with a `PulseIndicator + "Coming Soon"` label. Water intake is wired to the global hydration tracker.
 - **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
 - **Weight Trend chart**: `AreaChart` (Recharts) with `GlassTooltip` and an optional goal reference line.
+- **Body Composition card**: 3-column grid showing current BF% with ACE category badge + delta vs previous reading, a mini trend `AreaChart` with optional goal reference line, and goal progress bar. Uses `getBFCategory()` for gender-aware classification. When no BF% data exists, shows an empty state CTA linking to Profile. Chart threshold is 1+ entries; dots always visible.
+- **BF% badge on Metabolic Index card**: Subtle chip below BMI ranges showing latest BF% and category, using theme-native `surface-container-lowest` background.
 - **Live Suggestion banner**: Grayscale gym image with gradient overlay, `PulseIndicator`, active split name and schedule chips, "Start Workout" CTA.
 - **Olympus League widget**: `MiniBodyMap` + rank badge + weekly muscle group count. Links to `/muscle-map`.
 
@@ -410,6 +413,8 @@ Female-focused view computing whether the athlete is in menstruation, follicular
 ### `/profile` — Profile
 User settings, unit preferences (kg/lbs and cm/ft), theme toggle, personal info, avatar selection/upload, export/import, streak/achievement summaries, and metabolic cards (BMI / BMR / TDEE). `activityLevel` UI is mapped back to the `activity` column in `user_profiles`.
 
+**Body Composition section** (added 2026-04-17): Glass card before Muscle Mastery showing latest BF%, ACE category badge, measurement method, target BF% (set via themed modal), and recent log history (last 4 entries with ▼/▲ deltas). "+ Log BF%" button opens a modal with date input, BF% number input with live category preview, 6-method pill selector (InBody, DEXA, Smart Scale, Calipers, Navy Method, Visual), embedded Navy Method calculator (waist/neck/hips/height inputs with auto-fill), and optional notes field. Data persists via `setBodyFatLogSync` (Supabase + localStorage write-through cache). CSV export includes `bodyFatLog`.
+
 ### `/weight-log` — Weight Log
 Dedicated view for body weight history entries.
 
@@ -578,8 +583,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
   - `onAuthStateChange(SIGNED_OUT)` then fires and clears remaining cloud state
 - on account switch:
   - A `useEffect` on `session.user.id` detects the ID change and zeroes all in-memory fitness logs
-  - Clears per-user food/readiness localStorage keys for the previous `userId`
-  - Resets all auxiliary local-only logs (`waterLog`, `cardioLog`, `supplementLog`, etc.)
+  - Clears per-user food/readiness/bodyFat localStorage keys for the previous `userId`
+  - Resets all auxiliary local-only logs (`waterLog`, `cardioLog`, `supplementLog`, `bodyFatLog`, etc.)
 
 ### Data State
 
@@ -600,6 +605,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Supplements** | localStorage | `fittrack_supplementLog` |
 | **Supplement Config** | localStorage | `fittrack_supplementConfig` |
 | **Cycle Config**| localStorage | `fp_cycle_config` |
+| **Body Fat Logs** | Supabase DB + per-user write-through cache | `body_fat_logs` + `fittrack_bodyFatLog_<userId>` |
+| **Body Fat Goal** | Supabase DB (user_profiles) | `body_fat_goal` column on `user_profiles` |
 
 ### Live Refs
 - `foodLogRef` — always mirrors current `foodLog` state; used by `loadCloudData` to merge against live data rather than a stale closure snapshot
@@ -624,6 +631,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 
 This guarantees that even if the Supabase upsert fails, the local cache is always up-to-date for the next refresh fallback.
 
+`setBodyFatLog` follows the same write-through pattern (without the 90-day prune).
+
 ### `createSyncSetter` (Cloud Delta Sync)
 Factory function used to build all six cloud-backed setters. Given a `table`, a current state array, a `setState`, and a `mapperToCloud`:
 1. Calls `setLocalState(prev => ...)` synchronously to update React state
@@ -636,7 +645,7 @@ Factory function used to build all six cloud-backed setters. Given a `table`, a 
 ### Exposed Context API
 **Methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`, `removeToast`
 
-**Sync setters (replace original setters):** `setSplits`, `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`
+**Sync setters (replace original setters):** `setSplits`, `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, `setBodyFatLog`
 
 **Local-only setters (no cloud):** `setCaloriesLog`, `setFavoriteIds`, `setMonthlyRankHistory`, `toggleTheme`, `setWaterLog`, `setCardioLog`, `setSupplementLog`, `setSupplementConfig`, `setCycleConfig`
 
@@ -646,6 +655,7 @@ Factory function used to build all six cloud-backed setters. Given a `table`, a 
 - **Merge priority**: `loadCloudData` reads live `foodLogRef.current` / `readinessLogRef.current` (not stale render snapshots) when computing the cache source, eliminating race conditions when another device writes during an in-flight load.
 - **Fallback chain**: if cloud returns 0 food rows, `cachedFoodSource` (ref → localStorage) is used directly. Same for readiness. Cloud data is written into state only if `mergedLog.length > 0 || currentRef.length === 0`.
 - **Splits**: falls back to `INIT_SPLITS` (default programs) when `user_splits` returns empty.
+- **Body fat logs**: `loadCloudData` fetches `body_fat_logs` ordered by date descending, maps `user_id` → `userId`, `percentage` → `parseFloat`, and sets `bodyFatLog` state. Write-through localStorage cache at `fittrack_bodyFatLog_<userId>` ensures persistence across refreshes before cloud sync completes.
 
 ---
 

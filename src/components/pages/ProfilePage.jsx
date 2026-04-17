@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, Percent } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
@@ -7,7 +7,7 @@ import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations'
 import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
-import BodyFatRingCard from '../shared/BodyFatRingCard';
+
 
 const PRESETS = [
   { id: 'iron-man', name: 'Iron Man', universe: 'Marvel' },
@@ -182,7 +182,10 @@ export default function ProfilePage() {
   const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
   const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
 
-
+  const latestBFPct = useMemo(() => {
+    const logs = bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+    return logs.length > 0 ? logs[0].percentage : null;
+  }, [bodyFatLog, user?.id]);
 
   // Muscle Mastery Data
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
@@ -238,10 +241,14 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats Strip (9.8) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMI</span><span style={{ fontSize: 8, background: 'var(--surface-container-highest)', borderRadius: 8, color: 'var(--on-surface-variant)', padding: '3px 8px' }}>{getBMICat(bmi).label}</span></div>
           <div className="display-lg" style={{ color: 'var(--primary)' }}>{bmi}</div>
+        </div>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BF%</div>
+          <div className="display-lg" style={{ color: 'var(--primary)' }}>{latestBFPct ? `${latestBFPct.toFixed(1)}%` : '—'}</div>
         </div>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
@@ -255,8 +262,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── BODY COMPOSITION ─────────────────────────────────── */}
-      <BodyFatRingCard />
       {/* Muscle Mastery (9.4) */}
       <div style={{ marginBottom: 40 }}>
         <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 16 }}>Muscle Mastery</div>

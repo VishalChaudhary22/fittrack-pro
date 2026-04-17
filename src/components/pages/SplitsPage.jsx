@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, X, Edit2, Trash2, Check, Dumbbell, Repeat, Zap, Target, Trophy, Home, Award, Flame, AlertCircle } from 'lucide-react';
+import { ChevronDown, X, Edit2, Trash2, Check, Dumbbell, Repeat, Zap, Target, Trophy, Home, Award, Flame, AlertCircle, Sprout, Wrench } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ModalPortal } from '../shared/SharedComponents';
 import { gId } from '../../utils/helpers';
@@ -36,10 +36,10 @@ export default function SplitsPage() {
   }, [activeTier]);
 
   const TIERS = [
-    { key: 'beginner', label: '🟢 Beginner', weeks: '3–4 days/week', tagline: 'Build the foundation', desc: 'First 6 months, new to structured training' },
-    { key: 'intermediate', label: '🟡 Intermediate', weeks: '4–6 days/week', tagline: 'Accelerate the gains', desc: '6 months – 2 years, consistent training history' },
-    { key: 'advanced', label: '🔴 Advanced', weeks: '6 days/week', tagline: 'Maximum performance', desc: '2+ years, ready for high frequency & volume' },
-    { key: 'specialty', label: '⚙️ Specialty', weeks: 'Variable', tagline: 'Beyond the weights', desc: 'Home training, yoga, and powerlifting programs' },
+    { key: 'beginner',     label: 'Beginner',     Icon: Sprout,  weeks: '3–4 days/week', tagline: 'Build the foundation',    desc: 'First 6 months, new to structured training' },
+    { key: 'intermediate', label: 'Intermediate', Icon: Zap,     weeks: '4–6 days/week', tagline: 'Accelerate the gains',    desc: '6 months – 2 years, consistent training history' },
+    { key: 'advanced',     label: 'Advanced',     Icon: Flame,   weeks: '6 days/week',   tagline: 'Maximum performance',      desc: '2+ years, ready for high frequency & volume' },
+    { key: 'specialty',    label: 'Specialty',    Icon: Wrench,  weeks: 'Variable',      tagline: 'Beyond the weights',       desc: 'Home training, yoga, and powerlifting programs' },
   ];
 
   const pick = (split) => {
@@ -109,27 +109,31 @@ export default function SplitsPage() {
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 16, msOverflowStyle: 'none', scrollbarWidth: 'none' }} className="hide-scrollbar">
         {TIERS.map(tier => {
           const isActive = activeTier === tier.key;
+          const TierIcon = tier.Icon;
           return (
             <button
               key={tier.key}
               onClick={() => setActiveTier(tier.key)}
               style={{
                 flexShrink: 0,
-                padding: '10px 16px',
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '9px 18px',
                 borderRadius: 24,
                 fontSize: 13,
                 fontWeight: 600,
-                border: 'none',
-                background: isActive ? 'linear-gradient(135deg, var(--ember-start), var(--ember-end))' : 'var(--surface-container-highest)',
+                border: isActive ? 'none' : '1px solid var(--outline-variant)',
+                background: isActive ? 'linear-gradient(135deg, var(--ember-start), var(--ember-end))' : 'transparent',
                 color: isActive ? 'white' : 'var(--on-surface-variant)',
                 boxShadow: isActive ? 'var(--glow-primary)' : 'none',
                 transition: 'all 0.2s var(--ease-spring)',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                letterSpacing: '0.01em',
               }}
             >
+              <TierIcon size={14} strokeWidth={isActive ? 2.5 : 1.8} />
               {tier.label}
             </button>
-          )
+          );
         })}
       </div>
 
@@ -186,17 +190,12 @@ export default function SplitsPage() {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div className="headline-md" style={{ color: isActive ? 'var(--primary)' : 'var(--on-surface)', letterSpacing: '1px' }}>{split.name}</div>
-                      {split.isRecommended && (
-                        <div style={{ background: 'rgba(255,215,0,0.15)', color: '#FFD700', border: '1px solid rgba(255,215,0,0.3)', padding: '2px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          ⭐ Recommended
-                        </div>
-                      )}
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 2 }}>{split.description}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  {split.comingSoon ? <span className="tag" style={{ background: 'var(--surface-container-highest)' }}>Soon</span> : isActive ? <span className="tag" style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}><Check size={10} /> Active</span> : <button className="btn-p" style={{ padding: '7px 14px', fontSize: 13 }} onClick={() => pick(split)}>Select →</button>}
+                  {split.comingSoon ? <span className="tag" style={{ background: 'var(--surface-container-highest)' }}>Soon</span> : isActive ? <span className="tag" style={{ background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', gap: 4 }}><Check size={10} /> Active</span> : <button className="btn-p" style={{ padding: '7px 0', fontSize: 13, width: 88, textAlign: 'center', flexShrink: 0 }} onClick={() => pick(split)}>Select →</button>}
                   <ChevronDown size={14} color="var(--on-surface-dim)" style={{ transform: exp === split.id ? 'rotate(180deg)' : '', transition: '0.2s var(--ease-spring)', cursor: 'pointer', flexShrink: 0 }} onClick={() => setExp(exp === split.id ? null : split.id)} />
                 </div>
               </div>

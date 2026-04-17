@@ -1,16 +1,14 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
-import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit, getBFCategory } from '../../utils/calculations';
+import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import { getCyclePhase } from '../../utils/cycleCalculations';
 import { getActiveFestival } from '../../utils/festivals';
-import { BF_METHODS } from '../../data/constants';
 import {
   calcObjectiveReadiness,
   getMuscleRecoveryStatuses,
@@ -196,17 +194,6 @@ export default function DashboardPage() {
     return +(latest - previous).toFixed(1);
   }, [allUserLogs]);
 
-  // Body fat derived
-  const userBFLog = useMemo(() => bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date)), [bodyFatLog, user?.id]);
-  const latestBF = userBFLog[0] || null;
-  const previousBF = userBFLog[1] || null;
-  const bfDelta = latestBF && previousBF ? +(latestBF.percentage - previousBF.percentage).toFixed(1) : null;
-  const bfCat = latestBF ? getBFCategory(latestBF.percentage, user?.gender) : null;
-  const bfGoal = user?.bodyFatGoal || null;
-  const bfChartData = useMemo(() => {
-    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
-    return [...userBFLog].filter(e => new Date(e.date) >= cutoff).reverse().map(e => ({ date: fmt(e.date), pct: e.percentage, method: e.method }));
-  }, [userBFLog]);
 
   const activeSplit = splits.find(s => s.id === user.activeSplitId);
   const userWo = workoutLogs.filter(l => l.userId === user.id);

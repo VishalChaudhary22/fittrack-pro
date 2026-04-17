@@ -1,4 +1,4 @@
-import { ACTIVITY } from '../data/constants';
+import { ACTIVITY, BF_CATEGORIES } from '../data/constants';
 
 // ─── BMI ──────────────────────────────────────────────────────────────────────
 export const calcBMI = (w, h) => (!w || !h) ? null : (w / ((h / 100) ** 2)).toFixed(1);
@@ -55,4 +55,19 @@ export const calc1RM = (weight, reps) => {
 export const best1RMFromSets = (sets) => {
   if (!sets || !sets.length) return 0;
   return Math.max(...sets.map(s => calc1RM(s.weight || 0, s.reps || 0)));
+};
+
+// ─── Body Fat % Category (ACE Standard) ──────────────────────────────────────
+export const getBFCategory = (pct, gender = 'male') => {
+  const cats = BF_CATEGORIES[gender === 'female' ? 'female' : 'male'];
+  return cats.find(c => pct >= c.min && pct <= c.max) || cats[cats.length - 1];
+};
+
+// ─── Navy Method Body Fat Calculator ─────────────────────────────────────────
+export const calcBodyFat = (gender, waist, neck, height, hips = 0) => {
+  if (!waist || !neck || !height) return null;
+  if (gender === 'male')
+    return +(495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450).toFixed(1);
+  else
+    return +(495 / (1.29579 - 0.35004 * Math.log10(waist + hips - neck) + 0.22100 * Math.log10(height)) - 450).toFixed(1);
 };

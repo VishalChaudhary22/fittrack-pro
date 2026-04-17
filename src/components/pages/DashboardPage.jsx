@@ -5,11 +5,12 @@ import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Act
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
-import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
+import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit, getBFCategory } from '../../utils/calculations';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import { getCyclePhase } from '../../utils/cycleCalculations';
 import { getActiveFestival } from '../../utils/festivals';
+import { BF_METHODS } from '../../data/constants';
 import {
   calcObjectiveReadiness,
   getMuscleRecoveryStatuses,
@@ -100,7 +101,7 @@ const ParticlesBackground = () => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog } = useApp();
+  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showStepModal, setShowStepModal] = useState(false);
   const [stepInputVal, setStepInputVal] = useState('');
@@ -193,6 +194,18 @@ export default function DashboardPage() {
     const previous = allUserLogs[allUserLogs.length - 2].weight;
     return +(latest - previous).toFixed(1);
   }, [allUserLogs]);
+
+  // Body fat derived
+  const userBFLog = useMemo(() => bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date)), [bodyFatLog, user?.id]);
+  const latestBF = userBFLog[0] || null;
+  const previousBF = userBFLog[1] || null;
+  const bfDelta = latestBF && previousBF ? +(latestBF.percentage - previousBF.percentage).toFixed(1) : null;
+  const bfCat = latestBF ? getBFCategory(latestBF.percentage, user?.gender) : null;
+  const bfGoal = user?.bodyFatGoal || null;
+  const bfChartData = useMemo(() => {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    return [...userBFLog].filter(e => new Date(e.date) >= cutoff).reverse().map(e => ({ date: fmt(e.date), pct: e.percentage, method: e.method }));
+  }, [userBFLog]);
 
   const activeSplit = splits.find(s => s.id === user.activeSplitId);
   const userWo = workoutLogs.filter(l => l.userId === user.id);
@@ -459,6 +472,13 @@ export default function DashboardPage() {
                 Add weight & height in Profile to see BMI
               </div>
             )}
+            {latestBF && (
+              <div style={{ marginTop: 12, padding: '8px 12px', borderRadius: 10, background: `${bfCat?.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: bfCat?.color }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: bfCat?.color }}>{latestBF.percentage.toFixed(1)}% BF</span>
+                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>· {bfCat?.label}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -662,6 +682,77 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Body Composition Card */}
+        {latestBF ? (
+          <div className="glass-card bf-card-grid" style={{ padding: 24, borderRadius: 16, marginBottom: 16, display: 'grid', gridTemplateColumns: '1fr 1.6fr 0.9fr', gap: 20, alignItems: 'center' }}>
+            {/* LEFT: Current BF% */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--on-surface-variant)', marginBottom: 4 }}>Body Fat</div>
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 2.5rem)', color: 'var(--on-surface)', lineHeight: 1, letterSpacing: '-0.04em' }}>
+                {latestBF.percentage.toFixed(1)}<span style={{ fontSize: '1rem', color: 'var(--on-surface-variant)', marginLeft: 2, fontWeight: 700 }}>%</span>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: bfCat?.color }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: bfCat?.color }}>{bfCat?.label}</span>
+              </div>
+              {bfDelta !== null && (
+                <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: bfDelta < 0 ? '#51CF66' : bfDelta > 0 ? '#FF6B6B' : 'var(--on-surface-dim)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {bfDelta < 0 ? <TrendingDown size={12} /> : bfDelta > 0 ? <TrendingUp size={12} /> : null}
+                  {bfDelta === 0 ? 'No change' : `${bfDelta > 0 ? '+' : ''}${bfDelta}% vs prev`}
+                </div>
+              )}
+              <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 4 }}>{fmt(latestBF.date)} · {BF_METHODS.find(m => m.id === latestBF.method)?.label || latestBF.method}</div>
+            </div>
+
+            {/* CENTER: Trend mini-chart */}
+            <div className="bf-card-chart">
+              {bfChartData.length >= 2 ? (
+                <ResponsiveContainer width="100%" height={80}>
+                  <AreaChart data={bfChartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="bf-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Tooltip cursor={false} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 10, fontSize: 11, color: 'var(--on-surface)', fontWeight: 700 }} formatter={(val) => [`${val}%`, 'Body Fat']} />
+                    {bfGoal && <ReferenceLine y={bfGoal} stroke="var(--primary)" strokeDasharray="4 4" label={{ value: `Goal ${bfGoal}%`, fill: 'var(--primary)', fontSize: 9, position: 'insideTopRight' }} />}
+                    <Area type="monotone" dataKey="pct" stroke={bfCat?.color || 'var(--primary-container)'} strokeWidth={2} fill="url(#bf-gradient)" dot={false} activeDot={{ r: 4, fill: bfCat?.color || 'var(--primary)', strokeWidth: 0 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--on-surface-dim)' }}>Log 2+ readings to see trend</div>
+              )}
+            </div>
+
+            {/* RIGHT: Goal */}
+            <div style={{ textAlign: 'right' }}>
+              {bfGoal ? (<>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Goal</div>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 22, color: 'var(--primary)', lineHeight: 1 }}>{bfGoal}%</div>
+                <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 6 }}>
+                  {latestBF.percentage > bfGoal
+                    ? <span style={{ color: '#51CF66', fontWeight: 700 }}>{(latestBF.percentage - bfGoal).toFixed(1)}% to go</span>
+                    : <span style={{ color: '#51CF66', fontWeight: 700 }}>✓ Goal reached!</span>}
+                </div>
+                <div style={{ marginTop: 10, height: 4, borderRadius: 2, background: 'var(--surface-container-highest)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${bfCat?.color || 'var(--primary)'}, var(--primary))`, width: `${Math.min(100, Math.max(0, latestBF.percentage <= bfGoal ? 100 : ((userBFLog[userBFLog.length - 1]?.percentage - latestBF.percentage) / (userBFLog[userBFLog.length - 1]?.percentage - bfGoal)) * 100))}%`, transition: 'width .3s var(--ease-smooth)' }} />
+                </div>
+              </>) : (
+                <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontStyle: 'italic', lineHeight: 1.5 }}>Set a goal on your profile</div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="glass-card" style={{ padding: '20px 24px', borderRadius: 16, marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Body Fat %</div>
+              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', lineHeight: 1.5 }}>Track your body composition journey.<br />Log your first reading from an InBody,<br />DEXA, or smart scale scan.</div>
+            </div>
+            <button className="btn-p" onClick={() => navigate('/profile')} style={{ flexShrink: 0, padding: '10px 18px', fontSize: 12, borderRadius: 12 }}>Log BF% →</button>
+          </div>
+        )}
 
         {/* Live Suggestion Banner */}
         <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 180, marginBottom: 16 }}>

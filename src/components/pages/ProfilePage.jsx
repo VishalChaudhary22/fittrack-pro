@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Upload, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, Percent } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
-import { ACTIVITY } from '../../data/constants';
-import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
-import { fmt, kgToLbs, cmToFtIn } from '../../utils/helpers';
+import { ACTIVITY, BF_METHODS } from '../../data/constants';
+import { calcBMI, getBMICat, calcBMR, calcTDEE, getBFCategory, calcBodyFat } from '../../utils/calculations';
+import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 
@@ -101,11 +101,14 @@ function AvatarPickerModal({ open, onClose }) {
 }
 
 export default function ProfilePage() {
-  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs } = useApp();
+  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog } = useApp();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showBFLog, setShowBFLog] = useState(false);
+  const [bfForm, setBFForm] = useState({ date: tod(), percentage: '', method: 'inbody', notes: '' });
+  const [navyMeasures, setNavyMeasures] = useState({ waist: '', neck: '', hips: '', height: user?.height || '' });
   
   useEffect(() => {
     if (user && !ed) {
@@ -171,7 +174,8 @@ export default function ProfilePage() {
       foodLog,
       measurements,
       readinessLog,
-      stepLogs
+      stepLogs,
+      bodyFatLog
     });
     addToast('Data exported!', 'success');
   };
@@ -179,6 +183,11 @@ export default function ProfilePage() {
   const bmi = calcBMI(user.weight, user.height);
   const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
   const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
+
+  // Body Fat derived
+  const userBFLog = useMemo(() => bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date)), [bodyFatLog, user?.id]);
+  const latestBF = userBFLog[0] || null;
+  const bfCat = latestBF ? getBFCategory(latestBF.percentage, user?.gender) : null;
 
   // Muscle Mastery Data
   const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
@@ -249,6 +258,66 @@ export default function ProfilePage() {
           <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{tdee}</div>
           <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
         </div>
+      </div>
+
+      {/* ── BODY COMPOSITION ─────────────────────────────────── */}
+      <div className="glass-card" style={{ padding: '20px 24px', borderRadius: 20, marginBottom: 32, position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--on-surface-dim)', marginBottom: 4 }}>Body Composition</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 22, color: 'var(--on-surface)', lineHeight: 1 }}>
+              {latestBF
+                ? <>{latestBF.percentage.toFixed(1)}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginLeft: 3 }}>%</span></>
+                : <span style={{ fontSize: 16, color: 'var(--on-surface-dim)' }}>Not logged</span>}
+            </div>
+            {latestBF && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: `${bfCat?.color}22`, color: bfCat?.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{bfCat?.label}</span>
+                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>via {BF_METHODS.find(m => m.id === latestBF.method)?.label}</span>
+              </div>
+            )}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+            <button className="btn-p" onClick={() => setShowBFLog(true)} style={{ padding: '8px 16px', fontSize: 12, borderRadius: 12 }}>+ Log BF%</button>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Target</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => {
+                const val = prompt(`Set your target body fat % (current: ${user?.bodyFatGoal ?? 'not set'})`);
+                const num = parseFloat(val);
+                if (!isNaN(num) && num >= 2 && num <= 60) updateProfile({ bodyFatGoal: num });
+              }}>{user?.bodyFatGoal ? `${user.bodyFatGoal}%` : 'Set goal →'}</div>
+            </div>
+          </div>
+        </div>
+        {userBFLog.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {userBFLog.slice(0, 4).map((entry, i) => {
+              const cat = getBFCategory(entry.percentage, user?.gender);
+              return (
+                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: 12, background: i === 0 ? 'var(--surface-container)' : 'var(--surface-container-lowest)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: cat?.color }} />
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--on-surface)' }}>{entry.percentage.toFixed(1)}%</div>
+                      <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>{BF_METHODS.find(m => m.id === entry.method)?.label}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>{fmt(entry.date)}</div>
+                    {i < userBFLog.length - 1 && (() => {
+                      const prev = userBFLog[i + 1];
+                      const delta = (entry.percentage - prev.percentage).toFixed(1);
+                      const isDown = delta < 0;
+                      return <div style={{ fontSize: 10, fontWeight: 700, color: isDown ? '#51CF66' : '#FF6B6B' }}>{isDown ? '▼' : '▲'} {Math.abs(delta)}%</div>;
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 12, color: 'var(--on-surface-dim)', fontStyle: 'italic' }}>Log your first reading from an InBody, DEXA, or smart scale scan to start tracking.</div>
+        )}
       </div>
 
       {/* Muscle Mastery (9.4) */}
@@ -435,6 +504,103 @@ export default function ProfilePage() {
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
     <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
+
+    {/* Log BF% Modal */}
+    {showBFLog && (
+      <div className="mo" onClick={e => e.target === e.currentTarget && setShowBFLog(false)}>
+        <div className="md" style={{ maxWidth: 420, padding: '28px 24px' }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 20, color: 'var(--on-surface)' }}>Log Body Fat %</div>
+
+          {/* Date */}
+          <div style={{ marginBottom: 16 }}>
+            <div className="label-md" style={{ marginBottom: 6, color: 'var(--on-surface-dim)' }}>Date</div>
+            <input type="date" value={bfForm.date} max={tod()} onChange={e => setBFForm(p => ({ ...p, date: e.target.value }))} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 14 }} />
+          </div>
+
+          {/* BF% input */}
+          <div style={{ marginBottom: 16 }}>
+            <div className="label-md" style={{ marginBottom: 6, color: 'var(--on-surface-dim)' }}>Body Fat %</div>
+            <div style={{ position: 'relative' }}>
+              <input type="number" inputMode="decimal" placeholder="e.g. 18.5" value={bfForm.percentage} min="2" max="60" step="0.1" onChange={e => setBFForm(p => ({ ...p, percentage: e.target.value }))} style={{ width: '100%', padding: '12px 44px 12px 14px', borderRadius: 10, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 20, fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }} />
+              <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--on-surface-variant)', fontWeight: 700 }}>%</span>
+            </div>
+            {bfForm.percentage && !isNaN(parseFloat(bfForm.percentage)) && (() => {
+              const cat = getBFCategory(parseFloat(bfForm.percentage), user?.gender);
+              return <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: cat.color, letterSpacing: '0.08em' }}>● {cat.label} range</div>;
+            })()}
+          </div>
+
+          {/* Method selector */}
+          <div style={{ marginBottom: 16 }}>
+            <div className="label-md" style={{ marginBottom: 8, color: 'var(--on-surface-dim)' }}>How was it measured?</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {BF_METHODS.map(m => (
+                <button key={m.id} onClick={() => setBFForm(p => ({ ...p, method: m.id }))} style={{ padding: '7px 12px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, transition: 'all .15s', background: bfForm.method === m.id ? 'var(--primary-container)' : 'var(--surface-container-highest)', color: bfForm.method === m.id ? '#fff' : 'var(--on-surface-variant)' }}>{m.label}</button>
+              ))}
+            </div>
+            {bfForm.method !== 'visual' && bfForm.method !== 'navy' && (
+              <div style={{ marginTop: 6, fontSize: 10, color: 'var(--on-surface-dim)' }}>Accuracy: {BF_METHODS.find(m => m.id === bfForm.method)?.note}</div>
+            )}
+          </div>
+
+          {/* Navy Method Calculator */}
+          {bfForm.method === 'navy' && (
+            <div style={{ marginBottom: 16, padding: 14, borderRadius: 12, background: 'var(--surface-container-lowest)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Navy Method Calculator</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>Waist (cm)</div>
+                  <input type="number" inputMode="decimal" value={navyMeasures.waist} onChange={e => setNavyMeasures(p => ({ ...p, waist: e.target.value }))} placeholder="at navel" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>Neck (cm)</div>
+                  <input type="number" inputMode="decimal" value={navyMeasures.neck} onChange={e => setNavyMeasures(p => ({ ...p, neck: e.target.value }))} placeholder="narrowest" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
+                </div>
+                {user?.gender === 'female' && (
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>Hips (cm)</div>
+                    <input type="number" inputMode="decimal" value={navyMeasures.hips} onChange={e => setNavyMeasures(p => ({ ...p, hips: e.target.value }))} placeholder="widest" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginBottom: 4 }}>Height (cm)</div>
+                  <input type="number" inputMode="decimal" value={navyMeasures.height} onChange={e => setNavyMeasures(p => ({ ...p, height: e.target.value }))} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
+                </div>
+              </div>
+              <button style={{ marginTop: 10, width: '100%', padding: 9, borderRadius: 8, background: 'var(--surface-container-highest)', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--primary)' }} onClick={() => {
+                const { waist, neck, hips, height } = navyMeasures;
+                if (!waist || !neck || !height) return;
+                const result = calcBodyFat(user?.gender || 'male', parseFloat(waist), parseFloat(neck), parseFloat(height), parseFloat(hips || 0));
+                if (!isNaN(result) && result > 0) setBFForm(p => ({ ...p, percentage: String(result) }));
+              }}>Calculate & Pre-fill</button>
+              <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 6 }}>Accuracy ±3–4%. Use for trend tracking, not absolute values.</div>
+            </div>
+          )}
+
+          {/* Notes */}
+          <div style={{ marginBottom: 20 }}>
+            <div className="label-md" style={{ marginBottom: 6, color: 'var(--on-surface-dim)' }}>Notes (optional)</div>
+            <input type="text" placeholder="e.g. Post Cult.fit InBody scan" value={bfForm.notes} onChange={e => setBFForm(p => ({ ...p, notes: e.target.value }))} style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontSize: 14 }} />
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-g" style={{ flex: 1, padding: 12 }} onClick={() => setShowBFLog(false)}>Cancel</button>
+            <button className="btn-p" style={{ flex: 2, padding: 12 }} disabled={!bfForm.percentage || isNaN(parseFloat(bfForm.percentage))} onClick={() => {
+              const pct = parseFloat(bfForm.percentage);
+              if (isNaN(pct) || pct < 2 || pct > 60) return;
+              setBodyFatLog(prev => [
+                ...prev.filter(e => !(e.userId === user.id && e.date === bfForm.date)),
+                { id: gId(), userId: user.id, date: bfForm.date, percentage: pct, method: bfForm.method, notes: bfForm.notes.trim(), createdAt: Date.now() },
+              ]);
+              addToast('Body fat % logged!', 'success');
+              setShowBFLog(false);
+              setBFForm({ date: tod(), percentage: '', method: 'inbody', notes: '' });
+            }}>Save Entry</button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }

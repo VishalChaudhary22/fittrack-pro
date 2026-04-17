@@ -353,3 +353,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 }
 @media(min-width:769px){.bn{display:none!important}}
 @media(max-width:500px){.ex-r{grid-template-columns:28px 1fr 1fr 70px;gap:5px}}
+@media(max-width:480px){
+  .bf-card-grid{grid-template-columns:1fr 1fr!important;grid-template-rows:auto auto}
+  .bf-card-chart{grid-column:1/-1;order:3}
+}

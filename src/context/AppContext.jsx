@@ -263,6 +263,12 @@ export function AppProvider({ children }) {
     try { return JSON.parse(localStorage.getItem(`fittrack_stepLog_${cachedUserId}`) || '[]'); }
     catch { return []; }
   });
+  const [bodyFatLog, setBodyFatLogState] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return [];
+    try { return JSON.parse(localStorage.getItem(`fittrack_bodyFatLog_${cachedUserId}`) || '[]'); }
+    catch { return []; }
+  });
 
   const setStepLogs = useCallback((updater) => {
     setStepLogsState(prev => {
@@ -274,6 +280,17 @@ export function AppProvider({ children }) {
         const cutoffStr = cutoff.toISOString().split('T')[0];
         const pruned = next.filter(e => e.date >= cutoffStr);
         localStorage.setItem(`fittrack_stepLog_${cachedUserId}`, JSON.stringify(pruned));
+      }
+      return next;
+    });
+  }, []);
+
+  const setBodyFatLog = useCallback((updater) => {
+    setBodyFatLogState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+      if (cachedUserId) {
+        localStorage.setItem(`fittrack_bodyFatLog_${cachedUserId}`, JSON.stringify(next));
       }
       return next;
     });
@@ -372,9 +389,11 @@ export function AppProvider({ children }) {
       setCardioLog([]);
       setSupplementLog([]);
       setSupplementConfig([]);
+      setBodyFatLog([]);
       
       localStorage.removeItem(`fittrack_foodLog_${prevUserIdRef.current}`);
       localStorage.removeItem(`fittrack_readinessLog_${prevUserIdRef.current}`);
+      localStorage.removeItem(`fittrack_bodyFatLog_${prevUserIdRef.current}`);
     }
   
     prevUserIdRef.current = session.user.id;
@@ -419,6 +438,7 @@ export function AppProvider({ children }) {
       setMeasurements([]);
       setFoodLog([]);
       setStepLogs([]);
+      setBodyFatLog([]);
       // Clear local-only prefs (Fix 6)
       setFavoriteIds([]);
       setSupplementConfig([]);
@@ -528,7 +548,7 @@ export function AppProvider({ children }) {
     if (!userId) return;
 
     const [
-      workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes
+      workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes, bfRes
     ] = await Promise.all([
       supabase.from('workout_logs').select('*').eq('user_id', userId),
       supabase.from('health_logs').select('*').eq('user_id', userId),
@@ -537,9 +557,10 @@ export function AppProvider({ children }) {
       supabase.from('readiness_logs').select('*').eq('user_id', userId),
       supabase.from('user_splits').select('*').eq('user_id', userId),
       supabase.from('step_logs').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(90),
+      supabase.from('body_fat_logs').select('*').eq('user_id', userId).order('date', { ascending: false }),
     ]);
 
-    const cloudErrors = [workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes]
+    const cloudErrors = [workoutRes, healthRes, foodRes, measurementRes, readinessRes, splitsRes, stepRes, bfRes]
       .map(result => result.error)
       .filter(Boolean);
     if (cloudErrors.length > 0) {
@@ -553,6 +574,7 @@ export function AppProvider({ children }) {
     const rl = readinessRes.data || [];
     const sl = splitsRes.data || [];
     const stepData = stepRes.data || [];
+    const bfData = bfRes.data || [];
 
     const persistedFoodLog = readPersistedUserArray('fittrack_foodLog', userId);
     const persistedReadinessLog = readPersistedUserArray('fittrack_readinessLog', userId);
@@ -593,6 +615,16 @@ export function AppProvider({ children }) {
       : cachedStepSource;
     if (mergedStepLog.length > 0 || stepLogsRef.current.length === 0) {
       setStepLogs(mergedStepLog);
+    }
+
+    // Body fat logs
+    const cloudBF = bfData.map(row => ({
+      id: row.id, userId: row.user_id, date: row.date,
+      percentage: parseFloat(row.percentage), method: row.method,
+      notes: row.notes || '', createdAt: new Date(row.created_at).getTime(),
+    }));
+    if (cloudBF.length > 0) {
+      setBodyFatLog(cloudBF);
     }
 
     // Spltis fallback to INIT_SPLITS if none exist
@@ -678,6 +710,7 @@ export function AppProvider({ children }) {
       dietType: 'diet_type', units: 'units', unitWeight: 'unit_weight', unitHeight: 'unit_height',
       avatar: 'avatar', avatarType: 'avatar_type', avatarUrl: 'avatar_url',
       activeSplitId: 'active_split_id', isAdmin: 'is_admin', stepGoal: 'step_goal',
+      bodyFatGoal: 'body_fat_goal',
     };
     const snakeUpdates = {};
     for (const [camel, snake] of Object.entries(keyMap)) {
@@ -730,6 +763,7 @@ export function AppProvider({ children }) {
     avatar: profile.avatar, avatarType: profile.avatar_type, avatarUrl: profile.avatar_url, activeSplitId: profile.active_split_id,
     isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
     stepGoal: profile.step_goal || 10000,
+    bodyFatGoal: profile.body_fat_goal || null,
   } : null;
 
   // --- Mutator Wrappers for Cloud Sync ---
@@ -822,6 +856,12 @@ export function AppProvider({ children }) {
   const setSplitsSync = useCallback(createSyncSetter('user_splits', splits, setSplits, (l) => ({
     id: l.id, data: l
   })), [profile, splits]);
+
+  const setBodyFatLogSync = useCallback(createSyncSetter('body_fat_logs', bodyFatLog, setBodyFatLog, (l) => ({
+    id: l.id, date: l.date, percentage: l.percentage,
+    method: l.method || 'visual', notes: l.notes || null,
+    created_at: l.createdAt ? new Date(l.createdAt).toISOString() : new Date().toISOString(),
+  })), [profile, bodyFatLog]);
 
   const logReadiness = useCallback((entry) => {
     setReadinessLogSync(prev => {
@@ -921,6 +961,7 @@ export function AppProvider({ children }) {
     readinessLog, setReadinessLog: setReadinessLogSync, logReadiness,
 
     stepLogs, logSteps,
+    bodyFatLog, setBodyFatLog: setBodyFatLogSync,
 
     caloriesLog, setCaloriesLog,
     favoriteIds, setFavoriteIds,

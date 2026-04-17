@@ -50,3 +50,31 @@ export const MEASUREMENT_FIELDS = [
   { key: 'thighR', label: 'Thigh (R)', unit: 'cm' },
   { key: 'neck', label: 'Neck', unit: 'cm' },
 ];
+
+// ─── BODY FAT % CATEGORIES (ACE Standard) ────────────────────────────────────
+export const BF_CATEGORIES = {
+  male: [
+    { label: 'Essential Fat', min: 2,  max: 5,  color: '#4ECDC4' },
+    { label: 'Athlete',       min: 6,  max: 13, color: '#51CF66' },
+    { label: 'Fitness',       min: 14, max: 17, color: '#82C91E' },
+    { label: 'Average',       min: 18, max: 24, color: '#FFD166' },
+    { label: 'High',          min: 25, max: 100,color: '#FF6B6B' },
+  ],
+  female: [
+    { label: 'Essential Fat', min: 10, max: 13, color: '#4ECDC4' },
+    { label: 'Athlete',       min: 14, max: 20, color: '#51CF66' },
+    { label: 'Fitness',       min: 21, max: 24, color: '#82C91E' },
+    { label: 'Average',       min: 25, max: 31, color: '#FFD166' },
+    { label: 'High',          min: 32, max: 100,color: '#FF6B6B' },
+  ],
+};
+
+// ─── BODY FAT MEASUREMENT METHODS ────────────────────────────────────────────
+export const BF_METHODS = [
+  { id: 'inbody',      label: 'InBody Scan',      note: '±1–2%' },
+  { id: 'dexa',        label: 'DEXA Scan',         note: '±1% (most accurate)' },
+  { id: 'smart_scale', label: 'Smart Scale (BIA)', note: '±3–8%' },
+  { id: 'calipers',    label: 'Skinfold Calipers', note: '±3–5%' },
+  { id: 'navy',        label: 'Navy Method',       note: '±3–4% (calculated)' },
+  { id: 'visual',      label: 'Visual / Other',    note: '' },
+];

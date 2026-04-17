@@ -109,6 +109,8 @@ export default function ProfilePage() {
   const [showBFLog, setShowBFLog] = useState(false);
   const [bfForm, setBFForm] = useState({ date: tod(), percentage: '', method: 'inbody', notes: '' });
   const [navyMeasures, setNavyMeasures] = useState({ waist: '', neck: '', hips: '', height: user?.height || '' });
+  const [showBFGoal, setShowBFGoal] = useState(false);
+  const [bfGoalInput, setBFGoalInput] = useState(user?.bodyFatGoal || '');
   
   useEffect(() => {
     if (user && !ed) {
@@ -282,9 +284,8 @@ export default function ProfilePage() {
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Target</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => {
-                const val = prompt(`Set your target body fat % (current: ${user?.bodyFatGoal ?? 'not set'})`);
-                const num = parseFloat(val);
-                if (!isNaN(num) && num >= 2 && num <= 60) updateProfile({ bodyFatGoal: num });
+                setBFGoalInput(user?.bodyFatGoal || '');
+                setShowBFGoal(true);
               }}>{user?.bodyFatGoal ? `${user.bodyFatGoal}%` : 'Set goal →'}</div>
             </div>
           </div>
@@ -597,6 +598,37 @@ export default function ProfilePage() {
               setShowBFLog(false);
               setBFForm({ date: tod(), percentage: '', method: 'inbody', notes: '' });
             }}>Save Entry</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* BF% Goal Modal */}
+    {showBFGoal && (
+      <div className="mo" onClick={e => e.target === e.currentTarget && setShowBFGoal(false)}>
+        <div className="md" style={{ maxWidth: 360, padding: '28px 24px' }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 6, color: 'var(--on-surface)' }}>Set Body Fat Goal</div>
+          <div style={{ fontSize: 12, color: 'var(--on-surface-dim)', marginBottom: 20, lineHeight: 1.5 }}>
+            {latestBF ? `Current: ${latestBF.percentage.toFixed(1)}%` : 'No reading logged yet'}
+          </div>
+          <div style={{ position: 'relative', marginBottom: 12 }}>
+            <input type="number" inputMode="decimal" placeholder="e.g. 15" value={bfGoalInput} min="2" max="60" step="0.5" onChange={e => setBFGoalInput(e.target.value)} autoFocus style={{ width: '100%', padding: '14px 44px 14px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: '1.5px solid var(--surface-container)', color: 'var(--on-surface)', fontSize: 22, fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, transition: 'border .15s' }} onFocus={e => e.target.style.borderColor = 'var(--primary)'} onBlur={e => e.target.style.borderColor = 'var(--surface-container)'} />
+            <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: 'var(--on-surface-variant)', fontWeight: 700 }}>%</span>
+          </div>
+          {bfGoalInput && !isNaN(parseFloat(bfGoalInput)) && (() => {
+            const cat = getBFCategory(parseFloat(bfGoalInput), user?.gender);
+            return <div style={{ marginBottom: 16, fontSize: 11, fontWeight: 700, color: cat.color, display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color }} />{cat.label} range</div>;
+          })()}
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button className="btn-g" style={{ flex: 1, padding: 12, borderRadius: 12 }} onClick={() => setShowBFGoal(false)}>Cancel</button>
+            <button className="btn-p" style={{ flex: 2, padding: 12, borderRadius: 12 }} disabled={!bfGoalInput || isNaN(parseFloat(bfGoalInput))} onClick={() => {
+              const num = parseFloat(bfGoalInput);
+              if (!isNaN(num) && num >= 2 && num <= 60) {
+                updateProfile({ bodyFatGoal: num });
+                addToast(`Body fat goal set to ${num}%`, 'success');
+              }
+              setShowBFGoal(false);
+            }}>Save Goal</button>
           </div>
         </div>
       </div>

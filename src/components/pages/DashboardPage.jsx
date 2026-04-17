@@ -473,10 +473,10 @@ export default function DashboardPage() {
               </div>
             )}
             {latestBF && (
-              <div style={{ marginTop: 12, padding: '8px 12px', borderRadius: 10, background: `${bfCat?.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: bfCat?.color }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: bfCat?.color }}>{latestBF.percentage.toFixed(1)}% BF</span>
-                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>· {bfCat?.label}</span>
+              <div style={{ marginTop: 12, padding: '6px 10px', borderRadius: 8, background: 'var(--surface-container-lowest)', border: '1px solid var(--surface-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: bfCat?.color, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--on-surface)' }}>{latestBF.percentage.toFixed(1)}%</span>
+                <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>BF · {bfCat?.label}</span>
               </div>
             )}
           </div>
@@ -707,22 +707,22 @@ export default function DashboardPage() {
 
             {/* CENTER: Trend mini-chart */}
             <div className="bf-card-chart">
-              {bfChartData.length >= 2 ? (
+              {bfChartData.length >= 1 ? (
                 <ResponsiveContainer width="100%" height={80}>
-                  <AreaChart data={bfChartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                  <AreaChart data={bfChartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
                     <defs>
                       <linearGradient id="bf-gradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0.35} />
                         <stop offset="95%" stopColor={bfCat?.color || '#F85F1B'} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <Tooltip cursor={false} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 10, fontSize: 11, color: 'var(--on-surface)', fontWeight: 700 }} formatter={(val) => [`${val}%`, 'Body Fat']} />
+                    <Tooltip cursor={false} contentStyle={{ background: 'var(--surface-container)', backdropFilter: 'blur(12px)', border: '1px solid var(--surface-container-highest)', borderRadius: 10, fontSize: 11, color: 'var(--on-surface)', fontWeight: 700, boxShadow: 'var(--elevation-2)' }} formatter={(val) => [`${val}%`, 'Body Fat']} />
                     {bfGoal && <ReferenceLine y={bfGoal} stroke="var(--primary)" strokeDasharray="4 4" label={{ value: `Goal ${bfGoal}%`, fill: 'var(--primary)', fontSize: 9, position: 'insideTopRight' }} />}
-                    <Area type="monotone" dataKey="pct" stroke={bfCat?.color || 'var(--primary-container)'} strokeWidth={2} fill="url(#bf-gradient)" dot={false} activeDot={{ r: 4, fill: bfCat?.color || 'var(--primary)', strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="pct" stroke={bfCat?.color || 'var(--primary-container)'} strokeWidth={2} fill="url(#bf-gradient)" dot={{ fill: bfCat?.color || 'var(--primary)', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: bfCat?.color || 'var(--primary)', strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--on-surface-dim)' }}>Log 2+ readings to see trend</div>
+                <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--on-surface-dim)' }}>Log a reading to see your trend</div>
               )}
             </div>
 

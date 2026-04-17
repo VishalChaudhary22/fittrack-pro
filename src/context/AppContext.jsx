@@ -645,12 +645,16 @@ export function AppProvider({ children }) {
     const mappedSplits = sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS;
     setSplits(mappedSplits);
 
-    // Sync XP to leaderboard cache now that logs are loaded
-    if (userId && wl.length > 0) {
+    // Sync XP to leaderboard cache now that logs are loaded.
+    // Always sync — even with 0 workout logs — so the user appears on the leaderboard.
+    if (userId) {
       setTimeout(() => {
         const mappedLogs = wl.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes }));
-        // user object is not fully reconstructed here, but we just need id, name, avatar
-        syncUserXPToCache({ workoutLogs: mappedLogs, splits: mappedSplits, user: { id: userId, name: 'Athlete' } }).catch(console.warn);
+        // Use cached profile for real name/avatar
+        const cachedProfile = (() => { try { return JSON.parse(localStorage.getItem(getProfileCacheKey(userId))); } catch { return null; } })();
+        const userName = cachedProfile?.name || 'Athlete';
+        const userAvatar = cachedProfile?.avatar || userName.slice(0, 2).toUpperCase();
+        syncUserXPToCache({ workoutLogs: mappedLogs, splits: mappedSplits, user: { id: userId, name: userName, avatar: userAvatar } }).catch(console.warn);
       }, 2000);
     }
     

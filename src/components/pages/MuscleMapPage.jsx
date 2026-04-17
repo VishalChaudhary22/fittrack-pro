@@ -481,8 +481,7 @@ export default function MuscleMapPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filteredLeaderboard.map(player => {
                 const rowXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
-                // Exclude 0 XP users entirely from the ranked list
-                if (rowXP === 0) return null;
+                const isZero = rowXP === 0;
                 return (
                 <div key={player.id}
                   onClick={() => setSelectedPlayer(player)}
@@ -491,6 +490,7 @@ export default function MuscleMapPage() {
                     padding: '12px 16px', borderRadius: 16,
                     display: 'flex', alignItems: 'center', gap: 16,
                     cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                    opacity: isZero && !player.isMe ? 0.5 : 1,
                   }}
                 >
                   {/* "You" Indicator Border */}
@@ -533,7 +533,7 @@ export default function MuscleMapPage() {
                     </div>
                     <div style={{
                       fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 11,
-                      color: 'var(--on-surface-variant)', marginTop: 2
+                      color: isZero ? 'var(--on-surface-dim)' : 'var(--on-surface-variant)', marginTop: 2
                     }}>
                       {muscleFilter === 'all' ? player.tier : MUSCLE_GROUPS.find(m => m.key === muscleFilter)?.label}
                     </div>
@@ -542,7 +542,7 @@ export default function MuscleMapPage() {
                   <div style={{ textAlign: 'right' }}>
                     <div style={{
                       fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
-                      fontSize: 16, color: player.isMe ? 'var(--primary)' : 'var(--on-surface)'
+                      fontSize: 16, color: player.isMe ? 'var(--primary)' : isZero ? 'var(--on-surface-dim)' : 'var(--on-surface)'
                     }}>
                       {rowXP >= 1000 ? `${(rowXP / 1000).toFixed(1)}K` : rowXP}
                     </div>

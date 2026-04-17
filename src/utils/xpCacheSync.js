@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
 import { calcAllMuscleXP, getOverallRank } from '../data/muscleData';
-import { MOCK_LEADERBOARD } from '../data/leaderboardData';
 
 /**
  * Returns the current month string in 'YYYY-MM' format using local time.
@@ -81,10 +80,13 @@ export const fetchLeaderboard = async () => {
     .order('total_xp', { ascending: false })
     .limit(50); // top 50 is more than enough
 
-  if (error || !data || data.length === 0) {
+  if (error || !data) {
     if (error) console.warn('[XPCache] Fetch failed:', error.message);
-    console.warn('[XPCache] Using MOCK_LEADERBOARD offline fallback');
-    return MOCK_LEADERBOARD.map(p => ({ ...p, isMock: true }));
+    return [];
+  }
+  if (data.length === 0) {
+    console.log('[XPCache] monthly_xp_cache is empty for this month — no cached entries yet.');
+    return [];
   }
 
   return data.map(row => ({

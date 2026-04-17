@@ -112,10 +112,10 @@ export default function MuscleMapPage() {
 
     // Then: fetch the full leaderboard
     const data = await fetchLeaderboard();
+    // An empty array is valid during first boot (cache not yet populated)
+    setLeaderboardData(data);
     if (data.length === 0) {
-      setLeaderboardError('Could not load leaderboard. Check your connection.');
-    } else {
-      setLeaderboardData(data);
+      console.log('[Olympus] No cached XP entries yet — only the current user will show.');
     }
     setLeaderboardLoading(false);
   };
@@ -201,32 +201,36 @@ export default function MuscleMapPage() {
 
   // Build and sort the full leaderboard including the real user and global players
   const fullLeaderboard = useMemo(() => {
-    if (leaderboardLoading || leaderboardData.length === 0) {
-      // While loading or empty, show just the current user's data
-      const meEntry = {
-        id: user?.id || 'me',
-        name: 'You',
-        isMe: true,
-        totalXP: overall.totalXP,
-        tier: overall.name,
-        initials: (user?.name || 'ME').slice(0, 2).toUpperCase(),
-        color: '#FFB59B',
-        muscleXP: muscleXP,
-      };
+    const meEntry = {
+      id: user?.id || 'me',
+      name: 'You',
+      isMe: true,
+      totalXP: overall.totalXP,
+      tier: overall.name,
+      initials: (user?.name || 'ME').slice(0, 2).toUpperCase(),
+      color: getTierColor(overall.name),
+      muscleXP: muscleXP,
+    };
+
+    if (leaderboardLoading) {
       return [{ ...meEntry, rank: 1 }];
     }
 
-    // Map leaderboard data: mark the current user, merge with their live muscleXP
-    const list = leaderboardData.map(player => ({
+    // Check if current user is already in the cache data
+    const alreadyInCache = leaderboardData.some(p => p.id === user?.id);
+
+    // Build the full list: cache rows + inject self if missing
+    const baseList = leaderboardData.map(player => ({
       ...player,
       isMe: player.id === user?.id,
-      // For the current user, always use live computed XP (not the cached snapshot)
       muscleXP: player.id === user?.id ? muscleXP : player.muscleXP,
       totalXP: player.id === user?.id ? overall.totalXP : player.totalXP,
       tier: player.id === user?.id ? overall.name : player.tier,
       name: player.id === user?.id ? 'You' : player.name,
       color: getTierColor(player.id === user?.id ? overall.name : player.tier),
     }));
+
+    const list = alreadyInCache ? baseList : [...baseList, meEntry];
 
     return list
       .sort((a, b) => b.totalXP - a.totalXP)
@@ -328,7 +332,15 @@ export default function MuscleMapPage() {
                 fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 28,
                 color: 'var(--on-surface)', lineHeight: 1.2, marginBottom: 6,
               }}>
-                {myRank === 1 ? 'You are #1!' : topPercent <= 50 ? `You are in the top ${topPercent}%` : `You are rank #${myRank}`}
+                {leaderboardLoading
+                  ? 'Fetching your rank…'
+                  : myRank === undefined
+                    ? 'Syncing to leaderboard…'
+                    : myRank === 1
+                      ? 'You are #1! 🏆'
+                      : topPercent <= 50
+                        ? `You are in the top ${topPercent}%`
+                        : `You are rank #${myRank}`}
               </div>
               <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
                 {overall.progress < 1

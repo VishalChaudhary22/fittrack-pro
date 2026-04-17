@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
@@ -23,15 +24,7 @@ import { getStepGoalPercent, formatSteps, getDisplayStepLog, getSourceLabel } fr
 import { usePedometer } from '../../hooks/usePedometer';
 import BodyFatRingCard from '../shared/BodyFatRingCard';
 
-const getBMIInsight = (bmi) => {
-  if (!bmi) return '';
-  if (bmi < 16)   return "Severely underweight. Consult a nutritionist and increase caloric intake immediately.";
-  if (bmi < 18.5) return "You're underweight. A caloric surplus with protein focus will help build lean mass.";
-  if (bmi < 25)   return "You're within the healthy range. Maintain current caloric deficit to hit peak definition.";
-  if (bmi < 30)   return "Slightly above the healthy range. A moderate deficit and strength training will get you there.";
-  if (bmi < 35)   return "Obese range detected. Focus on a sustainable caloric deficit and daily movement.";
-  return "High obesity range. Prioritise medical guidance alongside your fitness plan.";
-};
+
 
 const ParticlesBackground = () => {
   const canvasRef = useRef(null);

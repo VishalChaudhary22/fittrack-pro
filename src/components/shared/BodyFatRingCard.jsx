@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TrendingDown, TrendingUp, Activity } from 'lucide-react';
 import BodyFatLogModal from './BodyFatLogModal';
-import { ProgressOrb, ModalPortal } from './SharedComponents';
-import { clamp, kgToLbs } from '../../utils/helpers';
+import { ProgressOrb, ModalPortal, GlassTooltip } from './SharedComponents';
+import { clamp, kgToLbs, fmt } from '../../utils/helpers';
 
 export default function BodyFatRingCard() {
   const { user, bodyFatLog, healthLogs } = useApp();
@@ -17,23 +18,17 @@ export default function BodyFatRingCard() {
   , [bodyFatLog, user?.id]);
 
   const latestBF = userBFLog[0] || null;
-  const previousBF = userBFLog[1] || null;
+  const previousBF = userBFLog.length >= 2 ? userBFLog[1] : null;
   const bfGoal = user?.bodyFatGoal || null;
-  const startBF = userBFLog.length > 0 ? userBFLog[userBFLog.length - 1].percentage : null;
   const currentPct = latestBF ? latestBF.percentage : 0;
 
-  // BF progress toward goal
-  let bfProgress = 0;
-  if (latestBF) {
-    if (bfGoal && startBF && startBF !== bfGoal) {
-      if (currentPct >= startBF) bfProgress = 0;
-      else if (currentPct <= bfGoal) bfProgress = 100;
-      else bfProgress = ((startBF - currentPct) / (startBF - bfGoal)) * 100;
-    } else {
-      const maxScale = user?.gender === 'female' ? 40 : 35;
-      bfProgress = Math.min(100, Math.max(0, (currentPct / maxScale) * 100));
-    }
-  }
+  // BF chart data (chronological order for Recharts)
+  const bfChartData = useMemo(() =>
+    [...userBFLog].reverse().map(l => ({
+      date: fmt(l.date),
+      bf: l.percentage,
+    }))
+  , [userBFLog]);
 
   // ── Weight Goal Derived State ───────────────────────────────────────────────
   const unitWeight = user.unitWeight || 'kg';
@@ -67,22 +62,7 @@ export default function BodyFatRingCard() {
   }, [user]);
 
   // ── BF Deltas ───────────────────────────────────────────────────────────────
-  const bfDelta = latestBF && previousBF ? +(latestBF.percentage - previousBF.percentage).toFixed(1) : null;
-
-  const prevMonthLastBF = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    const priorLogs = userBFLog.filter(e => {
-      const d = new Date(e.date);
-      return d.getFullYear() < currentYear || (d.getFullYear() === currentYear && d.getMonth() < currentMonth);
-    });
-    return priorLogs[0] || null;
-  }, [userBFLog]);
-
-  const bfMonthDelta = prevMonthLastBF && latestBF
-    ? +(latestBF.percentage - prevMonthLastBF.percentage).toFixed(1)
-    : null;
+  const bfDelta = (latestBF && previousBF) ? +(latestBF.percentage - previousBF.percentage).toFixed(1) : null;
 
   const trendArrow = useMemo(() => {
     if (bfDelta === null || bfDelta === undefined) return null;
@@ -93,15 +73,8 @@ export default function BodyFatRingCard() {
       : { up: false, color: 'var(--success)' };
   }, [bfDelta, bfGoal]);
 
-  // ── Ring parameters ─────────────────────────────────────────────────────────
-  // Stitch BF ring = 192px, shrunk 25% = 144px. Both rings same size.
-  const ringSize = 144;
-
-  // BF SVG ring math (from Stitch design)
-  const bfRadius = 54;
-  const bfCircumference = 2 * Math.PI * bfRadius; // ~339.29
-  const bfClampedProgress = clamp(bfProgress, 0, 100);
-  const bfStrokeDashoffset = bfCircumference * (1 - bfClampedProgress / 100);
+  // ── Ring size (weight goal, shrunk 25% from 144→108) ────────────────────────
+  const weightRingSize = 108;
 
   return (
     <>
@@ -111,7 +84,7 @@ export default function BodyFatRingCard() {
         boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
       }}>
 
-        {/* Subtle Glow Background (from Stitch) */}
+        {/* Subtle Glow Background */}
         <div style={{
           position: 'absolute', top: -80, right: -80,
           width: 256, height: 256,
@@ -120,46 +93,24 @@ export default function BodyFatRingCard() {
           pointerEvents: 'none',
         }} />
 
-        {/* ── Header ── */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-          position: 'relative', zIndex: 1, marginBottom: 24,
-        }}>
-          <div>
-            <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>BODY COMPOSITION</div>
-            <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 2, lineHeight: 1.1 }}>ANALYSIS</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-            {latestBF && (
-              <span style={{
-                background: 'var(--primary-container)', color: 'var(--on-primary)',
-                borderRadius: 14, padding: '6px 12px', fontSize: 10, fontWeight: 700,
-                textAlign: 'center', lineHeight: 1.2,
-              }}>
-                {bfMonthDelta !== null
-                  ? <>{bfMonthDelta > 0 ? '+' : ''}{bfMonthDelta}% BF THIS<br/>MONTH</>
-                  : <>—% BF THIS<br/>MONTH</>
-                }
-              </span>
-            )}
-            <button className="btn-g" style={{ padding: '6px 12px', fontSize: 10, fontWeight: 700, borderRadius: 10 }} onClick={() => setShowModal(true)}>
-              + LOG BF%
-            </button>
-          </div>
+        {/* ── Header (clean — no buttons or pills) ── */}
+        <div style={{ position: 'relative', zIndex: 1, marginBottom: 20 }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)' }}>BODY COMPOSITION</div>
+          <div className="headline-lg" style={{ color: 'var(--on-surface)', marginTop: 2, lineHeight: 1.1 }}>ANALYSIS</div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* TOP HALF: Weight Goal (Stitch layout + ProgressOrb ring)          */}
+        {/* WEIGHT GOAL — shrunk 25%                                          */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {user.weightGoal ? (
           <div style={{ position: 'relative', zIndex: 10 }}>
             {/* Header row: Target weight + remaining stats */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 6 }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
                   <span style={{
                     fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 'clamp(2rem, 5vw, 2.8rem)',
+                    fontSize: 'clamp(1.5rem, 4vw, 2.1rem)',
                     fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1,
                     letterSpacing: '-0.03em',
                   }}>
@@ -167,22 +118,22 @@ export default function BodyFatRingCard() {
                   </span>
                   <span style={{
                     fontFamily: "'Be Vietnam Pro', sans-serif",
-                    fontSize: 16, color: 'var(--on-surface-variant)',
+                    fontSize: 13, color: 'var(--on-surface-variant)',
                   }}>{wUnit}</span>
                 </div>
                 <div style={{
                   fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 11, fontWeight: 700, color: 'var(--primary)',
-                  textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 4,
+                  fontSize: 10, fontWeight: 700, color: 'var(--primary)',
+                  textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 3,
                 }}>Target Weight</div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 13, color: 'var(--on-surface)' }}>
+                <div style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 12, color: 'var(--on-surface)' }}>
                   <span style={{ fontWeight: 700 }}>{kgLeft}{wUnit}</span> to {isLoss ? 'lose' : 'gain'}
                 </div>
                 <div style={{
                   fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 11, color: 'var(--on-surface-variant)',
+                  fontSize: 10, color: 'var(--on-surface-variant)',
                 }}>
                   {weeksLeft !== null ? `${weeksLeft} wks left` : '—'}
                 </div>
@@ -190,16 +141,16 @@ export default function BodyFatRingCard() {
             </div>
 
             {/* Weight Goal Ring — centered */}
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
-              <ProgressOrb progress={goalPct || 0} size={ringSize} label={`${goalPct || 0}%`} subLabel="Done" />
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0' }}>
+              <ProgressOrb progress={goalPct || 0} size={weightRingSize} label={`${goalPct || 0}%`} subLabel="Done" />
             </div>
 
-            {/* Current / Goal text row (Stitch style) */}
+            {/* Current / Goal text row */}
             <div style={{
               display: 'flex', justifyContent: 'space-between',
               fontFamily: "'Be Vietnam Pro', sans-serif",
               fontSize: 10, color: 'var(--on-surface-variant)',
-              textTransform: 'uppercase', letterSpacing: '0.15em',
+              textTransform: 'uppercase', letterSpacing: '0.12em',
             }}>
               <span>Current: {displayW(latestWeight)}{wUnit}</span>
               <span>Goal: {displayW(user.weightGoal)}{wUnit}</span>
@@ -207,171 +158,185 @@ export default function BodyFatRingCard() {
           </div>
         ) : (
           <div style={{
-            padding: 20, textAlign: 'center',
+            padding: 16, textAlign: 'center',
             background: 'var(--surface-container-highest)', borderRadius: 10,
-            color: 'var(--on-surface-variant)', fontSize: 13,
+            color: 'var(--on-surface-variant)', fontSize: 12,
           }}>
             Set a weight goal to track progress
           </div>
         )}
 
-        {/* ── Divider (Tonal — from Stitch) ── */}
+        {/* ── Divider (Tonal) ── */}
         <div style={{
           height: 1, width: '100%',
           background: 'var(--surface-container-lowest)',
-          margin: '24px 0',
+          margin: '20px 0',
         }} />
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* BOTTOM HALF: Body Fat Analysis (Stitch SVG Ring, shrunk 25%)      */}
+        {/* BODY FAT — current BF card + area trend chart + log button        */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {latestBF ? (
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          {/* Section title */}
           <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: 24, position: 'relative', zIndex: 10, padding: '8px 0',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginBottom: 14,
           }}>
-            {/* Title row (Stitch style) */}
-            <div style={{
-              width: '100%', display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <h3 style={{
-                fontFamily: "'Be Vietnam Pro', sans-serif",
-                fontSize: 18, fontWeight: 600, color: 'var(--on-surface)',
-                margin: 0,
-              }}>Body Fat Analysis</h3>
-              <Activity size={22} color="var(--primary)" style={{ opacity: 0.7 }} />
-            </div>
+            <h3 style={{
+              fontFamily: "'Be Vietnam Pro', sans-serif",
+              fontSize: 15, fontWeight: 600, color: 'var(--on-surface)',
+              margin: 0,
+            }}>Body Fat Analysis</h3>
+            <Activity size={18} color="var(--primary)" style={{ opacity: 0.7 }} />
+          </div>
 
-            {/* BF Ring (SVG from Stitch design) */}
-            <div style={{
-              position: 'relative', width: ringSize, height: ringSize,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg
-                viewBox="0 0 120 120"
-                style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-              >
-                {/* Background Ring */}
-                <circle
-                  cx="60" cy="60" r={bfRadius}
-                  fill="none" stroke="var(--surface-container-lowest)" strokeWidth="8"
-                />
-                {/* Progress Ring */}
-                {bfClampedProgress > 0 && (
-                  <circle
-                    cx="60" cy="60" r={bfRadius}
-                    fill="none" stroke="url(#bf-ring-gradient)" strokeWidth="8"
-                    strokeDasharray={bfCircumference}
-                    strokeDashoffset={bfStrokeDashoffset}
-                    strokeLinecap="round"
-                    style={{
-                      transform: 'rotate(-90deg)',
-                      transformOrigin: '50% 50%',
-                      transition: 'stroke-dashoffset 0.35s',
-                    }}
-                  />
-                )}
-                <defs>
-                  <linearGradient id="bf-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="var(--primary)" />
-                    <stop offset="100%" stopColor="var(--primary-container)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Center Content (Stitch style) */}
+          {latestBF ? (
+            <>
+              {/* Current BF% + Previous + Goal — inline stat row */}
               <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                justifyContent: 'center', textAlign: 'center', zIndex: 10, marginTop: 2,
+                display: 'flex', alignItems: 'center', gap: 14,
+                marginBottom: 14,
               }}>
-                <span style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: 'clamp(2rem, 5vw, 2.5rem)',
-                  fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1,
-                  textShadow: '0 0 10px rgba(255, 181, 155, 0.5)',
-                }}>
-                  {currentPct.toFixed(1)}<span style={{
-                    fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 16,
-                  }}>%</span>
-                </span>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 11, color: 'var(--on-surface-variant)',
-                  textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 4,
-                }}>Current BF</span>
-              </div>
-            </div>
+                {/* Current */}
+                <div>
+                  <div style={{
+                    fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em',
+                    color: 'var(--on-surface-dim)', marginBottom: 2,
+                    fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700,
+                  }}>Current</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+                    <span style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: 'clamp(1.6rem, 4vw, 2rem)',
+                      fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1,
+                      textShadow: '0 0 10px rgba(255, 181, 155, 0.3)',
+                    }}>
+                      {currentPct.toFixed(1)}
+                    </span>
+                    <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 13, color: 'var(--on-surface-variant)' }}>%</span>
+                  </div>
+                </div>
 
-            {/* Stat bar: Previous | Goal | Trend (Stitch style, expanded) */}
-            <div style={{
-              width: '100%', display: 'flex', justifyContent: 'space-between',
-              background: 'var(--surface-container-low)', borderRadius: 8, padding: 12,
-            }}>
-              {/* Previous */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 10, color: 'var(--on-surface-variant)',
-                  textTransform: 'uppercase', letterSpacing: '0.15em',
-                }}>Previous</span>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 14, fontWeight: 600, color: 'var(--on-surface)',
-                }}>
-                  {previousBF ? `${previousBF.percentage.toFixed(1)}%` : '—'}
-                </span>
+                {/* Trend arrow */}
+                {trendArrow && (
+                  <div style={{ alignSelf: 'flex-end', paddingBottom: 4 }}>
+                    {trendArrow.up
+                      ? <TrendingUp size={18} color={trendArrow.color} />
+                      : <TrendingDown size={18} color={trendArrow.color} />
+                    }
+                  </div>
+                )}
+
+                {/* Previous */}
+                {previousBF && (
+                  <div>
+                    <div style={{
+                      fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em',
+                      color: 'var(--on-surface-dim)', marginBottom: 2,
+                      fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700,
+                    }}>Previous</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+                      <span style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
+                        fontWeight: 700, color: 'var(--on-surface-variant)', opacity: 0.6, lineHeight: 1,
+                      }}>
+                        {previousBF.percentage.toFixed(1)}
+                      </span>
+                      <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>%</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Goal BF% (pushed right) */}
+                {bfGoal && (
+                  <div style={{ marginLeft: 'auto' }}>
+                    <div style={{
+                      fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em',
+                      color: 'var(--on-surface-dim)', marginBottom: 2,
+                      fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700,
+                    }}>Goal</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+                      <span style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
+                        fontWeight: 700, color: 'var(--primary)', lineHeight: 1,
+                      }}>
+                        {bfGoal}
+                      </span>
+                      <span style={{ fontSize: 10, color: 'var(--primary)', opacity: 0.7 }}>%</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Goal */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 10, color: 'var(--on-surface-variant)',
-                  textTransform: 'uppercase', letterSpacing: '0.15em',
-                }}>Goal</span>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 14, fontWeight: 600, color: 'var(--on-surface)',
-                }}>
-                  {bfGoal ? `${bfGoal}%` : '—'}
-                </span>
-              </div>
-
-              {/* Trend */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 10, color: 'var(--on-surface-variant)',
-                  textTransform: 'uppercase', letterSpacing: '0.15em',
-                }}>Trend</span>
-                <span style={{
-                  fontFamily: "'Be Vietnam Pro', sans-serif",
-                  fontSize: 14, fontWeight: 600,
-                  color: trendArrow ? trendArrow.color : 'var(--on-surface)',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                }}>
-                  {bfDelta !== null ? (
-                    <>
-                      {bfDelta > 0 ? '+' : ''}{bfDelta}%
-                      {trendArrow && (trendArrow.up
-                        ? <TrendingUp size={14} />
-                        : <TrendingDown size={14} />
+              {/* Area Trend Chart */}
+              {bfChartData.length >= 2 ? (
+                <div style={{ marginBottom: 14 }}>
+                  <ResponsiveContainer width="100%" height={120}>
+                    <AreaChart data={bfChartData}>
+                      <defs>
+                        <linearGradient id="bf-area-grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#F85F1B" stopOpacity={0.18} />
+                          <stop offset="95%" stopColor="#F85F1B" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
+                      <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 8 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
+                      <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 8 }} width={30} axisLine={false} tickLine={false} />
+                      <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />
+                      <Area type="monotone" dataKey="bf" stroke="#F85F1B" strokeWidth={2} fill="url(#bf-area-grad)" dot={{ fill: '#F85F1B', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="Body Fat %" />
+                      {bfGoal && (
+                        <ReferenceLine y={bfGoal} stroke="rgba(248,95,27,.4)" strokeDasharray="5 5" label={{ value: 'Goal', fill: 'var(--primary)', fontSize: 9, position: 'insideTopRight' }} />
                       )}
-                    </>
-                  ) : '—'}
-                </span>
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div style={{
+                  height: 80, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--on-surface-variant)', marginBottom: 14,
+                  background: 'var(--surface-container-lowest)', borderRadius: 10,
+                }}>
+                  <Activity size={20} color="var(--primary)" style={{ opacity: 0.6, marginBottom: 6 }} />
+                  <div style={{ fontSize: 11 }}>Log 2+ readings to see your trend</div>
+                </div>
+              )}
+
+              {/* Log BF% Button */}
+              <button
+                className="btn-g"
+                style={{
+                  width: '100%', padding: '11px',
+                  fontSize: 12, fontWeight: 700, borderRadius: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                }}
+                onClick={() => setShowModal(true)}
+              >
+                + LOG BODY FAT %
+              </button>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                padding: '20px 0 14px', color: 'var(--on-surface-dim)', fontSize: 12,
+              }}>
+                Log your first body fat reading to start tracking
               </div>
+              <button
+                className="btn-g"
+                style={{
+                  width: '100%', padding: '11px',
+                  fontSize: 12, fontWeight: 700, borderRadius: 10,
+                }}
+                onClick={() => setShowModal(true)}
+              >
+                + LOG BODY FAT %
+              </button>
             </div>
-          </div>
-        ) : (
-          <div style={{
-            padding: '32px 0', textAlign: 'center',
-            color: 'var(--on-surface-dim)', fontSize: 14,
-          }}>
-            Log your first body fat reading
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {showModal && (

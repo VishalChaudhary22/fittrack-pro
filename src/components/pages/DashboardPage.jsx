@@ -462,32 +462,27 @@ export default function DashboardPage() {
           <div style={{ fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontWeight: 700, marginBottom: 16 }}>
             TRAINING OVERVIEW
           </div>
-          <div className="g2" style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: 24 }}>
-              <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>Sessions/Wk</div>
-                <div className="headline-lg" style={{ color: 'var(--primary)' }}>{thisWk}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>All Time</div>
-                <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{userWo.length}</div>
+          <div className="g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(65px, 1fr))', gap: 10 }}>
+            <div style={{ background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700, marginBottom: 4, letterSpacing: '0.05em' }}>Sessions/Wk</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)', lineHeight: 1 }}>{thisWk}</div>
+            </div>
+            <div style={{ background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700, marginBottom: 4, letterSpacing: '0.05em' }}>All Time</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)', lineHeight: 1 }}>{userWo.length}</div>
+            </div>
+            <div style={{ background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4, letterSpacing: '0.05em' }}>Current</div>
+              <div className="headline-lg" style={{ color: 'var(--primary)', display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
+                {streak.current}<span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 2 }}>d</span>
               </div>
             </div>
-            <div style={{ width: 1, background: 'var(--surface-container-highest)' }} className="hide-on-mobile" />
-            <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Current Streak</div>
-                <div className="headline-lg" style={{ color: 'var(--primary)', display: 'flex', alignItems: 'baseline' }}>
-                  {streak.current}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
-                </div>
+            <div style={{ background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative' }}>
+              <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4, letterSpacing: '0.05em' }}>Best Streak</div>
+              <div className="headline-lg" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
+                {streak.longest}<span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 2 }}>d</span>
               </div>
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase' }}>Best Streak</div>
-                <div className="headline-lg" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'baseline' }}>
-                  {streak.longest}<span style={{ fontSize: 14, color: 'var(--on-surface-variant)', fontFamily: "'Be Vietnam Pro', sans-serif", marginLeft: 3 }}>d</span>
-                </div>
-              </div>
-              {streak.current >= 3 && <div style={{ background: 'rgba(248,95,27,0.1)', color: 'var(--primary)', padding: '6px', borderRadius: '50%' }}><Zap size={16} /></div>}
+              {streak.current >= 3 && <div style={{ position: 'absolute', top: -6, right: -6, background: 'rgba(248,95,27,0.1)', color: 'var(--primary)', padding: '4px', borderRadius: '50%' }}><Zap size={10} /></div>}
             </div>
           </div>
         </div>

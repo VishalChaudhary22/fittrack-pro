@@ -306,11 +306,12 @@ export default function BodyFatRingCard() {
 
               {/* Log BF% Button */}
               <button
-                className="btn-g"
+                className="btn-p"
                 style={{
-                  width: '100%', padding: '11px',
-                  fontSize: 12, fontWeight: 700, borderRadius: 10,
+                  padding: '7px 13px',
+                  fontSize: 10, fontWeight: 700, borderRadius: 100,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  margin: '0 auto', width: 'fit-content'
                 }}
                 onClick={() => setShowModal(true)}
               >
@@ -325,10 +326,12 @@ export default function BodyFatRingCard() {
                 Log your first body fat reading to start tracking
               </div>
               <button
-                className="btn-g"
+                className="btn-p"
                 style={{
-                  width: '100%', padding: '11px',
-                  fontSize: 12, fontWeight: 700, borderRadius: 10,
+                  padding: '7px 13px',
+                  fontSize: 10, fontWeight: 700, borderRadius: 100,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  margin: '0 auto', width: 'fit-content'
                 }}
                 onClick={() => setShowModal(true)}
               >

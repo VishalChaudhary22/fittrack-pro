@@ -243,7 +243,27 @@ export function AppProvider({ children }) {
     try { return JSON.parse(localStorage.getItem(`fittrack_foodLog_${cachedUserId}`) || '[]'); }
     catch { return []; }
   });
-  const [stepLogs, setStepLogsState] = useState([]);
+  const [stepLogs, setStepLogsState] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return [];
+    try { return JSON.parse(localStorage.getItem(`fittrack_stepLog_${cachedUserId}`) || '[]'); }
+    catch { return []; }
+  });
+
+  const setStepLogs = useCallback((updater) => {
+    setStepLogsState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+      if (cachedUserId) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 90);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+        const pruned = next.filter(e => e.date >= cutoffStr);
+        localStorage.setItem(`fittrack_stepLog_${cachedUserId}`, JSON.stringify(pruned));
+      }
+      return next;
+    });
+  }, []);
 
   const setReadinessLog = useCallback((updater) => {
     setReadinessLogState(prev => {
@@ -379,7 +399,7 @@ export function AppProvider({ children }) {
       setReadinessLog([]);
       setMeasurements([]);
       setFoodLog([]);
-      setStepLogsState([]);
+      setStepLogs([]);
       // Clear local-only prefs (Fix 6)
       setFavoriteIds([]);
       setSupplementConfig([]);
@@ -547,7 +567,7 @@ export function AppProvider({ children }) {
       setReadinessLog(mergedReadinessLog);
     }
     
-    setStepLogsState(stepData);
+    setStepLogs(stepData);
 
     // Spltis fallback to INIT_SPLITS if none exist
     setSplits(sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);
@@ -799,7 +819,7 @@ export function AppProvider({ children }) {
       synced_at: new Date().toISOString(),
     };
     await supabase.from('step_logs').upsert(entry, { onConflict: 'id' });
-    setStepLogsState(prev => {
+    setStepLogs(prev => {
       const filtered = prev.filter(l => !(l.date === date && l.source === source));
       return [...filtered, entry].sort((a, b) => b.date.localeCompare(a.date));
     });

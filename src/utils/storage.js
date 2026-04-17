@@ -11,18 +11,14 @@ const STORAGE_KEYS = [
   'fittrack_favoriteFoods',
 ];
 
-export const exportData = () => {
+export const exportData = (payload = {}) => {
   let csvContent = "Table,Data\n\n";
   
-  STORAGE_KEYS.forEach(key => {
-    const val = localStorage.getItem(key);
-    if (!val) return;
+  Object.entries(payload).forEach(([key, data]) => {
+    if (!Array.isArray(data) || data.length === 0) return;
     
     try {
-      const data = JSON.parse(val);
-      if (!Array.isArray(data) || data.length === 0) return;
-      
-      const tableName = key.replace('fittrack_', '').toUpperCase();
+      const tableName = key.toUpperCase();
       csvContent += `--- ${tableName} ---\n`;
       
       // Get all unique keys

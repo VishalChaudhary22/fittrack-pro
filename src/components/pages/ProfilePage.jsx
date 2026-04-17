@@ -5,7 +5,7 @@ import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComp
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
 import { fmt, kgToLbs, cmToFtIn } from '../../utils/helpers';
-import { exportData, importData } from '../../utils/storage';
+import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 
 const PRESETS = [
@@ -101,7 +101,7 @@ function AvatarPickerModal({ open, onClose }) {
 }
 
 export default function ProfilePage() {
-  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak } = useApp();
+  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs } = useApp();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -163,22 +163,17 @@ export default function ProfilePage() {
     }
   };
 
-  const handleExport = () => { exportData(); addToast('Data exported!', 'success'); };
-  const handleImport = () => {
-    const input = document.createElement('input');
-    input.type = 'file'; input.accept = '.json';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const count = await importData(file);
-        addToast(`Imported ${count} data sets! Reloading...`, 'success');
-        setTimeout(() => window.location.reload(), 1500);
-      } catch (err) {
-        addToast(err.message, 'error');
-      }
-    };
-    input.click();
+  const handleExport = () => { 
+    exportData({
+      workoutLogs,
+      splits,
+      healthLogs,
+      foodLog,
+      measurements,
+      readinessLog,
+      stepLogs
+    });
+    addToast('Data exported!', 'success');
   };
 
   const bmi = calcBMI(user.weight, user.height);
@@ -430,9 +425,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-           <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 13 }} onClick={handleExport}><Download size={16} /> Export Data</button>
-           <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 13 }} onClick={handleImport}><Upload size={16} /> Import Data</button>
+        <div style={{ marginBottom: 16 }}>
+           <button style={{ width: '100%', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 13 }} onClick={handleExport}><Download size={16} /> Export Data</button>
         </div>
         
         <button style={{ width: '100%', background: 'rgba(255,107,107,0.08)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14 }} onClick={() => setConfirm(true)}><LogOut size={16} /> Logout</button>

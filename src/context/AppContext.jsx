@@ -135,6 +135,19 @@ const mergeFoodEntries = (cloudEntries, localEntries, userId) => {
   return merged.sort((a, b) => getEntryTime(b) - getEntryTime(a));
 };
 
+const mergeStepEntries = (cloudEntries, localEntries, userId) => {
+  const merged = [...cloudEntries];
+  const knownIds = new Set(cloudEntries.map(entry => entry.id));
+
+  localEntries
+    .filter(entry => entry?.user_id === userId || entry?.userId === userId)
+    .forEach(entry => {
+      if (!knownIds.has(entry.id)) merged.push(entry);
+    });
+
+  return merged.sort((a, b) => b.date.localeCompare(a.date));
+};
+
 const getReadinessKey = (entry, userId) => `${entry?.userId || userId}:${entry?.date || ''}`;
 
 const pickPreferredReadinessEntry = (existingEntry, nextEntry) => {
@@ -318,6 +331,7 @@ export function AppProvider({ children }) {
   const prevUserIdRef = useRef(null);
   const foodLogRef = useRef(foodLog);
   const readinessLogRef = useRef(readinessLog);
+  const stepLogsRef = useRef(stepLogs);
   const currentUserIdRef = useRef(null);
   const cloudRefreshTimerRef = useRef(null);
 
@@ -328,6 +342,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     readinessLogRef.current = readinessLog;
   }, [readinessLog]);
+
+  useEffect(() => {
+    stepLogsRef.current = stepLogs;
+  }, [stepLogs]);
 
   useEffect(() => {
     currentUserIdRef.current = session?.user?.id || profile?.id || localStorage.getItem('fittrack_last_user_id') || null;
@@ -537,8 +555,10 @@ export function AppProvider({ children }) {
 
     const persistedFoodLog = readPersistedUserArray('fittrack_foodLog', userId);
     const persistedReadinessLog = readPersistedUserArray('fittrack_readinessLog', userId);
+    const persistedStepLog = readPersistedUserArray('fittrack_stepLog', userId);
     const cachedFoodSource = foodLogRef.current.length > 0 ? foodLogRef.current : persistedFoodLog;
     const cachedReadinessSource = readinessLogRef.current.length > 0 ? readinessLogRef.current : persistedReadinessLog;
+    const cachedStepSource = stepLogsRef.current.length > 0 ? stepLogsRef.current : persistedStepLog;
 
     setWorkoutLogs(wl.map(i => ({ ...i, userId: i.user_id, splitId: i.split_id, dayId: i.day_id, dayName: i.day_name, durationMinutes: i.duration_minutes })));
     setHealthLogs(hl.map(i => ({ ...i, userId: i.user_id })));
@@ -567,7 +587,12 @@ export function AppProvider({ children }) {
       setReadinessLog(mergedReadinessLog);
     }
     
-    setStepLogs(stepData);
+    const mergedStepLog = stepData.length > 0
+      ? mergeStepEntries(stepData, cachedStepSource, userId)
+      : cachedStepSource;
+    if (mergedStepLog.length > 0 || stepLogsRef.current.length === 0) {
+      setStepLogs(mergedStepLog);
+    }
 
     // Spltis fallback to INIT_SPLITS if none exist
     setSplits(sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS);

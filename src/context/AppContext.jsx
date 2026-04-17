@@ -8,6 +8,7 @@ import { INIT_SPLITS } from '../data/splits';
 // Supabase & Migration imports
 import { supabase } from '../lib/supabaseClient';
 import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, uploadLocalDataToCloud } from '../utils/authMigration';
+import { calcStepsCalories } from '../utils/activityUtils';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -832,13 +833,15 @@ export function AppProvider({ children }) {
   const logSteps = useCallback(async ({ steps, date, source = 'manual', distanceKm, caloriesActive, floors }) => {
     if (!profile?.id) return;
     const userId = profile.id;
+    const calculatedCals = caloriesActive ?? calcStepsCalories(steps, profile.weight || 70);
+
     const entry = {
       id: `${userId}_${date}_${source}`,
       user_id: userId,
       date,
       steps,
       distance_km: distanceKm || null,
-      calories_active: caloriesActive || null,
+      calories_active: calculatedCals || null,
       floors: floors || null,
       source,
       synced_at: new Date().toISOString(),

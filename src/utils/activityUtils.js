@@ -1,10 +1,11 @@
 export const calcStepsCalories = (steps, userWeightKg) => {
-  // Average stride length: 0.762m for Indian men (~5'8"), 0.6858m for women (~5'4")
-  // 1 kcal ≈ burned every 20 steps at moderate pace for 70kg person
-  // MET for walking at 4 km/h = 3.0
-  // This is an estimate — device data is always more accurate
-  const kcalPer1000Steps = userWeightKg * 0.05; // approx
-  return Math.round((steps / 1000) * kcalPer1000Steps);
+  // Using MET formula for moderate walking (3 mph = 3.5 METs)
+  // Calories = (MET × 3.5 × weight_in_kg / 200) * duration_in_minutes
+  // Assuming average of 100 steps per minute for moderate pace walking:
+  // Calories = (3.5 × 3.5 × weight_in_kg / 200) * (steps / 100)
+  // Which simplifies to: 0.0006125 * weight_in_kg * steps
+  if (!userWeightKg || !steps) return 0;
+  return Math.round(0.0006125 * userWeightKg * steps);
 };
 
 export const getStepGoalPercent = (steps, goal = 10000) =>

@@ -350,6 +350,7 @@ export function AppProvider({ children }) {
   const foodLogRef = useRef(foodLog);
   const readinessLogRef = useRef(readinessLog);
   const stepLogsRef = useRef(stepLogs);
+  const bodyFatLogRef = useRef(bodyFatLog);
   const currentUserIdRef = useRef(null);
   const cloudRefreshTimerRef = useRef(null);
 
@@ -364,6 +365,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     stepLogsRef.current = stepLogs;
   }, [stepLogs]);
+
+  useEffect(() => {
+    bodyFatLogRef.current = bodyFatLog;
+  }, [bodyFatLog]);
 
   useEffect(() => {
     currentUserIdRef.current = session?.user?.id || profile?.id || localStorage.getItem('fittrack_last_user_id') || null;
@@ -617,14 +622,19 @@ export function AppProvider({ children }) {
       setStepLogs(mergedStepLog);
     }
 
-    // Body fat logs
+    // Body fat logs — merge local entries to avoid wiping unsynced local logs
     const cloudBF = bfData.map(row => ({
       id: row.id, userId: row.user_id, date: row.date,
       percentage: parseFloat(row.percentage), method: row.method,
       notes: row.notes || '', createdAt: new Date(row.created_at).getTime(),
     }));
-    if (cloudBF.length > 0) {
-      setBodyFatLog(cloudBF);
+    const persistedBFLog = readPersistedUserArray('fittrack_bodyFatLog', userId);
+    const localBFSource = bodyFatLogRef.current.length > 0 ? bodyFatLogRef.current : persistedBFLog;
+    const cloudBFIds = new Set(cloudBF.map(e => e.id));
+    const localOnlyBF = localBFSource.filter(e => e.userId === userId && !cloudBFIds.has(e.id));
+    const mergedBF = [...cloudBF, ...localOnlyBF].sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (mergedBF.length > 0 || bodyFatLogRef.current.length === 0) {
+      setBodyFatLog(mergedBF);
     }
 
     // Spltis fallback to INIT_SPLITS if none exist

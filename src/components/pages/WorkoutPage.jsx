@@ -615,6 +615,8 @@ function ExerciseSwapModal({ exerciseName, onSwap, onClose }) {
   );
 }
 
+const workoutPageCache = { trackerScroll: 0 };
+
 export default function WorkoutPage() {
   useScrollRestoration('/workout');
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
@@ -819,9 +821,11 @@ export default function WorkoutPage() {
   }, [session]);
 
   const start = day => {
+    workoutPageCache.trackerScroll = window.scrollY;
     if (day.type === 'yoga') {
       setSession({ day, isYoga: true });
       setDone(null);
+      window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     const exs = day.exercises.map(ex => {
@@ -842,6 +846,7 @@ export default function WorkoutPage() {
     startTimeRef.current = timestamp;
     setSession({ day, exs, notes: '', startTime: timestamp });
     setDone(null);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const upd = (ei, si, f, v) => setSession(p => {
@@ -944,7 +949,11 @@ export default function WorkoutPage() {
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-p" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => { setSession(null); setDone(null); }}>Log Another</button>
+          <button className="btn-p" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => { 
+            setSession(null); 
+            setDone(null); 
+            setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0); 
+          }}>Log Another</button>
           <button className="btn-g" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => nav('/muscle-map')}>View Map →</button>
         </div>
       </div>
@@ -954,6 +963,9 @@ export default function WorkoutPage() {
   if (session) {
     if (session.isYoga) {
       const handleYogaComplete = (completedPreset) => {
+        // [omitted ... replaced with yoga complete logic further down so this chunk targets just the return below]
+        // Actually wait, I only need to replace the onBack in YogaSessionView.
+        // I will do that carefully.
         const log = {
           id: gId(), userId: user.id, splitId: activeSplit.id,
           dayId: session.day.id, dayName: session.day.name,
@@ -978,7 +990,11 @@ export default function WorkoutPage() {
         });
         addToast('Yoga session logged! 🧘', 'success');
       };
-      return <YogaSessionView day={session.day} onBack={() => { setSession(null); setDone(null); }} onComplete={handleYogaComplete} />;
+      return <YogaSessionView day={session.day} onBack={() => { 
+        setSession(null); 
+        setDone(null); 
+        setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0); 
+      }} onComplete={handleYogaComplete} />;
     }
     const pct = Math.round((session.exs.flatMap(e => e.sets).filter(s => s.done).length / session.exs.flatMap(e => e.sets).length) * 100) || 0;
     return (
@@ -1128,6 +1144,7 @@ export default function WorkoutPage() {
           startTimeRef.current = null;
           setElapsed(0);
           setSession(null); skipRestTimer();
+          setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0);
         }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
           Discard Workout
         </button>

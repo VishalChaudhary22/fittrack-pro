@@ -352,13 +352,20 @@ export default function DietPage() {
     }
   }, [showSearch, selectedFood, showCustom]);
 
+  const closeSearch = () => {
+    setShowSearch(false);
+    setTimeout(() => window.scrollTo({ top: dietTabCache.trackerScroll || 0, behavior: 'instant' }), 0);
+  };
+
   const handleOpenSearch = (slot) => {
+    dietTabCache.trackerScroll = window.scrollY;
     setSearchMealSlot(slot);
     setShowSearch(true);
     setSelectedFood(null);
     setShowCustom(false);
     setSearchQuery('');       // Bug 1 fix — always start fresh
     setSearchCat('All');      // Gap 3 fix — correct default
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleSelectFood = (food) => {
@@ -390,7 +397,7 @@ export default function DietPage() {
     });
     if (!isOil) {
       addToast(`${item.name} logged.`, 'success');
-      setShowSearch(false);
+      closeSearch();
       setSelectedFood(null);
       setShowCustom(false);
       setCustomInput({ name: '', cals: '', p: '', c: '', f: '' });
@@ -927,7 +934,7 @@ export default function DietPage() {
               <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: 16, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                   <button className="btn-g" style={{ padding: 8 }} onClick={() => { setSelectedFood(null); setShowCustom(false); }}><ChevronLeft size={20}/></button>
-                  <button className="btn-g" aria-label="Close search" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
+                  <button className="btn-g" aria-label="Close search" style={{ padding: 8 }} onClick={closeSearch}><X size={20}/></button>
                 </div>
                 
                 {showCustom ? (
@@ -1157,7 +1164,7 @@ export default function DietPage() {
                 <div style={{ padding: '16px 24px 12px', background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <h3 className="headline-md" style={{ margin: 0, fontSize: 20 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
-                    <button className="btn-g" aria-label="Close meal search" style={{ padding: 8 }} onClick={() => setShowSearch(false)}><X size={20}/></button>
+                    <button className="btn-g" aria-label="Close meal search" style={{ padding: 8 }} onClick={closeSearch}><X size={20}/></button>
                   </div>
                   <div style={{ position: 'relative' }}>
                     <Search style={{ position: 'absolute', top: 14, left: 16, color: 'var(--on-surface-dim)' }} size={18} />

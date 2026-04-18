@@ -4,8 +4,10 @@ import { ChevronDown, X, Edit2, Trash2, Check, Dumbbell, Repeat, Zap, Target, Tr
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ModalPortal } from '../shared/SharedComponents';
 import { gId } from '../../utils/helpers';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function SplitsPage() {
+  useScrollRestoration('/splits');
   const { user, splits, setSplits, setActiveSplitId, addToast, workoutLogs } = useApp();
   const navigate = useNavigate();
   const isAdmin = user.isAdmin;

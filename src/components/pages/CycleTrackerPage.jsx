@@ -3,8 +3,10 @@ import { Settings, Save, Sparkles, Calendar } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
 import { getCyclePhase } from '../../utils/cycleCalculations';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function CycleTrackerPage() {
+  useScrollRestoration('/cycle');
   const { cycleConfig, setCycleConfig, addToast } = useApp();
   
   const [startDate, setStartDate] = useState(cycleConfig?.startDate || '');

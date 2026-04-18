@@ -1,9 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints } from 'lucide-react';
+import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints, Edit2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import EditWorkoutModal from '../shared/EditWorkoutModal';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
 import { fmt, tod } from '../../utils/helpers';
 import { getMusclesForExercise, MUSCLE_GROUPS } from '../../data/muscleData';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+
+const historyCache = { activeTab: 'strength', search: '', filterSplit: '' };
 
 // Format duration from durationMinutes
 const fmtDuration = (mins) => {
@@ -22,12 +26,18 @@ const calcVolume = (exercises) => {
 };
 
 export default function WorkoutHistoryPage() {
-  const { user, workoutLogs, setWorkoutLogs, splits, addToast, cardioLog, setCardioLog } = useApp();
-  const [search, setSearch] = useState('');
-  const [filterSplit, setFilterSplit] = useState('');
+  useScrollRestoration('/history');
+  const { user, workoutLogs, setWorkoutLogs, splits, addToast, cardioLog, setCardioLog, updateWorkoutLog } = useApp();
+  const [search, setSearchRaw] = useState(historyCache.search);
+  const [filterSplit, setFilterSplitRaw] = useState(historyCache.filterSplit);
   const [expandId, setExpandId] = useState(null);
   const [confirm, setConfirm] = useState(null);
-  const [activeTab, setActiveTab] = useState('strength'); // 'strength' | 'cardio'
+  const [editLog, setEditLog] = useState(null);
+  const [activeTab, setActiveTabRaw] = useState(historyCache.activeTab); // 'strength' | 'cardio'
+
+  const setSearch = (v) => { historyCache.search = v; setSearchRaw(v); };
+  const setFilterSplit = (v) => { historyCache.filterSplit = v; setFilterSplitRaw(v); };
+  const setActiveTab = (v) => { historyCache.activeTab = v; setActiveTabRaw(v); };
   
   // Cardio Form State
   const [cType, setCType] = useState('Running');
@@ -298,9 +308,14 @@ export default function WorkoutHistoryPage() {
                           {log.notes}
                         </div>
                       )}
-                      <button className="btn-d" style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '8px 12px', borderRadius: 8, color: 'var(--error)', borderColor: 'rgba(255,59,48,0.3)' }} onClick={e => { e.stopPropagation(); deleteLog(log.id); }}>
-                        <Trash2 size={12} /> Delete Session
-                      </button>
+                      <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                        <button className="btn-p" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, padding: '10px 12px', borderRadius: 8 }} onClick={e => { e.stopPropagation(); setEditLog(log); }}>
+                          <Edit2 size={14} /> Edit Session
+                        </button>
+                        <button className="btn-d" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, padding: '10px 12px', borderRadius: 8, color: 'var(--error)', borderColor: 'rgba(255,59,48,0.3)', background: 'transparent' }} onClick={e => { e.stopPropagation(); deleteLog(log.id); }}>
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -378,6 +393,18 @@ export default function WorkoutHistoryPage() {
         </div>
       )}
       </>)}
+
+      {editLog && (
+        <EditWorkoutModal 
+          log={editLog} 
+          splits={splits} 
+          onSave={async (updatedLog) => {
+            await updateWorkoutLog(updatedLog.id, updatedLog);
+            addToast('Workout updated', 'success');
+          }}
+          onClose={() => setEditLog(null)} 
+        />
+      )}
 
       <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>

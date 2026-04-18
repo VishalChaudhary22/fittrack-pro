@@ -56,13 +56,22 @@ const CONSTANTS = {
   ]
 };
 
+const dietTabCache = { activeTab: 'tracker' };
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+
 export default function DietPage() {
   const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
-  const [activeTab, setActiveTab] = useState('tracker');
+  
+  useScrollRestoration('/diet');
+  const [activeTab, setActiveTabRaw] = useState(dietTabCache.activeTab);
+  const setActiveTab = useCallback((tab) => {
+    dietTabCache.activeTab = tab;
+    setActiveTabRaw(tab);
+  }, []);
 
   // Search State
   const [showSearch, setShowSearch] = useState(false);

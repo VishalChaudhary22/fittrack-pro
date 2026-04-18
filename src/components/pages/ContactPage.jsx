@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Mail, Dumbbell, Salad, TrendingUp, Trophy, Check } from 'lucide-react';
 import { PageHeader } from '../shared/SharedComponents';
+import { useScrollRestoration, clearScrollPosition } from '../../hooks/useScrollRestoration';
 
 export default function ContactPage() {
+  useScrollRestoration('/contact');
   const [f, setF] = useState({ name: '', email: '', phone: '', goal: '', service: 'workout', message: '' });
   const [sub, setSub] = useState(false);
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
   const SVCS = [{ id: 'workout', label: 'Custom Workout Plan', Icon: Dumbbell, price: '₹2,000' }, { id: 'diet', label: 'Custom Diet Plan', Icon: Salad, price: '₹3,000' }, { id: 'combo', label: 'Workout + Diet', Icon: TrendingUp, price: '₹4,500' }, { id: 'coaching', label: 'Online Coaching', Icon: Trophy, price: 'Enquire' }];
-  const send = () => { if (!f.name || !f.email) return; const svc = SVCS.find(s => s.id === f.service); window.open(`mailto:vishalchaudhary28@gmail.com?subject=${encodeURIComponent(`FitTrack — ${svc.label} from ${f.name}`)}&body=${encodeURIComponent(`Name: ${f.name}\nEmail: ${f.email}\nPhone: ${f.phone || '—'}\nService: ${svc.label} (${svc.price})\nGoal: ${f.goal || '—'}\n\n${f.message}`)}`); setSub(true); };
+  const send = () => { if (!f.name || !f.email) return; const svc = SVCS.find(s => s.id === f.service); window.open(`mailto:vishalchaudhary28@gmail.com?subject=${encodeURIComponent(`FitTrack — ${svc.label} from ${f.name}`)}&body=${encodeURIComponent(`Name: ${f.name}\nEmail: ${f.email}\nPhone: ${f.phone || '—'}\nService: ${svc.label} (${svc.price})\nGoal: ${f.goal || '—'}\n\n${f.message}`)}`); clearScrollPosition('/contact'); setSub(true); };
 
   if (sub) return (<div className="pg-in" style={{ textAlign: 'center', padding: '80px 20px' }}><Mail size={48} color="var(--primary)" style={{ marginBottom: 16 }} /><div className="headline-lg" style={{ fontSize: 32, color: 'var(--primary)' }}>MESSAGE SENT!</div><div style={{ color: 'var(--on-surface-variant)', marginTop: 12, marginBottom: 32 }}>Vishal will respond within 24 hours.</div><button className="btn-p" style={{ padding: '14px 32px', borderRadius: 12 }} onClick={() => setSub(false)}>Send Another</button></div>);
 

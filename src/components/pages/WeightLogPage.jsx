@@ -3,8 +3,10 @@ import { Scale, Edit2, Trash2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
 import { fmt, gId, tod, kgToLbs } from '../../utils/helpers';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function WeightLogPage() {
+  useScrollRestoration('/weight-log');
   const { user, healthLogs, setHealthLogs, addToast } = useApp();
   const unitWeight = user.unitWeight || 'kg';
   const isImpWeight = unitWeight === 'lbs';

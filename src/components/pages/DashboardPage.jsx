@@ -25,6 +25,7 @@ import { usePedometer } from '../../hooks/usePedometer';
 import BodyFatRingCard from '../shared/BodyFatRingCard';
 import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
 import { hasSufficientData, computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
+import { useScrollRestoration, clearScrollPosition } from '../../hooks/useScrollRestoration';
 
 
 
@@ -94,6 +95,7 @@ const ParticlesBackground = () => {
 };
 
 export default function DashboardPage() {
+  useScrollRestoration('/');
   const navigate = useNavigate();
   const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
@@ -308,6 +310,7 @@ export default function DashboardPage() {
     if (!w || isNaN(w)) return;
     setHealthLogs(p => [...p, { id: gId(), userId: user.id, date: tod(), weight: w, notes: logNote }]);
     setLogNote(''); setShowLog(false);
+    clearScrollPosition('/');
     addToast(`Weight logged: ${isImpWeight ? kgToLbs(w) + ' lbs' : w + ' kg'}`, 'success');
   };
 

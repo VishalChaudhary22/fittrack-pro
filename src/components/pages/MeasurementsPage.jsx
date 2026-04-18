@@ -5,8 +5,10 @@ import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ModalPortal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../data/constants';
 import { gId, tod, fmt } from '../../utils/helpers';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function MeasurementsPage() {
+  useScrollRestoration('/measurements');
   const { user, measurements, setMeasurements, addToast } = useApp();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({});

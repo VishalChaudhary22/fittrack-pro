@@ -10,6 +10,9 @@ import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank, ge
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
 import { fetchLeaderboard, syncUserXPToCache } from '../../utils/xpCacheSync';
 import { supabase } from '../../lib/supabaseClient';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+
+const muscleMapTabCache = { activeTab: 'leaderboard' };
 
 // ─── RANK BADGE ──────────────────────────────────────────────────────────────
 const RankBadge = ({ rank, size = 'md' }) => {
@@ -77,8 +80,10 @@ const MuscleCard = ({ muscle, xp }) => {
 
 // ─── MUSCLE MAP PAGE ─────────────────────────────────────────────────────────
 export default function MuscleMapPage() {
+  useScrollRestoration('/muscle-map');
   const { workoutLogs, splits, user, monthlyRankHistory } = useApp();
-  const [activeTab, setActiveTab] = useState('leaderboard'); // 'leaderboard' | 'friends' | 'mystats'
+  const [activeTab, setActiveTabRaw] = useState(muscleMapTabCache.activeTab); 
+  const setActiveTab = (tab) => { muscleMapTabCache.activeTab = tab; setActiveTabRaw(tab); };
   const [selectedPlayer, setSelectedPlayer] = useState(null); // player object or null
   const [filter, setFilter] = useState('all');
   const [muscleFilter, setMuscleFilter] = useState('all');
@@ -118,6 +123,12 @@ export default function MuscleMapPage() {
     // Background: keep our own cache row warm (for realtime subscription optimisation)
     syncUserXPToCache({ workoutLogs, splits, user }).catch(console.warn);
   };
+
+  useEffect(() => {
+    if (muscleMapTabCache.activeTab === 'leaderboard') {
+      loadLeaderboard();
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab !== 'leaderboard') return;

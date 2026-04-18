@@ -1026,11 +1026,15 @@ export function AppProvider({ children }) {
     setLastSuggestionDate(today);
   }, [setLastSuggestionDate]);
 
+  const updateWorkoutLog = useCallback(async (logId, updater) => {
+    setWorkoutLogsSync(prev => prev.map(l => l.id === logId ? (typeof updater === 'function' ? updater(l) : { ...l, ...updater }) : l));
+  }, [setWorkoutLogsSync]);
+
   const value = {
     user, authLoading, dataLoaded, updateProfile, logout, session,
     // Provide the Sync wrappers in place of the old setters
     splits, setSplits: setSplitsSync, setActiveSplitId,
-    workoutLogs, setWorkoutLogs: setWorkoutLogsSync,
+    workoutLogs, setWorkoutLogs: setWorkoutLogsSync, updateWorkoutLog,
     healthLogs, setHealthLogs: setHealthLogsSync,
     foodLog, setFoodLog: setFoodLogSync,
     measurements, setMeasurements: setMeasurementsSync,

@@ -7,6 +7,7 @@ import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
+import { useScrollRestoration, clearScrollPosition } from '../../hooks/useScrollRestoration';
 
 // ─── AUDIO & PERSISTENCE HELPERS ────────────────────────────────────────────────
 let _audioCtx = null;
@@ -615,9 +616,11 @@ function ExerciseSwapModal({ exerciseName, onSwap, onClose }) {
 }
 
 export default function WorkoutPage() {
+  useScrollRestoration('/workout');
   const { user, splits, workoutLogs, setWorkoutLogs, addToast } = useApp();
   const nav = useNavigate();
   const activeSplit = splits.find(s => s.id === user.activeSplitId) || splits[0];
+  const [pastDate, setPastDate] = useState(tod());
   // --- Session state: auto-resume from localStorage on mount ---
   const [session, setSession] = useState(() => {
     try {
@@ -876,10 +879,11 @@ export default function WorkoutPage() {
     setConfirmFinish(false);
     clearPersistedSession();
     startTimeRef.current = null;
+    clearScrollPosition('/history');
     setElapsed(0);
     const endTimestamp = new Date().getTime();
     const log = {
-      id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: tod(), notes: session.notes,
+      id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: pastDate, notes: session.notes,
       durationMinutes: session.startTime ? Math.round((endTimestamp - session.startTime) / 60000) : null,
       exercises: session.exs.map(ex => ({
         name: ex.sv || ex.name,
@@ -953,7 +957,7 @@ export default function WorkoutPage() {
         const log = {
           id: gId(), userId: user.id, splitId: activeSplit.id,
           dayId: session.day.id, dayName: session.day.name,
-          date: tod(), notes: '',
+          date: pastDate, notes: '',
           durationMinutes: Math.round(
             (completedPreset.durations
               ? completedPreset.durations.reduce((a, b) => a + b, 0)
@@ -1181,7 +1185,21 @@ export default function WorkoutPage() {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Workout Tracker" sub={activeSplit ? activeSplit.name : 'Select a split first'} />
+      <PageHeader
+        title="Workout Tracker"
+        sub={activeSplit ? activeSplit.name : 'Select a split first'}
+        action={
+          !session && (
+            <input
+              type="date"
+              value={pastDate}
+              max={tod()}
+              onChange={e => setPastDate(e.target.value)}
+              style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 12, fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif" }}
+            />
+          )
+        }
+      />
       {!activeSplit ? <EmptyState Icon={Trophy} title="No Split Selected" message="Go to Splits to select a workout program first" /> :
         <>
           {persistedSession && !session && (() => {

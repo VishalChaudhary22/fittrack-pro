@@ -6,13 +6,21 @@ import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
 import { best1RMFromSets, calc1RM } from '../../utils/calculations';
 import { fmt } from '../../utils/helpers';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+
+const progressFilterCache = { ss: null, sd: '', se: '' };
 
 export default function ProgressPage() {
+  useScrollRestoration('/progress');
   const { user, workoutLogs, splits } = useApp();
   const act = splits.find(s => s.id === user.activeSplitId) || splits[0];
-  const [ss, setSs] = useState(act?.id || splits[0]?.id);
-  const [sd, setSd] = useState('');
-  const [se, setSe] = useState('');
+  const [ss, setSsRaw] = useState(progressFilterCache.ss || act?.id || splits[0]?.id);
+  const [sd, setSdRaw] = useState(progressFilterCache.sd);
+  const [se, setSeRaw] = useState(progressFilterCache.se);
+
+  const setSs = (v) => { progressFilterCache.ss = v; setSsRaw(v); };
+  const setSd = (v) => { progressFilterCache.sd = v; setSdRaw(v); };
+  const setSe = (v) => { progressFilterCache.se = v; setSeRaw(v); };
   
   // Standalone 1RM State
   const [rmWt, setRmWt] = useState('');

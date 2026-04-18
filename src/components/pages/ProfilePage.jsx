@@ -7,6 +7,7 @@ import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations'
 import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 
 const PRESETS = [
@@ -102,6 +103,7 @@ function AvatarPickerModal({ open, onClose }) {
 }
 
 export default function ProfilePage() {
+  useScrollRestoration('/profile');
   const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog } = useApp();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });

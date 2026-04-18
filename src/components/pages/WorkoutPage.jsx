@@ -963,9 +963,6 @@ export default function WorkoutPage() {
   if (session) {
     if (session.isYoga) {
       const handleYogaComplete = (completedPreset) => {
-        // [omitted ... replaced with yoga complete logic further down so this chunk targets just the return below]
-        // Actually wait, I only need to replace the onBack in YogaSessionView.
-        // I will do that carefully.
         const log = {
           id: gId(), userId: user.id, splitId: activeSplit.id,
           dayId: session.day.id, dayName: session.day.name,

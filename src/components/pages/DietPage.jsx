@@ -472,7 +472,6 @@ export default function DietPage() {
               </div>
             );
           })}
-          })}
         </div>
 
         {/* ADAPTIVE DIET BANNER */}

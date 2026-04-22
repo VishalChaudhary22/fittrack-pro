@@ -448,19 +448,29 @@ export default function DashboardPage() {
                  {/* TDEE Side */}
                  {(() => {
                     const hasAdaptive = tdeeEstimate?.estimatedTDEE && (tdeeEstimate.confidence === 'high' || tdeeEstimate.confidence === 'medium');
-                    const displayTDEE = hasAdaptive ? tdeeEstimate.estimatedTDEE : (user.weight && user.height && user.age ? Math.round(calcBMR(user.weight, user.height, user.age, user.gender) * (ACTIVITY[user.activityLevel || 'moderate']?.mult || 1.55)) : null);
+                    const staticTDEE = (user.weight && user.height && user.age) ? Math.round(calcBMR(user.weight, user.height, user.age, user.gender) * (ACTIVITY[user.activityLevel || 'moderate']?.mult || 1.55)) : null;
+                    const displayTDEE = hasAdaptive ? tdeeEstimate.estimatedTDEE : staticTDEE;
+                    const confLabel = hasAdaptive ? (tdeeEstimate.confidence === 'high' ? 'HIGH' : 'MED') : null;
                     return (
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 8px', position: 'relative' }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '14px 8px', position: 'relative', overflow: 'hidden' }}>
+                         {/* T3 adaptation pulse */}
                          {tdeeEstimate?.insights?.some(i => i.type === 'metabolic-adaptation') && (
-                           <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--error)', animation: 'pulse 2s infinite' }} title="Metabolic Adaptation Detected" />
+                           <div style={{ position: 'absolute', top: 6, right: 6, width: 6, height: 6, borderRadius: '50%', background: 'var(--error)', boxShadow: '0 0 8px var(--error)', animation: 'pulse 2s var(--ease-smooth) infinite' }} />
                          )}
-                         <Zap size={20} color="var(--tertiary-container)" style={{ marginBottom: 4 }} />
-                         <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px' }}>TDEE</span>
-                         <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--on-surface)', marginTop: 4 }}>
+                         {/* Confidence badge */}
+                         {confLabel && (
+                           <div style={{ position: 'absolute', top: 6, right: 6, fontSize: 7, fontWeight: 800, letterSpacing: '0.12em', fontFamily: "'Be Vietnam Pro', sans-serif", color: confLabel === 'HIGH' ? 'var(--success)' : 'var(--warning, #F59E0B)', background: confLabel === 'HIGH' ? 'rgba(81,207,102,0.12)' : 'rgba(245,158,11,0.12)', padding: '2px 5px', borderRadius: 4 }}>{confLabel}</div>
+                         )}
+                         {/* Mini ember ring */}
+                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(248,95,27,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                           <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid var(--primary-container)', borderTopColor: 'transparent', transform: 'rotate(45deg)' }} />
+                         </div>
+                         <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Be Vietnam Pro', sans-serif" }}>TDEE</span>
+                         <span className="headline-lg" style={{ fontSize: '1.4rem', color: 'var(--on-surface)', marginTop: 2, lineHeight: 1 }}>
                            {displayTDEE || '—'}
                          </span>
-                         <span style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 2 }}>
-                           {hasAdaptive ? (tdeeEstimate.confidence === 'high' ? '🛡️ Adaptive' : '⚡ Adaptive') : (displayTDEE ? '📊 Formula' : 'Set profile')}
+                         <span style={{ fontSize: 9, fontWeight: 600, color: hasAdaptive ? 'var(--primary)' : 'var(--on-surface-dim)', marginTop: 3, fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+                           {hasAdaptive ? 'Adaptive' : (displayTDEE ? 'Calculated' : 'Set profile')}
                          </span>
                       </div>
                     );

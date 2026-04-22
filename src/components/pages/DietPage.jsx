@@ -8,7 +8,7 @@ import { TDEEInsightCard } from '../shared/TDEEInsightCard';
 import { TDEEDetailSheet } from '../shared/TDEEDetailSheet';
 import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
-import { calcBMI, calcBMR, calcDeficit, calcTDEESource } from '../../utils/calculations';
+import { calcBMI, calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
 import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
@@ -528,7 +528,7 @@ export default function DietPage() {
           onLearnMore={() => setShowTDEEDetails(true)}
         />
         {!isUnset && tdeeEstimate?.confidence === 'insufficient' && (
-           <div style={{ background: 'var(--surface-light)', borderRadius: 12, padding: '12px 16px', marginBottom: 24, border: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+           <div style={{ background: 'var(--surface-container-low)', borderRadius: 12, padding: '12px 16px', marginBottom: 24, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <Info size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
               <div>
                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', marginBottom: 4 }}>Learning your metabolism...</div>

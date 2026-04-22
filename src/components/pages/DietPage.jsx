@@ -476,7 +476,7 @@ export default function DietPage() {
             { l: 'Height', v: user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`) : '—', i: Ruler },
             { l: 'BMI Score', v: (!bmi || isNaN(bmi) || bmi === 0) ? '—' : bmi, i: Calculator },
             { l: 'Body Fat', v: latestBF ? `${latestBF.percentage}%` : '—', i: ActivityIcon },
-            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal${tdeeConfig?.source === 'estimated' ? (tdeeConfig.confidence === 'high' ? ' 🛡️' : ' ⚡') : (tdeeConfig?.source === 'manual' ? ' 🔒' : '')}`, i: Zap },
+            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal`, i: Zap },
             { l: 'Activity', v: (user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
             const Icon = s.i;
             return (

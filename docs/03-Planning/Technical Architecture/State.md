@@ -100,6 +100,7 @@ fittrack-pro/
     │       ├── BodyMapSVG.jsx          # Canvas-based anatomical renderer
     │       ├── AvatarInitials.jsx      # Initials avatar circle (Phase 3)
     │       ├── PlayerDetailModal.jsx   # Bottom-sheet muscle modal (Phase 3)
+    │       ├── EditWorkoutModal.jsx    # [NEW] Full CRUD editor for history logs (exercises, sets, notes)
     │       └── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
     ├── context/
     │   └── AppContext.jsx        # Global auth + hybrid cloud/local app state, per-user cache, cross-device refresh + sync wrappers
@@ -119,6 +120,7 @@ fittrack-pro/
     │   ├── useLocalStorage.js
     │   ├── useFoodCache.js
     │   ├── usePedometer.js       # Live browser pedometry via DeviceMotion
+    │   ├── useScrollRestoration.js # PERSISTENT: saves Y-offset per route key via module Map
     │   ├── useTheme.js
     │   └── useToast.js
     ├── lib/
@@ -206,6 +208,7 @@ All exported from `src/components/shared/SharedComponents.jsx`:
 | `Skeleton` / `SkeletonCard` | Shimmer skeleton using the `shimmer` keyframe. |
 | `EmptyState` | LED-glow icon container + headline + optional CTA button. |
 | `Portal` | `createPortal` wrapper for z-index escape (modals, floating pill). |
+| `EditWorkoutModal` | `EditWorkoutModal.jsx` | Full-screen bottom sheet with CRUD support for existing workout logs. Allows adding/removing exercises (from split or custom), managing set volume, updating date/duration, and notes. Uses atomic `updateWorkoutLog` in AppContext for cloud synchronization. Features a smart conditional-rendering architecture for the Add Exercise sub-panel to prevent z-index bleed and event-bubbling bugs. |
 
 Additional shared components in separate files:
 
@@ -249,6 +252,8 @@ Three states: **day picker → active session → post-session summary**.
 - **Floating live pill**: fixed bottom-right Portal — glass pill with animated pulse dot + "Live tracking" label
 
 **Session data model**: Each session stores `startTime: Date.now()` on start. On finish, the log records `durationMinutes` (rounded to nearest minute) plus `muscle`, `primaryMuscle`, and `secondaryMuscles` on every exercise (enabling reliable XP calculation independent of split lookup).
+
+**Scroll Persistence**: `WorkoutPage` uses a module-level `workoutPageCache` to track the scroll position of the tracker list before a session starts. This ensures that when a session is finished, discarded, or yoga is completed, the page restores the user's exact scroll position in the split list rather than jumping to the top. Programmatic scrolls use `behavior: 'instant'` to bypass global CSS smooth scrolling.
 
 **Post-session summary**: XP / Sets / Volume row + `BodyMapSVG` mini-map of muscles trained. "Log Another" + "View Map →" actions.
 
@@ -331,6 +336,8 @@ Fully rebuilt. Merges the original diet guide/meal plan content with the Indian 
 - Results list with badges (Root Veg, Customisable, Fasting-safe)
 - Custom Food quick-add form (name + calories + macros)
 
+**Scroll Persistence**: `DietPage` uses a module-level `dietTabCache` to store the scroll position of the tracker when the search modal opens. Closing search (via cancel or log) restores the scroll position instantly using the `dietTabCache.trackerScroll` offset.
+
 **Food Detail Pane** (inside modal, when a food is selected):
 - Food name + category badge
 - Serving picker chips (horizontal scroll, includes delivery sizes with info chip: "📦 Delivery estimate")
@@ -406,6 +413,10 @@ All existing muscle map content in a single scroll:
 
 ### `/history` — Workout History
 **Phase 2 editorial redesign complete.** `WorkoutHistoryPage.jsx` now renders a top-level tab switcher to toggle between **Weights** and **Cardio** logging. Let users manually enter discrete cardio sessions (e.g. Activity Type, Minutes, Distance, Calories Burned). Gives a rich view into session-specific exercises with ghost watermarks and dynamic volume stats.
+
+**Workout Editing**: Added "Edit Session" capability to every weight log entry. Tapping "Edit" opens `EditWorkoutModal`, enabling full CRUD for the session. Changes are saved optimistically via `updateWorkoutLog` in AppContext and synced to Supabase.
+
+**Scroll Persistence**: Integrated `useScrollRestoration('/history')` to save and restore the list position when navigating to and from the History page.
 
 ### `/cycle` — Cycle Syncing (Period Tracker)
 Female-focused view computing whether the athlete is in menstruation, follicular, ovulation, or luteal phase. Provides contextualized training cues (e.g., dial back heavy lifts in luteal). Syncs to contextual Dashboard profile badge.
@@ -643,9 +654,9 @@ Factory function used to build all six cloud-backed setters. Given a `table`, a 
 6. Calls `supabase.from(table).delete().in('id', toDeleteIds)` for removed rows
 
 ### Exposed Context API
-**Methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`, `removeToast`
+**Methods:** `updateProfile`, `logout`, `setActiveSplitId`, `logReadiness`, `getStreak`, `getFoodStreak`, `toggleFavoriteFood`, `addToast`, `removeToast`, `updateWorkoutLog`
 
-**Sync setters (replace original setters):** `setSplits`, `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, `setBodyFatLog`
+**Sync setters (replace original setters):** `setSplits`, `setWorkoutLogs`, `setHealthLogs`, `setFoodLog`, `setMeasurements`, `setReadinessLog`, `setBodyFatLog`, `setWorkoutLogsSync` (atomic update)
 
 **Local-only setters (no cloud):** `setCaloriesLog`, `setFavoriteIds`, `setMonthlyRankHistory`, `toggleTheme`, `setWaterLog`, `setCardioLog`, `setSupplementLog`, `setSupplementConfig`, `setCycleConfig`
 
@@ -792,6 +803,18 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Layout Tweaks**: Shrunk the overarching weight-goal column by 25% to optimize card symmetry. Decoupled the "Log Body Fat" button from its full-width treatment—redesigning it as an isolated, compact pill strictly matching the dashboard header's `+ Log Weight` visual signature (padding: 7px 13px, border-radius: 100px).
 - **Data Display**: Refactored the stat row above the chart to simultaneously inline Current %, Previous %, and Target Goal %, rendering them instantly stable across component mounts. Null states instruct the user to "Log for at least two days to see your trend," acknowledging the system's strict 1-log-per-day restriction.
 - **Cloud Sync Loss Bug (`AppContext.jsx`)**: Restructured `.loadCloudData` to stop natively overwriting the state with raw `cloudBF`. Integrated an ID-mapped merger function alongside a fresh `bodyFatLogRef` hook to deterministically merge fast-path local unsynced entries against the backend row load. Eliminates the data disappearing act previously observed midway through logging a new state update.
+
+### Workout Editing & Scroll Restoration (Fixed 2026-04-18)
+**Symptoms:** 
+- The "Add Exercise" modal inside the log editor was a transparent overlay that didn't fully cover the background, causing UI text bleed and accidental click-through closings.
+- The "Custom" exercise feature was non-functional (modal closed without adding).
+- Navigating back from a workout session or cancelling a food log reset the page scroll to the top, causing user frustration on long lists.
+
+**Fixes Applied:**
+- **EditWorkoutModal Re-architecture**: Implemented a conditional-rendering model that swaps the editor for the exercise picker rather than layering them with `z-index`. Fixed the nonexistent `--background` variable by mapping to `--surface`. Added `stopPropagation` to prevent events from bubbling to the backdrop close handler.
+- **Improved Duration Input**: Fixed visibility by adding explicit `Space Grotesk` font styling and an inline "min" label, ensuring the number is readable on all devices.
+- **Module-Level Scroll Caching**: Implemented `workoutPageCache` and `dietTabCache` Map objects that store the exact `window.scrollY` offset before entering a dedicated "mode" (like a session or a search overlay). These offsets are restored with `behavior: 'instant'` upon exit.
+- **Global `useScrollRestoration`**: Deployed a persistent route-based scroll hook that preserves list position when navigating between pages (e.g., History → Dashboard → History).
 
 ---
 

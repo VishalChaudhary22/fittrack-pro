@@ -97,7 +97,7 @@ export const classifyScenario = (rateData, params) => {
   if (goal === 'loss') {
     // S1: Losing too fast (>1.0% BW/week for 2+ weeks)
     if (rateKgPerWeek < 0 && bwPct > 1.0) {
-      const adjust = bwPct > 1.5 ? 250 : 150;
+      const adjust = Math.min(bwPct > 1.5 ? 250 : 150, 200);
       return {
         scenario: 'S1',
         severity: 'action',
@@ -108,7 +108,7 @@ export const classifyScenario = (rateData, params) => {
     }
     // S3: Not losing / gaining when should lose
     if (rateKgPerWeek > 0.05) {
-      const adjust = rateKgPerWeek > 0.3 ? -400 : -250;
+      const adjust = Math.max(rateKgPerWeek > 0.3 ? -400 : -250, -200);
       return {
         scenario: 'S3',
         severity: 'action',
@@ -127,6 +127,16 @@ export const classifyScenario = (rateData, params) => {
         reasoning: `Your weight has barely moved (${Math.abs(rateKgPerWeek).toFixed(2)} kg/week) over the past 3+ weeks. A small reduction of 200 kcal may help break through.`,
       };
     }
+    // S2b: Losing but too slowly (between stall and optimal)
+    if (rateKgPerWeek < -0.05 && Math.abs(rateKgPerWeek) < 0.15) {
+      return {
+        scenario: 'S2b',
+        severity: 'warning',
+        adjustKcal: -100,
+        message: 'Progress is too slow',
+        reasoning: `You're losing ${Math.abs(rateKgPerWeek).toFixed(2)} kg/week — below the optimal 0.25 kg/week pace. A small 100 kcal reduction keeps momentum without feeling deprived.`,
+      };
+    }
     // S6: On track
     if (rateKgPerWeek < -0.1 && bwPct <= 1.0) {
       return {
@@ -142,7 +152,7 @@ export const classifyScenario = (rateData, params) => {
   if (goal === 'gain') {
     // S4: Gaining too fast (>0.5% BW/week)
     if (rateKgPerWeek > 0 && bwPct > 0.5) {
-      const adjust = bwPct > 0.8 ? -250 : -150;
+      const adjust = Math.max(bwPct > 0.8 ? -250 : -150, -200);
       return {
         scenario: 'S4',
         severity: 'warning',
@@ -316,3 +326,19 @@ export const checkSuggestionCooldown = (lastSuggestionDate) => {
     daysSinceLast,
   };
 };
+
+const DISMISS_KEY = 'fittrack_coaching_dismissed_at_';
+
+export function dismissCoaching(userId) {
+  try {
+    localStorage.setItem(DISMISS_KEY + userId, new Date().toISOString());
+  } catch { /* quota */ }
+}
+
+export function isCoachingDismissed(userId, suppressDays = 7) {
+  try {
+    const raw = localStorage.getItem(DISMISS_KEY + userId);
+    if (!raw) return false;
+    return (Date.now() - new Date(raw)) / 86400000 < suppressDays;
+  } catch { return false; }
+}

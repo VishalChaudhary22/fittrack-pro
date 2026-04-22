@@ -472,7 +472,40 @@ export default function DietPage() {
               </div>
             );
           })}
+          })}
         </div>
+
+        {/* ADAPTIVE DIET BANNER */}
+        {adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && adaptiveSuggestion.adjustKcal !== 0 && (() => {
+          const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
+          const newMacros = recomputeMacros({
+            goal: adaptiveSuggestion.goal,
+            currentWeight: user.weight,
+            goalWeight: user.weightGoal,
+            newKcal,
+            workoutDays: user.workoutDays,
+          });
+          return (
+            <AdaptiveDietBanner
+              suggestion={adaptiveSuggestion}
+              currentKcal={adaptiveSuggestion.goalKcal}
+              newKcal={newKcal}
+              newMacros={newMacros}
+              onAccept={acceptSuggestion}
+              onDismiss={dismissSuggestion}
+            />
+          );
+        })()}
+        {/* On-track banner */}
+        {adaptiveSuggestion && adaptiveSuggestion.scenario === 'S6' && (
+          <AdaptiveDietBanner
+            suggestion={adaptiveSuggestion}
+            currentKcal={goalKcal}
+            newKcal={goalKcal}
+            onAccept={acceptSuggestion}
+            onDismiss={dismissSuggestion}
+          />
+        )}
 
         {/* GOAL SECTION WRAPPER */}
         <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)', boxShadow: 'var(--glow-primary)', marginBottom: 24, position: 'relative' }}>
@@ -569,37 +602,6 @@ export default function DietPage() {
 
         {activeTab === 'guide' && (
           <div>
-            {/* ADAPTIVE DIET BANNER */}
-            {adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && adaptiveSuggestion.adjustKcal !== 0 && (() => {
-              const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
-              const newMacros = recomputeMacros({
-                goal: adaptiveSuggestion.goal,
-                currentWeight: user.weight,
-                goalWeight: user.weightGoal,
-                newKcal,
-                workoutDays: user.workoutDays,
-              });
-              return (
-                <AdaptiveDietBanner
-                  suggestion={adaptiveSuggestion}
-                  currentKcal={adaptiveSuggestion.goalKcal}
-                  newKcal={newKcal}
-                  newMacros={newMacros}
-                  onAccept={acceptSuggestion}
-                  onDismiss={dismissSuggestion}
-                />
-              );
-            })()}
-            {/* On-track banner */}
-            {adaptiveSuggestion && adaptiveSuggestion.scenario === 'S6' && (
-              <AdaptiveDietBanner
-                suggestion={adaptiveSuggestion}
-                currentKcal={goalKcal}
-                newKcal={goalKcal}
-                onAccept={acceptSuggestion}
-                onDismiss={dismissSuggestion}
-              />
-            )}
             {/* BLUEPRINT HEADER CARD */}
             <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, borderLeft: '4px solid var(--primary)', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>

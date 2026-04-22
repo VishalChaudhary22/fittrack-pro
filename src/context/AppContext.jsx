@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabaseClient';
 import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, uploadLocalDataToCloud } from '../utils/authMigration';
 import { calcStepsCalories } from '../utils/activityUtils';
 import { syncUserXPToCache } from '../utils/xpCacheSync';
-import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros } from '../utils/adaptiveCalories';
+import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros, isCoachingDismissed, dismissCoaching } from '../utils/adaptiveCalories';
 import { calcBMR, calcTDEE, calcDeficit } from '../utils/calculations';
 
 const AppContext = createContext(null);
@@ -988,6 +988,7 @@ export function AppProvider({ children }) {
   const adaptiveSuggestion = useMemo(() => {
     if (!user || !healthLogs || healthLogs.length < 5) return null;
     if (!checkSuggestionCooldown(lastSuggestionDate).canSuggest) return null;
+    if (isCoachingDismissed(user.id)) return null;
     const userLogs = healthLogs.filter(l => l.userId === user.id && l.weight);
     if (!hasSufficientData(userLogs)) return null;
     const rateData = computeWeeklyRate(userLogs);
@@ -1022,9 +1023,8 @@ export function AppProvider({ children }) {
   }, [updateProfile, setLastSuggestionDate, addToast]);
 
   const dismissSuggestion = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setLastSuggestionDate(today);
-  }, [setLastSuggestionDate]);
+    if (user?.id) dismissCoaching(user.id);
+  }, [user]);
 
   const updateWorkoutLog = useCallback(async (logId, updater) => {
     setWorkoutLogsSync(prev => prev.map(l => l.id === logId ? (typeof updater === 'function' ? updater(l) : { ...l, ...updater }) : l));

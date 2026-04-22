@@ -38,6 +38,7 @@ fittrack-pro/
 ├── TODO-female-anatomy.md
 ├── TODO-body-wireframe-readiness.md
 ├── TODO-readiness-plan.md
+├── TODO-adaptive-TDEE.md        # Adaptive TDEE Engine — reverse-engineered burn & metabolic adaptation
 ├── TODO.md
 ├── vercel.json                  # SPA rewrite rules for Vercel
 ├── index.html
@@ -101,7 +102,9 @@ fittrack-pro/
     │       ├── AvatarInitials.jsx      # Initials avatar circle (Phase 3)
     │       ├── PlayerDetailModal.jsx   # Bottom-sheet muscle modal (Phase 3)
     │       ├── EditWorkoutModal.jsx    # [NEW] Full CRUD editor for history logs (exercises, sets, notes)
-    │       └── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
+    │       ├── ReadinessCheckIn.jsx    # Daily readiness check-in bottom sheet
+│       ├── TDEEInsightCard.jsx     # Actionable metabolic insight banner
+│       └── TDEEDetailSheet.jsx     # Bottom-sheet for engine transparency (math & logs)
     ├── context/
     │   └── AppContext.jsx        # Global auth + hybrid cloud/local app state, per-user cache, cross-device refresh + sync wrappers
     ├── data/
@@ -134,7 +137,8 @@ fittrack-pro/
         ├── helpers.js            # gId, tod, formatting
         ├── readinessUtils.js     # Readiness scoring (includes steps), muscle recovery, spotlight muscles
         ├── storage.js            # localStorage key constants
-        └── authMigration.js      # Legacy ID migration + first-login cloud upload normalization
+        ├── authMigration.js      # Legacy ID migration + first-login cloud upload normalization
+        └── adaptiveTDEE.js       # [NEW] Least-squares regression engine for reverse-engineered TDEE
 ```
 
 ---
@@ -208,7 +212,10 @@ All exported from `src/components/shared/SharedComponents.jsx`:
 | `Skeleton` / `SkeletonCard` | Shimmer skeleton using the `shimmer` keyframe. |
 | `EmptyState` | LED-glow icon container + headline + optional CTA button. |
 | `Portal` | `createPortal` wrapper for z-index escape (modals, floating pill). |
-| `EditWorkoutModal` | `EditWorkoutModal.jsx` | Full-screen bottom sheet with CRUD support for existing workout logs. Allows adding/removing exercises (from split or custom), managing set volume, updating date/duration, and notes. Uses atomic `updateWorkoutLog` in AppContext for cloud synchronization. Features a smart conditional-rendering architecture for the Add Exercise sub-panel to prevent z-index bleed and event-bubbling bugs. |
+| `EditWorkoutModal` | Full-screen bottom sheet with CRUD support for existing workout logs. Allows adding/removing exercises (from split or custom), managing set volume, updating date/duration, and notes. Uses atomic `updateWorkoutLog` in AppContext for cloud synchronization. Features a smart conditional-rendering architecture for the Add Exercise sub-panel to prevent z-index bleed and event-bubbling bugs. |
+| `TDEEInsightCard` | Premium banner surfaced on DietPage when actual metabolism diverges from static estimates. Includes "Update targets" action and "Learn more" trigger. |
+| `TDEEDetailSheet` | Transparency modal revealing the math behind the Adaptive TDEE estimate (logged days, weight delta, implied deficit, confidence score). |
+
 
 Additional shared components in separate files:
 
@@ -226,7 +233,7 @@ Additional shared components in separate files:
 Rebuilt around the Kinetic Elite aesthetic. Key sections:
 - **Welcome header**: editorial-style headline in Space Grotesk with ember text-gradient on the first name. Greeting is now user-aware: first-time accounts see `"WELCOME, [NAME]"` once, then subsequent visits show `"WELCOME BACK, [NAME]"`. Theme toggle pill lives here. Includes a dynamic cycle-phase badge for female athletes and celebratory banners on Indian holidays / festivals.
 - **Daily Readiness widget**: Anatomical wireframe figure (3/4 perspective PNG) with per-muscle recovery status chips (optimal/fatigued/critical). Tapping opens the `ReadinessCheckIn` bottom sheet only if no completed check-in exists for today. Dashboard waits for `dataLoaded` before deciding whether to re-open the questionnaire, preventing false re-prompts during auth/cloud rehydration. Readiness card uses the saved subjective score when present and falls back to the objective training-only score otherwise.
-- **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. BMI card has a concentric CSS ring with ember glow + per-range insight text.
+- **Weight Analysis + Metabolic Index**: 2-col glass card row. Weight card shows current / previous log with a goal-aware trend arrow. Metabolic Index card is a dual-stat view showing BMI (left) and Adaptive TDEE (right). The TDEE side displays the estimate, confidence score, and a pulsing red dot if metabolic adaptation (T3) is detected.
 - **Sessions / Streak**: 2-col layout converted into a 4-item responsive grid (`var(--surface-container-lowest)` tiles). Displays current-week session count, all-time total, and current/longest streak with a Zap icon for active streaks.
 - **Placeholder activity cards**: Steps, Calories Burned — show `—` with a `PulseIndicator + "Coming Soon"` label. Water intake is wired to the global hydration tracker.
 - **Goal progress**: Glass card with `ProgressOrb`, target/remaining/weeks-left breakdown. Opens a `ScrollPicker` modal.
@@ -299,8 +306,9 @@ Fully rebuilt. Merges the original diet guide/meal plan content with the Indian 
 **Stats strip**: 5 compact pill chips showing Weight, Height, BMI, TDEE, Activity. Label in `--on-surface-variant` @ 10px, value in `--primary` @ 13px bold. Replaced the old full-width material icon cards.
 
 **Goal card**:
-- **Configured profile**: SVG ring gauges for Kcal, Protein, Carbs, Fat — showing consumed vs target. Rings use `stroke-dasharray`/`stroke-dashoffset`. Summary row above rings shows daily targets (`🔥 2100 kcal · 💪 160g P · 🌾 210g C · 🧈 58g F`). All values are computed dynamically from `calcBMR` / `calcTDEE` / `calcDeficit`, not static presets.
-- **Incomplete profile**: The card switches to a `"Targets Locked"` setup state with a CTA to update the profile when age, height, weight, or target weight is missing.
+- **Configured profile**: SVG ring gauges for Kcal, Protein, Carbs, Fat — showing consumed vs target. Rings use `stroke-dasharray`/`stroke-dashoffset`. Summary row above rings shows daily targets (`🔥 2100 kcal · 💪 160g P · 🌾 210g C · ☎️ 58g F`). All values are computed dynamically using the TDEE priority chain (`Manual > Accepted Adaptive > Static fallback`).
+- **TDEE Insights**: An `AdaptiveDietBanner` or `TDEEInsightCard` appears above the goal card to nudge users toward calculated adjustments or inform them of metabolic changes.
+- **Incomplete profile**: The card switches to a `"Targets Locked"` setup state with a CTA to update the profile when age, height, weight, or target weight is missing. Includes a "Learning your metabolism" nudge if logs are < 10 days.
 
 **Tab switcher**: `[🍽 Daily Tracker]`, `[📋 Meal Guide]`, `[📊 Analysis]`. Pill-style with ember gradient on active tab.
 
@@ -423,6 +431,11 @@ Female-focused view computing whether the athlete is in menstruation, follicular
 
 ### `/profile` — Profile
 User settings, unit preferences (kg/lbs and cm/ft), theme toggle, personal info, avatar selection/upload, export/import, streak/achievement summaries, and metabolic cards (BMI / BMR / TDEE). `activityLevel` UI is mapped back to the `activity` column in `user_profiles`.
+
+**Metabolism & Targets section**: Dedicated glass card for Managing TDEE.
+- **Adaptive TDEE toggle**: Allows turning the auto-applied engine ON/OFF.
+- **Manual Override**: `ScrollPicker` button to force a specific TDEE baseline (locks at Priority 1 in the cascade).
+- Lists currently active TDEE source (Manual / Estimated / Static).
 
 **Body Composition section** (added 2026-04-17): Glass card before Muscle Mastery showing latest BF%, ACE category badge, measurement method, target BF% (set via themed modal), and recent log history (last 4 entries with ▼/▲ deltas). "+ Log BF%" button opens a modal with date input, BF% number input with live category preview, 6-method pill selector (InBody, DEXA, Smart Scale, Calipers, Navy Method, Visual), embedded Navy Method calculator (waist/neck/hips/height inputs with auto-fill), and optional notes field. Data persists via `setBodyFatLogSync` (Supabase + localStorage write-through cache). CSV export includes `bodyFatLog`.
 
@@ -618,6 +631,9 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Cycle Config**| localStorage | `fp_cycle_config` |
 | **Body Fat Logs** | Supabase DB + per-user write-through cache | `body_fat_logs` + `fittrack_bodyFatLog_<userId>` |
 | **Body Fat Goal** | Supabase DB (user_profiles) | `body_fat_goal` column on `user_profiles` |
+| **Adaptive TDEE** | localStorage (per-user) | `fittrack_tdeeEstimate_<userId>` |
+| **TDEE Preferences** | localStorage (per-user) | `fittrack_tdeePreferences_<userId>` |
+
 
 ### Live Refs
 - `foodLogRef` — always mirrors current `foodLog` state; used by `loadCloudData` to merge against live data rather than a stale closure snapshot
@@ -625,6 +641,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 - `currentUserIdRef` — mirrors `session.user.id || profile.id || localStorage fittrack_last_user_id`; read inside `createSyncSetter`'s `setTimeout` to avoid stale closure userId
 - `isFetchingProfile` — ref-based mutex preventing concurrent `fetchProfile` calls
 - `cloudRefreshTimerRef` — debounce handle (250 ms) for `scheduleCloudRefresh` to coalesce rapid realtime events
+- `tdeeRecomputeTimerRef` — 2-second debounce handle for `adaptiveTDEE` logic re-runs on diet/health changes.
+
 
 ### Cloud Sync & Realtime
 - **`scheduleCloudRefresh(userId)`**: 250ms debounced wrapper around `loadCloudData` so multiple rapid realtime events collapse into a single re-fetch

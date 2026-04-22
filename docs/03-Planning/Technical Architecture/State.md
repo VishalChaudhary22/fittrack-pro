@@ -816,6 +816,21 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Module-Level Scroll Caching**: Implemented `workoutPageCache` and `dietTabCache` Map objects that store the exact `window.scrollY` offset before entering a dedicated "mode" (like a session or a search overlay). These offsets are restored with `behavior: 'instant'` upon exit.
 - **Global `useScrollRestoration`**: Deployed a persistent route-based scroll hook that preserves list position when navigating between pages (e.g., History → Dashboard → History).
 
+### Adaptive Coaching Engine Refinements (Applied 2026-04-22)
+**Symptoms:**
+- The engine lacked a scenario for when weight loss was occurring, but too slowly (-0.05 to -0.15 kg/week).
+- Aggressive calorie cuts (e.g., -400 kcal) on weight stalls or sudden weight spikes were demoralizing to users and violated adherence principles.
+- Dismissing the coaching banner locked out the engine for 7 days but simultaneously reset the timeline, treating a "Dismiss" as an "Accept".
+- The UI had broken CSS tokens, a non-functional "Review" button reliant on hash-routing, and rendered in suboptimal locations on both the Dashboard and Diet pages.
+- The Body Composition target progress ring incorrectly increased when weight moved away from the target goal instead of clamping to 0%.
+
+**Fixes Applied:**
+- **Engine Patches (`adaptiveCalories.js`)**: Injected the new `S2b` (Loss Too Slow) scenario for a conservative -100 kcal nudge. Capped all adjustment extremes via `Math.min` / `Math.max` to ±200 kcal for adherence safety.
+- **Dismiss Separation (`AppContext.jsx`)**: Rerouted `dismissSuggestion` to write exclusively to a `localStorage` cache (`fittrack_coaching_dismissed_at_<id>`). This suppresses the banner for 7 days but preserves the `lastKcalSuggestionDate` so the underlying model's regression cooldown doesn't reset.
+- **UI & Routing Overhaul (`AdaptiveDietBanner.jsx`)**: Scrubbed hardcoded `glass-card` classes and undefined ember tokens in favor of implicit Kinetic Elite theming. Rebuilt both the compact and full banner variants to feature explicit typographic grids and animated pulsing indicator glows. Mapped the compact "Review" button to use the `onDetails` prop for native `react-router` navigation.
+- **Strategic Repositioning**: Moved the Dashboard coaching banner out of the data metrics scroll and placed it immediately above the Body Composition card. Detached the Diet Page banner from the `activeTab === 'guide'` conditional array so the user sees the prompt globally above the main Goal Tracker card.
+- **Progress Ring Patch (`BodyFatRingCard.jsx`)**: Updated the math in `goalPct` to be directionally aware (`isLossGoal`), clamping progress to `0%` using `Math.max` when the user's weight diverges inversely from their objective.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work

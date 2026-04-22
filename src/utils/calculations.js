@@ -20,6 +20,29 @@ export const calcBMR = (w, h, age, g) =>
 export const calcTDEE = (bmr, lvl) =>
   Math.round(bmr * (ACTIVITY[lvl]?.mult || 1.55));
 
+export const calcTDEESource = (profile, tdeeEstimate) => {
+  // Priority 1: manual override
+  if (profile?.manualTDEEOverride) {
+    return { value: profile.manualTDEEOverride, source: 'manual', confidence: 'manual' };
+  }
+  
+  // Priority 2: user explicitly accepted estimated TDEE
+  if (profile?.useEstimatedTDEE && tdeeEstimate && (tdeeEstimate.confidence === 'high' || tdeeEstimate.confidence === 'medium')) {
+    return { value: tdeeEstimate.estimatedTDEE, source: 'estimated', confidence: tdeeEstimate.confidence };
+  }
+  
+  // Priority 3: high confidence auto-applied estimate
+  if (tdeeEstimate && tdeeEstimate.confidence === 'high') {
+    return { value: tdeeEstimate.estimatedTDEE, source: 'estimated', confidence: 'high' };
+  }
+  
+  // Priority 4: fallback static multiplier
+  const bmr = calcBMR(profile?.weight || 70, profile?.height || 170, profile?.age || 30, profile?.gender || 'male');
+  const staticTDEE = profile?.tdee || calcTDEE(bmr, profile?.activityLevel || 'sedentary');
+  
+  return { value: staticTDEE, source: 'static', confidence: null };
+};
+
 // ─── Goal from weight difference ─────────────────────────────────────────────
 export const goalFromWeight = (curr, tgt) => {
   if (!tgt) return 'maintenance';

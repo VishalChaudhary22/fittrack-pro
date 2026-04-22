@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, ConfirmDialog, ThemeTogglePill } from '../shared/SharedComponents';
+import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
-import { calcBMI, getBMICat, calcBMR, calcTDEE } from '../../utils/calculations';
-import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
+import { calcBMI, getBMICat, calcBMR, calcTDEE, calcTDEESource } from '../../utils/calculations';
+import { fmt, kgToLbs, cmToFtIn, gId, tod, mkIntItems } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
@@ -104,11 +104,12 @@ function AvatarPickerModal({ open, onClose }) {
 
 export default function ProfilePage() {
   useScrollRestoration('/profile');
-  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog } = useApp();
+  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showManualTDEEPicker, setShowManualTDEEPicker] = useState(false);
   
   useEffect(() => {
     if (user && !ed) {
@@ -182,7 +183,8 @@ export default function ProfilePage() {
 
   const bmi = calcBMI(user.weight, user.height);
   const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
-  const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
+  const tdeeConfig = calcTDEESource(user, tdeeEstimate);
+  const tdee = tdeeConfig?.value || calcTDEE(bmr, user.activityLevel || 'moderate');
 
   const latestBFPct = useMemo(() => {
     const logs = bodyFatLog.filter(e => e.userId === user?.id).sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -408,6 +410,36 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Adaptive TDEE Settings */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Metabolism & Targets</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+           <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Adaptive TDEE</div>
+              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Auto-adjust targets based on weight & food logs</div>
+           </div>
+           <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+             <button onClick={() => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: true }))} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: tdeePreferences?.useEstimatedTDEE ? 'var(--primary)' : 'transparent', color: tdeePreferences?.useEstimatedTDEE ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ON</button>
+             <button onClick={() => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: false }))} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: !tdeePreferences?.useEstimatedTDEE ? 'var(--primary)' : 'transparent', color: !tdeePreferences?.useEstimatedTDEE ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>OFF</button>
+           </div>
+        </div>
+        <div style={{ height: 1, background: 'var(--surface-container-highest)', margin: '16px 0' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+           <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Manual TDEE Override</div>
+              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Force a specific baseline</div>
+           </div>
+           <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowManualTDEEPicker(true)}>
+              {tdeePreferences?.manualTDEE ? `${tdeePreferences.manualTDEE} kcal` : 'Set manual'}
+           </button>
+        </div>
+        {tdeePreferences?.manualTDEE && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+            <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setTdeePreferences(p => ({ ...p, manualTDEE: null }))}>Clear manual override</button>
+          </div>
+        )}
+      </div>
+
       {/* Settings & Actions (9.7) */}
       <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
         <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Settings</div>
@@ -448,6 +480,7 @@ export default function ProfilePage() {
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
     <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
+    <ScrollPicker isOpen={showManualTDEEPicker} onClose={() => setShowManualTDEEPicker(false)} title="Set Default TDEE" options={mkIntItems(1200, 4500, 50, ' kcal')} value={tdeePreferences?.manualTDEE || tdee} onSelect={(v) => { setTdeePreferences(p => ({ ...p, manualTDEE: v })); setShowManualTDEEPicker(false); }} />
   </>
   );
 }

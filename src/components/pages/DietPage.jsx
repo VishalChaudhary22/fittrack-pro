@@ -4,9 +4,11 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
 import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
+import { TDEEInsightCard } from '../shared/TDEEInsightCard';
+import { TDEEDetailSheet } from '../shared/TDEEDetailSheet';
 import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
-import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
+import { calcBMI, calcBMR, calcDeficit, calcTDEESource } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
 import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
@@ -60,8 +62,9 @@ const dietTabCache = { activeTab: 'tracker' };
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function DietPage() {
-  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile } = useApp();
+  const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile, tdeeEstimate, setTdeePreferences } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
+  const [showTDEEDetails, setShowTDEEDetails] = useState(false);
   
   const [diet, setDiet] = useState('nonveg');
   const [dateStr, setDateStr] = useState(tod());
@@ -72,6 +75,19 @@ export default function DietPage() {
     dietTabCache.activeTab = tab;
     setActiveTabRaw(tab);
   }, []);
+
+  const handleUpdateTDEETargets = async () => {
+     if (!tdeeEstimate?.estimatedTDEE || !user) return;
+     const newTdee = tdeeEstimate.estimatedTDEE;
+     const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
+     const goal = deficitInfo.goal;
+     const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
+     const computedKcal = goal === 'loss' ? newTdee - dailyDelta : goal === 'gain' ? newTdee + dailyDelta : newTdee;
+     
+     setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
+     await updateProfile({ customGoalKcal: computedKcal, useEstimatedTDEE: true });
+     addToast('Targets successfully updated to adaptive TDEE! 🚀', 'success');
+  };
 
   // Search State
   const [showSearch, setShowSearch] = useState(false);
@@ -460,7 +476,7 @@ export default function DietPage() {
             { l: 'Height', v: user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`) : '—', i: Ruler },
             { l: 'BMI Score', v: (!bmi || isNaN(bmi) || bmi === 0) ? '—' : bmi, i: Calculator },
             { l: 'Body Fat', v: latestBF ? `${latestBF.percentage}%` : '—', i: ActivityIcon },
-            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal`, i: Zap },
+            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal${tdeeConfig?.source === 'estimated' ? (tdeeConfig.confidence === 'high' ? ' 🛡️' : ' ⚡') : (tdeeConfig?.source === 'manual' ? ' 🔒' : '')}`, i: Zap },
             { l: 'Activity', v: (user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
             const Icon = s.i;
             return (
@@ -504,6 +520,21 @@ export default function DietPage() {
             onAccept={acceptSuggestion}
             onDismiss={dismissSuggestion}
           />
+        )}
+        
+        <TDEEInsightCard 
+          tdeeEstimate={tdeeEstimate}
+          onUpdateTargets={handleUpdateTDEETargets}
+          onLearnMore={() => setShowTDEEDetails(true)}
+        />
+        {!isUnset && tdeeEstimate?.confidence === 'insufficient' && (
+           <div style={{ background: 'var(--surface-light)', borderRadius: 12, padding: '12px 16px', marginBottom: 24, border: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <Info size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+              <div>
+                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', marginBottom: 4 }}>Learning your metabolism...</div>
+                 <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', lineHeight: 1.4 }}>Log your weight and food consistently for at least 10 days to unlock Adaptive TDEE targets.</div>
+              </div>
+           </div>
         )}
 
         {/* GOAL SECTION WRAPPER */}
@@ -1268,6 +1299,7 @@ export default function DietPage() {
           </div>
         </div>
       )}
+      <TDEEDetailSheet isOpen={showTDEEDetails} onClose={() => setShowTDEEDetails(false)} tdeeEstimate={tdeeEstimate} />
     </div>
   );
 }

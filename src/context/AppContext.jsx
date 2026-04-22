@@ -11,7 +11,8 @@ import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, up
 import { calcStepsCalories } from '../utils/activityUtils';
 import { syncUserXPToCache } from '../utils/xpCacheSync';
 import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros, isCoachingDismissed, dismissCoaching } from '../utils/adaptiveCalories';
-import { calcBMR, calcTDEE, calcDeficit } from '../utils/calculations';
+import { getBestTDEE, detectMetabolicAdaptation } from '../utils/adaptiveTDEE';
+import { calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../utils/calculations';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -273,6 +274,20 @@ export function AppProvider({ children }) {
     catch { return []; }
   });
 
+  const [tdeeEstimate, setTdeeEstimate] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return null;
+    try { return JSON.parse(localStorage.getItem(`fittrack_tdeeEstimate_${cachedUserId}`)) || null; }
+    catch { return null; }
+  });
+
+  const [tdeeHistory, setTdeeHistory] = useState(() => {
+    const cachedUserId = localStorage.getItem('fittrack_last_user_id');
+    if (!cachedUserId) return [];
+    try { return JSON.parse(localStorage.getItem(`fittrack_tdeeHistory_${cachedUserId}`)) || []; }
+    catch { return []; }
+  });
+
   const setStepLogs = useCallback((updater) => {
     setStepLogsState(prev => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
@@ -343,6 +358,7 @@ export function AppProvider({ children }) {
   const [supplementConfig, setSupplementConfig] = useLocalStorage('fittrack_supplementConfig', []);
   const [cycleConfig, setCycleConfig] = useLocalStorage('fp_cycle_config', { startDate: '', cycleLength: 28 });
   const [lastSuggestionDate, setLastSuggestionDate] = useLocalStorage('fittrack_last_suggestion_date', null);
+  const [tdeePreferences, setTdeePreferences] = useLocalStorage('fittrack_tdee_preferences', { manualTDEEOverride: null, useEstimatedTDEE: false });
 
   const { theme, toggleTheme, initTheme } = useTheme();
   const { toasts, addToast, removeToast } = useToast();
@@ -357,6 +373,9 @@ export function AppProvider({ children }) {
   const bodyFatLogRef = useRef(bodyFatLog);
   const currentUserIdRef = useRef(null);
   const cloudRefreshTimerRef = useRef(null);
+  const tdeeRecomputeTimerRef = useRef(null);
+  const healthLogsRef = useRef(healthLogs);
+  const userRef = useRef(null);
 
   useEffect(() => {
     foodLogRef.current = foodLog;
@@ -373,6 +392,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     bodyFatLogRef.current = bodyFatLog;
   }, [bodyFatLog]);
+  
+  useEffect(() => {
+    healthLogsRef.current = healthLogs;
+  }, [healthLogs]);
 
   useEffect(() => {
     currentUserIdRef.current = session?.user?.id || profile?.id || localStorage.getItem('fittrack_last_user_id') || null;
@@ -403,6 +426,10 @@ export function AppProvider({ children }) {
       localStorage.removeItem(`fittrack_foodLog_${prevUserIdRef.current}`);
       localStorage.removeItem(`fittrack_readinessLog_${prevUserIdRef.current}`);
       localStorage.removeItem(`fittrack_bodyFatLog_${prevUserIdRef.current}`);
+      setTdeeEstimate(null);
+      setTdeeHistory([]);
+      localStorage.removeItem(`fittrack_tdeeEstimate_${prevUserIdRef.current}`);
+      localStorage.removeItem(`fittrack_tdeeHistory_${prevUserIdRef.current}`);
     }
   
     prevUserIdRef.current = session.user.id;
@@ -798,7 +825,55 @@ export function AppProvider({ children }) {
     customGoalKcal: profile.custom_goal_kcal || null,
     customProteinG: profile.custom_protein_g || null,
     lastKcalSuggestionDate: profile.last_kcal_suggestion_date || null,
+    manualTDEEOverride: tdeePreferences.manualTDEEOverride,
+    useEstimatedTDEE: tdeePreferences.useEstimatedTDEE,
   } : null;
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  const scheduleTDEERecompute = useCallback(() => {
+    const cachedUserId = currentUserIdRef.current;
+    if (!cachedUserId) return;
+    if (tdeeRecomputeTimerRef.current) clearTimeout(tdeeRecomputeTimerRef.current);
+    
+    tdeeRecomputeTimerRef.current = setTimeout(() => {
+      tdeeRecomputeTimerRef.current = null;
+      if (!userRef.current) return;
+      
+      const hl = healthLogsRef.current || [];
+      const fl = foodLogRef.current || [];
+      
+      const best = getBestTDEE(hl, fl, userRef.current, userRef.current.manualTDEEOverride);
+      const est = best.estimate;
+      
+      if (est) {
+        setTdeeEstimate(est);
+        localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(est));
+        
+        if (est.confidence !== 'insufficient') {
+          setTdeeHistory(prev => {
+            const h = [...prev];
+            const idx = h.findIndex(e => e.windowEnd === est.windowEnd);
+            if (idx !== -1) {
+              h[idx] = est;
+              localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(h));
+              return h;
+            }
+            const updated = [...h, est].sort((a,b) => new Date(a.windowEnd) - new Date(b.windowEnd));
+            const pruned = updated.slice(-12);
+            localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(pruned));
+            return pruned;
+          });
+        }
+      }
+    }, 2000);
+  }, [setTdeeEstimate, setTdeeHistory]);
+
+  useEffect(() => {
+    scheduleTDEERecompute();
+  }, [healthLogs, foodLog, user, scheduleTDEERecompute]);
 
   // --- Mutator Wrappers for Cloud Sync ---
   // To avoid rewriting all 21 setters in the app, we provide a smart wrapper that updates local AND cloud state.
@@ -995,7 +1070,8 @@ export function AppProvider({ children }) {
 
     // Determine goal from deficit calculation
     const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
-    const tdee = calcTDEE(bmr, user.activityLevel || 'moderate');
+    const tdeeSource = calcTDEESource(user, tdeeEstimate);
+    const tdee = tdeeSource.value;
     const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
     const goal = deficitInfo.goal;
     const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
@@ -1009,7 +1085,7 @@ export function AppProvider({ children }) {
       gender: user.gender,
     });
     return { ...scenario, goalKcal, tdee, goal };
-  }, [user, healthLogs, lastSuggestionDate]);
+  }, [user, healthLogs, lastSuggestionDate, tdeeEstimate]);
 
   const acceptSuggestion = useCallback(async (newKcal, newProtein) => {
     const today = new Date().toISOString().split('T')[0];
@@ -1057,6 +1133,7 @@ export function AppProvider({ children }) {
     cycleConfig, setCycleConfig,
     // Adaptive Diet
     adaptiveSuggestion, acceptSuggestion, dismissSuggestion,
+    tdeeEstimate, tdeeHistory, tdeePreferences, setTdeePreferences
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

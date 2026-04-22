@@ -97,7 +97,7 @@ const ParticlesBackground = () => {
 export default function DashboardPage() {
   useScrollRestoration('/');
   const navigate = useNavigate();
-  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion } = useApp();
+  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, tdeeEstimate } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showStepModal, setShowStepModal] = useState(false);
   const [stepInputVal, setStepInputVal] = useState('');
@@ -430,26 +430,36 @@ export default function DashboardPage() {
             <Activity size={24} style={{ position: 'absolute', top: 12, right: 12, opacity: 0.15, color: 'var(--on-surface)' }} />
             <div style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: 12 }}>METABOLIC INDEX</div>
             
-            {Math.round(bmi) && !isNaN(bmi) ? (<>
-              <div style={{ position: 'relative', width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
-                <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span className="headline-lg" style={{ fontSize: '2.5rem', color: 'var(--on-surface)' }}>{bmi}</span>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, width: '100%' }}>
-                {[{ l: 'Under', r: '<18.5' }, { l: 'Normal', r: '18.5–25' }, { l: 'Over', r: '25–30' }, { l: 'Obese', r: '>30' }].map(s => {
-                  const isActive = bmiCat.label.startsWith(s.l);
-                  return (
-                    <div key={s.l} style={{ textAlign: 'center', padding: '6px', borderRadius: 8, background: isActive ? 'var(--surface-container-highest)' : 'var(--surface-container-lowest)', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' }}>
-                      <div style={{ fontSize: 10, fontWeight: 700 }}>{s.l}</div>
-                      <div style={{ fontSize: 9, opacity: 0.7 }}>{s.r}</div>
+            {Math.round(bmi) && !isNaN(bmi) ? (
+              <div style={{ display: 'flex', gap: 16, width: '100%' }}>
+                 {/* BMI Side */}
+                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--surface-container-lowest)' }}></div>
+                      <div className="ember-glow" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '4px solid var(--primary-container)', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(45deg)' }}></div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <span className="headline-lg" style={{ fontSize: '2rem', color: 'var(--on-surface)' }}>{bmi}</span>
+                      </div>
                     </div>
-                  );
-                })}
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textAlign: 'center', lineHeight: 1.2 }}>BMI:<br/>{bmiCat.label}</div>
+                 </div>
+
+                 {/* TDEE Side */}
+                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 8px', position: 'relative' }}>
+                    {tdeeEstimate?.insights?.some(i => i.type === 'metabolic-adaptation') && (
+                      <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--error)', animation: 'pulse 2s infinite' }} title="Metabolic Adaptation Detected" />
+                    )}
+                    <Zap size={20} color="var(--tertiary-container)" style={{ marginBottom: 4 }} />
+                    <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px' }}>Adaptive TDEE</span>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--on-surface)', marginTop: 4 }}>
+                      {tdeeEstimate?.estimatedTDEE ? `${tdeeEstimate.estimatedTDEE}` : '—'}
+                    </span>
+                    <span style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 2 }}>
+                      {tdeeEstimate?.confidence === 'high' ? '🛡️ High Conf' : tdeeEstimate?.confidence === 'medium' ? '⚡ Med Conf' : 'Learning...'}
+                    </span>
+                 </div>
               </div>
-            </>) : (
+            ) : (
               <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '16px' }}>
                 Add weight & height
               </div>

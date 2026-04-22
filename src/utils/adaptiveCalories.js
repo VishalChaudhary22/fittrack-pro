@@ -342,3 +342,52 @@ export function isCoachingDismissed(userId, suppressDays = 7) {
     return (Date.now() - new Date(raw)) / 86400000 < suppressDays;
   } catch { return false; }
 }
+
+/**
+ * Classify a purely TDEE-driven scenario based on the recent estimate divergence.
+ * These are structurally separate from the weight-regression scenarios (S1-S10).
+ *
+ * @param {Object} tdeeEstimate
+ * @returns {Object|null} scenario shape matching S-series
+ */
+export const classifyTDEEScenario = (tdeeEstimate) => {
+  if (!tdeeEstimate || !tdeeEstimate.insights || tdeeEstimate.insights.length === 0) return null;
+
+  // T3 Takes precedence - Metabolic Adaptation
+  const mInsight = tdeeEstimate.insights.find(i => i.type === 'metabolic-adaptation');
+  if (mInsight) {
+    return {
+      scenario: 'T3',
+      severity: 'warning',
+      adjustKcal: 0,
+      message: 'Signs of metabolic adaptation',
+      reasoning: `You've been in a deficit for ${mInsight.deficitWeeks} weeks and your TDEE has dropped by ~${mInsight.adaptationPercent}%. A short diet break at maintenance can reset this.`,
+    };
+  }
+
+  // T1 - TDEE meaningfully higher than static
+  const hInsight = tdeeEstimate.insights.find(i => i.type === 'tdee-higher-than-static');
+  if (hInsight) {
+    return {
+      scenario: 'T1',
+      severity: 'info',
+      adjustKcal: 150, // Capped conservative bump
+      message: 'Your real calorie burn is higher than estimated',
+      reasoning: `Your logged data shows you're burning ~${hInsight.delta} kcal more than your calculated target. Consider increasing your target by 150 kcal.`,
+    };
+  }
+
+  // T2 - TDEE meaningfully lower than static
+  const lInsight = tdeeEstimate.insights.find(i => i.type === 'tdee-lower-than-static');
+  if (lInsight) {
+    return {
+      scenario: 'T2',
+      severity: 'warning',
+      adjustKcal: -100, // Gentle bump down
+      message: 'Your activity level may be lower than expected',
+      reasoning: `Your weight data suggests your actual burn is ~${Math.abs(lInsight.delta)} kcal below the estimate. Nudging your target down slightly.`,
+    };
+  }
+
+  return null;
+};

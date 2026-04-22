@@ -77,9 +77,9 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
             {suggestion.message}
           </div>
           {!isPositive && suggestion.adjustKcal !== 0 && (
-             <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>
-               Suggested target: <span style={{ fontWeight: 700, color: 'var(--on-surface)' }}>{newKcal} kcal</span>
-             </div>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>
+              Suggested target: <span style={{ fontWeight: 700, color: 'var(--on-surface)' }}>{newKcal} kcal</span>
+            </div>
           )}
         </div>
 
@@ -93,10 +93,10 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
               display: 'flex', alignItems: 'center', gap: 4, transition: 'background 0.2s'
             }}
           >
-            Review 
+            Review
           </button>
         )}
-        
+
         <style>{`
           @keyframes cascadeIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -180,16 +180,16 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
             display: 'flex', alignItems: 'center', gap: 12,
           }}>
             <div>
-               <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current</div>
-               <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface-variant)', textDecoration: 'line-through' }}>{currentKcal}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-surface-variant)', textDecoration: 'line-through' }}>{currentKcal}</div>
             </div>
             <TrendingUp size={16} color="var(--primary)" style={{ transform: suggestion.adjustKcal > 0 ? 'rotate(-45deg)' : 'rotate(45deg)' }} />
             <div>
-               <div style={{ fontSize: 10, fontWeight: 800, color: severityColor, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Suggested</div>
-               <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--on-surface)' }}>{newKcal} <span style={{ fontSize: 12 }}>kcal</span></div>
+              <div style={{ fontSize: 10, fontWeight: 800, color: severityColor, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Suggested</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--on-surface)' }}>{newKcal} <span style={{ fontSize: 12 }}>kcal</span></div>
             </div>
           </div>
-          
+
           {newMacros && (
             <div style={{
               padding: '12px 18px', borderRadius: 16,

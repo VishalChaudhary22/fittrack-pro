@@ -45,7 +45,13 @@ export default function BodyFatRingCard() {
   const goalPct = useMemo(() => {
     if (!user.weightGoal || !user.weightGoalStart) return null;
     const total = Math.abs(user.weightGoalStart - user.weightGoal);
-    const done = Math.abs(user.weightGoalStart - latestWeight);
+    const isLossGoal = user.weightGoalStart > user.weightGoal;
+    const doneRaw = isLossGoal 
+      ? user.weightGoalStart - latestWeight 
+      : latestWeight - user.weightGoalStart;
+    
+    // Math.max guarantees it doesn't go below 0 (if user gains weight on a cut, or loses weight on a bulk)
+    const done = Math.max(0, doneRaw);
     return clamp(Math.round(done / total * 100), 0, 100);
   }, [user, latestWeight]);
 

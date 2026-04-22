@@ -840,33 +840,37 @@ export function AppProvider({ children }) {
     
     tdeeRecomputeTimerRef.current = setTimeout(() => {
       tdeeRecomputeTimerRef.current = null;
-      if (!userRef.current) return;
-      
-      const hl = healthLogsRef.current || [];
-      const fl = foodLogRef.current || [];
-      
-      const best = getBestTDEE(hl, fl, userRef.current, userRef.current.manualTDEEOverride);
-      const est = best.estimate;
-      
-      if (est) {
-        setTdeeEstimate(est);
-        localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(est));
+      try {
+        if (!userRef.current) return;
         
-        if (est.confidence !== 'insufficient') {
-          setTdeeHistory(prev => {
-            const h = [...prev];
-            const idx = h.findIndex(e => e.windowEnd === est.windowEnd);
-            if (idx !== -1) {
-              h[idx] = est;
-              localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(h));
-              return h;
-            }
-            const updated = [...h, est].sort((a,b) => new Date(a.windowEnd) - new Date(b.windowEnd));
-            const pruned = updated.slice(-12);
-            localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(pruned));
-            return pruned;
-          });
+        const hl = healthLogsRef.current || [];
+        const fl = foodLogRef.current || [];
+        
+        const best = getBestTDEE(hl, fl, userRef.current, null);
+        const est = best?.estimate;
+        
+        if (est) {
+          setTdeeEstimate(est);
+          try { localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(est)); } catch(e) {}
+          
+          if (est.confidence !== 'insufficient') {
+            setTdeeHistory(prev => {
+              const h = [...prev];
+              const idx = h.findIndex(e => e.windowEnd === est.windowEnd);
+              if (idx !== -1) {
+                h[idx] = est;
+                try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(h)); } catch(e) {}
+                return h;
+              }
+              const updated = [...h, est].sort((a,b) => new Date(a.windowEnd) - new Date(b.windowEnd));
+              const pruned = updated.slice(-12);
+              try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(pruned)); } catch(e) {}
+              return pruned;
+            });
+          }
         }
+      } catch (err) {
+        console.error('[TDEE] Recompute error:', err);
       }
     }, 2000);
   }, [setTdeeEstimate, setTdeeHistory]);
@@ -1061,30 +1065,35 @@ export function AppProvider({ children }) {
 
   // --- Adaptive Diet Suggestion ---
   const adaptiveSuggestion = useMemo(() => {
-    if (!user || !healthLogs || healthLogs.length < 5) return null;
-    if (!checkSuggestionCooldown(lastSuggestionDate).canSuggest) return null;
-    if (isCoachingDismissed(user.id)) return null;
-    const userLogs = healthLogs.filter(l => l.userId === user.id && l.weight);
-    if (!hasSufficientData(userLogs)) return null;
-    const rateData = computeWeeklyRate(userLogs);
+    try {
+      if (!user || !healthLogs || healthLogs.length < 5) return null;
+      if (!checkSuggestionCooldown(lastSuggestionDate).canSuggest) return null;
+      if (isCoachingDismissed(user.id)) return null;
+      const userLogs = healthLogs.filter(l => l.userId === user.id && l.weight);
+      if (!hasSufficientData(userLogs)) return null;
+      const rateData = computeWeeklyRate(userLogs);
 
-    // Determine goal from deficit calculation
-    const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
-    const tdeeSource = calcTDEESource(user, tdeeEstimate);
-    const tdee = tdeeSource.value;
-    const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
-    const goal = deficitInfo.goal;
-    const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
-    const computedKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
-    const goalKcal = user.customGoalKcal || computedKcal;
+      // Determine goal from deficit calculation
+      const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
+      const tdeeSource = calcTDEESource(user, tdeeEstimate);
+      const tdee = tdeeSource?.value || 2000;
+      const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);
+      const goal = deficitInfo.goal;
+      const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
+      const computedKcal = goal === 'loss' ? tdee - dailyDelta : goal === 'gain' ? tdee + dailyDelta : tdee;
+      const goalKcal = user.customGoalKcal || computedKcal;
 
-    const scenario = classifyScenario(rateData, {
-      goal,
-      currentWeight: user.weight,
-      goalKcal,
-      gender: user.gender,
-    });
-    return { ...scenario, goalKcal, tdee, goal };
+      const scenario = classifyScenario(rateData, {
+        goal,
+        currentWeight: user.weight,
+        goalKcal,
+        gender: user.gender,
+      });
+      return { ...scenario, goalKcal, tdee, goal };
+    } catch (err) {
+      console.error('[AdaptiveSuggestion] Error:', err);
+      return null;
+    }
   }, [user, healthLogs, lastSuggestionDate, tdeeEstimate]);
 
   const acceptSuggestion = useCallback(async (newKcal, newProtein) => {

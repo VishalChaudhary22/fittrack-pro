@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
+import { ACTIVITY } from '../../data/constants';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import { getCyclePhase } from '../../utils/cycleCalculations';
@@ -445,19 +446,25 @@ export default function DashboardPage() {
                  </div>
 
                  {/* TDEE Side */}
-                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 8px', position: 'relative' }}>
-                    {tdeeEstimate?.insights?.some(i => i.type === 'metabolic-adaptation') && (
-                      <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--error)', animation: 'pulse 2s infinite' }} title="Metabolic Adaptation Detected" />
-                    )}
-                    <Zap size={20} color="var(--tertiary-container)" style={{ marginBottom: 4 }} />
-                    <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px' }}>Adaptive TDEE</span>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--on-surface)', marginTop: 4 }}>
-                      {tdeeEstimate?.estimatedTDEE ? `${tdeeEstimate.estimatedTDEE}` : '—'}
-                    </span>
-                    <span style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 2 }}>
-                      {tdeeEstimate?.confidence === 'high' ? '🛡️ High Conf' : tdeeEstimate?.confidence === 'medium' ? '⚡ Med Conf' : 'Learning...'}
-                    </span>
-                 </div>
+                 {(() => {
+                    const hasAdaptive = tdeeEstimate?.estimatedTDEE && (tdeeEstimate.confidence === 'high' || tdeeEstimate.confidence === 'medium');
+                    const displayTDEE = hasAdaptive ? tdeeEstimate.estimatedTDEE : (user.weight && user.height && user.age ? Math.round(calcBMR(user.weight, user.height, user.age, user.gender) * (ACTIVITY[user.activityLevel || 'moderate']?.mult || 1.55)) : null);
+                    return (
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-lowest)', borderRadius: 12, padding: '12px 8px', position: 'relative' }}>
+                         {tdeeEstimate?.insights?.some(i => i.type === 'metabolic-adaptation') && (
+                           <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: 'var(--error)', animation: 'pulse 2s infinite' }} title="Metabolic Adaptation Detected" />
+                         )}
+                         <Zap size={20} color="var(--tertiary-container)" style={{ marginBottom: 4 }} />
+                         <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px' }}>TDEE</span>
+                         <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--on-surface)', marginTop: 4 }}>
+                           {displayTDEE || '—'}
+                         </span>
+                         <span style={{ fontSize: 9, color: 'var(--on-surface-dim)', marginTop: 2 }}>
+                           {hasAdaptive ? (tdeeEstimate.confidence === 'high' ? '🛡️ Adaptive' : '⚡ Adaptive') : (displayTDEE ? '📊 Formula' : 'Set profile')}
+                         </span>
+                      </div>
+                    );
+                 })()}
               </div>
             ) : (
               <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '16px' }}>

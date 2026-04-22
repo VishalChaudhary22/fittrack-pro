@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker } from '../shared/SharedComponents';
+import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcTDEESource } from '../../utils/calculations';
-import { fmt, kgToLbs, cmToFtIn, gId, tod, mkIntItems } from '../../utils/helpers';
+import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
@@ -480,7 +480,26 @@ export default function ProfilePage() {
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
     <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
-    <ScrollPicker isOpen={showManualTDEEPicker} onClose={() => setShowManualTDEEPicker(false)} title="Set Default TDEE" options={mkIntItems(1200, 4500, 50, ' kcal')} value={tdeePreferences?.manualTDEE || tdee} onSelect={(v) => { setTdeePreferences(p => ({ ...p, manualTDEE: v })); setShowManualTDEEPicker(false); }} />
+    {showManualTDEEPicker && (
+      <ModalPortal>
+        <div className="mo" onClick={() => setShowManualTDEEPicker(false)}>
+          <div className="md" onClick={e => e.stopPropagation()} style={{ maxWidth: 340, textAlign: 'center' }}>
+            <div className="headline-md" style={{ marginBottom: 8, color: 'var(--on-surface)' }}>Set Default TDEE</div>
+            <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 16 }}>Choose your daily calorie target baseline</div>
+            <ScrollPicker
+              value={tdeePreferences?.manualTDEE || tdee}
+              onChange={(v) => setTdeePreferences(p => ({ ...p, manualTDEE: v }))}
+              items={Array.from({ length: Math.floor((4500 - 1200) / 50) + 1 }, (_, i) => 1200 + i * 50)}
+              unit="kcal"
+            />
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              <button className="btn-g" style={{ flex: 1, padding: '12px' }} onClick={() => setShowManualTDEEPicker(false)}>Cancel</button>
+              <button className="btn-p" style={{ flex: 1, padding: '12px' }} onClick={() => setShowManualTDEEPicker(false)}>Done</button>
+            </div>
+          </div>
+        </div>
+      </ModalPortal>
+    )}
   </>
   );
 }

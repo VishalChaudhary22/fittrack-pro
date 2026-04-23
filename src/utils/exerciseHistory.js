@@ -8,7 +8,7 @@ const norm = (s) => s?.trim().toLowerCase() ?? '';
 
 /**
  * Returns weight + reps of the most recent completed set for an exercise.
- * Searches workoutLogs newest-first. Returns the last done set of the first
+ * Searches workoutLogs newest-first. Returns the last set of the first
  * matching log found (preserves that session's rep cadence).
  */
 export function getLastLiftedForExercise(workoutLogs, exerciseName) {
@@ -29,6 +29,27 @@ export function getLastLiftedForExercise(workoutLogs, exerciseName) {
 }
 
 /**
+ * Returns ALL sets from the most recent session for an exercise.
+ * Used by swap pre-fill to map set-1→set-1, set-2→set-2, etc.
+ * Returns { sets: [{weight, reps}, ...], date } or null.
+ */
+export function getLastSessionSets(workoutLogs, exerciseName) {
+  if (!workoutLogs?.length || !exerciseName) return null;
+  const target = norm(exerciseName);
+  const sorted = [...workoutLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  for (const log of sorted) {
+    for (const ex of log.exercises ?? []) {
+      if (norm(ex.name) !== target) continue;
+      const sets = ex.sets ?? [];
+      if (!sets.length) continue;
+      return { sets: sets.map(s => ({ weight: s.weight ?? 0, reps: s.reps ?? 0 })), date: log.date };
+    }
+  }
+  return null;
+}
+
+/**
  * Returns the all-time PR for an exercise.
  * WEIGHTED (weight > 0): PR = heaviest weight. Tiebreak: most reps at that weight.
  * BODYWEIGHT (weight === 0): PR = most reps ever.
@@ -42,7 +63,8 @@ export function getAllTimePR(workoutLogs, exerciseName) {
     for (const ex of log.exercises ?? []) {
       if (norm(ex.name) !== target) continue;
       for (const set of ex.sets ?? []) {
-        if (!set.done) continue;
+        // Saved logs don't have a `done` flag (stripped during save)
+        if (set.done === false) continue;
         const w = set.weight ?? 0;
         const r = set.reps ?? 0;
         if (r <= 0) continue;

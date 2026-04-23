@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock } from 'lucide-react';
-import { getLastLiftedForExercise, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
+import { getLastLiftedForExercise, getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
@@ -873,7 +873,8 @@ export default function WorkoutPage() {
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
   const swapExercise = (exerciseIndex, newName) => {
-    const history = getLastLiftedForExercise(workoutLogs, newName);
+    const lastSession = getLastSessionSets(workoutLogs, newName);
+    const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 
     setSession(prev => ({
       ...prev,
@@ -883,11 +884,18 @@ export default function WorkoutPage() {
           ...ex,
           sv: newName,
           _swapHistory: history ?? null,
-          sets: ex.sets.map(set => ({
-            ...set,
-            weight: set.done ? set.weight : (history ? String(history.weight) : ''),
-            reps:   set.done ? set.reps   : (history ? String(history.reps)   : ''),
-          })),
+          sets: ex.sets.map((set, si) => {
+            if (set.done) return set;
+            // Map set-by-set: use matching index, fall back to last historical set
+            const histSet = lastSession
+              ? (lastSession.sets[si] ?? lastSession.sets[lastSession.sets.length - 1])
+              : null;
+            return {
+              ...set,
+              weight: histSet ? String(histSet.weight) : '',
+              reps:   histSet ? String(histSet.reps)   : '',
+            };
+          }),
         };
       }),
     }));

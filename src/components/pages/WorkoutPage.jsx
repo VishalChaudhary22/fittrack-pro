@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Flame } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock } from 'lucide-react';
 import { getLastLiftedForExercise, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
@@ -885,8 +885,8 @@ export default function WorkoutPage() {
           _swapHistory: history ?? null,
           sets: ex.sets.map(set => ({
             ...set,
-            weight: set.done ? set.weight : (history ? String(history.weight) : set.weight),
-            reps:   set.done ? set.reps   : (history ? String(history.reps)   : set.reps),
+            weight: set.done ? set.weight : (history ? String(history.weight) : ''),
+            reps:   set.done ? set.reps   : (history ? String(history.reps)   : ''),
           })),
         };
       }),
@@ -1129,9 +1129,7 @@ export default function WorkoutPage() {
                   const pr        = prMap[exName] ?? null;
                   const isPR      = s.done && beatsAllTimePR(pr, parseFloat(s.weight) || 0, parseFloat(s.reps) || 0);
 
-                  const isFirstPR = isPR && !ex.sets
-                    .slice(0, si)
-                    .some(prev => prev.done && beatsAllTimePR(pr, parseFloat(prev.weight) || 0, parseFloat(prev.reps) || 0));
+
 
                   return (
                   <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -1147,8 +1145,8 @@ export default function WorkoutPage() {
                     
                     <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isPR ? (
-                        <div className="pr-badge-circle" title="Personal Record">
-                          <Flame size={11} color="#fff" strokeWidth={2.5} />
+                        <div className="pr-badge-pill" title="Personal Record">
+                          PR
                         </div>
                       ) : (
                         si + 1
@@ -1180,7 +1178,7 @@ export default function WorkoutPage() {
                         <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
                       )}
                     </div>
-                    {isFirstPR && <div className="pr-new-label">NEW PR</div>}
+
                   </div>
                   </div>
                   );

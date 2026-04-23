@@ -285,21 +285,21 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats Strip (9.8) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
-        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="profile-metrics-grid">
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMI</span><span style={{ fontSize: 8, background: 'var(--surface-container-highest)', borderRadius: 8, color: 'var(--on-surface-variant)', padding: '3px 8px' }}>{getBMICat(bmi).label}</span></div>
           <div className="display-lg" style={{ color: 'var(--primary)' }}>{bmi}</div>
         </div>
-        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BF%</div>
           <div className="display-lg" style={{ color: 'var(--primary)' }}>{latestBFPct ? `${latestBFPct.toFixed(1)}%` : '—'}</div>
         </div>
-        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
           <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{bmr}</div>
           <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
         </div>
-        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>TDEE</div>
           <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{tdee}</div>
           <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>

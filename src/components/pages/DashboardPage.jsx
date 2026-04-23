@@ -294,7 +294,7 @@ export default function DashboardPage() {
     const proteinMultiplier = isHeavyCut ? 2.0 : 1.8;
 
     return {
-      goalKcal: Math.round(k),
+      goalKcal: user?.customGoalKcal || Math.round(k),
       protTarget: Math.round(baseWeightForProtein * proteinMultiplier),
       carbTarget: Math.round((k * (goal === 'loss' ? .38 : .44)) / 4),
       fatTarget: Math.round((k * .26) / 9),

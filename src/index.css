@@ -374,12 +374,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   }
 }
 
-@keyframes prLabelFade {
-  0%   { opacity: 0; transform: translateY(5px); }
-  12%  { opacity: 1; transform: translateY(0);   }
-  72%  { opacity: 1; }
-  100% { opacity: 0; }
-}
+
 
 /* ── PR set row ──────────────────────────────────────────────── */
 
@@ -392,33 +387,40 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 /* ── PR badge circle ─────────────────────────────────────────── */
 
-.pr-badge-circle {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #FFB59B, #F85F1B);
-  box-shadow: 0 0 8px rgba(248, 95, 27, 0.35);
-  flex-shrink: 0;
-  will-change: transform;
-}
+
 
 /* ── "NEW PR" floating type label ────────────────────────────── */
 
-.pr-new-label {
-  position: absolute;
-  top: -18px;
-  right: 8px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-weight: 500;
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--primary-container);
-  animation: prLabelFade 2.5s var(--ease-smooth) forwards;
-  pointer-events: none;
+.pr-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #FFB59B, #F85F1B);
+  box-shadow: 0 1px 6px rgba(248, 95, 27, 0.30);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #fff;
   white-space: nowrap;
-  will-change: opacity, transform;
+  will-change: transform;
+}
+
+/* ── Profile metrics 2×2 / 1×4 grid ────────────────────────────── */
+
+.profile-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .profile-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

@@ -357,3 +357,68 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .bf-card-grid{grid-template-columns:1fr 1fr!important;grid-template-rows:auto auto}
   .bf-card-chart{grid-column:1/-1;order:3}
 }
+
+/* ── PR animations ───────────────────────────────────────────── */
+
+@keyframes prFlash {
+  0%   { box-shadow: none; background-color: var(--surface-container); }
+  20%  {
+    box-shadow:
+      inset 0 0 0 1px rgba(248, 95, 27, 0.20),
+      0 0 24px rgba(248, 95, 27, 0.30);
+    background-color: var(--surface-container-high);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(248, 95, 27, 0.08);
+    background-color: var(--surface-container-high);
+  }
+}
+
+@keyframes prLabelFade {
+  0%   { opacity: 0; transform: translateY(5px); }
+  12%  { opacity: 1; transform: translateY(0);   }
+  72%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── PR set row ──────────────────────────────────────────────── */
+
+.set-row.is-pr {
+  border-left: 2.5px solid var(--primary-container);
+  border-radius: 10px;
+  animation: prFlash 700ms var(--ease-smooth) forwards;
+  background-color: var(--surface-container-high) !important;
+}
+
+/* ── PR badge circle ─────────────────────────────────────────── */
+
+.pr-badge-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFB59B, #F85F1B);
+  box-shadow: 0 0 8px rgba(248, 95, 27, 0.35);
+  flex-shrink: 0;
+  will-change: transform;
+}
+
+/* ── "NEW PR" floating type label ────────────────────────────── */
+
+.pr-new-label {
+  position: absolute;
+  top: -18px;
+  right: 8px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary-container);
+  animation: prLabelFade 2.5s var(--ease-smooth) forwards;
+  pointer-events: none;
+  white-space: nowrap;
+  will-change: opacity, transform;
+}

@@ -72,12 +72,22 @@ export const BottomNav = () => {
       <nav className="bn">
         {NAV_MOBILE_MAIN.map(({ id, label, Icon, path }) => (
           <button key={id} onClick={() => { navigate(path); setShowMore(false); }} style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px',
             color: isActive(path) ? 'var(--primary-container)' : 'var(--on-surface-variant)', transition: 'color .15s var(--ease-smooth)', minWidth: 0,
           }}>
-            <Icon size={20} />
-            <span style={{ fontSize: 9, fontWeight: 600, fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '.3px', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
+            <Icon size={18} />
+            <span style={{
+              fontSize: 9, fontWeight: 600, fontFamily: "'Be Vietnam Pro', sans-serif",
+              letterSpacing: '.3px', textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.15, maxWidth: '100%',
+            }}>
+              {label.includes('\n')
+                ? label.split('\n').map((line, i) => (
+                    <span key={i} style={{ display: 'block' }}>{line}</span>
+                  ))
+                : label
+              }
+            </span>
           </button>
         ))}
         <button onClick={() => setShowMore(!showMore)} style={{

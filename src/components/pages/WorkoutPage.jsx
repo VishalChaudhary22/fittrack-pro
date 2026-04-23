@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Flame } from 'lucide-react';
+import { getLastLiftedForExercise, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
@@ -648,6 +649,15 @@ export default function WorkoutPage() {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [swapTarget, setSwapTarget] = useState(null);
 
+  const prMap = useMemo(() => {
+    const map = {};
+    for (const ex of session?.exs ?? []) {
+      const name = ex.sv || ex.name;
+      map[name] = getAllTimePR(workoutLogs, name);
+    }
+    return map;
+  }, [session?.exs, workoutLogs]);
+
   // Timer State (Fix 3 & 5)
   const [restDuration, setRestDuration] = useState(() => {
     const saved = localStorage.getItem('fittrack_restTimerDuration');
@@ -863,11 +873,23 @@ export default function WorkoutPage() {
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
   const swapExercise = (exerciseIndex, newName) => {
+    const history = getLastLiftedForExercise(workoutLogs, newName);
+
     setSession(prev => ({
       ...prev,
-      exs: prev.exs.map((ex, i) =>
-        i === exerciseIndex ? { ...ex, sv: newName } : ex
-      ),
+      exs: prev.exs.map((ex, i) => {
+        if (i !== exerciseIndex) return ex;
+        return {
+          ...ex,
+          sv: newName,
+          _swapHistory: history ?? null,
+          sets: ex.sets.map(set => ({
+            ...set,
+            weight: set.done ? set.weight : (history ? String(history.weight) : set.weight),
+            reps:   set.done ? set.reps   : (history ? String(history.reps)   : set.reps),
+          })),
+        };
+      }),
     }));
   };
 
@@ -1053,6 +1075,32 @@ export default function WorkoutPage() {
                 </button>
               </div>
 
+              {/* Swapped Exercise Last Session Chip */}
+              {ex._swapHistory && !ex.sets.every(s => s.done) && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  color: 'var(--on-surface-dim)',
+                  background: 'var(--surface-container)',
+                  borderRadius: 8,
+                  padding: '3px 10px',
+                  marginTop: 4,
+                  marginBottom: 8,
+                  fontFamily: 'Be Vietnam Pro, sans-serif',
+                  fontSize: '11px',
+                  letterSpacing: '0.04em',
+                }}>
+                  <Clock size={11} color="var(--on-surface-dim)" strokeWidth={2} />
+                  {ex._swapHistory.weight > 0
+                    ? `Last: ${ex._swapHistory.weight} kg x ${ex._swapHistory.reps} reps`
+                    : `Last: ${ex._swapHistory.reps} reps (bodyweight)`
+                  }
+                  {' · '}
+                  {new Date(ex._swapHistory.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                </div>
+              )}
+
               {/* Last Session Reference Row (UX-4.5) */}
               {(() => {
                 const prevLog = workoutLogs.filter(l => l.userId === user.id && l.dayId === session.day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -1076,17 +1124,36 @@ export default function WorkoutPage() {
 
               {/* Set Rows */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {ex.sets.map((s, si) => (
+                {ex.sets.map((s, si) => {
+                  const exName    = ex.sv || ex.name;
+                  const pr        = prMap[exName] ?? null;
+                  const isPR      = s.done && beatsAllTimePR(pr, parseFloat(s.weight) || 0, parseFloat(s.reps) || 0);
+
+                  const isFirstPR = isPR && !ex.sets
+                    .slice(0, si)
+                    .some(prev => prev.done && beatsAllTimePR(pr, parseFloat(prev.weight) || 0, parseFloat(prev.reps) || 0));
+
+                  return (
                   <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {restActive && restTimerPosition?.ei === ei && restTimerPosition?.si === si && (
                       <RestTimer secondsLeft={restSecondsLeft} onSkip={skipRestTimer} onExtend={extendRestTimer} />
                     )}
-                    <div className="set-row" style={{ 
-                      background: 'var(--surface-container-low)', padding: 12, borderRadius: 12, transition: 'all 0.2s', 
-                      opacity: s.done ? 0.7 : 1, filter: s.done ? 'grayscale(50%)' : 'none' 
-                    }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-container-low)'}>
+                    <div className={`set-row ${isPR ? 'is-pr' : ''}`} style={{ 
+                      background: isPR ? 'var(--surface-container-high)' : 'var(--surface-container-low)',
+                      padding: 12, borderRadius: 12, transition: 'all 0.2s', position: 'relative',
+                      opacity: s.done ? (isPR ? 1 : 0.7) : 1, filter: s.done ? (isPR ? 'none' : 'grayscale(50%)') : 'none',
+                      borderLeft: isPR ? '2.5px solid var(--primary-container)' : 'none'
+                    }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = isPR ? 'var(--surface-container-high)' : 'var(--surface-container-low)'}>
                     
-                    <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center' }}>{si + 1}</div>
+                    <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {isPR ? (
+                        <div className="pr-badge-circle" title="Personal Record">
+                          <Flame size={11} color="#fff" strokeWidth={2.5} />
+                        </div>
+                      ) : (
+                        si + 1
+                      )}
+                    </div>
                     
                     <div style={{ paddingRight: 8 }}>
                       <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ width: '100%', minHeight: 44, background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
@@ -1113,6 +1180,7 @@ export default function WorkoutPage() {
                         <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
                       )}
                     </div>
+                    {isFirstPR && <div className="pr-new-label">NEW PR</div>}
                   </div>
                   </div>
                 ))}

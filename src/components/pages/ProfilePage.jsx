@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
@@ -110,6 +111,45 @@ export default function ProfilePage() {
   const [confirm, setConfirm] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [showManualTDEEPicker, setShowManualTDEEPicker] = useState(false);
+
+  const [feedbackOpen,    setFeedbackOpen]    = useState(false);
+  const [feedbackSubject, setFeedbackSubject] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [includeProfile,  setIncludeProfile]  = useState(true);
+  const [feedbackStatus,  setFeedbackStatus]  = useState('idle');
+
+  const handleFeedbackSubmit = async () => {
+    if (!feedbackMessage.trim() || feedbackStatus === 'sending') return;
+    setFeedbackStatus('sending');
+
+    const meta = includeProfile
+      ? `Age: ${user?.age ?? '-'}, Weight: ${user?.weight ?? '-'} kg, Goal: ${user?.weightGoal ?? '-'} kg, Diet: ${user?.dietType ?? '-'}, Activity: ${user?.activity ?? '-'}, Gender: ${user?.gender ?? '-'}`
+      : 'Not shared';
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          from_name:  user?.name   || 'FitTrack User',
+          from_email: user?.email  || 'anonymous',
+          subject:    feedbackSubject.trim() || 'General Feedback',
+          message:    feedbackMessage.trim(),
+          user_id:    user?.id     || 'unknown',
+          meta,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+      setFeedbackStatus('sent');
+      setFeedbackSubject('');
+      setFeedbackMessage('');
+      setTimeout(() => setFeedbackStatus('idle'), 4500);
+    } catch (err) {
+      console.error('[Feedback] EmailJS error:', err);
+      setFeedbackStatus('error');
+      setTimeout(() => setFeedbackStatus('idle'), 4500);
+    }
+  };
   
   useEffect(() => {
     if (user && !ed) {
@@ -476,6 +516,74 @@ export default function ProfilePage() {
         
         <button style={{ width: '100%', background: 'rgba(255,107,107,0.08)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14 }} onClick={() => setConfirm(true)}><LogOut size={16} /> Logout</button>
       </div>
+
+      {/* Feedback Card */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, marginTop: 12, overflow: 'hidden' }}>
+        <button
+          onClick={() => setFeedbackOpen(v => !v)}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: 'var(--surface-container-high)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MessageSquare size={16} color="var(--primary)" />
+            </div>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)' }}>Feedback & Bugs</div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>Help us improve FitTrack</div>
+            </div>
+          </div>
+          <ChevronDown size={18} color="var(--on-surface-dim)" style={{ transform: feedbackOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        </button>
+
+        <div style={{ maxHeight: feedbackOpen ? 500 : 0, opacity: feedbackOpen ? 1 : 0, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', overflow: 'hidden' }}>
+          <div style={{ padding: '0 20px 20px 20px' }}>
+            <div style={{ height: 1, background: 'var(--surface-container-highest)', marginBottom: 16 }} />
+            
+            {feedbackStatus === 'sent' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>
+                <CheckCircle size={32} color="var(--primary)" />
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Feedback Sent</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Thank you! Your input helps shape the future of FitTrack.</div>
+              </div>
+            ) : feedbackStatus === 'error' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>
+                <AlertCircle size={32} color="var(--danger)" />
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Failed to send</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Something went wrong. Please try again later.</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input
+                  type="text"
+                  placeholder="Subject (e.g. Bug, Feature Request)"
+                  value={feedbackSubject}
+                  onChange={e => setFeedbackSubject(e.target.value)}
+                  style={{ width: '100%', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--on-surface)', outline: 'none' }}
+                />
+                <textarea
+                  placeholder="Tell us what's on your mind..."
+                  value={feedbackMessage}
+                  onChange={e => setFeedbackMessage(e.target.value)}
+                  rows={4}
+                  style={{ width: '100%', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--on-surface)', outline: 'none', resize: 'vertical', minHeight: 80 }}
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '4px 0' }}>
+                  <input type="checkbox" checked={includeProfile} onChange={e => setIncludeProfile(e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                  <span style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>Include basic profile data (helps with debugging)</span>
+                </label>
+                <button
+                  onClick={handleFeedbackSubmit}
+                  disabled={!feedbackMessage.trim() || feedbackStatus === 'sending'}
+                  style={{ width: '100%', background: 'var(--primary)', color: 'var(--on-primary)', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 700, cursor: feedbackMessage.trim() && feedbackStatus !== 'sending' ? 'pointer' : 'not-allowed', opacity: feedbackMessage.trim() && feedbackStatus !== 'sending' ? 1 : 0.5, marginTop: 4, transition: 'opacity 0.2s' }}
+                >
+                  {feedbackStatus === 'sending' ? 'Sending...' : 'Send Feedback'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />

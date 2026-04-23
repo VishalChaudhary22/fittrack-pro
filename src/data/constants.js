@@ -1,4 +1,4 @@
-import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler, Activity } from 'lucide-react';
+import { LayoutDashboard, Dumbbell, Target, Salad, TrendingUp, Mail, User, Clock, Scale, Ruler, Activity, Trophy } from 'lucide-react';
 
 // ─── ACTIVITY LEVELS ──────────────────────────────────────────────────────────
 export const ACTIVITY = {
@@ -23,20 +23,20 @@ export const NAV = [
 
 // ─── EXTRA NAV (hidden in "More" on mobile) ──────────────────────────────────
 export const NAV_MOBILE_MAIN = [
-  { id: 'dashboard', label: 'Home', Icon: LayoutDashboard, path: '/' },
-  { id: 'splits', label: 'Splits', Icon: Dumbbell, path: '/splits' },
-  { id: 'workout', label: 'Tracker', Icon: Target, path: '/workout' },
-  { id: 'diet', label: 'Diet', Icon: Salad, path: '/diet' },
-  { id: 'progress', label: 'Analytics', Icon: TrendingUp, path: '/progress' },
+  { id: 'dashboard', label: 'Home',              Icon: LayoutDashboard, path: '/' },
+  { id: 'splits',    label: 'Splits',             Icon: Dumbbell,        path: '/splits' },
+  { id: 'workout',   label: 'Tracker',            Icon: Target,          path: '/workout' },
+  { id: 'diet',      label: 'Diet',               Icon: Salad,           path: '/diet' },
+  { id: 'musclemap', label: 'Olympus\nLeague',    Icon: Trophy,          path: '/muscle-map' },
 ];
 
 export const NAV_MOBILE_MORE = [
-  { id: 'history', label: 'History', Icon: Clock, path: '/history' },
-  { id: 'weightlog', label: 'Weight Log', Icon: Scale, path: '/weight-log' },
-  { id: 'measurements', label: 'Measurements', Icon: Ruler, path: '/measurements' },
-  { id: 'musclemap', label: 'Olympus League', Icon: Activity, path: '/muscle-map' },
-  { id: 'contact', label: 'Coaching', Icon: Mail, path: '/contact' },
-  { id: 'profile', label: 'Profile', Icon: User, path: '/profile' },
+  { id: 'progress',     label: 'Analytics',      Icon: TrendingUp,  path: '/progress' },
+  { id: 'history',      label: 'History',        Icon: Clock,       path: '/history' },
+  { id: 'weightlog',    label: 'Weight Log',     Icon: Scale,       path: '/weight-log' },
+  { id: 'measurements', label: 'Measurements',   Icon: Ruler,       path: '/measurements' },
+  { id: 'contact',      label: 'Coaching',       Icon: Mail,        path: '/contact' },
+  { id: 'profile',      label: 'Profile',        Icon: User,        path: '/profile' },
 ];
 
 // ─── BODY MEASUREMENT FIELDS ─────────────────────────────────────────────────

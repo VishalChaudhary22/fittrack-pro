@@ -19,9 +19,9 @@ export function getLastLiftedForExercise(workoutLogs, exerciseName) {
   for (const log of sorted) {
     for (const ex of log.exercises ?? []) {
       if (norm(ex.name) !== target) continue;
-      const done = (ex.sets ?? []).filter(s => s.done);
-      if (!done.length) continue;
-      const last = done[done.length - 1];
+      const sets = ex.sets ?? [];
+      if (!sets.length) continue;
+      const last = sets[sets.length - 1];
       return { weight: last.weight ?? 0, reps: last.reps ?? 0, date: log.date };
     }
   }

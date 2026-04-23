@@ -1183,7 +1183,8 @@ export default function WorkoutPage() {
                     {isFirstPR && <div className="pr-new-label">NEW PR</div>}
                   </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               
               <button className="add-set-btn" onClick={() => addS(ei)}>+ Add Set</button>

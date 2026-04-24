@@ -322,174 +322,147 @@ const YogaSessionView = ({ day, onBack, onComplete }) => {
 
 // ─── COMPACT RING REST TIMER ──────────────────────────────────────────────────
 const RestTimer = ({ secondsLeft, totalDuration, onSkip, onExtend }) => {
-  const RING_SIZE = window.innerWidth < 360 ? 72 : 88;
-  const STROKE_W = 6;
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
+
+  const RING_SIZE = window.innerWidth < 360 ? 180 : 220;
+  const STROKE_W = 8;
   const RADIUS = (RING_SIZE - STROKE_W) / 2;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
   const total = totalDuration || 90;
-  const progress = total > 0 ? secondsLeft / total : 0;
+  const maxTotal = Math.max(total, secondsLeft);
+  const progress = maxTotal > 0 ? secondsLeft / maxTotal : 0;
   const dashOffset = CIRCUMFERENCE * (1 - progress);
   const isLowTime = secondsLeft <= 10;
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      background: 'var(--surface-container-low)',
-      borderRadius: 20,
-      padding: '16px 20px',
-      marginBottom: 16,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <section style={{ marginBottom: 40, position: 'relative' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 24, background: 'var(--surface-container-low)', padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '2px solid rgba(248, 95, 27, 0.2)' }}>
+        <div style={{ position: 'absolute', top: -48, right: -48, width: 192, height: 192, background: 'rgba(248, 95, 27, 0.05)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }}></div>
+        <h2 className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--on-surface-variant)', marginBottom: 24 }}>Rest Timer</h2>
 
-      {/* Ambient radial glow — top-left corner */}
-      <div style={{
-        position: 'absolute',
-        top: -24, left: -24,
-        width: 80, height: 80,
-        background: 'rgba(248,95,27,0.06)',
-        borderRadius: '50%',
-        filter: 'blur(20px)',
-        pointerEvents: 'none',
-      }} />
+        {/* CENTER — SVG Ring Timer with Number */}
+        <div style={{ position: 'relative', flexShrink: 0, marginBottom: 32 }}>
+          <svg
+            width={RING_SIZE}
+            height={RING_SIZE}
+            style={{
+              transform: 'rotate(-90deg)',
+              display: 'block',
+              animation: isLowTime ? 'restTimerPulse 1s var(--ease-smooth) infinite' : 'none',
+            }}
+          >
+            {/* Track ring — static grey background */}
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RADIUS}
+              fill="none"
+              stroke="var(--surface-container-highest)"
+              strokeWidth={STROKE_W}
+            />
+            {/* Progress ring — drains clockwise */}
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RADIUS}
+              fill="none"
+              stroke={isLowTime ? 'var(--primary)' : 'var(--primary-container)'}
+              strokeWidth={STROKE_W}
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+              style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+            />
+          </svg>
 
-      {/* LEFT — SVG Ring Timer */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        <svg
-          width={RING_SIZE}
-          height={RING_SIZE}
-          style={{
-            transform: 'rotate(-90deg)',
-            display: 'block',
-            animation: isLowTime ? 'restTimerPulse 1s var(--ease-smooth) infinite' : 'none',
-          }}
-        >
-          {/* Track ring — static grey background */}
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RADIUS}
-            fill="none"
-            stroke="var(--surface-container-highest)"
-            strokeWidth={STROKE_W}
-          />
-          {/* Progress ring — drains clockwise */}
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RADIUS}
-            fill="none"
-            stroke={isLowTime ? 'var(--primary)' : 'var(--primary-container)'}
-            strokeWidth={STROKE_W}
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
-          />
-        </svg>
-
-        {/* Number + label centered over the SVG ring */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 26,
-            fontWeight: 700,
-            letterSpacing: '-0.04em',
-            lineHeight: 1,
-            color: isLowTime ? 'var(--primary)' : 'var(--on-surface)',
-            transition: 'color 0.3s',
+          {/* Number + label centered over the SVG ring */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
-            {secondsLeft}
-          </span>
-          <span style={{
-            fontFamily: "'Be Vietnam Pro', sans-serif",
-            fontSize: 7,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            color: 'var(--on-surface-dim)',
-            marginTop: 1,
-          }}>
-            SEC
-          </span>
+            <span style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 'clamp(3.5rem, 10vw, 4rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+              color: isLowTime ? 'var(--primary)' : 'var(--on-surface)',
+              transition: 'color 0.3s',
+            }}>
+              {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
+              <span style={{ fontSize: '2rem', fontWeight: 300, color: 'var(--primary)', letterSpacing: 0 }}>s</span>
+            </span>
+          </div>
         </div>
+
+        {/* BOTTOM — +30s and Skip stacked horizontally */}
+        <div style={{
+          display: 'flex',
+          gap: 16,
+          zIndex: 1,
+        }}>
+
+          {/* +30s ghost pill */}
+          <button
+            onClick={() => onExtend(30)}
+            style={{
+              padding: '8px 24px',
+              borderRadius: 999,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'var(--surface-container-highest)',
+              color: 'var(--on-surface)',
+              fontFamily: "'Be Vietnam Pro', sans-serif",
+              fontSize: 12,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              transition: 'transform 0.1s var(--ease-smooth)',
+            }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
+            onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +30s
+          </button>
+
+          {/* Skip ember pill */}
+          <button
+            onClick={onSkip}
+            style={{
+              padding: '8px 32px',
+              borderRadius: 999,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-container))',
+              color: '#fff',
+              fontFamily: "'Be Vietnam Pro', sans-serif",
+              fontSize: 14,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              boxShadow: '0 10px 20px rgba(248,95,27,0.2)',
+              transition: 'transform 0.1s var(--ease-smooth)',
+            }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
+            onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Skip
+          </button>
+        </div>
+
       </div>
-
-      {/* RIGHT — +30s and Skip stacked vertically */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        marginLeft: 16,
-      }}>
-
-        {/* +30s ghost pill */}
-        <button
-          onClick={() => onExtend(30)}
-          style={{
-            padding: '0 16px',
-            height: 36,
-            minWidth: 68,
-            borderRadius: 999,
-            border: 'none',
-            cursor: 'pointer',
-            background: 'var(--surface-container-highest)',
-            color: 'var(--on-surface)',
-            fontFamily: "'Be Vietnam Pro', sans-serif",
-            fontSize: 12,
-            fontWeight: 700,
-            transition: 'transform 0.1s var(--ease-smooth)',
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
-          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          +30s
-        </button>
-
-        {/* Skip ember pill */}
-        <button
-          onClick={onSkip}
-          style={{
-            padding: '0 16px',
-            height: 36,
-            minWidth: 68,
-            borderRadius: 999,
-            border: 'none',
-            cursor: 'pointer',
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-container))',
-            color: '#fff',
-            fontFamily: "'Be Vietnam Pro', sans-serif",
-            fontSize: 12,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            boxShadow: '0 4px 12px rgba(248,95,27,0.25)',
-            transition: 'transform 0.1s var(--ease-smooth)',
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
-          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          Skip
-        </button>
-      </div>
-
-    </div>
+    </section>
   );
 };
 

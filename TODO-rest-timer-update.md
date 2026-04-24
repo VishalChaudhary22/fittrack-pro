@@ -528,3 +528,47 @@ const STROKE_W = 6;
 - Any change to how the timer starts (that's in the `upd()` set-done handler — untouched)
 - Any change to the "Active Session:" label and `PulseIndicator` in the session header
   above the timer — those remain exactly as-is
+
+---
+
+## 🔄 Revision Plan (V2)
+
+### Goals:
+1. **Revert Layout to Vertical Stack**: Restore the original timer layout format:
+   - "Rest Timer" Label at the top
+   - Centered large countdown number surrounded by the ring
+   - `+30s` and `Skip` buttons side-by-side horizontally below the ring (removing the wide spacing issue).
+2. **Minutes and Seconds Format**: Change the countdown text from `126 SEC` to `02:06s`.
+3. **Fix Ring Overfill**: Ensure that when `+30s` is clicked and time exceeds the default (e.g., 120s / 90s), the ring calculates its 100% relative to the new maximum time so it stays filled to the right side rather than overfilling and looking misaligned.
+
+### Proposed Structure (V2):
+```jsx
+<div style={{ flexDirection: 'column', alignItems: 'center' }}>
+  <h2 className="label-md">Rest Timer</h2>
+  
+  {/* The Ring Wrapper */}
+  <div style={{ position: 'relative' }}>
+    <svg width="220" height="220">
+      <circle stroke="track" />
+      <circle stroke="progress" strokeDashoffset={fixedOffset} />
+    </svg>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span className="headline-lg" style={{ fontSize: '4rem' }}>
+        02:06<span style={{ fontSize: '2rem' }}>s</span>
+      </span>
+    </div>
+  </div>
+
+  {/* Horizontal Buttons Below */}
+  <div style={{ display: 'flex', gap: 16 }}>
+    <button>+30s</button>
+    <button>Skip</button>
+  </div>
+</div>
+```
+
+### Steps:
+- [x] Modify `RestTimer` in `WorkoutPage.jsx` to output the vertical layout structure.
+- [x] Increase the SVG `RING_SIZE` to ~220px to fit the `02:06` format text cleanly inside it.
+- [x] Update the timer text output to `mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0')`.
+- [x] Calculate `maxTotal = Math.max(totalDuration, secondsLeft)` and use `secondsLeft / maxTotal` to compute `progress`. This guarantees `progress` never exceeds `1.0`.

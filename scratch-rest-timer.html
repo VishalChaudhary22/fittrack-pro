@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rest Timer Revision Preview</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+    
+    body {
+      background-color: #131315;
+      color: #EAEAF0;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    
+    .timer-container {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: #1A1A1D;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px solid rgba(248, 95, 27, 0.2);
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: -48px;
+      right: -48px;
+      width: 192px;
+      height: 192px;
+      background: rgba(248, 95, 27, 0.05);
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #E3BFB3;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .ring-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .number-display {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 4rem; /* scaled down slightly from clamp(4rem, 12vw, 7rem) to fit ring */
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: #EAEAF0;
+      line-height: 1;
+    }
+
+    .buttons-row {
+      display: flex;
+      gap: 16px;
+      z-index: 1;
+    }
+
+    .btn-ghost {
+      padding: 8px 24px;
+      border-radius: 999px;
+      background: #353437;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #EAEAF0;
+      border: none;
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    .btn-primary {
+      padding: 8px 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #FFB59B 0%, #F85F1B 100%);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 10px 20px rgba(248,95,27,0.2);
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <section style="margin-bottom: 40px; position: relative; width: 100%; max-width: 375px;">
+    <div class="timer-container">
+      <div class="ambient-glow"></div>
+      <h2 class="label">Rest Timer</h2>
+      
+      <div class="ring-wrapper">
+        <svg width="220" height="220" style="transform: rotate(-90deg); display: block;">
+          <circle cx="110" cy="110" r="102" fill="none" stroke="#353437" stroke-width="8"></circle>
+          <!-- 126s left out of 90s total. So maxTotal = 126. Progress = 1.0. offset = 0 -->
+          <circle cx="110" cy="110" r="102" fill="none" stroke="#F85F1B" stroke-width="8" stroke-linecap="round" stroke-dasharray="640.88" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="number-display">
+          02:06
+        </div>
+      </div>
+
+      <div class="buttons-row">
+        <button class="btn-ghost">+30s</button>
+        <button class="btn-primary">Skip</button>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

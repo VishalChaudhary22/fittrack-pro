@@ -331,9 +331,9 @@ const RestTimer = ({ secondsLeft, totalDuration, onSkip, onExtend }) => {
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
   // Track the highest time we've seen so the ring drains properly when extended
-  const [maxObserved, setMaxObserved] = React.useState(totalDuration || 90);
+  const [maxObserved, setMaxObserved] = useState(totalDuration || 90);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (secondsLeft > maxObserved) {
       setMaxObserved(secondsLeft);
     }

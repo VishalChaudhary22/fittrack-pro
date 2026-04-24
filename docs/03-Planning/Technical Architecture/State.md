@@ -849,6 +849,21 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Strategic Repositioning**: Moved the Dashboard coaching banner out of the data metrics scroll and placed it immediately above the Body Composition card. Detached the Diet Page banner from the `activeTab === 'guide'` conditional array so the user sees the prompt globally above the main Goal Tracker card.
 - **Progress Ring Patch (`BodyFatRingCard.jsx`)**: Updated the math in `goalPct` to be directionally aware (`isLossGoal`), clamping progress to `0%` using `Math.max` when the user's weight diverges inversely from their objective.
 
+### Critical Bug Fix Sprint (Applied 2026-04-23)
+**Symptoms:**
+- The "swap exercise" pre-fill logic was completely broken, returning `null` because saved workout logs strip the `done` flag, causing the `exerciseHistory.js` lookup to fail. Even when partially fixed, it only mapped the final set's values to all rows.
+- The PR badge on the workout tracker used a redundant `Flame` icon and had outdated CSS animations that no longer matched the Kinetic Elite system.
+- The Profile Page metrics grid overflowed the viewport on small mobile devices (375px widths).
+- The Dashboard "Today's Nutrition" card desynced from the Diet Page's primary TDEE target when the Adaptive Engine applied adjustments.
+- The Adaptive Coaching Banner appeared to mysteriously vanish on mobile.
+
+**Fixes Applied:**
+- **Swap & Pre-fill Engine (`exerciseHistory.js` & `WorkoutPage.jsx`)**: Rebuilt the historical lookup logic. Added `getLastSessionSets()` to retrieve the full array of sets from the most recent session (ignoring the missing `done` flag). `swapExercise` now maps these sets 1:1 (Set 1 → Set 1, Set 2 → Set 2). Also fixed a latent bug where `getAllTimePR` was silently failing for the exact same `s.done` reason.
+- **PR Badge Redesign (`WorkoutPage.jsx` & `index.css`)**: Removed the `Flame` icon and "NEW PR" floating label. Replaced the UI with a minimal, text-based "PR" pill (`.pr-badge-pill`) that aligns with current token standards. Cleaned up unused `@keyframes prLabelFade`.
+- **Responsive Layouts (`ProfilePage.jsx` & `index.css`)**: Migrated the profile metrics grid to a dedicated `.profile-metrics-grid` CSS class utilizing `grid-template-columns` with a 640px breakpoint (2x2 on mobile, 1x4 on desktop) and `min-width: 0` constraints to eliminate horizontal overflow.
+- **TDEE State Sync (`DashboardPage.jsx`)**: Updated the dashboard `goalKcal` calculation to strictly prioritize `user.customGoalKcal` (the adaptive adjustment override), bringing it into perfect parity with the Diet Page's logic.
+- **Adaptive Banner Audit**: Verified that the "vanishing" banner is not a bug; it is the intended behavior of the 7-day `localStorage` dismissal cooldown.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work

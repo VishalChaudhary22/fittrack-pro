@@ -330,9 +330,16 @@ const RestTimer = ({ secondsLeft, totalDuration, onSkip, onExtend }) => {
   const RADIUS = (RING_SIZE - STROKE_W) / 2;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-  const total = totalDuration || 90;
-  const maxTotal = Math.max(total, secondsLeft);
-  const progress = maxTotal > 0 ? secondsLeft / maxTotal : 0;
+  // Track the highest time we've seen so the ring drains properly when extended
+  const [maxObserved, setMaxObserved] = React.useState(totalDuration || 90);
+
+  React.useEffect(() => {
+    if (secondsLeft > maxObserved) {
+      setMaxObserved(secondsLeft);
+    }
+  }, [secondsLeft, maxObserved]);
+
+  const progress = maxObserved > 0 ? secondsLeft / maxObserved : 0;
   const dashOffset = CIRCUMFERENCE * (1 - progress);
   const isLowTime = secondsLeft <= 10;
 

@@ -250,7 +250,7 @@ Three states: **day picker → active session → post-session summary**.
 
 **Active session**:
 - Session header with `PulseIndicator` + session name + rest-length selector
-- `HeroRestTimer`: inline section (not a modal) — `clamp(4rem, 12vw, 7rem)` Space Grotesk countdown, ambient blob background, `+30s` ghost pill + `Skip` ember pill
+- **RestTimer**: vertical stacked layout — large `220px` SVG ring with `mm:ss` Space Grotesk countdown (`clamp(3.5rem, 10vw, 4rem)`), ambient blob background, horizontal `+30s` ghost pill and `Skip` ember pill buttons.
 - Exercise blocks: `1.5rem / -0.04em` header, `.label-md` muscle/focusType subline, info icon button
 - Set grid: `.set-row` layout (`34px 1fr 1fr 44px`), each row is a `surface-container-low` card that lifts to `surface-container` on hover. Completed rows dim to 0.7 opacity. Bottom-bar focus styling on inputs.
 - `.add-set-btn`: full-width dashed ghost button below each set list
@@ -863,6 +863,11 @@ Several rounds of mobile UX fixes on the food search modal:
 - **Responsive Layouts (`ProfilePage.jsx` & `index.css`)**: Migrated the profile metrics grid to a dedicated `.profile-metrics-grid` CSS class utilizing `grid-template-columns` with a 640px breakpoint (2x2 on mobile, 1x4 on desktop) and `min-width: 0` constraints to eliminate horizontal overflow.
 - **TDEE State Sync (`DashboardPage.jsx`)**: Updated the dashboard `goalKcal` calculation to strictly prioritize `user.customGoalKcal` (the adaptive adjustment override), bringing it into perfect parity with the Diet Page's logic.
 - **Adaptive Banner Audit**: Verified that the "vanishing" banner is not a bug; it is the intended behavior of the 7-day `localStorage` dismissal cooldown.
+- **Rest Timer Layout & Progress (Applied 2026-04-24)**:
+  - **Layout Refactor**: Reverted the rest timer from a horizontal flex layout to a vertical stack to fix excessive button spacing on mobile.
+  - **Format Update**: Updated countdown text from seconds (`126s`) to minutes and seconds (`02:06s`).
+  - **Stateful Max Tracking**: Fixed a bug where the ring stayed at 100% after adding time. Introduced `maxObserved` local state to track the highest time value reached, ensuring the ring drains proportionally immediately from the new peak.
+  - **Reference Error Fix**: Resolved a "try again" crash caused by an undefined `React` object in a functional component that only imported specific hooks.
 
 ---
 

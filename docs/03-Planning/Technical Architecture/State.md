@@ -189,6 +189,7 @@ The app uses the **"Kinetic Elite"** design system, defined in `index.css`. It w
 - Spring easing tokens: `--ease-spring`, `--ease-smooth`, `--ease-decel`, `--ease-accel`
 - `@keyframes cascadeIn` — staggered card/list mount (`.cascade-item`, delays up to `:nth-child(5)`)
 - `@keyframes pulse` — perpetual live indicator (used on `PulseIndicator` component)
+- `@keyframes restTimerPulse` — low-time warning pulse on the rest timer ring stroke
 - `@keyframes shimmer` — skeleton loading gradient sweep
 - `@keyframes pgIn / pgOut` — page entry/exit transitions
 
@@ -633,6 +634,8 @@ Hybrid state in `AppContext.jsx`. Identity and core fitness data are cloud-synch
 | **Body Fat Goal** | Supabase DB (user_profiles) | `body_fat_goal` column on `user_profiles` |
 | **Adaptive TDEE** | localStorage (per-user) | `fittrack_tdeeEstimate_<userId>` |
 | **TDEE Preferences** | localStorage (per-user) | `fittrack_tdeePreferences_<userId>` |
+| **Active Rest Timer** | localStorage | `fittrack_activeRestTimer` |
+| **Active Rest Timer Pos** | localStorage | `fittrack_activeRestTimerPos` |
 
 
 ### Live Refs

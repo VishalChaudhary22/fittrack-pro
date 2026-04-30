@@ -109,7 +109,7 @@ export const getRank = (xp, type = 'muscle') => {
 // ─── XP CALCULATION ──────────────────────────────────────────────────────────
 // Computes total XP per muscle group from workout logs
 // Filters to current calendar month only and applies volume + consistency bonuses.
-export const calcAllMuscleXP = (workoutLogs, splits, user) => {
+export const calcAllMuscleXP = (workoutLogs, splits, user, targetMonth) => {
   const userId = typeof user === 'string' ? user : user?.id;
   const activeSplitId = typeof user === 'string' ? 'ppl' : (user?.activeSplitId || 'ppl');
   
@@ -144,15 +144,27 @@ export const calcAllMuscleXP = (workoutLogs, splits, user) => {
     });
   });
 
-  // Filter logs to current calendar month
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
+  // Filter logs to target calendar month (defaults to current month)
+  let startOfMonth, endOfMonth;
+  if (targetMonth) {
+    const [yr, mo] = targetMonth.split('-').map(Number);
+    startOfMonth = new Date(yr, mo - 1, 1);
+    endOfMonth = new Date(yr, mo, 0); // last day of target month
+    endOfMonth.setHours(23, 59, 59, 999);
+  } else {
+    startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    endOfMonth = null;
+  }
   startOfMonth.setHours(0, 0, 0, 0);
   
-  const userLogs = workoutLogs.filter(l => 
-    l.userId === userId && 
-    new Date(l.date + 'T00:00:00') >= startOfMonth
-  );
+  const userLogs = workoutLogs.filter(l => {
+    if (l.userId !== userId) return false;
+    const logDate = new Date(l.date + 'T00:00:00');
+    if (logDate < startOfMonth) return false;
+    if (endOfMonth && logDate > endOfMonth) return false;
+    return true;
+  });
 
   if (userLogs.length === 0 && workoutLogs.length > 0) {
     console.warn('calcAllMuscleXP: no logs found for user', userId, 'this month. Total logs:', workoutLogs.length);

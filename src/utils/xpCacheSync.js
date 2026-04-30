@@ -80,7 +80,7 @@ export const syncUserXPToCache = async ({ workoutLogs, splits, user }) => {
  * @param {Array} splits - the splits array (needed for exercise→muscle mapping)
  * @returns {Promise<Array>}
  */
-export const fetchLeaderboard = async (splits) => {
+export const fetchLeaderboard = async (splits, targetMonth) => {
   // 1. Fetch all registered users
   const { data: users, error: usersErr } = await supabase
     .from('user_profiles')
@@ -91,16 +91,28 @@ export const fetchLeaderboard = async (splits) => {
     return [];
   }
 
-  // 2. Fetch this month's workout_logs for ALL users
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  const monthStart = startOfMonth.toISOString().split('T')[0]; // 'YYYY-MM-01'
+  // 2. Fetch workout_logs for the target month (defaults to current month)
+  let monthStart, monthEnd;
+  if (targetMonth) {
+    const [yr, mo] = targetMonth.split('-').map(Number);
+    monthStart = `${yr}-${String(mo).padStart(2, '0')}-01`;
+    const lastDay = new Date(yr, mo, 0).getDate();
+    monthEnd = `${yr}-${String(mo).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  } else {
+    const som = new Date();
+    som.setDate(1);
+    som.setHours(0, 0, 0, 0);
+    monthStart = som.toISOString().split('T')[0];
+    monthEnd = null;
+  }
 
-  const { data: allLogs, error: logsErr } = await supabase
+  let logsQuery = supabase
     .from('workout_logs')
     .select('id, user_id, split_id, day_id, day_name, date, exercises, duration_minutes')
     .gte('date', monthStart);
+  if (monthEnd) logsQuery = logsQuery.lte('date', monthEnd);
+
+  const { data: allLogs, error: logsErr } = await logsQuery;
 
   if (logsErr) {
     console.warn('[Leaderboard] Failed to fetch workout_logs:', logsErr.message);
@@ -123,7 +135,7 @@ export const fetchLeaderboard = async (splits) => {
         durationMinutes: l.duration_minutes,
       }));
 
-    const muscleXP = calcAllMuscleXP(userLogs, splits, u.id);
+    const muscleXP = calcAllMuscleXP(userLogs, splits, u.id, targetMonth);
     const overall = getOverallRank(muscleXP);
 
     return {

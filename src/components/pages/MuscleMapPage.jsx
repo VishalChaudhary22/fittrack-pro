@@ -8,7 +8,7 @@ import ErrorBoundary from '../shared/ErrorBoundary';
 import PlayerDetailModal from '../shared/PlayerDetailModal';
 import { MUSCLE_GROUPS, RANK_TIERS, getRank, calcAllMuscleXP, getOverallRank, getTierColor } from '../../data/muscleData';
 import { MONTHLY_BENCHMARKS, getBenchmarkBracket } from '../../data/rankBenchmarks';
-import { fetchLeaderboard, syncUserXPToCache } from '../../utils/xpCacheSync';
+import { fetchLeaderboard, syncUserXPToCache, getCurrentMonth } from '../../utils/xpCacheSync';
 import { supabase } from '../../lib/supabaseClient';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
@@ -89,6 +89,7 @@ export default function MuscleMapPage() {
   const [muscleFilter, setMuscleFilter] = useState('all');
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef(null);
+  const [selectedMonth, setSelectedMonth] = useState(() => getCurrentMonth());
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -113,27 +114,24 @@ export default function MuscleMapPage() {
     setLeaderboardError(null);
 
     // Fetch the leaderboard — computes XP from actual workout_logs for all users
-    const data = await fetchLeaderboard(splits);
+    const data = await fetchLeaderboard(splits, selectedMonth);
     setLeaderboardData(data);
     if (data.length === 0) {
       console.log('[Olympus] No users found.');
     }
     setLeaderboardLoading(false);
 
-    // Background: keep our own cache row warm (for realtime subscription optimisation)
-    syncUserXPToCache({ workoutLogs, splits, user }).catch(console.warn);
+    // Background: keep our own cache row warm (only for current month)
+    if (selectedMonth === getCurrentMonth()) {
+      syncUserXPToCache({ workoutLogs, splits, user }).catch(console.warn);
+    }
   };
 
   useEffect(() => {
-    if (muscleMapTabCache.activeTab === 'leaderboard') {
+    if (activeTab === 'leaderboard') {
       loadLeaderboard();
     }
-  }, []);
-
-  useEffect(() => {
-    if (activeTab !== 'leaderboard') return;
-    loadLeaderboard();
-  }, [activeTab]); // only re-run when tab switches to leaderboard
+  }, [activeTab, selectedMonth]);
 
   // Realtime subscription — refresh when ANY user logs a workout
   useEffect(() => {
@@ -168,8 +166,8 @@ export default function MuscleMapPage() {
   }, [activeTab]);
 
   const muscleXP = useMemo(
-    () => calcAllMuscleXP(workoutLogs, splits, user?.id),
-    [workoutLogs, splits, user?.id]
+    () => calcAllMuscleXP(workoutLogs, splits, user?.id, selectedMonth),
+    [workoutLogs, splits, user?.id, selectedMonth]
   );
 
   const overall = useMemo(() => getOverallRank(muscleXP), [muscleXP]);
@@ -349,6 +347,65 @@ export default function MuscleMapPage() {
             {t.label}
           </button>
         ))}
+      </div>
+
+      {/* Month Navigator */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 12, marginBottom: 16,
+      }}>
+        <button
+          onClick={() => {
+            const [yr, mo] = selectedMonth.split('-').map(Number);
+            const d = new Date(yr, mo - 2, 1);
+            setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+          }}
+          style={{
+            background: 'var(--surface-container-highest)', border: 'none',
+            borderRadius: 10, cursor: 'pointer', width: 32, height: 32,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--on-surface)', fontSize: 18, fontWeight: 700,
+            fontFamily: "'Space Grotesk', sans-serif",
+            transition: 'all .15s var(--ease-smooth)',
+          }}
+        >‹</button>
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+          fontSize: 14, minWidth: 160, textAlign: 'center',
+          color: selectedMonth === getCurrentMonth() ? 'var(--primary)' : 'var(--on-surface)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          {(() => {
+            const [yr, mo] = selectedMonth.split('-').map(Number);
+            return new Date(yr, mo - 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+          })()}
+          {selectedMonth === getCurrentMonth() && (
+            <span style={{
+              fontSize: 8, fontWeight: 800, color: '#fff',
+              background: 'var(--primary-container)', padding: '2px 6px',
+              borderRadius: 4, textTransform: 'uppercase', letterSpacing: '.08em',
+            }}>Live</span>
+          )}
+        </div>
+        <button
+          onClick={() => {
+            if (selectedMonth === getCurrentMonth()) return;
+            const [yr, mo] = selectedMonth.split('-').map(Number);
+            const d = new Date(yr, mo, 1);
+            setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+          }}
+          disabled={selectedMonth === getCurrentMonth()}
+          style={{
+            background: 'var(--surface-container-highest)', border: 'none',
+            borderRadius: 10, width: 32, height: 32,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--on-surface)', fontSize: 18, fontWeight: 700,
+            fontFamily: "'Space Grotesk', sans-serif",
+            opacity: selectedMonth === getCurrentMonth() ? 0.3 : 1,
+            cursor: selectedMonth === getCurrentMonth() ? 'default' : 'pointer',
+            transition: 'all .15s var(--ease-smooth)',
+          }}
+        >›</button>
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}

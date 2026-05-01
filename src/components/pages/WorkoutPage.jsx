@@ -634,10 +634,14 @@ const EXERCISE_ALTERNATIVES = {
 };
 
 function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
-  // Build alternatives: lookup from the current exercise's swap list
-  let alternatives = [...(EXERCISE_ALTERNATIVES[exerciseName] || [])];
-  // If we're currently on a swapped exercise, add the original back as an option
-  if (originalName && originalName !== exerciseName && !alternatives.includes(originalName)) {
+  // Always use the ORIGINAL exercise's swap list as the source of truth.
+  // This ensures we always have the full list even when the swapped-to exercise
+  // (e.g. "Machine Chest Press") has no entry in EXERCISE_ALTERNATIVES.
+  const baseAlternatives = EXERCISE_ALTERNATIVES[originalName] || EXERCISE_ALTERNATIVES[exerciseName] || [];
+  let alternatives = [...baseAlternatives];
+  // If we're currently on a swapped exercise, add the original back as a swap-back option
+  const isSwapped = originalName && originalName !== exerciseName;
+  if (isSwapped && !alternatives.includes(originalName)) {
     alternatives.unshift(originalName);
   }
   // Remove the current exercise from alternatives (can't swap to self)
@@ -718,14 +722,16 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {alternatives.map(alt => (
+            {alternatives.map(alt => {
+              const isOriginal = isSwapped && alt === originalName;
+              return (
               <button
                 key={alt}
                 onClick={() => { onSwap(alt); onClose(); }}
                 style={{
                   width: '100%', padding: '14px 16px', minHeight: 44,
-                  borderRadius: 12, border: 'none', cursor: 'pointer',
-                  background: 'var(--surface-container)',
+                  borderRadius: 12, border: isOriginal ? '1px solid var(--primary-container)' : 'none', cursor: 'pointer',
+                  background: isOriginal ? 'var(--surface-container-high)' : 'var(--surface-container)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   fontFamily: "'Be Vietnam Pro', sans-serif",
                   fontSize: 14, fontWeight: 600,
@@ -733,19 +739,20 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
                   transition: 'background 0.15s, transform 0.1s',
                 }}
                 onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container-high)'}
-                onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container)'}
+                onMouseOut={e => e.currentTarget.style.background = isOriginal ? 'var(--surface-container-high)' : 'var(--surface-container)'}
                 onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
                 onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
               >
                 <span>{alt}</span>
                 <span style={{
-                  fontSize: 9, color: 'var(--primary)',
+                  fontSize: 9, color: isOriginal ? 'var(--tertiary, #4CAF50)' : 'var(--primary)',
                   fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em',
                 }}>
-                  Swap
+                  {isOriginal ? 'Original' : 'Swap'}
                 </span>
               </button>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

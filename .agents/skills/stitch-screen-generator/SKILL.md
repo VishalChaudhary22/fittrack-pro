@@ -1,5 +1,5 @@
 ---
-name: stitch-design
+name: stitch-screen-generator
 description: Unified entry point for Stitch design work. Handles prompt enhancement (UI/UX keywords, atmosphere), design system synthesis (.stitch/DESIGN.md), and high-fidelity screen generation/editing via Stitch MCP.
 allowed-tools:
   - "StitchMCP"

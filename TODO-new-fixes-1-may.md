@@ -352,6 +352,6 @@ Phase 3 (infra sprint — Edge Functions):
   [x] Test end-to-end
 
 Phase 4 (Olympus-specific):
-  [ ] olympus-overtaken push
-  [ ] podium-proximity push
+  [x] olympus-overtaken push
+  [x] podium-proximity push
 ```

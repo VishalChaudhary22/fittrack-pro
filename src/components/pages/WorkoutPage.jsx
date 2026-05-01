@@ -567,17 +567,17 @@ const EXERCISE_ALTERNATIVES = {
   // ═══════════════════════════════════════════════════════════════════════
   // QUADS — Compound (Squat pattern)
   // ═══════════════════════════════════════════════════════════════════════
-  'Squats':                                ['Smith Machine Squats', 'Leg Press', 'Hack Squats', 'Goblet Squats'],
-  'Barbell Back Squat':                    ['Smith Machine Squats', 'Leg Press', 'Hack Squats', 'Front Squats'],
+  'Squats':                                ['Smith Machine Squats', 'Leg Press', 'Hack Squats', 'Pendulum Squats', 'Goblet Squats'],
+  'Barbell Back Squat':                    ['Smith Machine Squats', 'Leg Press', 'Hack Squats', 'Pendulum Squats', 'Front Squats'],
   'Front Squat':                           ['Barbell Back Squat', 'Goblet Squats', 'Hack Squats'],
   'Front Squats':                          ['Barbell Back Squat', 'Goblet Squats', 'Hack Squats'],
-  'Hack Squat':                            ['Leg Press', 'Smith Machine Squats', 'Barbell Back Squat'],
-  'Hack Squats':                           ['Leg Press', 'Smith Machine Squats', 'Front Squats'],
+  'Hack Squat':                            ['Leg Press', 'Smith Machine Squats', 'Pendulum Squats', 'Barbell Back Squat'],
+  'Hack Squats':                           ['Leg Press', 'Smith Machine Squats', 'Pendulum Squats', 'Front Squats'],
   'Leg Press':                             ['Squats', 'Hack Squats', 'Pendulum Squats', 'Smith Machine Squats'],
   'Pendulum Squats':                       ['Hack Squats', 'Leg Press', 'Smith Machine Squats'],
   'Goblet Squats':                         ['Front Squats', 'Bodyweight Squats', 'Leg Press'],
   'Bodyweight Squats':                     ['Goblet Squats', 'Jump Squats', 'Leg Press'],
-  'Smith Machine Squats':                  ['Squats', 'Hack Squats', 'Leg Press'],
+  'Smith Machine Squats':                  ['Squats', 'Hack Squats', 'Pendulum Squats', 'Leg Press'],
   // QUADS — Unilateral
   'Walking Lunges':                        ['Bulgarian Split Squats', 'Step-Ups', 'Reverse Lunges'],
   'Walking Dumbbell Lunge':                ['Bulgarian Split Squats', 'Step-Ups', 'Reverse Lunges'],
@@ -1271,43 +1271,34 @@ export default function WorkoutPage() {
                 </button>
               </div>
 
-              {/* Swapped Exercise Last Session Chip */}
-              {ex._swapHistory && !ex.sets.every(s => s.done) && (
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  color: 'var(--on-surface-dim)',
-                  background: 'var(--surface-container)',
-                  borderRadius: 8,
-                  padding: '3px 10px',
-                  marginTop: 4,
-                  marginBottom: 8,
-                  fontFamily: 'Be Vietnam Pro, sans-serif',
-                  fontSize: '11px',
-                  letterSpacing: '0.04em',
-                }}>
-                  <Clock size={11} color="var(--on-surface-dim)" strokeWidth={2} />
-                  {ex._swapHistory.weight > 0
-                    ? `Last: ${ex._swapHistory.weight} kg x ${ex._swapHistory.reps} reps`
-                    : `Last: ${ex._swapHistory.reps} reps (bodyweight)`
-                  }
-                  {' · '}
-                  {new Date(ex._swapHistory.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                </div>
-              )}
-
-              {/* Last Session Reference Row (UX-4.5) */}
+              {/* Previous Session Reference Row (cross-split lookup) */}
               {(() => {
-                const prevLog = workoutLogs.filter(l => l.userId === user.id && l.dayId === session.day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                const pe = prevLog?.exercises?.find(e => e.name === (ex.sv || ex.name));
+                const exName = ex.sv || ex.name;
+                const allNames = [exName, ...(ex.variants || [])];
+                const sorted = [...workoutLogs]
+                  .filter(l => l.userId === user.id)
+                  .sort((a, b) => new Date(b.date) - new Date(a.date));
+                let prevLog = null;
+                let pe = null;
+                for (const log of sorted) {
+                  for (const logEx of (log.exercises || [])) {
+                    if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
+                      prevLog = log;
+                      pe = logEx;
+                      break;
+                    }
+                  }
+                  if (pe) break;
+                }
                 if (!pe?.sets?.length) return null;
+                const displaySets = pe.sets.slice(0, 3);
                 return (
                   <div style={{ padding: '6px 12px', marginBottom: 8, background: 'var(--surface-container)', borderRadius: 10, borderLeft: '2px solid var(--primary-container)', fontSize: 11, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
                     <span style={{ color: 'var(--on-surface-dim)', fontWeight: 700, marginRight: 4 }}>PREV ({fmt(prevLog.date)}):</span>
-                    {pe.sets.map((s, i) => (
-                      <span key={i} style={{ color: 'var(--on-surface-variant)' }}>{s.reps}r × {s.weight}kg{i < pe.sets.length - 1 ? ',' : ''}</span>
+                    {displaySets.map((s, i) => (
+                      <span key={i} style={{ color: 'var(--on-surface-variant)' }}>{s.reps}r × {s.weight}kg{i < displaySets.length - 1 ? ',' : ''}</span>
                     ))}
+                    {pe.sets.length > 3 && <span style={{ color: 'var(--outline)' }}>+{pe.sets.length - 3} more</span>}
                   </div>
                 );
               })()}

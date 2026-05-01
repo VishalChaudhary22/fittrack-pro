@@ -633,8 +633,15 @@ const EXERCISE_ALTERNATIVES = {
   'Australian Pull-ups':                   ['Inverted Rows', 'Seated Cable Row (Bar)', 'Resistance Band Rows'],
 };
 
-function ExerciseSwapModal({ exerciseName, onSwap, onClose }) {
-  const alternatives = EXERCISE_ALTERNATIVES[exerciseName] || [];
+function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
+  // Build alternatives: lookup from the current exercise's swap list
+  let alternatives = [...(EXERCISE_ALTERNATIVES[exerciseName] || [])];
+  // If we're currently on a swapped exercise, add the original back as an option
+  if (originalName && originalName !== exerciseName && !alternatives.includes(originalName)) {
+    alternatives.unshift(originalName);
+  }
+  // Remove the current exercise from alternatives (can't swap to self)
+  alternatives = alternatives.filter(a => a !== exerciseName);
 
   return (
     <div
@@ -1244,7 +1251,7 @@ export default function WorkoutPage() {
                     </h3>
                     {!ex.variants && (
                       <button
-                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.name })}
+                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex.name })}
                         aria-label={`Swap ${ex.name}`}
                         style={{
                           background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
@@ -1441,6 +1448,7 @@ export default function WorkoutPage() {
         <Portal>
           <ExerciseSwapModal
             exerciseName={swapTarget.name}
+            originalName={swapTarget.originalName}
             onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
             onClose={() => setSwapTarget(null)}
           />

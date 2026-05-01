@@ -20,6 +20,17 @@ CREATE INDEX IF NOT EXISTS body_fat_logs_user_date ON public.body_fat_logs(user_
 -- 4. RLS — users can only read/write their own entries
 ALTER TABLE public.body_fat_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "body_fat_logs: own data only"
-  ON public.body_fat_logs FOR ALL
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_policies
+        WHERE tablename = 'body_fat_logs'
+          AND policyname = 'body_fat_logs: own data only'
+    ) THEN
+        CREATE POLICY "body_fat_logs: own data only"
+          ON public.body_fat_logs FOR ALL
+          USING (auth.uid() = user_id);
+    END IF;
+END
+$$;

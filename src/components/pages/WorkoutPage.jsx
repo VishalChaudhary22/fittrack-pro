@@ -969,16 +969,35 @@ export default function WorkoutPage() {
       return;
     }
     const exs = day.exercises.map(ex => {
-      const prev = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      // Cross-split: find the most recent log containing this exercise (any split, any day)
+      const allNames = [ex.name, ...(ex.variants || [])];
       let prevEx = null;
-      if (prev) {
-        prevEx = prev.exercises.find(e => e.name === ex.name || (ex.variants && ex.variants.includes(e.name)));
+
+      const sorted = [...workoutLogs]
+        .filter(l => l.userId === user.id)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      for (const log of sorted) {
+        for (const logEx of (log.exercises || [])) {
+          if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
+            prevEx = logEx;
+            break;
+          }
+        }
+        if (prevEx) break;
       }
+
       return {
-        ...ex, sv: prevEx?.name || (ex.variants ? ex.variants[0] : null),
+        ...ex,
+        sv: prevEx?.name || (ex.variants ? ex.variants[0] : null),
         sets: Array.from({ length: ex.sets || 3 }, (_, i) => {
-          const pSet = prevEx?.sets[i];
-          return { reps: '', weight: pSet ? String(pSet.weight) : '', done: false, targetRep: pSet ? String(pSet.reps) : (ex.repsRange || '8-12') };
+          const pSet = prevEx?.sets?.[i] ?? prevEx?.sets?.[prevEx.sets.length - 1];
+          return {
+            reps: '',
+            weight: pSet ? String(pSet.weight) : '',
+            done: false,
+            targetRep: pSet ? String(pSet.reps) : (ex.repsRange || '8-12'),
+          };
         }),
       };
     });
@@ -1047,6 +1066,21 @@ export default function WorkoutPage() {
     clearScrollPosition('/history');
     setElapsed(0);
     const endTimestamp = new Date().getTime();
+
+    // Calculate new PRs before adding the log
+    const newPRs = session.exs.map(ex => {
+      const name = ex.sv || ex.name;
+      const oldPR = getAllTimePR(workoutLogs, name);
+      const sessionBest = Math.max(0, ...ex.sets.filter(s => s.done).map(s => parseFloat(s.weight) || 0));
+      const sessionBestReps = ex.sets.filter(s => s.done && parseFloat(s.weight) === sessionBest).reduce((max, s) => Math.max(max, parseFloat(s.reps) || 0), 0);
+      if (sessionBest > 0 || sessionBestReps > 0) { // Ensure there are actually completed sets
+        if (beatsAllTimePR(oldPR, sessionBest, sessionBestReps)) {
+          return { name, newWeight: sessionBest, oldWeight: oldPR?.weight ?? null, isBodyweight: sessionBest === 0, newReps: sessionBestReps, oldReps: oldPR?.reps ?? null };
+        }
+      }
+      return null;
+    }).filter(Boolean);
+
     const log = {
       id: gId(), userId: user.id, splitId: activeSplit.id, dayId: session.day.id, dayName: session.day.name, date: pastDate, notes: session.notes,
       durationMinutes: session.startTime ? Math.round((endTimestamp - session.startTime) / 60000) : null,
@@ -1057,6 +1091,7 @@ export default function WorkoutPage() {
         secondaryMuscles: ex.secondaryMuscles || [],
         sets: ex.sets.filter(s => s.done).map(s => ({ reps: parseFloat(s.reps) || 0, weight: parseFloat(s.weight) || 0 }))
       })).filter(ex => ex.sets.length > 0),
+      _newPRs: newPRs
     };
     setWorkoutLogs(p => {
       const newLogs = [...p, log];
@@ -1107,6 +1142,29 @@ export default function WorkoutPage() {
             <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
           </div>
         </div>
+
+        {done._newPRs && done._newPRs.length > 0 && (
+          <div className="card" style={{ padding: 20, marginBottom: 16, background: 'var(--surface-container-low)', borderRadius: 16, border: '1px solid var(--primary-container)' }}>
+            <div className="label-md" style={{ color: 'var(--primary)', marginBottom: 12, textAlign: 'center' }}>NEW PERSONAL RECORDS! 🏆</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {done._newPRs.map((pr, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container)', padding: 12, borderRadius: 12 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--on-surface)' }}>{pr.name}</div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: 'var(--primary)', fontWeight: 800 }}>
+                      {pr.isBodyweight ? `${pr.newReps} reps` : `${pr.newWeight}kg × ${pr.newReps}`}
+                    </div>
+                    {pr.oldWeight !== null && (
+                      <div style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>
+                        Previous: {pr.oldWeight === 0 ? `${pr.oldReps} reps` : `${pr.oldWeight}kg`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 10 }}>
           <button className="btn-p" style={{ flex: 1, padding: '14px', fontSize: 14 }} onClick={() => { 

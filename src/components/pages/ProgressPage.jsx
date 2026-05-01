@@ -7,6 +7,7 @@ import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
 import { best1RMFromSets, calc1RM } from '../../utils/calculations';
 import { fmt } from '../../utils/helpers';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+import { getAllTimePR } from '../../utils/exerciseHistory';
 
 const progressFilterCache = { ss: null, sd: '', se: '' };
 
@@ -46,6 +47,7 @@ export default function ProgressPage() {
   const pr = cd.length ? Math.max(...cd.map(d => d.maxWeight)) : 0;
   const prData = pr ? cd.find(d => d.maxWeight === pr) : null;
   const history1RM = cd.length ? Math.max(...cd.map(d => d.est1rm)) : 0;
+  const allTimePR = se ? getAllTimePR(ul, se) : null;
   const pbCardRef = useRef(null);
 
   const sharePB = async () => {
@@ -226,6 +228,11 @@ export default function ProgressPage() {
              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', fontWeight: 500 }}>
                Achieved: {cd.length && cd.find(d => d.maxWeight === pr)?.rawDate ? new Date(cd.find(d => d.maxWeight === pr)?.rawDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown'}
              </div>
+             {allTimePR && allTimePR.weight > pr && (
+               <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginTop: 4 }}>
+                 All-time: {allTimePR.weight}kg {allTimePR.isBodyweight ? `(${allTimePR.reps} reps)` : ''}
+               </div>
+             )}
           </div>
           {/* Card 3 - Total Sessions */}
           <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>

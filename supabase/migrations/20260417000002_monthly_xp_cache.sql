@@ -1,6 +1,6 @@
 -- monthly_xp_cache: public XP leaderboard data, refreshed after each workout
 -- One row per user per month. Upserted on conflict.
-create table public.monthly_xp_cache (
+create table if not exists public.monthly_xp_cache (
   id           uuid default gen_random_uuid() primary key,
   user_id      uuid not null references auth.users(id) on delete cascade,
   month        text not null, -- Format: 'YYYY-MM' e.g. '2026-04'
@@ -27,15 +27,40 @@ create table public.monthly_xp_cache (
 -- Public read — leaderboard is visible to all authenticated users
 alter table public.monthly_xp_cache enable row level security;
 
-create policy "Anyone authenticated can read XP cache"
-  on public.monthly_xp_cache for select
-  to authenticated
-  using (true);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_policies
+        WHERE tablename = 'monthly_xp_cache'
+          AND policyname = 'Anyone authenticated can read XP cache'
+    ) THEN
+        create policy "Anyone authenticated can read XP cache"
+          on public.monthly_xp_cache for select
+          to authenticated
+          using (true);
+    END IF;
 
-create policy "Users can only write their own XP cache"
-  on public.monthly_xp_cache for insert
-  with check (auth.uid() = user_id);
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_policies
+        WHERE tablename = 'monthly_xp_cache'
+          AND policyname = 'Users can only write their own XP cache'
+    ) THEN
+        create policy "Users can only write their own XP cache"
+          on public.monthly_xp_cache for insert
+          with check (auth.uid() = user_id);
+    END IF;
 
-create policy "Users can only update their own XP cache"
-  on public.monthly_xp_cache for update
-  using (auth.uid() = user_id);
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_policies
+        WHERE tablename = 'monthly_xp_cache'
+          AND policyname = 'Users can only update their own XP cache'
+    ) THEN
+        create policy "Users can only update their own XP cache"
+          on public.monthly_xp_cache for update
+          using (auth.uid() = user_id);
+    END IF;
+END
+$$;

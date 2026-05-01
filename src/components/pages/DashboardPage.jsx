@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw } from 'lucide-react';
+import { Flame, Trophy, Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, Footprints, Droplets, RefreshCw, Share } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 
@@ -142,6 +142,37 @@ export default function DashboardPage() {
   
   const [showLog, setShowLog] = useState(false);
   const [showGoal, setShowGoal] = useState(false);
+  const [showIosInstall, setShowIosInstall] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
+
+  useEffect(() => {
+    const isIos = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(userAgent);
+    };
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+    if (isIos() && !isInStandaloneMode()) {
+      setShowIosInstall(true);
+    }
+  }, []);
   const [logWeight, setLogWeight] = useState(user.weight);
   const [logNote, setLogNote] = useState('');
   const [goalTarget, setGoalTarget] = useState(user.weightGoal || user.weight - 5);
@@ -340,6 +371,29 @@ export default function DashboardPage() {
   return (
     <>
       <div className="pg-in">
+        {showIosInstall && (
+          <div style={{ background: 'var(--primary-container)', borderRadius: 16, padding: '16px 20px', marginBottom: 20, display: 'flex', gap: 16, alignItems: 'center', position: 'relative' }}>
+            <button onClick={() => setShowIosInstall(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--on-primary)', opacity: 0.7, cursor: 'pointer' }}><X size={16} /></button>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install FitTrack Pro</div>
+              <div style={{ fontSize: 12, color: 'var(--on-primary)', opacity: 0.9, lineHeight: 1.4 }}>
+                Tap <Share size={14} style={{ verticalAlign: 'middle', display: 'inline', margin: '0 4px' }} /> then <strong>Add to Home Screen</strong> for the best experience.
+              </div>
+            </div>
+          </div>
+        )}
+        {deferredPrompt && (
+          <div style={{ background: 'var(--primary-container)', borderRadius: 16, padding: '16px 20px', marginBottom: 20, display: 'flex', gap: 16, alignItems: 'center', position: 'relative' }}>
+            <button onClick={() => setDeferredPrompt(null)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--on-primary)', opacity: 0.7, cursor: 'pointer' }}><X size={16} /></button>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install FitTrack Pro</div>
+              <div style={{ fontSize: 12, color: 'var(--on-primary)', opacity: 0.9, lineHeight: 1.4, marginBottom: 12 }}>
+                Install the app on your device for quick access and push notifications.
+              </div>
+              <button onClick={handleInstallClick} style={{ background: 'var(--on-primary)', color: 'var(--primary)', padding: '8px 16px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Install App</button>
+            </div>
+          </div>
+        )}
         {/* Welcome Header */}
         <header style={{ position: 'relative', marginBottom: 32 }}>
           <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', fontFamily: "'Space Grotesk'" }}>

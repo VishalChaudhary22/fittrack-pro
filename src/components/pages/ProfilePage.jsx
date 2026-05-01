@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
@@ -9,6 +9,7 @@ import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+import { useNotifications } from '../../hooks/useNotifications';
 
 
 const PRESETS = [
@@ -106,6 +107,7 @@ function AvatarPickerModal({ open, onClose }) {
 export default function ProfilePage() {
   useScrollRestoration('/profile');
   const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
+  const { permission, preferences, loading, subscribeToPush, updatePreferences } = useNotifications();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -476,6 +478,47 @@ export default function ProfilePage() {
         {tdeePreferences?.manualTDEE && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
             <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setTdeePreferences(p => ({ ...p, manualTDEE: null }))}>Clear manual override</button>
+          </div>
+        )}
+      </div>
+
+      {/* Notifications */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Notifications</div>
+        
+        {permission !== 'granted' && (
+          <div style={{ background: 'var(--surface-container)', borderRadius: 16, padding: 16, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Bell size={20} color="var(--primary)" />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Enable Push Notifications</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Get alerts for streaks and Olympus League ranking.</div>
+              </div>
+            </div>
+            <button onClick={subscribeToPush} style={{ background: 'var(--primary)', color: 'var(--on-primary)', padding: '10px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Enable Notifications</button>
+          </div>
+        )}
+
+        {permission === 'granted' && !loading && preferences && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {Object.entries({
+              workout_reminders: { label: 'Workout Reminders', desc: 'Daily nudges to hit your goals' },
+              diet_reminders: { label: 'Diet Reminders', desc: 'Alerts to log your meals' },
+              streak_alerts: { label: 'Streak Alerts', desc: 'Warning before you lose a streak' },
+              olympus_weekly: { label: 'Olympus Weekly', desc: 'Weekly ranking summary' },
+              olympus_overtaken: { label: 'Overtaken Alerts', desc: 'When someone passes your rank' }
+            }).map(([key, info]) => (
+              <div key={key}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>{info.label}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>{info.desc}</div></div>
+                   <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+                     <button onClick={() => updatePreferences({ [key]: true })} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: preferences[key] ? 'var(--primary)' : 'transparent', color: preferences[key] ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ON</button>
+                     <button onClick={() => updatePreferences({ [key]: false })} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: !preferences[key] ? 'var(--primary)' : 'transparent', color: !preferences[key] ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>OFF</button>
+                   </div>
+                </div>
+                {key !== 'olympus_overtaken' && <div style={{ height: 1, background: 'var(--surface-container-highest)', marginTop: 16 }} />}
+              </div>
+            ))}
           </div>
         )}
       </div>

@@ -64,7 +64,6 @@ export function getAllTimePR(workoutLogs, exerciseName) {
       if (norm(ex.name) !== target) continue;
       for (const set of ex.sets ?? []) {
         // Saved logs don't have a `done` flag (stripped during save)
-        if (set.done === false) continue;
         const w = set.weight ?? 0;
         const r = set.reps ?? 0;
         if (r <= 0) continue;

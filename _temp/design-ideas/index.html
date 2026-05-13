@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTrack Pro — Design Direction Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0A0A0C;
+    color: #EAEAF0;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #353437; border-radius: 4px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useEffect, useRef } = React;
+
+/* ─── Design Direction Data ─────────────────────────────────────── */
+const DIRECTIONS = [
+  {
+    id: 'kinetic-evolution',
+    school: 'Information Architecture',
+    designer: 'Dieter Rams × Teenage Engineering',
+    title: 'Kinetic Evolution',
+    subtitle: 'Evolve your current system with surgical precision',
+    mood: ['Disciplined', 'Technical', 'Warm', 'Data-rich'],
+    description: 'Keep Kinetic Elite\'s ember orange DNA but elevate it with dense data visualization, animated muscle heatmaps, and a HUD-style workout tracker. Think: a premium sports watch UI brought to mobile.',
+    ideas: [
+      {
+        name: 'Animated Muscle Heatmap',
+        detail: 'Replace the static muscle map with a real-time SVG body that glows where you trained this week. Intensity = color saturation. Untrained areas stay cool grey. Touch a muscle group to see volume/frequency stats.',
+        effort: 'Medium',
+        impact: 'High',
+      },
+      {
+        name: 'HUD-Style Workout Tracker',
+        detail: 'Redesign the active workout screen as a heads-up display: large mono-spaced weight/rep numbers in the center, a circular progress ring for set completion around the edges, and a ticker tape of session stats at the top.',
+        effort: 'High',
+        impact: 'High',
+      },
+      {
+        name: 'Micro-Stat Sparklines',
+        detail: 'Add tiny inline sparkline charts next to every exercise name showing your weight progression over the last 8 sessions. Uses DM Mono for the numbers to feel like a trading terminal for gains.',
+        effort: 'Low',
+        impact: 'Medium',
+      },
+      {
+        name: 'Session Replay Timeline',
+        detail: 'After finishing a workout, show a horizontal timeline of your session: each set as a node, color-coded by PR/normal/failed, with time gaps visualized. Makes the post-workout review feel like reviewing game footage.',
+        effort: 'Medium',
+        impact: 'High',
+      },
+    ],
+    palette: ['#131315', '#1A1A1D', '#FFB59B', '#F85F1B', '#E3BFB3'],
+    fonts: 'Space Grotesk + DM Mono',
+  },
+  {
+    id: 'motion-poetics',
+    school: 'Motion Poetics',
+    designer: 'Field.io × R/GA',
+    title: 'Liquid Iron',
+    subtitle: 'Movement-driven UI with physics-based interactions',
+    mood: ['Dynamic', 'Immersive', 'Fluid', 'Cinematic'],
+    description: 'Transform every interaction into choreographed motion. Cards slide with spring physics, sets complete with particle bursts, and PR celebrations are full-screen takeovers. The app feels alive.',
+    ideas: [
+      {
+        name: 'Spring-Physics Card Stack',
+        detail: 'Exercise cards in the workout tracker become a draggable vertical stack with spring physics. Swipe right to mark set done (with haptic snap), swipe left to skip. Cards compress and expand with momentum.',
+        effort: 'High',
+        impact: 'High',
+      },
+      {
+        name: 'PR Celebration Takeover',
+        detail: 'When you hit a personal record, the entire screen does a 2-second cinematic takeover: background blurs, confetti particles burst from the PR row, the weight number scales up with a gold gradient, then settles back.',
+        effort: 'Medium',
+        impact: 'Very High',
+      },
+      {
+        name: 'Breathing Rest Timer',
+        detail: 'Replace the circular rest timer with a pulsing, breathing orb that expands and contracts. The orb\'s color shifts from cool blue to warm amber as rest time runs out. Subtle particle drift inside the orb.',
+        effort: 'Medium',
+        impact: 'Medium',
+      },
+      {
+        name: 'Fluid Page Transitions',
+        detail: 'Shared-element transitions between pages: the exercise card morphs into the detail view, the dashboard weight stat zooms into the full weight log page. Uses FLIP animation technique for 60fps smoothness.',
+        effort: 'High',
+        impact: 'High',
+      },
+    ],
+    palette: ['#0C0C0F', '#161619', '#6C9AFF', '#3D6BFF', '#B4C7FF'],
+    fonts: 'Space Grotesk + Be Vietnam Pro',
+  },
+  {
+    id: 'eastern-minimal',
+    school: 'Eastern Philosophy',
+    designer: 'Kenya Hara × Naoto Fukasawa',
+    title: 'Mu (無)',
+    subtitle: 'Radical emptiness as a design statement',
+    mood: ['Contemplative', 'Precise', 'Serene', 'Unhurried'],
+    description: 'Strip everything to essence. Massive whitespace, single-column layouts, type as the primary visual element. No gradients, no glow, no decoration. Strength through restraint — the Muji of fitness apps.',
+    ideas: [
+      {
+        name: 'Type-Only Dashboard',
+        detail: 'The home screen is pure typography: your most important number (streak, weekly volume, body weight) displayed at 72px in a refined serif. Secondary stats in 11px uppercase. No cards, no boxes, no icons. Just numbers and negative space.',
+        effort: 'Medium',
+        impact: 'High',
+      },
+      {
+        name: 'Mono-Weight Workout View',
+        detail: 'The active workout uses a single font weight throughout. Sets are displayed as a simple vertical list with generous line-height. Completed sets get a subtle horizontal strikethrough. The entire screen breathes.',
+        effort: 'Low',
+        impact: 'Medium',
+      },
+      {
+        name: 'Seasonal Color Shift',
+        detail: 'The accent color subtly shifts with the calendar: warm terracotta in autumn, cool stone in winter, soft sage in spring, warm sand in summer. Just one color, one season. Users don\'t control it — it\'s ambient.',
+        effort: 'Low',
+        impact: 'Medium',
+      },
+      {
+        name: 'Ritual Mode',
+        detail: 'A toggle that strips the workout view to absolute minimum: just the current exercise name, weight field, and reps field. No history, no PREV, no timer visible. For users who want to be fully present, not optimizing.',
+        effort: 'Medium',
+        impact: 'Medium',
+      },
+    ],
+    palette: ['#F5F2ED', '#E8E4DD', '#1A1A1E', '#8C7A6E', '#C4B5A5'],
+    fonts: 'Cormorant Garamond + Space Grotesk',
+  },
+];
+
+/* ─── Components ────────────────────────────────────────────────── */
+
+function Swatch({ colors }) {
+  return (
+    <div style={{ display: 'flex', gap: 6 }}>
+      {colors.map((c, i) => (
+        <div key={i} style={{
+          width: 28, height: 28, borderRadius: 8,
+          background: c,
+          border: c === '#F5F2ED' || c === '#E8E4DD' ? '1px solid #3a3a3d' : 'none',
+        }} title={c} />
+      ))}
+    </div>
+  );
+}
+
+function IdeaCard({ idea, index, accentColor }) {
+  const [expanded, setExpanded] = useState(false);
+  const effortColor = { Low: '#51CF66', Medium: '#FFB59B', High: '#FF6B6B', 'Very High': '#FF3B30' }[idea.effort] || '#FFB59B';
+  const impactColor = { Low: '#6E6E76', Medium: '#FFB59B', High: '#51CF66', 'Very High': '#51CF66' }[idea.impact] || '#FFB59B';
+
+  return (
+    <div
+      onClick={() => setExpanded(!expanded)}
+      style={{
+        background: '#1A1A1D',
+        borderRadius: 16,
+        padding: '18px 20px',
+        cursor: 'pointer',
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        borderLeft: `3px solid ${expanded ? accentColor : 'transparent'}`,
+        animation: `fadeUp 0.4s cubic-bezier(0, 0, 0.2, 1) ${index * 80}ms both`,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: expanded ? 12 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#6E6E76', width: 24 }}>
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <span style={{ fontWeight: 600, fontSize: 14, letterSpacing: '-0.01em' }}>{idea.name}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+            padding: '3px 8px', borderRadius: 6,
+            background: `${effortColor}15`, color: effortColor,
+          }}>
+            {idea.effort}
+          </span>
+          <span style={{
+            fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+            padding: '3px 8px', borderRadius: 6,
+            background: `${impactColor}15`, color: impactColor,
+          }}>
+            {idea.impact}
+          </span>
+        </div>
+      </div>
+      {expanded && (
+        <p style={{
+          fontSize: 13, lineHeight: 1.6, color: '#B0B0B8',
+          paddingLeft: 34, paddingRight: 8,
+          animation: 'fadeUp 0.3s ease both',
+        }}>
+          {idea.detail}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function DirectionCard({ direction, index }) {
+  const [open, setOpen] = useState(false);
+  const schoolColors = {
+    'Information Architecture': '#FFB59B',
+    'Motion Poetics': '#6C9AFF',
+    'Eastern Philosophy': '#C4B5A5',
+  };
+  const accent = schoolColors[direction.school] || '#FFB59B';
+
+  return (
+    <section style={{
+      marginBottom: 48,
+      animation: `fadeUp 0.5s cubic-bezier(0, 0, 0.2, 1) ${index * 150}ms both`,
+    }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
+        }}>
+          <span style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: 11, fontWeight: 500, color: accent,
+            textTransform: 'uppercase', letterSpacing: '0.15em',
+          }}>
+            Direction {String(index + 1).padStart(2, '0')}
+          </span>
+          <span style={{
+            fontSize: 9, padding: '3px 10px', borderRadius: 20,
+            background: `${accent}12`, color: accent,
+            fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em',
+          }}>
+            {direction.school}
+          </span>
+        </div>
+
+        <h2 style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 'clamp(1.8rem, 4vw, 2.4rem)',
+          fontWeight: 700, letterSpacing: '-0.04em',
+          lineHeight: 1.05, marginBottom: 4,
+          background: `linear-gradient(135deg, ${accent}, #EAEAF0)`,
+          WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+        }}>
+          {direction.title}
+        </h2>
+
+        <p style={{
+          fontSize: 13, color: '#6E6E76', fontWeight: 500,
+          letterSpacing: '-0.01em', marginBottom: 12,
+        }}>
+          {direction.subtitle} — inspired by <span style={{ color: '#B0B0B8' }}>{direction.designer}</span>
+        </p>
+
+        {/* Mood tags */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+          {direction.mood.map(m => (
+            <span key={m} style={{
+              fontSize: 10, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+              background: '#212124', color: '#B0B0B8',
+              letterSpacing: '0.05em',
+            }}>
+              {m}
+            </span>
+          ))}
+        </div>
+
+        <p style={{
+          fontSize: 14, lineHeight: 1.65, color: '#B0B0B8',
+          maxWidth: 640,
+        }}>
+          {direction.description}
+        </p>
+      </div>
+
+      {/* Palette + Fonts */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 20,
+        marginBottom: 20, flexWrap: 'wrap',
+      }}>
+        <Swatch colors={direction.palette} />
+        <span style={{
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 11, color: '#6E6E76',
+        }}>
+          {direction.fonts}
+        </span>
+      </div>
+
+      {/* Ideas */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {direction.ideas.map((idea, i) => (
+          <IdeaCard key={idea.name} idea={idea} index={i} accentColor={accent} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 96px' }}>
+      {/* Hero */}
+      <header style={{ marginBottom: 56, animation: 'fadeUp 0.5s ease both' }}>
+        <div style={{
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 10, fontWeight: 500, color: '#6E6E76',
+          textTransform: 'uppercase', letterSpacing: '0.2em',
+          marginBottom: 12,
+        }}>
+          FitTrack Pro — Design Direction Explorer
+        </div>
+        <h1 style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 'clamp(2rem, 5vw, 3rem)',
+          fontWeight: 700, letterSpacing: '-0.04em',
+          lineHeight: 1.05, marginBottom: 16,
+        }}>
+          3 Design Directions<br/>
+          <span style={{ color: '#6E6E76' }}>for your next evolution</span>
+        </h1>
+        <p style={{
+          fontSize: 14, lineHeight: 1.65, color: '#B0B0B8',
+          maxWidth: 560,
+        }}>
+          Your current design system (<span style={{ color: '#FFB59B' }}>Kinetic Elite</span>) is already strong.
+          These directions explore how to push further — from surgical upgrades to radical departures.
+          Tap any idea to expand details. Each is rated by effort and impact.
+        </p>
+      </header>
+
+      {/* Directions */}
+      {DIRECTIONS.map((d, i) => (
+        <DirectionCard key={d.id} direction={d} index={i} />
+      ))}
+
+      {/* Footer guidance */}
+      <footer style={{
+        marginTop: 48, padding: '24px 20px', borderRadius: 16,
+        background: '#1A1A1D',
+        animation: 'fadeUp 0.5s ease 0.6s both',
+      }}>
+        <div style={{
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 10, color: '#6E6E76',
+          textTransform: 'uppercase', letterSpacing: '0.15em',
+          marginBottom: 10,
+        }}>
+          Next steps
+        </div>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: '#B0B0B8' }}>
+          Pick a direction (or mix: "Direction 01's sparklines + Direction 02's PR celebration").
+          I'll build a high-fidelity interactive prototype of your chosen ideas as a standalone HTML demo — no changes to the production app until you approve.
+        </p>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

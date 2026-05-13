@@ -16,8 +16,14 @@ import WeightLogPage from './components/pages/WeightLogPage';
 import MeasurementsPage from './components/pages/MeasurementsPage';
 import MuscleMapPage from './components/pages/MuscleMapPage';
 import CycleTrackerPage from './components/pages/CycleTrackerPage';
+import { useChatbot } from './hooks/useChatbot';
+import ChatbotButton from './components/shared/ChatbotButton';
+import ChatbotModal from './components/shared/ChatbotModal';
+
 function AppInner() {
-  const { user, authLoading, toasts, removeToast } = useApp();
+  const { user, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
+
+  const chatbot = useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog });
 
   if (authLoading) {
     return (
@@ -57,20 +63,24 @@ function AppInner() {
           <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
           <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
           <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
-          <Route path="/diet" element={<ErrorBoundary><DietPage /></ErrorBoundary>} />
-          <Route path="/progress" element={<ErrorBoundary><ProgressPage /></ErrorBoundary>} />
+          <Route path="/diet" element={<ErrorBoundary><DietPage chatbot={chatbot} /></ErrorBoundary>} />
+          <Route path="/progress" element={<ErrorBoundary><ProgressPage chatbot={chatbot} /></ErrorBoundary>} />
           <Route path="/contact" element={<ErrorBoundary><ContactPage /></ErrorBoundary>} />
           <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
-          <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage /></ErrorBoundary>} />
+          <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage chatbot={chatbot} /></ErrorBoundary>} />
           <Route path="/weight-log" element={<ErrorBoundary><WeightLogPage /></ErrorBoundary>} />
           <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
-          <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage /></ErrorBoundary>} />
+          <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage chatbot={chatbot} /></ErrorBoundary>} />
           <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <BottomNav />
       <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <ChatbotButton onClick={chatbot.openChat} />
+      {chatbot.isOpen && (
+        <ChatbotModal chatbot={chatbot} user={user} />
+      )}
     </div>
   );
 }

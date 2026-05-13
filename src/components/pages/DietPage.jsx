@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
@@ -61,7 +61,7 @@ const CONSTANTS = {
 const dietTabCache = { activeTab: 'tracker' };
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
-export default function DietPage() {
+export default function DietPage({ chatbot }) {
   const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile, tdeeEstimate, setTdeePreferences } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   const [showTDEEDetails, setShowTDEEDetails] = useState(false);
@@ -823,11 +823,26 @@ export default function DietPage() {
 
             {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
                <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24, border: '1px solid var(--primary-container)' }}>
-                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
                    <Zap size={16} color="var(--primary)" />
                    <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>High-Impact Nudge</span> 
                  </div>
-                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>You're <strong>{Math.round(protTarget - todayTotals.protein)}g</strong> short on protein today — try: <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Paneer 100g, Chicken Breast 100g, 2 Eggs, Soya Chunks 50g, or 1 Scoop Whey.</span></p>
+                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4, marginBottom: 12 }}>You're <strong>{Math.round(protTarget - todayTotals.protein)}g</strong> short on protein today.</p>
+                 <button
+                   onClick={() => {
+                     if (chatbot) {
+                       chatbot.openChat();
+                       setTimeout(() => chatbot.sendMessage(`I need ${Math.round(protTarget - todayTotals.protein)}g more protein today. What are some quick meal ideas?`), 300);
+                     }
+                   }}
+                   style={{
+                     background: 'var(--primary)', border: 'none', borderRadius: 8,
+                     padding: '8px 12px', color: 'var(--on-primary)', fontSize: 12, fontWeight: 700,
+                     display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', transition: '0.2s'
+                   }}
+                 >
+                   <Bot size={14} /> Ask FORGE for protein meal ideas
+                 </button>
                </div>
             )}
 

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2, Download } from 'lucide-react';
+import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2, Download, Bot } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useApp } from '../../context/AppContext';
 import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
@@ -11,7 +11,7 @@ import { getAllTimePR } from '../../utils/exerciseHistory';
 
 const progressFilterCache = { ss: null, sd: '', se: '' };
 
-export default function ProgressPage() {
+export default function ProgressPage({ chatbot }) {
   useScrollRestoration('/progress');
   const { user, workoutLogs, splits } = useApp();
   const act = splits.find(s => s.id === user.activeSplitId) || splits[0];
@@ -307,6 +307,38 @@ export default function ProgressPage() {
                 </button>
               </div>
             </div>
+            
+            {pr > 0 && (
+              <button
+                onClick={() => {
+                  if (chatbot) {
+                    chatbot.openChat();
+                    setTimeout(() => chatbot.sendMessage(`How can I beat my Personal Best of ${pr}kg on ${se}?`), 300);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-container-highest)',
+                  border: 'none',
+                  borderRadius: 12,
+                  padding: '12px',
+                  color: 'var(--on-surface)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                  marginTop: -8 // to pull it closer to the PB card
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container-high)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-container-highest)'}
+              >
+                <Bot size={16} color="var(--primary)" /> Ask FORGE how to beat this PR
+              </button>
+            )}
 
             {/* 8.5 Focus Groups */}
             <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)' }}>

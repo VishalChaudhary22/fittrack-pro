@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Shield, Trophy, Sparkles, TrendingUp, Minus, Award, Calendar, Users } from 'lucide-react';
+import { Shield, Trophy, Sparkles, TrendingUp, Minus, Award, Calendar, Users, Bot } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState } from '../shared/SharedComponents';
 import BodyMapSVG from '../shared/BodyMapSVG';
@@ -79,7 +79,7 @@ const MuscleCard = ({ muscle, xp }) => {
 };
 
 // ─── MUSCLE MAP PAGE ─────────────────────────────────────────────────────────
-export default function MuscleMapPage() {
+export default function MuscleMapPage({ chatbot }) {
   useScrollRestoration('/muscle-map');
   const { workoutLogs, splits, user, monthlyRankHistory } = useApp();
   const [activeTab, setActiveTabRaw] = useState(muscleMapTabCache.activeTab); 
@@ -832,6 +832,27 @@ export default function MuscleMapPage() {
               </div>
             );
           })}
+          {weakestMuscle && (muscleXP[weakestMuscle.key] || 0) < (muscleXP[sortedMuscles[0]?.key] || 0) * 0.3 && (
+            <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'center', background: 'var(--surface-container-lowest)' }}>
+               <button
+                 onClick={() => {
+                   if (chatbot) {
+                     chatbot.openChat();
+                     setTimeout(() => chatbot.sendMessage(`How can I improve my ${weakestMuscle.label} strength?`), 300);
+                   }
+                 }}
+                 style={{
+                   background: 'rgba(255,107,107,.1)', border: 'none', borderRadius: 20,
+                   padding: '8px 16px', color: 'var(--danger)', fontSize: 12, fontWeight: 700,
+                   display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', transition: '0.2s'
+                 }}
+                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,107,107,.15)'}
+                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,107,107,.1)'}
+               >
+                 <Bot size={14} /> Ask FORGE how to improve {weakestMuscle.label}
+               </button>
+            </div>
+          )}
         </div>
 
         {/* SECTION 3 — Percentile Benchmarks */}

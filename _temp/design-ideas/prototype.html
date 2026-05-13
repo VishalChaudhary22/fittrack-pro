@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FitTrack Pro — Kinetic Iron Prototype</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background: #0A0A0C;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #EAEAF0
+    }
+
+    /* Device Frame */
+    .device {
+      width: 393px;
+      height: 852px;
+      background: #131315;
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 0 2px #2B2B2E;
+      display: flex;
+      flex-direction: column
+    }
+
+    .device-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 126px;
+      height: 34px;
+      background: #0A0A0C;
+      border-radius: 0 0 20px 20px;
+      z-index: 100
+    }
+
+    .device-home {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: #6E6E76;
+      border-radius: 100px;
+      z-index: 100
+    }
+
+    /* Scrollable content */
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 52px 20px 32px;
+      scrollbar-width: none
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes prBurst {
+      0% {
+        transform: scale(0);
+        opacity: 1
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8
+      }
+
+      100% {
+        transform: scale(1.6);
+        opacity: 0
+      }
+    }
+
+    @keyframes prGlow {
+      0% {
+        box-shadow: none
+      }
+
+      50% {
+        box-shadow: 0 0 30px rgba(248, 95, 27, 0.5)
+      }
+
+      100% {
+        box-shadow: 0 0 8px rgba(248, 95, 27, 0.1)
+      }
+    }
+
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.6
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 1
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0
+      }
+
+      100% {
+        background-position: 200% 0
+      }
+    }
+
+    @keyframes confetti {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(-80px) rotate(720deg);
+        opacity: 0
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1
+      }
+    }
+
+    @keyframes pulseRing {
+
+      0%,
+      100% {
+        stroke-opacity: 0.3
+      }
+
+      50% {
+        stroke-opacity: 1
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ─── Mock Data ─────────────────────────────────────────────── */
+    const EXERCISES = [
+      {
+        name: 'Smith Machine Incline Press', muscle: 'CHEST', sets: [
+          { reps: 10, weight: 80, done: true, pr: false }, { reps: 8, weight: 90, done: true, pr: false }, { reps: 6, weight: 100, done: false, pr: false }
+        ], history: [60, 65, 70, 75, 80, 85, 85, 90]
+      },
+      {
+        name: 'Flat Dumbbell Press', muscle: 'CHEST', sets: [
+          { reps: 9, weight: 36, done: false, pr: false }, { reps: 7, weight: 38, done: false, pr: false }, { reps: 6, weight: 40, done: false, pr: false }
+        ], history: [28, 30, 32, 32, 34, 34, 36, 36]
+      },
+      {
+        name: 'Cable Fly', muscle: 'CHEST', sets: [
+          { reps: 12, weight: 15, done: false, pr: false }, { reps: 10, weight: 17.5, done: false, pr: false }, { reps: 10, weight: 17.5, done: false, pr: false }
+        ], history: [10, 10, 12.5, 12.5, 12.5, 15, 15, 15]
+      },
+    ];
+
+    /* ─── Sparkline Component ───────────────────────────────────── */
+    function Sparkline({ data, width = 80, height = 24, color = '#FFB59B' }) {
+      if (!data || data.length < 2) return null;
+      const min = Math.min(...data), max = Math.max(...data);
+      const range = max - min || 1;
+      const points = data.map((v, i) => {
+        const x = (i / (data.length - 1)) * width;
+        const y = height - ((v - min) / range) * height;
+        return `${x},${y}`;
+      }).join(' ');
+      return (
+        <svg width={width} height={height} style={{ display: 'block' }}>
+          <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
+          <circle cx={(data.length - 1) / (data.length - 1) * width} cy={height - ((data[data.length - 1] - min) / range) * height} r="2.5" fill={color} />
+        </svg>
+      );
+    }
+
+    /* ─── PR Celebration Overlay ────────────────────────────────── */
+    function PRCelebration({ weight, onDone }) {
+      useEffect(() => { const t = setTimeout(onDone, 2500); return () => clearTimeout(t) }, [onDone]);
+      const particles = Array.from({ length: 12 }, (_, i) => i);
+      return (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,12,0.85)', backdropFilter: 'blur(12px)', animation: 'fadeUp 0.3s ease' }}>
+          {particles.map(i => (
+            <div key={i} style={{
+              position: 'absolute', width: 6, height: 6, borderRadius: 3,
+              background: ['#FFB59B', '#F85F1B', '#51CF66', '#6C9AFF', '#EAEAF0'][i % 5],
+              top: '50%', left: '50%',
+              animation: `confetti 1.5s cubic-bezier(0.2,0,0.2,1) ${i * 80}ms forwards`,
+              transform: `rotate(${i * 30}deg) translateX(${40 + i * 8}px)`,
+            }} />
+          ))}
+          <div style={{ textAlign: 'center', animation: 'fadeUp 0.4s ease 0.2s both' }}>
+            <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: '#FFB59B', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 }}>New Personal Record</div>
+            <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 56, fontWeight: 700, letterSpacing: '-0.04em', background: 'linear-gradient(135deg,#FFB59B,#F85F1B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{weight} kg</div>
+            <div style={{ fontSize: 12, color: '#6E6E76', marginTop: 4 }}>Tap anywhere to continue</div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── Breathing Rest Timer ──────────────────────────────────── */
+    function BreathingTimer({ seconds, total, onSkip }) {
+      const pct = seconds / total;
+      const color = pct > 0.5 ? '#6C9AFF' : pct > 0.2 ? '#FFB59B' : '#F85F1B';
+      const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const ss = String(seconds % 60).padStart(2, '0');
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '20px 0', animation: 'fadeUp 0.3s ease' }}>
+          <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: '#6E6E76', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Rest Timer</div>
+          <div style={{ position: 'relative', width: 100, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Breathing orb */}
+            <div style={{
+              position: 'absolute', width: 80, height: 80, borderRadius: '50%',
+              background: `radial-gradient(circle, ${color}20 0%, transparent 70%)`,
+              animation: 'breathe 3s ease-in-out infinite',
+            }} />
+            <svg width="100" height="100" style={{ position: 'absolute', transform: 'rotate(-90deg)' }}>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#212124" strokeWidth="3" />
+              <circle cx="50" cy="50" r="42" fill="none" stroke={color} strokeWidth="3"
+                strokeDasharray={2 * Math.PI * 42} strokeDashoffset={2 * Math.PI * 42 * (1 - pct)}
+                strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.5s ease' }} />
+            </svg>
+            <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 22, fontWeight: 500, color, zIndex: 1 }}>{mm}:{ss}</span>
+          </div>
+          <button onClick={onSkip} style={{
+            background: '#212124', border: 'none', borderRadius: 20, padding: '8px 20px',
+            fontFamily: "'Be Vietnam Pro',sans-serif", fontSize: 11, fontWeight: 600, color: '#B0B0B8',
+            cursor: 'pointer', letterSpacing: '0.05em', textTransform: 'uppercase',
+          }}>Skip</button>
+        </div>
+      );
+    }
+
+    /* ─── Session Timeline ──────────────────────────────────────── */
+    function SessionTimeline({ exercises }) {
+      const allSets = exercises.flatMap((ex, ei) => ex.sets.map((s, si) => ({ ...s, exIndex: ei, setIndex: si, exName: ex.name })));
+      const doneSets = allSets.filter(s => s.done);
+      if (doneSets.length === 0) return null;
+      return (
+        <div style={{ padding: '16px 0', animation: 'fadeUp 0.4s ease' }}>
+          <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: '#6E6E76', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 12 }}>Session Timeline</div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', overflowX: 'auto', paddingBottom: 4 }}>
+            {doneSets.map((s, i) => (
+              <div key={i} style={{
+                width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: s.pr ? 'linear-gradient(135deg,#FFB59B,#F85F1B)' : '#1A1A1D',
+                border: s.pr ? 'none' : '1px solid #2B2B2E', flexShrink: 0,
+                animation: `slideIn 0.3s ease ${i * 60}ms both`,
+              }}>
+                <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: s.pr ? '#fff' : '#B0B0B8', fontWeight: 600 }}>{s.weight}</span>
+              </div>
+            ))}
+            <div style={{ width: 32, height: 32, borderRadius: 10, border: '1.5px dashed #353437', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 14, color: '#353437' }}>+</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── Exercise Card ─────────────────────────────────────────── */
+    function ExerciseCard({ exercise, index, onPR }) {
+      const [sets, setSets] = useState(exercise.sets);
+      const [completing, setCompleting] = useState(null);
+
+      const toggleSet = (si) => {
+        if (sets[si].done) return;
+        setCompleting(si);
+        setTimeout(() => {
+          const newSets = [...sets];
+          const isNewPR = newSets[si].weight > Math.max(...exercise.history);
+          newSets[si] = { ...newSets[si], done: true, pr: isNewPR };
+          setSets(newSets);
+          setCompleting(null);
+          if (isNewPR) onPR(newSets[si].weight);
+        }, 300);
+      };
+
+      return (
+        <div style={{
+          background: '#1A1A1D', borderRadius: 20, padding: '20px', marginBottom: 12,
+          animation: `fadeUp 0.4s cubic-bezier(0,0,0.2,1) ${index * 100}ms both`,
+          transition: 'transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275)',
+        }}>
+          {/* Header with sparkline */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 17, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 3 }}>{exercise.name}</h3>
+              <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: '#6E6E76', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{exercise.muscle} · {sets.length} sets</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+              <Sparkline data={exercise.history} />
+              <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: '#6E6E76' }}>8 sessions</span>
+            </div>
+          </div>
+
+          {/* Set Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr auto', gap: '8px 8px', alignItems: 'center', fontSize: 11, color: '#6E6E76', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+            <span>Set</span><span>Reps</span><span>KG</span><span style={{ width: 40, textAlign: 'center' }}>Done</span>
+          </div>
+          {sets.map((s, si) => (
+            <div key={si} style={{
+              display: 'grid', gridTemplateColumns: '28px 1fr 1fr auto', gap: '8px 8px', alignItems: 'center',
+              padding: '10px 0', borderRadius: 10, marginBottom: 2,
+              background: s.pr ? 'rgba(248,95,27,0.08)' : 'transparent',
+              borderLeft: s.pr ? '2.5px solid #F85F1B' : '2.5px solid transparent',
+              paddingLeft: s.pr ? 8 : 0,
+              animation: s.pr ? 'prGlow 0.7s ease forwards' : 'none',
+              opacity: completing === si ? 0.5 : 1, transition: 'opacity 0.2s',
+            }}>
+              <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, color: '#6E6E76' }}>{si + 1}</span>
+              <div style={{ background: '#131315', borderRadius: 8, padding: '10px 12px', fontFamily: "'DM Mono',monospace", fontSize: 15, fontWeight: 500, color: s.done ? '#6E6E76' : '#EAEAF0', textDecoration: s.done ? 'line-through' : 'none' }}>
+                {s.reps}
+              </div>
+              <div style={{ background: '#131315', borderRadius: 8, padding: '10px 12px', fontFamily: "'DM Mono',monospace", fontSize: 15, fontWeight: 500, color: s.done ? '#6E6E76' : '#EAEAF0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {s.weight}
+                {s.pr && <span style={{ fontSize: 8, fontWeight: 700, color: '#F85F1B', textTransform: 'uppercase', letterSpacing: '0.1em', background: 'rgba(248,95,27,0.15)', padding: '2px 5px', borderRadius: 4 }}>PR</span>}
+              </div>
+              <button onClick={() => toggleSet(si)} disabled={s.done} style={{
+                width: 40, height: 40, borderRadius: 12, border: 'none', cursor: s.done ? 'default' : 'pointer',
+                background: s.done ? 'linear-gradient(135deg,#FFB59B,#F85F1B)' : '#212124',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.25s cubic-bezier(0.175,0.885,0.32,1.275)',
+                transform: completing === si ? 'scale(0.8)' : 'scale(1)',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8.5L6.5 12L13 4" stroke={s.done ? '#fff' : '#6E6E76'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /* ─── Main App ──────────────────────────────────────────────── */
+    function App() {
+      const [prWeight, setPrWeight] = useState(null);
+      const [showRest, setShowRest] = useState(false);
+      const [restSeconds, setRestSeconds] = useState(90);
+      const timerRef = useRef(null);
+
+      const startRest = () => {
+        setShowRest(true);
+        setRestSeconds(90);
+      };
+
+      useEffect(() => {
+        if (!showRest) return;
+        timerRef.current = setInterval(() => {
+          setRestSeconds(p => {
+            if (p <= 1) { clearInterval(timerRef.current); setShowRest(false); return 0 }
+            return p - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timerRef.current);
+      }, [showRest]);
+
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 20px' }}>
+          <div className="device">
+            <div className="device-notch" />
+            <div className="device-home" />
+
+            {prWeight && <PRCelebration weight={prWeight} onDone={() => setPrWeight(null)} />}
+
+            <div className="screen">
+              {/* Session Header */}
+              <div style={{ marginBottom: 24, animation: 'fadeUp 0.4s ease' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: '#FFB59B', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 3, background: '#F85F1B', animation: 'breathe 2s ease-in-out infinite' }} />
+                    Active Session: Upper A
+                  </span>
+                  <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: '#6E6E76' }}>12:34</span>
+                </div>
+                <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 700, letterSpacing: '-0.04em' }}>Workout Tracker</h1>
+              </div>
+
+              {/* Rest Timer */}
+              {showRest && <BreathingTimer seconds={restSeconds} total={90} onSkip={() => { clearInterval(timerRef.current); setShowRest(false) }} />}
+
+              {/* Session Timeline */}
+              <SessionTimeline exercises={EXERCISES} />
+
+              {/* Exercise Cards */}
+              {EXERCISES.map((ex, i) => (
+                <ExerciseCard key={ex.name} exercise={ex} index={i} onPR={(w) => { setPrWeight(w); startRest() }} />
+              ))}
+
+              {/* Rest Button */}
+              {!showRest && (
+                <button onClick={startRest} style={{
+                  width: '100%', padding: '14px', borderRadius: 16, border: '1.5px dashed #353437',
+                  background: 'transparent', fontFamily: "'Be Vietnam Pro',sans-serif", fontSize: 12,
+                  fontWeight: 600, color: '#6E6E76', cursor: 'pointer', letterSpacing: '0.05em',
+                  textTransform: 'uppercase', marginTop: 8, transition: 'all 0.2s',
+                }}>
+                  Start Rest Timer
+                </button>
+              )}
+
+              {/* Legend */}
+              <div style={{ marginTop: 24, padding: '16px', background: '#161619', borderRadius: 14 }}>
+                <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: '#6E6E76', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10 }}>Prototype Features</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11, color: '#B0B0B8' }}>
+                  <span>✦ Tap checkmarks to complete sets</span>
+                  <span>✦ Beat 90kg on Set 3 of Incline Press for a PR celebration</span>
+                  <span>✦ Sparkline charts show 8-session weight trends</span>
+                  <span>✦ Session Timeline builds as you complete sets</span>
+                  <span>✦ Breathing orb rest timer with color shift</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>

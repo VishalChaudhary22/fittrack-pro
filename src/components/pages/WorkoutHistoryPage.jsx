@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints, Edit2 } from 'lucide-react';
+import { Clock, Trash2, ChevronDown, Search, Activity, Timer, Dumbbell, Zap, Flame, Footprints, Edit2, Bot } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import EditWorkoutModal from '../shared/EditWorkoutModal';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
@@ -25,7 +25,7 @@ const calcVolume = (exercises) => {
   );
 };
 
-export default function WorkoutHistoryPage() {
+export default function WorkoutHistoryPage({ chatbot }) {
   useScrollRestoration('/history');
   const { user, workoutLogs, setWorkoutLogs, splits, addToast, cardioLog, setCardioLog, updateWorkoutLog } = useApp();
   const [search, setSearchRaw] = useState(historyCache.search);
@@ -254,6 +254,23 @@ export default function WorkoutHistoryPage() {
                       <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(248,95,27,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Dumbbell size={18} color="var(--primary)" />
                       </div>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (chatbot) {
+                            chatbot.openChat();
+                            setTimeout(() => chatbot.sendMessage(
+                              `How did I do on ${log.dayName} on ${fmt(log.date)}? Any improvements?`
+                            ), 300);
+                          }
+                        }}
+                        style={{ width: 36, height: 36, borderRadius: 10, background: 'transparent', border: '1px solid var(--outline-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--on-surface-dim)', transition: '0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--on-surface-dim)'; e.currentTarget.style.borderColor = 'var(--outline-variant)'; }}
+                        aria-label="Ask FORGE about this session"
+                      >
+                        <Bot size={18} />
+                      </button>
                       <ChevronDown size={16} color="var(--on-surface-dim)" style={{ transform: isExpanded ? 'rotate(180deg)' : '', transition: '.2s' }} />
                     </div>
                   </div>

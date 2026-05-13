@@ -429,3 +429,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+@media (min-width: 769px) {
+  button[aria-label="Open FORGE AI Coach"] {
+    bottom: 24px !important;
+  }
+}

@@ -60,7 +60,15 @@ fittrack-pro/
 │       ├── 20260407033900_add_rls_public_read.sql       # RLS policies for public read access
 │       ├── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, measurements, readiness, splits sync
 │       ├── 20260409_add_leaderboard_rls.sql             # Public SELECT policies for leaderboard reads on user_profiles + workout_logs
-│       └── 20260417_body_fat_logs.sql                   # body_fat_logs table + body_fat_goal column on user_profiles + RLS
+│       ├── 20260417_body_fat_logs.sql                   # body_fat_logs table + body_fat_goal column on user_profiles + RLS
+│       └── 20260501091225_schedule_push_notifications.sql # pg_cron scheduling for Edge Functions
+│   └── functions/
+│       ├── _shared/
+│       │   └── push.ts                             # Shared web-push logic for Edge Functions
+│       ├── send-workout-reminder/                   # Scheduled daily workout nudge
+│       ├── send-diet-reminder/                      # Scheduled daily macro nudge
+│       ├── send-streak-alert/                       # Morning streak motivation
+│       └── send-olympus-weekly/                     # Weekly rank summary push
 ├── scripts/                     # Data population & validation scripts
 │   ├── generate_seed.js         # Generates SQL seed from JS food objects
 │   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
@@ -872,12 +880,20 @@ Several rounds of mobile UX fixes on the food search modal:
   - **Stateful Max Tracking**: Fixed a bug where the ring stayed at 100% after adding time. Introduced `maxObserved` local state to track the highest time value reached, ensuring the ring drains proportionally immediately from the new peak.
   - **Reference Error Fix**: Resolved a "try again" crash caused by an undefined `React` object in a functional component that only imported specific hooks.
 
+### Push Notifications & History Depth (Applied 2026-05-01)
+**Fixes Applied:**
+- **Push Notification Infrastructure**: Deployed `web-push` based Edge Functions for workout, diet, streak, and Olympus rank reminders. Integrated `pg_cron` and `pg_net` via migration `20260501091225` for server-side scheduling. Established `push_subscriptions` and `notification_logs` schema.
+- **Exercise Swap & History Restoration (`exerciseHistory.js`)**: Overhauled historical lookup to fix a major pre-fill bug where saved logs (stripped of `done: true`) were ignored. Added `getLastSessionSets()` to enable 1:1 set mapping (Set 1 → Set 1) during swaps, ensuring users don't lose their previous session's progress context.
+- **Vercel Production Syntax Fix**: Resolved a "black screen" production failure by escaping problematic characters in inline Babel scripts within `index.html`.
+- **Adaptive TDEE UI Polish**: Fixed the Metabolic Index card to render a cleaner formula breakdown and confidence score, removing generic icons in favor of high-fidelity typographic hierarchy.
+
 ---
 
 ## 🔲 Known Gaps / Pending Work
 
 | Item | Notes |
 |------|-------|
+| Web Push Subscription Flow | Backend is ready, but frontend `ServiceWorker` and permission request UI are not yet implemented. |
 | Supplement brand entries | 26 whey + 10 mass gainer entries documented in `TODO-supplement-db.md` — not yet added to `indianFoods.js` |
 | Food count vs target | ~207 entries in `indianFoods.js` vs 350 target. Missing items mainly in sweets/mithai, fruits, and regional variants |
 | Steps / Calories data | Placeholder cards on Dashboard, no real data source wired |
@@ -886,12 +902,5 @@ Several rounds of mobile UX fixes on the food search modal:
 | `cascade-item` stagger | Defined in CSS but not applied broadly across all card lists |
 | Friends tab (Olympus League) | EmptyState stub — no real social graph backend |
 | Time-range filter pills (Analytics) | `[1M] [3M] [6M]` pills are visual only — state wiring deferred |
-| Leaderboard light-theme rows | Inline `rgba` glass values on leaderboard rows may look off in light mode; prefer `var(--glass-bg)` |
-| B12/D3/Iron alerts | Implemented on DietPage Analysis tab; thresholds may still need tuning against real usage |
-| GI-aware carb guidance | Documented in Phase 4 — not yet implemented |
-| Recipe builder | Cancelled — comprehensive pre-built coverage + custom food entry is enough |
-| Supabase as primary food source | `useFoodCache()` fetches full remote food data first, then falls back to local JS. Search execution in DietPage is still local/in-memory after cache load |
-| Food entry cloud completeness | `food_logs` now authoritative with local write-through fallback; long-term goal is to verify upsert success rates in production logs and remove debug `✅/❌` console statements |
 | Reset-password route | Forgot-password email flow is wired, but `/reset-password` is not yet mounted in the router |
-| UX audit items | `TODO-ux-audit.md` + 13 per-page audit files (`TODO-UX-01` through `TODO-UX-13`) pending review |
-| Supabase upsert debug logging | `[CloudSync] ✅/❌` console.log statements in `createSyncSetter` should be removed or downgraded before a production-hardened release |
+| GI-aware carb guidance | Documented in Phase 4 — not yet implemented |

@@ -77,7 +77,7 @@ function AppInner() {
       </main>
       <BottomNav />
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <ChatbotButton onClick={chatbot.openChat} />
+      <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />
       {chatbot.isOpen && (
         <ChatbotModal chatbot={chatbot} user={user} />
       )}

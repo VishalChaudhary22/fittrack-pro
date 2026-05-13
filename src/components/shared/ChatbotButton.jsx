@@ -1,22 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bot, X } from 'lucide-react';
 
 const GREETING_KEY = 'forge_greeted';
 
 export default function ChatbotButton({ onClick, hasUnread = false, userName }) {
   const [showGreeting, setShowGreeting] = useState(false);
-  const [greetingVisible, setGreetingVisible] = useState(false); // controls opacity for fade
+  const [greetingVisible, setGreetingVisible] = useState(false);
+
+  // Define dismissGreeting first with useCallback so it's stable
+  const dismissGreeting = useCallback(() => {
+    setGreetingVisible(false);
+    setTimeout(() => setShowGreeting(false), 300);
+  }, []);
 
   useEffect(() => {
-    // Only show greeting once per session
     if (sessionStorage.getItem(GREETING_KEY)) return;
 
     const showTimer = setTimeout(() => {
       setShowGreeting(true);
-      // Small delay for entrance animation
-      requestAnimationFrame(() => setGreetingVisible(true));
       sessionStorage.setItem(GREETING_KEY, '1');
-    }, 1800); // appear 1.8s after mount — after page settles
+      // Tiny delay so the element mounts before we trigger the transition
+      setTimeout(() => setGreetingVisible(true), 30);
+    }, 1800);
 
     return () => clearTimeout(showTimer);
   }, []);
@@ -24,19 +29,14 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
   // Auto-dismiss after 5 seconds
   useEffect(() => {
     if (!showGreeting) return;
-    const timer = setTimeout(() => dismissGreeting(), 5000);
+    const timer = setTimeout(dismissGreeting, 5000);
     return () => clearTimeout(timer);
-  }, [showGreeting]);
+  }, [showGreeting, dismissGreeting]);
 
-  const dismissGreeting = () => {
-    setGreetingVisible(false);
-    setTimeout(() => setShowGreeting(false), 300); // wait for fade-out
-  };
-
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (showGreeting) dismissGreeting();
     onClick();
-  };
+  }, [showGreeting, dismissGreeting, onClick]);
 
   const firstName = userName?.split(' ')[0] || 'there';
 
@@ -45,12 +45,13 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
       {/* Greeting Tooltip */}
       {showGreeting && (
         <div
+          onClick={handleClick}
           style={{
             position: 'fixed',
-            bottom: 'calc(132px + env(safe-area-inset-bottom, 12px))',
+            bottom: 'calc(134px + env(safe-area-inset-bottom, 12px))',
             right: 16,
             maxWidth: 220,
-            padding: '12px 14px',
+            padding: '12px 14px 12px 14px',
             background: 'var(--surface-container-low)',
             border: '1px solid var(--outline-variant)',
             borderRadius: 14,
@@ -61,7 +62,6 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
             transition: 'opacity .3s ease, transform .3s ease',
             cursor: 'pointer',
           }}
-          onClick={handleClick}
         >
           {/* Close button */}
           <button
@@ -69,9 +69,9 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
             style={{
               position: 'absolute', top: 6, right: 6,
               background: 'none', border: 'none', cursor: 'pointer',
-              padding: 2, lineHeight: 0, color: 'var(--on-surface-dim)',
+              padding: 2, lineHeight: 0, color: 'var(--on-surface-variant)',
             }}
-            aria-label="Dismiss"
+            aria-label="Dismiss greeting"
           >
             <X size={12} />
           </button>
@@ -83,15 +83,14 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
             Need help with your workout or diet? I'm here.
           </div>
 
-          {/* Triangle pointer */}
+          {/* Triangle pointer pointing down toward FAB */}
           <div style={{
-            position: 'absolute', bottom: -6, right: 28,
+            position: 'absolute', bottom: -6, right: 22,
             width: 12, height: 12,
             background: 'var(--surface-container-low)',
             border: '1px solid var(--outline-variant)',
             borderTop: 'none', borderLeft: 'none',
             transform: 'rotate(45deg)',
-            borderRadius: 2,
           }} />
         </div>
       )}

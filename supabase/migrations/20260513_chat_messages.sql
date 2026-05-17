@@ -1,6 +1,6 @@
 -- Persists conversation history per user
 -- Keeps last 50 messages per user (older pruned on insert)
-create table public.chat_messages (
+create table if not exists public.chat_messages (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users(id) on delete cascade,
   role         text not null check (role in ('user', 'assistant')),
@@ -10,11 +10,12 @@ create table public.chat_messages (
 );
 
 -- Index for fast per-user fetch
-create index chat_messages_user_id_created on public.chat_messages(user_id, created_at desc);
+create index if not exists chat_messages_user_id_created on public.chat_messages(user_id, created_at desc);
 
 -- RLS: users only see their own messages
 alter table public.chat_messages enable row level security;
 
+drop policy if exists "own messages only" on public.chat_messages;
 create policy "own messages only"
   on public.chat_messages for all
   using (auth.uid() = user_id);

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell, Edit2, Settings, Activity, Target, Moon, Sun, Monitor } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
@@ -107,7 +107,7 @@ function AvatarPickerModal({ open, onClose }) {
 export default function ProfilePage() {
   useScrollRestoration('/profile');
   const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
-  const { permission, preferences, loading, subscribeToPush, updatePreferences } = useNotifications();
+  const { permission, preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -486,7 +486,7 @@ export default function ProfilePage() {
       <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
         <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Notifications</div>
         
-        {permission !== 'granted' && (
+        {!pushEnabled && (
           <div style={{ background: 'var(--surface-container)', borderRadius: 16, padding: 16, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Bell size={20} color="var(--primary)" />
@@ -495,18 +495,31 @@ export default function ProfilePage() {
                 <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Get alerts for streaks and Olympus League ranking.</div>
               </div>
             </div>
-            <button onClick={subscribeToPush} style={{ background: 'var(--primary)', color: 'var(--on-primary)', padding: '10px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Enable Notifications</button>
+            <button onClick={enablePush} style={{ background: 'var(--primary)', color: 'var(--on-primary)', padding: '10px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Enable Push Notifications</button>
           </div>
         )}
 
-        {permission === 'granted' && !loading && preferences && (
+        {pushEnabled && (
+          <div style={{ background: 'var(--surface-container)', borderRadius: 16, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div>
+               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Push Notifications</div>
+               <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Enabled on this device</div>
+             </div>
+             <button onClick={disablePush} style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', padding: '8px 12px', borderRadius: 10, border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>Disable</button>
+          </div>
+        )}
+
+        {!prefsLoading && preferences && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {Object.entries({
-              workout_reminders: { label: 'Workout Reminders', desc: 'Daily nudges to hit your goals' },
-              diet_reminders: { label: 'Diet Reminders', desc: 'Alerts to log your meals' },
-              streak_alerts: { label: 'Streak Alerts', desc: 'Warning before you lose a streak' },
-              olympus_weekly: { label: 'Olympus Weekly', desc: 'Weekly ranking summary' },
-              olympus_overtaken: { label: 'Overtaken Alerts', desc: 'When someone passes your rank' }
+              email_weekly: { label: 'Weekly Summary Email', desc: 'Your progress delivered to your inbox every Sunday' },
+              ...(pushEnabled ? {
+                workout_reminders: { label: 'Workout Reminders', desc: 'Daily nudges to hit your goals' },
+                diet_reminders: { label: 'Diet Reminders', desc: 'Alerts to log your meals' },
+                streak_alerts: { label: 'Streak Alerts', desc: 'Warning before you lose a streak' },
+                olympus_weekly: { label: 'Olympus Weekly', desc: 'Weekly ranking summary via Push' },
+                olympus_overtaken: { label: 'Overtaken Alerts', desc: 'When someone passes your rank' }
+              } : {})
             }).map(([key, info]) => (
               <div key={key}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -104,8 +104,20 @@ export default function SplitsPage() {
   const tieredSplits = splits.filter(s => s.tier === activeTier);
 
   return (
-    <div className="pg-in">
-      <PageHeader title="Training Splits" sub="Choose your level" action={isAdmin && <button className="btn-p" style={{ padding: '9px 16px', fontSize: 13 }} onClick={() => setAddSp(true)}>+ New Split</button>} />
+    <div className="pg-in" style={{ paddingBottom: 100 }}>
+      <PageHeader 
+        title="Training Splits" 
+        sub="Choose your level" 
+        action={
+          <button 
+            className="btn-p" 
+            style={{ padding: '9px 16px', fontSize: 13 }} 
+            onClick={() => navigate('/split-builder')}
+          >
+            + Custom Split
+          </button>
+        } 
+      />
       
       {/* Tier Selector Pills */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 16, msOverflowStyle: 'none', scrollbarWidth: 'none' }} className="hide-scrollbar">

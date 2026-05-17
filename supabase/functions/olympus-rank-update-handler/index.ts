@@ -23,6 +23,49 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     let notificationsSent = 0;
 
+    // --- 0. Tier-Change Detection Logic ---
+    const getTier = (xp: number) => {
+      if (xp >= 300000) return 'Diamond';
+      if (xp >= 150000) return 'Platinum';
+      if (xp >= 75000) return 'Gold';
+      if (xp >= 25000) return 'Silver';
+      return 'Bronze';
+    };
+
+    const oldTier = getTier(oldRecord.total_xp);
+    const newTier = getTier(newRecord.total_xp);
+
+    if (newTier !== oldTier) {
+      // Send push for tier up
+      // Check if they want Olympus updates
+      const { data: pref, error: prefError } = await supabase
+        .from('notification_preferences')
+        .select('olympus_weekly') // Using olympus_weekly as a general setting for rank updates
+        .eq('user_id', newRecord.user_id)
+        .single();
+        
+      if (!prefError && pref?.olympus_weekly) {
+        await sendPushNotification(
+          supabaseUrl, 
+          supabaseKey, 
+          newRecord.user_id, 
+          {
+            title: "Rank Up! 🎉",
+            body: `You just advanced to ${newTier} Tier! Keep up the great work!`,
+            icon: "/fittrack-icon-192.png",
+            badge: "/badge-72.png",
+            tag: "olympus-tier",
+            data: { url: "/olympus" }
+          }, 
+          'olympus_tier'
+        );
+        notificationsSent++;
+      }
+      
+      // Update last_known_tier in user_profiles
+      await supabase.from('user_profiles').update({ last_known_tier: newTier }).eq('id', newRecord.user_id);
+    }
+
     // --- 1. Overtaken Logic ---
     // Find all users in the same month who have XP between old and new (i.e., we just passed them)
     const { data: overtakenUsers, error: overtakenError } = await supabase
@@ -57,7 +100,8 @@ serve(async (req) => {
               title: "Rank Alert ⚠️",
               body: "A rival just overtook you in the Olympus League! Log a workout to reclaim your rank.",
               icon: "/fittrack-icon-192.png",
-              badge: "/fittrack-icon-192.png",
+              badge: "/badge-72.png",
+              tag: "olympus-overtaken",
               data: { url: "/olympus" }
             }, 
             'olympus_overtaken'
@@ -103,7 +147,8 @@ serve(async (req) => {
               title: "Podium Proximity 🏆",
               body: "You're within 500 XP of the podium! Keep pushing to reach the Top 3.",
               icon: "/fittrack-icon-192.png",
-              badge: "/fittrack-icon-192.png",
+              badge: "/badge-72.png",
+              tag: "podium-proximity",
               data: { url: "/olympus" }
             }, 
             'podium_proximity'

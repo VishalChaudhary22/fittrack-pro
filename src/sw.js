@@ -13,8 +13,9 @@ self.addEventListener('push', (event) => {
     const options = {
       body: data.body || 'You have a new notification.',
       icon: data.icon || '/fittrack-icon-192.png',
-      badge: data.badge || '/fittrack-icon-192.png',
+      badge: data.badge || '/badge-72.png',
       vibrate: data.vibrate || [100, 50, 100],
+      tag: data.tag || data.type || 'fittrack-default', // Tag-based deduplication
       data: {
         url: data.url || '/'
       }
@@ -55,4 +56,10 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// Handle notification closes for analytics
+self.addEventListener('notificationclose', (event) => {
+  console.log('[ServiceWorker] Notification closed:', event.notification.tag);
+  // Future: could post to a Supabase analytics endpoint here if needed
 });

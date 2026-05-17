@@ -13,6 +13,7 @@ import { syncUserXPToCache } from '../utils/xpCacheSync';
 import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros, isCoachingDismissed, dismissCoaching } from '../utils/adaptiveCalories';
 import { getBestTDEE, detectMetabolicAdaptation } from '../utils/adaptiveTDEE';
 import { calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../utils/calculations';
+import { loadSwapRegistryFromCloud } from '../utils/swapRegistry';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -671,6 +672,9 @@ export function AppProvider({ children }) {
     // Spltis fallback to INIT_SPLITS if none exist
     const mappedSplits = sl.length > 0 ? sl.map(i => i.data) : INIT_SPLITS;
     setSplits(mappedSplits);
+
+    // Load Swap Registry
+    await loadSwapRegistryFromCloud(userId);
 
     // Sync XP to leaderboard cache now that logs are loaded.
     // Always sync — even with 0 workout logs — so the user appears on the leaderboard.

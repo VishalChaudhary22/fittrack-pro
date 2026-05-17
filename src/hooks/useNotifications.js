@@ -19,6 +19,7 @@ export const useNotifications = () => {
   const { user } = useApp();
   const [permission, setPermission] = useState('default');
   const [preferences, setPreferences] = useState(null);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,14 +35,13 @@ export const useNotifications = () => {
     }
     const fetchPrefs = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('notification_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const [prefsRes, subsRes] = await Promise.all([
+        supabase.from('notification_preferences').select('*').eq('user_id', user.id).single(),
+        supabase.from('push_subscriptions').select('id').eq('user_id', user.id).limit(1)
+      ]);
       
-      if (data) {
-        setPreferences(data);
+      if (prefsRes.data) {
+        setPreferences(prefsRes.data);
       } else {
         // Defaults if no row exists yet
         setPreferences({
@@ -50,9 +50,17 @@ export const useNotifications = () => {
           streak_alerts: true,
           olympus_weekly: true,
           olympus_overtaken: true,
-          podium_proximity: true
+          podium_proximity: true,
+          email_weekly: false
         });
       }
+      
+      if (subsRes.data && subsRes.data.length > 0) {
+        setPushEnabled(true);
+      } else {
+        setPushEnabled(false);
+      }
+      
       setLoading(false);
     };
     fetchPrefs();
@@ -97,6 +105,7 @@ export const useNotifications = () => {
           device_type: navigator.userAgent
         }, { onConflict: 'user_id, endpoint' });
 
+        setPushEnabled(true);
         return true;
       }
       return false;
@@ -106,11 +115,41 @@ export const useNotifications = () => {
     }
   }, [user]);
 
+  const unsubscribeFromPush = useCallback(async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !user) {
+      return false;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      
+      if (subscription) {
+        const subObj = JSON.parse(JSON.stringify(subscription));
+        await subscription.unsubscribe();
+        
+        // Remove from Supabase
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .match({ user_id: user.id, endpoint: subObj.endpoint });
+      }
+      
+      setPushEnabled(false);
+      return true;
+    } catch (error) {
+      console.error('Error unsubscribing from push:', error);
+      return false;
+    }
+  }, [user]);
+
   return {
     permission,
     preferences,
     loading,
-    subscribeToPush,
+    pushEnabled,
+    enablePush: subscribeToPush,
+    disablePush: unsubscribeFromPush,
     updatePreferences
   };
 };

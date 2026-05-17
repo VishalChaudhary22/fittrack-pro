@@ -8,6 +8,7 @@ import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
+import { getSwappedExercise, registerSwap, removeSwap } from '../../utils/swapRegistry';
 import { useScrollRestoration, clearScrollPosition } from '../../hooks/useScrollRestoration';
 
 // ─── AUDIO & PERSISTENCE HELPERS ────────────────────────────────────────────────
@@ -647,6 +648,8 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   // Remove the current exercise from alternatives (can't swap to self)
   alternatives = alternatives.filter(a => a !== exerciseName);
 
+  const [applyToSplit, setApplyToSplit] = useState(true);
+
   return (
     <div
       style={{
@@ -712,6 +715,23 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
             textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700,
           }}>Current</span>
         </button>
+
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
+          padding: '12px 16px', background: 'var(--surface-container-highest)', borderRadius: 12,
+          cursor: 'pointer'
+        }}>
+          <input 
+            type="checkbox" 
+            checked={applyToSplit} 
+            onChange={e => setApplyToSplit(e.target.checked)} 
+            style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+          />
+          <span style={{ fontSize: 13, color: 'var(--on-surface)', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+            Apply to entire split <span style={{color: 'var(--on-surface-dim)'}}>(cross-day)</span>
+          </span>
+        </label>
+
         {alternatives.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '20px 16px',
@@ -727,7 +747,7 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
               return (
               <button
                 key={alt}
-                onClick={() => { onSwap(alt); onClose(); }}
+                onClick={() => { onSwap(alt, applyToSplit); onClose(); }}
                 style={{
                   width: '100%', padding: '14px 16px', minHeight: 44,
                   borderRadius: 12, border: isOriginal ? '1px solid var(--primary-container)' : 'none', cursor: 'pointer',
@@ -1001,9 +1021,12 @@ export default function WorkoutPage() {
         if (prevEx) break;
       }
 
+      // Feature 2: Apply cross-day swap if registered
+      const swappedEx = getSwappedExercise(ex, activeSplit?.id, user.id);
+
       return {
-        ...ex,
-        sv: prevEx?.name || (ex.variants ? ex.variants[0] : null),
+        ...swappedEx,
+        sv: prevEx?.name || (swappedEx.variants ? swappedEx.variants[0] : swappedEx.name),
         sets: Array.from({ length: ex.sets || 3 }, (_, i) => {
           const pSet = prevEx?.sets?.[i] ?? prevEx?.sets?.[prevEx.sets.length - 1];
           return {
@@ -1035,7 +1058,7 @@ export default function WorkoutPage() {
   const rmS = (ei, si) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sets: e[ei].sets.filter((_, i) => i !== si) }; return { ...p, exs: e }; });
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
-  const swapExercise = (exerciseIndex, newName) => {
+  const swapExercise = (exerciseIndex, newName, applyToSplit = false) => {
     const lastSession = getLastSessionSets(workoutLogs, newName);
     const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 
@@ -1043,9 +1066,25 @@ export default function WorkoutPage() {
       ...prev,
       exs: prev.exs.map((ex, i) => {
         if (i !== exerciseIndex) return ex;
+
+        // If applyToSplit is checked, register or remove the swap
+        if (applyToSplit && activeSplit && ex.exerciseId) {
+          if (newName === ex.originalName) {
+            // User is reverting to the original exercise
+            removeSwap(ex.originalId, activeSplit.id, user.id);
+          } else {
+            // Registering a new swap
+            // We use standard exerciseID format for the replacement for future-proofing
+            const replacementId = newName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const targetId = ex.originalId || ex.exerciseId;
+            registerSwap(targetId, ex.originalName || ex.name, replacementId, newName, activeSplit.id, user.id);
+          }
+        }
+
         return {
           ...ex,
           sv: newName,
+          name: newName, // Update the displayed name
           _swapHistory: history ?? null,
           sets: ex.sets.map((set, si) => {
             if (set.done) return set;

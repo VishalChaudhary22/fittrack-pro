@@ -6,6 +6,8 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import AuthModal from './components/pages/AuthModal';
 import DashboardPage from './components/pages/DashboardPage';
 import SplitsPage from './components/pages/SplitsPage';
+import SplitBuilderPage from './components/pages/SplitBuilderPage';
+import NotificationPrompt from './components/shared/NotificationPrompt';
 import WorkoutPage from './components/pages/WorkoutPage';
 import DietPage from './components/pages/DietPage';
 import ProgressPage from './components/pages/ProgressPage';
@@ -62,6 +64,7 @@ function AppInner() {
         <Routes>
           <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
           <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
+          <Route path="/split-builder" element={<ErrorBoundary><SplitBuilderPage /></ErrorBoundary>} />
           <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
           <Route path="/diet" element={<ErrorBoundary><DietPage chatbot={chatbot} /></ErrorBoundary>} />
           <Route path="/progress" element={<ErrorBoundary><ProgressPage chatbot={chatbot} /></ErrorBoundary>} />

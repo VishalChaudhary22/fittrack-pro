@@ -1,7 +1,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 
+const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')!;
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')!;
+
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
 const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
@@ -10,7 +15,82 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DAILY_LIMIT = 30; // messages per user per day (free tier safety valve)
+const DAILY_LIMIT = 30;
+
+// Convert Gemini-format history → OpenAI/Groq format
+function toOpenAIMessages(systemPrompt: string, history: any[], userMessage: string) {
+  const messages: any[] = [{ role: 'system', content: systemPrompt }];
+  for (const turn of history) {
+    const role = turn.role === 'model' ? 'assistant' : 'user';
+    const content = Array.isArray(turn.parts) ? turn.parts.map((p: any) => p.text).join('') : turn.content ?? '';
+    if (content) messages.push({ role, content });
+  }
+  messages.push({ role: 'user', content: userMessage });
+  return messages;
+}
+
+// ── Groq call ─────────────────────────────────────────────
+async function callGroq(systemPrompt: string, history: any[], userMessage: string): Promise<string> {
+  const messages = toOpenAIMessages(systemPrompt, history, userMessage);
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages,
+      temperature: 0.7,
+      max_tokens: 2048,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groq ${res.status}: ${err.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const reply = data.choices?.[0]?.message?.content;
+  if (!reply) throw new Error('Empty response from Groq');
+  return reply;
+}
+
+// ── Gemini fallback call ───────────────────────────────────
+async function callGemini(systemPrompt: string, history: any[], userMessage: string): Promise<string> {
+  const payload = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [
+      ...history,
+      { role: 'user', parts: [{ text: userMessage }] },
+    ],
+    generationConfig: { temperature: 0.7, topP: 0.9, maxOutputTokens: 2048 },
+    safetySettings: [
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    ],
+  };
+
+  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini ${res.status}: ${err.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!reply) throw new Error('Empty response from Gemini');
+  return reply;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -39,8 +119,7 @@ serve(async (req) => {
       .single();
 
     const today = new Date().toISOString().split('T')[0];
-    const isNewDay = !profile?.chat_count_reset_date ||
-      profile.chat_count_reset_date !== today;
+    const isNewDay = !profile?.chat_count_reset_date || profile.chat_count_reset_date !== today;
     const chatCount = isNewDay ? 0 : (profile?.chat_count_today || 0);
 
     if (chatCount >= DAILY_LIMIT) {
@@ -53,52 +132,33 @@ serve(async (req) => {
 
     if (!userMessage?.trim()) return errorResponse(400, 'No message provided');
 
-    // ── Call Gemini ───────────────────────────────────────
-    const geminiPayload = {
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents: [
-        ...conversationHistory,
-        { role: 'user', parts: [{ text: userMessage }] },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9,
-        maxOutputTokens: 2048, // allow complete responses
-      },
-      safetySettings: [
-        // Allow fitness/health content
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-      ],
-    };
+    // ── Call AI: Groq first, Gemini as fallback ───────────
+    let replyText: string;
+    let provider: string;
 
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiPayload),
-    });
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error('Gemini error:', errText);
-      return errorResponse(502, `Gemini API error (${geminiRes.status}): ${errText.slice(0, 300)}`);
+    try {
+      replyText = await callGroq(systemPrompt, conversationHistory, userMessage);
+      provider = 'groq';
+      console.log('Response from Groq ✓');
+    } catch (groqErr) {
+      console.warn('Groq failed, falling back to Gemini:', groqErr.message);
+      try {
+        replyText = await callGemini(systemPrompt, conversationHistory, userMessage);
+        provider = 'gemini';
+        console.log('Response from Gemini fallback ✓');
+      } catch (geminiErr) {
+        console.error('Both providers failed. Groq:', groqErr.message, '| Gemini:', geminiErr.message);
+        return errorResponse(502, 'AI service unavailable — try again in a moment');
+      }
     }
 
-    const geminiData = await geminiRes.json();
-    const replyText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!replyText) return errorResponse(502, 'Empty response from AI');
-
-    const tokensUsed = geminiData.usageMetadata?.totalTokenCount || 0;
-
-    // ── Persist messages to chat_messages ─────────────────
+    // ── Persist messages ──────────────────────────────────
     await supabase.from('chat_messages').insert([
       { user_id: user.id, role: 'user', content: userMessage },
-      { user_id: user.id, role: 'assistant', content: replyText, tokens_used: tokensUsed },
+      { user_id: user.id, role: 'assistant', content: replyText },
     ]);
 
-    // ── Prune old messages (keep last 100 per user) ────────
+    // ── Prune old messages (keep last 100) ────────────────
     const { data: allMsgs } = await supabase
       .from('chat_messages')
       .select('id')
@@ -106,7 +166,7 @@ serve(async (req) => {
       .order('created_at', { ascending: false });
 
     if (allMsgs && allMsgs.length > 100) {
-      const toDelete = allMsgs.slice(100).map(m => m.id);
+      const toDelete = allMsgs.slice(100).map((m: any) => m.id);
       await supabase.from('chat_messages').delete().in('id', toDelete);
     }
 
@@ -116,7 +176,7 @@ serve(async (req) => {
       chat_count_reset_date: today,
     }).eq('id', user.id);
 
-    return new Response(JSON.stringify({ reply: replyText, tokensUsed }), {
+    return new Response(JSON.stringify({ reply: replyText, provider }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
 

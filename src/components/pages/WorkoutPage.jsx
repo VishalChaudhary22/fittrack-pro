@@ -10,6 +10,7 @@ import { calcAllMuscleXP } from '../../data/muscleData';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
 import { getSwappedExercise, registerSwap, removeSwap } from '../../utils/swapRegistry';
 import { useScrollRestoration, clearScrollPosition } from '../../hooks/useScrollRestoration';
+import { EXERCISE_LIBRARY } from '../../data/exerciseLibrary';
 
 // ─── AUDIO & PERSISTENCE HELPERS ────────────────────────────────────────────────
 let _audioCtx = null;
@@ -638,17 +639,44 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   // Always use the ORIGINAL exercise's swap list as the source of truth.
   // This ensures we always have the full list even when the swapped-to exercise
   // (e.g. "Machine Chest Press") has no entry in EXERCISE_ALTERNATIVES.
-  const baseAlternatives = EXERCISE_ALTERNATIVES[originalName] || EXERCISE_ALTERNATIVES[exerciseName] || [];
-  let alternatives = [...baseAlternatives];
-  // If we're currently on a swapped exercise, add the original back as a swap-back option
+  const targetName = originalName || exerciseName;
+  const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === targetName);
+  let alternatives = [];
+  
+  if (libEntry && libEntry.muscle) {
+    // Find all exercises that target the SAME muscle
+    const sameMuscleExercises = EXERCISE_LIBRARY.filter(ex => ex.muscle === libEntry.muscle);
+    
+    // Combine all their names and their respective alternatives from EXERCISE_ALTERNATIVES
+    const allOptions = new Set();
+    sameMuscleExercises.forEach(ex => {
+      allOptions.add(ex.name); // Add the exercise itself
+      const alts = EXERCISE_ALTERNATIVES[ex.name] || [];
+      alts.forEach(alt => allOptions.add(alt));
+    });
+    
+    // Also include any alternatives explicitly defined for the targetName just in case
+    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    baseAlternatives.forEach(alt => allOptions.add(alt));
+    
+    alternatives = Array.from(allOptions);
+  } else {
+    // Fallback if not found in library
+    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    alternatives = [...baseAlternatives];
+  }
+
+  // Add originalName as an option if currently swapped
   const isSwapped = originalName && originalName !== exerciseName;
   if (isSwapped && !alternatives.includes(originalName)) {
     alternatives.unshift(originalName);
   }
+
   // Remove the current exercise from alternatives (can't swap to self)
   alternatives = alternatives.filter(a => a !== exerciseName);
-
-  const [applyToSplit, setApplyToSplit] = useState(true);
+  
+  // Sort alphabetically for a cleaner UI
+  alternatives.sort((a, b) => a.localeCompare(b));
 
   return (
     <div
@@ -703,7 +731,7 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             fontFamily: "'Be Vietnam Pro', sans-serif",
             fontSize: 14, fontWeight: 600,
-            color: 'var(--on-surface)', marginBottom: 10,
+            color: 'var(--on-surface)', marginBottom: 20,
             transition: 'transform 0.1s',
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
@@ -715,22 +743,6 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
             textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700,
           }}>Current</span>
         </button>
-
-        <label style={{
-          display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
-          padding: '12px 16px', background: 'var(--surface-container-highest)', borderRadius: 12,
-          cursor: 'pointer'
-        }}>
-          <input 
-            type="checkbox" 
-            checked={applyToSplit} 
-            onChange={e => setApplyToSplit(e.target.checked)} 
-            style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
-          />
-          <span style={{ fontSize: 13, color: 'var(--on-surface)', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-            Apply to entire split <span style={{color: 'var(--on-surface-dim)'}}>(cross-day)</span>
-          </span>
-        </label>
 
         {alternatives.length === 0 ? (
           <div style={{
@@ -747,7 +759,7 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
               return (
               <button
                 key={alt}
-                onClick={() => { onSwap(alt, applyToSplit); onClose(); }}
+                onClick={() => { onSwap(alt); onClose(); }}
                 style={{
                   width: '100%', padding: '14px 16px', minHeight: 44,
                   borderRadius: 12, border: isOriginal ? '1px solid var(--primary-container)' : 'none', cursor: 'pointer',
@@ -1058,7 +1070,7 @@ export default function WorkoutPage() {
   const rmS = (ei, si) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sets: e[ei].sets.filter((_, i) => i !== si) }; return { ...p, exs: e }; });
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
 
-  const swapExercise = (exerciseIndex, newName, applyToSplit = false) => {
+  const swapExercise = (exerciseIndex, newName) => {
     const lastSession = getLastSessionSets(workoutLogs, newName);
     const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 
@@ -1066,20 +1078,6 @@ export default function WorkoutPage() {
       ...prev,
       exs: prev.exs.map((ex, i) => {
         if (i !== exerciseIndex) return ex;
-
-        // If applyToSplit is checked, register or remove the swap
-        if (applyToSplit && activeSplit && ex.exerciseId) {
-          if (newName === ex.originalName) {
-            // User is reverting to the original exercise
-            removeSwap(ex.originalId, activeSplit.id, user.id);
-          } else {
-            // Registering a new swap
-            // We use standard exerciseID format for the replacement for future-proofing
-            const replacementId = newName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const targetId = ex.originalId || ex.exerciseId;
-            registerSwap(targetId, ex.originalName || ex.name, replacementId, newName, activeSplit.id, user.id);
-          }
-        }
 
         return {
           ...ex,

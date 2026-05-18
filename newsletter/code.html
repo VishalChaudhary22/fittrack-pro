@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb59b",
+                        "on-primary": "#5b1a00",
+                        "tertiary-fixed": "#ffdbce",
+                        "tertiary": "#ffb599",
+                        "error-container": "#93000a",
+                        "surface-dim": "#131315",
+                        "on-surface-variant": "#e3bfb3",
+                        "secondary-container": "#474747",
+                        "inverse-primary": "#a93800",
+                        "surface-container-low": "#1b1b1d",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "surface-container-high": "#2a2a2c",
+                        "on-secondary-container": "#b6b5b4",
+                        "surface-variant": "#353437",
+                        "outline": "#aa8a7f",
+                        "on-primary-fixed-variant": "#812900",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#e76c37",
+                        "outline-variant": "#5a4138",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-secondary": "#303030",
+                        "surface-bright": "#39393b",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "surface-tint": "#ffb59b",
+                        "on-surface": "#e5e1e4",
+                        "on-primary-fixed": "#380d00",
+                        "inverse-surface": "#e5e1e4",
+                        "surface-container": "#201f21",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "on-tertiary": "#5a1c00",
+                        "error": "#ffb4ab",
+                        "surface": "#131315",
+                        "on-primary-container": "#501600",
+                        "secondary": "#c8c6c6",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary-fixed": "#ffdbcf",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-highest": "#353437",
+                        "background": "#131315",
+                        "on-background": "#e5e1e4",
+                        "on-tertiary-container": "#4f1700",
+                        "primary-container": "#f85f1b",
+                        "secondary-fixed": "#e4e2e1",
+                        "inverse-on-surface": "#303032",
+                        "primary-fixed-dim": "#ffb59b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "display": ["Space Grotesk"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(53, 52, 55, 0.6);
+            backdrop-filter: blur(20px);
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #FFB59B 0%, #F85F1B 100%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(90, 65, 56, 0.15);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="bg-surface/60 backdrop-blur-xl dark:bg-surface/60 docked full-width top-0 sticky z-50 shadow-[0_20px_40px_rgba(0,0,0,0.4)] flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary transition-transform active:scale-95 cursor-pointer">menu</span>
+<h1 class="font-display font-bold text-xl tracking-widest text-primary italic uppercase">KINETIC ELITE</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-label text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors" href="#">Training</a>
+<a class="font-label text-label-md uppercase tracking-wider text-primary" href="#">Digest</a>
+<a class="font-label text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors" href="#">Community</a>
+</div>
+<img alt="User profile photo" class="w-10 h-10 rounded-full border-2 border-primary-container/30 object-cover" data-alt="A professional close-up portrait of an elite athlete in a high-end training facility. The lighting is dramatic and moody, utilizing deep obsidian shadows and warm orange rim lighting that matches the brand's primary color palette. The individual has a focused, determined expression, reflecting a high-performance mindset. The background is softly blurred, showing hints of advanced gym machinery in a minimalist, modern boutique gym setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMVB-i04Y9weRFQ8pNzLCOLnj54OOdLy_XfhLD2lwessK9z4aTs8dlIfq7iBxZFRsMSghxYSVgsCoPO2O8pDdHvmYZzYsnP_9FJnjT0LNCEJrzRNb-nMU3WWNW-qGrX_02tgEEwGO-6BwviWZGg53VFQrgxgzszjabN3woCOYOoGkgog_MVCe-Tiyp2iJleARpnJp9RRquEyOeifjPsezdrCcH79zOP-6iciAOhRgoL3tITZp4vrcWU1GW9BNfcrDwny5LcIhG3_hf"/>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-6 pt-12 pb-32">
+<!-- Hero Section & The Daily Streak -->
+<section class="mb-20">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+<div>
+<span class="font-display text-primary text-sm tracking-[0.3em] uppercase mb-2 block">Weekly Newsletter</span>
+<h2 class="font-display text-5xl md:text-7xl font-bold leading-none tracking-tighter">THE DAILY<br/><span class="text-primary">STREAK</span></h2>
+</div>
+<div class="glass-panel p-6 rounded-2xl ghost-border flex-1 max-w-md">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Consistency Protocol</span>
+<span class="font-display text-xl text-primary font-bold">128 DAYS</span>
+</div>
+<!-- Streak Tracker -->
+<div class="flex justify-between items-center gap-2">
+<!-- Past Days -->
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant">M</span>
+<div class="w-10 h-10 rounded-full ember-gradient flex items-center justify-center shadow-[0_0_15px_rgba(248,95,27,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant">T</span>
+<div class="w-10 h-10 rounded-full ember-gradient flex items-center justify-center shadow-[0_0_15px_rgba(248,95,27,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant">W</span>
+<div class="w-10 h-10 rounded-full ember-gradient flex items-center justify-center shadow-[0_0_15px_rgba(248,95,27,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant">T</span>
+<div class="w-10 h-10 rounded-full ember-gradient flex items-center justify-center shadow-[0_0_15px_rgba(248,95,27,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant">F</span>
+<div class="w-10 h-10 rounded-full ember-gradient flex items-center justify-center shadow-[0_0_15px_rgba(248,95,27,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Current Day (Hollow) -->
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-primary font-bold">S</span>
+<button class="w-10 h-10 rounded-full border-2 border-primary border-dashed flex items-center justify-center hover:bg-primary/10 transition-colors active:scale-90 group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">add</span>
+</button>
+</div>
+<!-- Future Day -->
+<div class="flex flex-col items-center gap-2">
+<span class="font-label text-[10px] text-on-surface-variant/40">S</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Previous Edition Reference -->
+<section class="mb-24">
+<div class="bg-surface-container-low rounded-3xl overflow-hidden flex flex-col md:flex-row items-center border border-white/5">
+<div class="w-full md:w-1/2 h-64 md:h-96 overflow-hidden">
+<img alt="Previous edition preview" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9CHMgs6nzSNUCoTc5-_MCgKGL9uPj_o28gYbB1RRJz-M01lFD_n95DLRK_eZhdZwp5hXVr9o0o1nn6m9FjI60q-3uHrzX0vY8fZ4jlenODMVS8r3cOZv2hgIEu-2canAijdR89J8BQONxT7nij-AxnhU5Jx-KbIOhLV3oBZnvxRgN1Jgppgz5zGeDV7CKQ4Ucjp_8S71CA2TBRQq-j6VMTBwfgNobWg_Ikv8js0ecSQ61rbBv4qTG2TOr1TMVte2m07XdP__VLj9K"/>
+</div>
+<div class="p-8 md:p-12 w-full md:w-1/2">
+<h3 class="font-display text-3xl font-bold mb-4 uppercase">Last Week's Analytics</h3>
+<p class="text-on-surface-variant mb-8 leading-relaxed">We analyzed the performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
+<button class="px-8 py-3 rounded-xl bg-surface-container-highest text-on-surface font-label text-sm uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all">Review Archive</button>
+</div>
+</div>
+</section>
+<!-- Research Vault Section -->
+<section class="space-y-16">
+<div class="flex items-center gap-4">
+<h3 class="font-display text-4xl font-bold uppercase tracking-tight">Research Vault</h3>
+<div class="h-[2px] flex-grow bg-gradient-to-r from-primary/30 to-transparent"></div>
+<span class="font-label text-xs uppercase text-on-surface-variant tracking-[0.2em]">03 NEW PAPERS</span>
+</div>
+<!-- Card 1 -->
+<article class="group">
+<div class="relative overflow-hidden rounded-3xl bg-surface-container-low border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+<div class="grid md:grid-cols-2">
+<div class="h-[400px] overflow-hidden relative">
+<img alt="High-intensity training study" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A high-contrast cinematic shot of a dark, moody gym interior with specialized performance measurement equipment. Intense shafts of cool blue light cut through a light atmospheric haze, while warm orange LED strips provide a technical, high-performance aesthetic. A sophisticated athlete is visible in the background, out of focus, engaging in explosive movement. The overall mood is cold, clinical, and high-tech, emphasizing elite sports science research." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-surface-container-low/90 hidden md:block"></div>
+</div>
+<div class="p-10 md:p-16 flex flex-col justify-center">
+<div class="flex gap-3 mb-6">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">Hypertrophy</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Metabolism</span>
+</div>
+<h4 class="font-display text-3xl font-bold mb-6 group-hover:text-primary transition-colors">The Anabolic Window: New Longitudinal Findings on Protein Timing</h4>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-8">Recent clinical data suggests that the 'anabolic window' is significantly wider than previously assumed, prioritizing total daily intake over immediate post-workout consumption.</p>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">timer</span>
+<span class="font-label text-xs text-on-surface-variant">8 MIN READ</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">science</span>
+<span class="font-label text-xs text-on-surface-variant">PEER REVIEWED</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="group">
+<div class="relative overflow-hidden rounded-3xl bg-surface-container-low border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+<div class="grid md:grid-cols-2">
+<div class="h-[400px] overflow-hidden relative md:order-2">
+<img alt="Neural adaptation research" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="An abstract and artistic representation of neural pathways and muscle fibers intertwining. The lighting is dominated by deep obsidian tones and glowing orange filaments representing energy and nerve impulses. The image has a macro-photography feel, focusing on intricate textures and light patterns that evoke the feeling of internal biological performance. The aesthetic is futuristic and technical, fitting the 'Obsidian Performance' theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB"/>
+<div class="absolute inset-0 bg-gradient-to-l from-transparent to-surface-container-low/90 hidden md:block"></div>
+</div>
+<div class="p-10 md:p-16 flex flex-col justify-center md:order-1">
+<div class="flex gap-3 mb-6">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">Neurology</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Strength</span>
+</div>
+<h4 class="font-display text-3xl font-bold mb-6 group-hover:text-primary transition-colors">Neural Drive &amp; Force Production: Why Mind-Muscle Connection Matters</h4>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-8">Investigating the voluntary activation of motor units and how conscious focus can increase total force output by up to 12% in experienced lifters.</p>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">timer</span>
+<span class="font-label text-xs text-on-surface-variant">12 MIN READ</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">psychology</span>
+<span class="font-label text-xs text-on-surface-variant">NEURO-ELITE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+</section>
+<!-- CTA Section -->
+<section class="mt-32 mb-12">
+<div class="ember-gradient p-1 bg-rounded-3xl rounded-[2rem]">
+<div class="bg-surface p-12 md:p-20 rounded-[1.85rem] text-center relative overflow-hidden">
+<!-- Subtle Glow Background -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 blur-[120px] rounded-full"></div>
+<h3 class="font-display text-4xl md:text-6xl font-bold mb-6 relative z-10">FUEL YOUR<br/>EVOLUTION</h3>
+<p class="text-on-surface-variant text-xl max-w-2xl mx-auto mb-12 relative z-10">Get daily science-backed protocols delivered to your inbox and join the top 1% of performers globally.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+<input class="bg-surface-container-lowest border-none px-8 py-4 rounded-xl text-on-surface focus:ring-2 focus:ring-primary w-full sm:w-80 font-body placeholder:text-on-surface-variant/40" placeholder="Enter elite email" type="email"/>
+<button class="ember-gradient px-12 py-4 rounded-xl text-on-primary font-display font-bold uppercase tracking-widest hover:scale-105 transition-transform active:scale-95 shadow-[0_15px_30px_rgba(248,95,27,0.4)]">Subscribe</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface-container/80 backdrop-blur-2xl dark:bg-surface-container/80 fixed bottom-0 w-full z-50 rounded-t-xl shadow-[0_-10px_30px_rgba(0,0,0,0.5)] flex justify-around items-center px-4 py-3">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-90 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label text-label-md uppercase tracking-wider text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-90 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined mb-1">fitness_center</span>
+<span class="font-label text-label-md uppercase tracking-wider text-[10px]">Training</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/20 text-primary rounded-xl p-2 shadow-[0_0_15px_rgba(255,181,155,0.1)] active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined mb-1">newspaper</span>
+<span class="font-label text-label-md uppercase tracking-wider text-[10px]">Digest</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 active:scale-90 transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-label text-label-md uppercase tracking-wider text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>

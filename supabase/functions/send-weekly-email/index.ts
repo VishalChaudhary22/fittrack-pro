@@ -312,10 +312,30 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     let emailsSent = 0;
 
-    const { data: users, error: usersError } = await supabase
+    let reqBody: any = {};
+    if (req.method === "POST") {
+      try {
+        reqBody = await req.json();
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const { data: dbUsers, error: usersError } = await supabase
       .from("user_profiles").select("id, email, name").not("email", "is", null);
 
     if (usersError) throw usersError;
+    
+    let users = dbUsers || [];
+    
+    if (reqBody.testEmail) {
+      users = users.filter((u: any) => u.email === reqBody.testEmail);
+      if (users.length === 0) {
+        // If test user not in db, create dummy to preview
+        users = [{ id: "test-dummy-id", email: reqBody.testEmail, name: "Test Athlete" }];
+      }
+    }
+
     if (!users || users.length === 0) return new Response("No users to email", { status: 200 });
 
     const today = new Date();

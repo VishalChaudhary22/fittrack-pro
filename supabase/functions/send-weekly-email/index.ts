@@ -349,6 +349,7 @@ serve(async (req) => {
     // Fetch dynamic RSS articles once for all emails
     const articles = await fetchFitnessIntel();
 
+    const errors = [];
     for (const user of users) {
       if (!user.email) continue;
 
@@ -367,7 +368,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendApiKey}` },
         body: JSON.stringify({
-          from: "FitTrack Pro <noreply@fittrack-pro.com>",
+          from: "FitTrack Pro <onboarding@resend.dev>",
           to: user.email,
           subject: workoutCount > 0
             ? `${workoutCount} workouts this week — your FitTrack digest`
@@ -380,11 +381,13 @@ serve(async (req) => {
         emailsSent++;
         await supabase.from("notification_logs").insert({ user_id: user.id, type: "email_weekly", status: "sent" });
       } else {
-        console.error(`Failed to send to ${user.email}: ${await res.text()}`);
+        const errorText = await res.text();
+        console.error(`Failed to send to ${user.email}: ${errorText}`);
+        errors.push({ email: user.email, error: errorText });
       }
     }
 
-    return new Response(JSON.stringify({ success: true, emailsSent }), {
+    return new Response(JSON.stringify({ success: true, emailsSent, errors }), {
       headers: { "Content-Type": "application/json" }, status: 200,
     });
   } catch (error: any) {

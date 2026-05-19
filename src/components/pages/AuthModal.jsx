@@ -119,7 +119,7 @@ export default function AuthModal() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: 'demo@fittrackpro.in',
-      password: 'FitTrack2026!',
+      password: 'Kaaya2026!',
     });
     if (error) setAuthError('Demo account unavailable — try registering');
     setLoading(false);

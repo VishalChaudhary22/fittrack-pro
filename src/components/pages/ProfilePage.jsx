@@ -133,7 +133,7 @@ export default function ProfilePage() {
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
-          from_name:  user?.name   || 'FitTrack User',
+          from_name:  user?.name   || 'Kaaya User',
           from_email: user?.email  || 'anonymous',
           subject:    feedbackSubject.trim() || 'General Feedback',
           message:    feedbackMessage.trim(),

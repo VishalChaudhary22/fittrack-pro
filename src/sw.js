@@ -29,7 +29,7 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification('Kaaya', {
         body: event.data.text(),
-        icon: '/fittrack-icon-192.png'
+        icon: '/kaaya-icon-192.png'
       })
     );
   }

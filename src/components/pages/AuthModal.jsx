@@ -183,9 +183,11 @@ export default function AuthModal() {
         
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, var(--primary), #FF9A5C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(232,84,13,.3)' }}>
-            <Dumbbell size={32} color="#fff" />
-          </div>
+          <img 
+            src="/kaaya-icon-192.png" 
+            alt="Kaaya Logo" 
+            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 16px', display: 'block', boxShadow: '0 8px 24px rgba(232,84,13,.2)' }} 
+          />
           <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.04em', color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>
             Kaaya
           </div>

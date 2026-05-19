@@ -8,7 +8,7 @@ const STRAVA_CLIENT_SECRET = Deno.env.get('STRAVA_CLIENT_SECRET') || '';
 serve(async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.split('/').pop();
-  const origin = req.headers.get('origin') || 'https://fittrackbyvishal.vercel.app';
+  const origin = req.headers.get('origin') || 'https://kaaya.fit';
   const redirect_uri = `${origin}/strava/callback`;
 
   // Step 1: Generate authorization URL

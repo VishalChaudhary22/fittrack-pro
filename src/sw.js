@@ -22,12 +22,12 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-      self.registration.showNotification(data.title || 'FitTrack Pro', options)
+      self.registration.showNotification(data.title || 'Kaaya', options)
     );
   } catch (err) {
     // Fallback if not JSON
     event.waitUntil(
-      self.registration.showNotification('FitTrack Pro', {
+      self.registration.showNotification('Kaaya', {
         body: event.data.text(),
         icon: '/fittrack-icon-192.png'
       })

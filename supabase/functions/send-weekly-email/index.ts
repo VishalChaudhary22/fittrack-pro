@@ -139,7 +139,7 @@ function buildEmailHtml(
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onPrimary};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.15;margin:0 0 4px;">${escapeHtml(workoutLabel)}</h2>
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:15px;color:rgba(255,255,255,0.8);line-height:1.5;margin:0 0 24px;">
-        ${workoutCount >= 4 ? "You're in the top 12% of FitTrack users this month." : "Keep building. Consistency compounds."}
+        ${workoutCount >= 4 ? "You're in the top 12% of Kaaya users this month." : "Keep building. Consistency compounds."}
       </p>
       ${consistencyProtocol}
       ${statsCardsHtml}
@@ -160,7 +160,7 @@ function buildEmailHtml(
         ${bestLiftHtml}
         <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:12px 0 0;">Strength declines after ~10 days of inactivity. Don't lose momentum.</p>
       </div>
-      <a href="https://fittrackbyvishal.vercel.app/workout" style="display:inline-block;background-color:${C.primaryContainer};background:linear-gradient(135deg,${C.primary},${C.primaryContainer});color:${C.onPrimary};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:14px 32px;border-radius:16px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
+      <a href="https://kaaya.fit/workout" style="display:inline-block;background-color:${C.primaryContainer};background:linear-gradient(135deg,${C.primary},${C.primaryContainer});color:${C.onPrimary};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:14px 32px;border-radius:16px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
     </div>
   `;
 
@@ -201,20 +201,20 @@ function buildEmailHtml(
         <div style="padding:20px 24px;">
           <h4 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:${C.onSurface};text-transform:uppercase;margin:0 0 8px;">Last Week's Analytics</h4>
           <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
-          <a href="https://fittrackbyvishal.vercel.app/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;">Review Archive</a>
+          <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;">Review Archive</a>
         </div>
       </div>
     </div>
   `;
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><title>FitTrack Pro Weekly Digest</title><style>html,body,table,td,div,p,a{color-scheme:dark !important;}body{background-color:${C.surfaceLowest} !important;color:${C.onSurface} !important;}</style><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><title>Kaaya Weekly Digest</title><style>html,body,table,td,div,p,a{color-scheme:dark !important;}body{background-color:${C.surfaceLowest} !important;color:${C.onSurface} !important;}</style><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
 <body bgcolor="${C.surfaceLowest}" style="margin:0;padding:0;background-color:${C.surfaceLowest};background:${C.surfaceLowest};color:${C.onSurface};color-scheme:dark;">
 <table role="presentation" width="100%" bgcolor="${C.surfaceLowest}" cellpadding="0" cellspacing="0" style="background-color:${C.surfaceLowest};background:${C.surfaceLowest};"><tr><td align="center" bgcolor="${C.surfaceLowest}" style="padding: 20px 0;background-color:${C.surfaceLowest};background:${C.surfaceLowest};">
 <div style="max-width:600px;margin:0 auto;background-color:${C.surface};background:${C.surface};border-radius:4px;overflow:hidden;text-align:left;color:${C.onSurface};">
   <!-- Header -->
   <div style="background-color:${C.surfaceLowest};background:${C.surfaceLowest};padding:24px 28px 20px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface};letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">FITTRACK PRO</h1></td>
+      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface};letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA</h1></td>
       <td style="text-align:right;vertical-align:top;"><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.5);letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
     </tr></table>
   </div>
@@ -235,11 +235,11 @@ function buildEmailHtml(
   ${researchVault}
   <!-- CTA -->
   <div style="padding:16px 28px 28px;text-align:center;background-color:${C.surface};background:${C.surface};">
-    <a href="https://fittrackbyvishal.vercel.app/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
+    <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
   </div>
   <!-- Footer -->
   <div style="padding:20px 28px 28px;background-color:${C.surfaceLowest};background:${C.surfaceLowest};">
-    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4);text-align:center;line-height:1.8;margin:0;">You're receiving this because you train with FitTrack Pro.<br><a href="https://fittrackbyvishal.vercel.app/profile" style="color:${C.onSurfaceVariant};text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant};text-decoration:underline;">Unsubscribe</a></p>
+    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4);text-align:center;line-height:1.8;margin:0;">You're receiving this because you train with Kaaya.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant};text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant};text-decoration:underline;">Unsubscribe</a></p>
   </div>
 </div>
 </td></tr></table>
@@ -344,11 +344,11 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendApiKey}` },
         body: JSON.stringify({
-          from: "FitTrack Pro <onboarding@resend.dev>",
+          from: "Kaaya <updates@kaaya.fit>",
           to: user.email,
           subject: workoutCount > 0
-            ? `${workoutCount} ${workoutCount === 1 ? "workout" : "workouts"} last week — your FitTrack digest`
-            : "No workouts last week — your FitTrack digest",
+            ? `${workoutCount} ${workoutCount === 1 ? "workout" : "workouts"} last week — your Kaaya digest`
+            : "No workouts last week — your Kaaya digest",
           html: htmlContent,
         }),
       });

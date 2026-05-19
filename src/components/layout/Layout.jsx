@@ -52,7 +52,7 @@ export const Sidebar = () => {
           {sb && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
         </div>
       </div>
-      {sb && <div style={{ padding: '10px 20px 20px 20px', fontSize: 11, color: 'var(--on-surface-dim)' }}>FitTrack Pro v5.1</div>}
+      {sb && <div style={{ padding: '10px 20px 20px 20px', fontSize: 11, color: 'var(--on-surface-dim)' }}>Kaaya v5.1</div>}
     </div>
   );
 };

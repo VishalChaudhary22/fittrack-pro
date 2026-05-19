@@ -8,7 +8,7 @@ const FITBIT_CLIENT_SECRET = Deno.env.get('FITBIT_CLIENT_SECRET') || '';
 serve(async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.split('/').pop();
-  const origin = req.headers.get('origin') || 'https://fittrackbyvishal.vercel.app';
+  const origin = req.headers.get('origin') || 'https://kaaya.fit';
   // Allow local development origin as well
   const redirect_uri = `${origin}/fitbit/callback`;
 

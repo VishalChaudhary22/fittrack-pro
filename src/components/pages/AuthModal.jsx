@@ -187,7 +187,7 @@ export default function AuthModal() {
             <Dumbbell size={32} color="#fff" />
           </div>
           <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.04em', color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>
-            FitTrack Pro
+            Kaaya
           </div>
           <div style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, letterSpacing: '.5px' }}>
              {mode === 'login' ? 'Welcome back' : 'Create your account'}

@@ -15,8 +15,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
       },
       manifest: {
-        name: 'FitTrack Pro',
-        short_name: 'FitTrack',
+        name: 'Kaaya',
+        short_name: 'Kaaya',
         description: 'Kinetic Elite Fitness Tracker',
         theme_color: '#f85f1b',
         background_color: '#090a0f',

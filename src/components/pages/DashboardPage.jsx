@@ -375,7 +375,7 @@ export default function DashboardPage() {
           <div style={{ background: 'var(--primary-container)', borderRadius: 16, padding: '16px 20px', marginBottom: 20, display: 'flex', gap: 16, alignItems: 'center', position: 'relative' }}>
             <button onClick={() => setShowIosInstall(false)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--on-primary)', opacity: 0.7, cursor: 'pointer' }}><X size={16} /></button>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install FitTrack Pro</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install Kaaya</div>
               <div style={{ fontSize: 12, color: 'var(--on-primary)', opacity: 0.9, lineHeight: 1.4 }}>
                 Tap <Share size={14} style={{ verticalAlign: 'middle', display: 'inline', margin: '0 4px' }} /> then <strong>Add to Home Screen</strong> for the best experience.
               </div>
@@ -386,7 +386,7 @@ export default function DashboardPage() {
           <div style={{ background: 'var(--primary-container)', borderRadius: 16, padding: '16px 20px', marginBottom: 20, display: 'flex', gap: 16, alignItems: 'center', position: 'relative' }}>
             <button onClick={() => setDeferredPrompt(null)} style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--on-primary)', opacity: 0.7, cursor: 'pointer' }}><X size={16} /></button>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install FitTrack Pro</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-primary)', marginBottom: 4 }}>Install Kaaya</div>
               <div style={{ fontSize: 12, color: 'var(--on-primary)', opacity: 0.9, lineHeight: 1.4, marginBottom: 12 }}>
                 Install the app on your device for quick access and push notifications.
               </div>

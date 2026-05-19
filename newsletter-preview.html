@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kaaya · Weekly Digest Preview</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap"
+    rel="stylesheet">
   <style>
     /* ── Kinetic Elite Design Tokens ───────────────────────────── */
     :root {
@@ -23,7 +26,11 @@
       --outline-variant: #5a4138;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       background: var(--surface-lowest);
@@ -35,47 +42,81 @@
 
     /* ── Switcher ─────────────────────────────────────────── */
     .switcher {
-      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-      z-index: 100; display: flex; gap: 2px;
-      background: var(--surface-highest); padding: 4px;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 2px;
+      background: var(--surface-highest);
+      padding: 4px;
       border-radius: 12px;
-      border: 1px solid rgba(90,65,56,0.15);
+      border: 1px solid rgba(90, 65, 56, 0.15);
     }
+
     .switcher button {
-      border: none; background: transparent;
+      border: none;
+      background: transparent;
       color: var(--on-surface-variant);
       font: 700 10px/1 'Space Grotesk', sans-serif;
-      cursor: pointer; padding: 10px 18px; border-radius: 9px;
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 9px;
       transition: all 0.25s ease;
-      letter-spacing: 0.1em; text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
-    .switcher button:hover { color: var(--primary); }
+
+    .switcher button:hover {
+      color: var(--primary);
+    }
+
     .switcher button.on {
       background: linear-gradient(135deg, #FFB59B, #F85F1B);
       color: var(--on-primary);
     }
-    .variant { display: none; }
-    .variant.on { display: block; }
+
+    .variant {
+      display: none;
+    }
+
+    .variant.on {
+      display: block;
+    }
 
     /* ── Email frame ──────────────────────────────────────── */
     .email {
-      max-width: 600px; margin: 60px auto 0;
+      max-width: 600px;
+      margin: 60px auto 0;
       background: var(--surface);
       border-radius: 4px;
       overflow: hidden;
     }
 
     /* ── Reusable ─────────────────────────────────────────── */
-    .sg { font-family: 'Space Grotesk', sans-serif; }
-    .bv { font-family: 'Be Vietnam Pro', sans-serif; }
+    .sg {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .bv {
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
     .eyebrow {
       font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.16em; text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
-    .ember-gradient { background: linear-gradient(135deg, #FFB59B 0%, #F85F1B 100%); }
+
+    .ember-gradient {
+      background: linear-gradient(135deg, #FFB59B 0%, #F85F1B 100%);
+    }
   </style>
 </head>
+
 <body>
 
   <!-- ── Switcher ────────────────────────────────────────── -->
@@ -92,23 +133,31 @@
 
       <!-- HEADER -->
       <div style="background:var(--surface-lowest); padding:24px 28px 20px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td>
-            <div class="eyebrow" style="color:var(--primary-container); margin-bottom:4px;">Weekly Digest</div>
-            <div class="sg" style="font-size:22px; font-weight:900; color:var(--on-surface); letter-spacing:0.05em; font-style:italic; text-transform:uppercase;">FITTRACK PRO</div>
-          </td>
-          <td style="text-align:right; vertical-align:top;">
-            <div class="bv" style="font-size:10px; color:rgba(227,191,179,0.5); letter-spacing:0.1em; text-transform:uppercase; line-height:1.6;">
-              May 12 – 18, 2026
-            </div>
-          </td>
-        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <div class="eyebrow" style="color:var(--primary-container); margin-bottom:4px;">Weekly Digest</div>
+              <div class="sg"
+                style="font-size:22px; font-weight:900; color:var(--on-surface); letter-spacing:0.05em; font-style:italic; text-transform:uppercase;">
+                KAAYA</div>
+            </td>
+            <td style="text-align:right; vertical-align:top;">
+              <div class="bv"
+                style="font-size:10px; color:rgba(227,191,179,0.5); letter-spacing:0.1em; text-transform:uppercase; line-height:1.6;">
+                May 12 – 18, 2026
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- HERO: ACTIVE STATUS -->
       <div class="ember-gradient" style="padding:32px 28px 28px;">
-        <div class="bv" style="font-size:10px; font-weight:700; color:var(--on-primary); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">THIS WEEK'S REPORT</div>
-        <div class="sg" style="font-size:32px; font-weight:900; color:#FFFFFF; letter-spacing:-0.03em; line-height:1.15; margin-bottom:4px;">
+        <div class="bv"
+          style="font-size:10px; font-weight:700; color:var(--on-primary); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">
+          THIS WEEK'S REPORT</div>
+        <div class="sg"
+          style="font-size:32px; font-weight:900; color:#FFFFFF; letter-spacing:-0.03em; line-height:1.15; margin-bottom:4px;">
           4 workouts logged.
         </div>
         <div class="bv" style="font-size:15px; color:rgba(255,255,255,0.8); line-height:1.5; margin-bottom:24px;">
@@ -116,68 +165,112 @@
         </div>
 
         <!-- Consistency Protocol -->
-        <div style="padding:24px;background:var(--surface-low);border-radius:24px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.03);">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr>
-            <td>
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--on-surface-variant);letter-spacing:0.16em;text-transform:uppercase;">Consistency Protocol</div>
-            </td>
-            <td style="text-align:right;">
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;">3 DAYS</div>
-            </td>
-          </tr></table>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align:center;"><tr>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">M</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">T</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">W</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">✓</div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">T</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">F</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">✓</div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">S</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">✓</div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">S</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-          </tr></table>
+        <div
+          style="padding:24px;background:var(--surface-low);border-radius:24px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.03);">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+            <tr>
+              <td>
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--on-surface-variant);letter-spacing:0.16em;text-transform:uppercase;">
+                  Consistency Protocol</div>
+              </td>
+              <td style="text-align:right;">
+                <div
+                  style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;">
+                  3 DAYS</div>
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align:center;">
+            <tr>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  M</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  T</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">
+                  W</div>
+                <div
+                  style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">
+                  ✓</div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  T</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">
+                  F</div>
+                <div
+                  style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">
+                  ✓</div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--primary-container);margin-bottom:8px;">
+                  S</div>
+                <div
+                  style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-container));margin:0 auto;line-height:36px;color:var(--on-primary);font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">
+                  ✓</div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  S</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <!-- Stat cards -->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="width:33%; padding-right:6px;">
-            <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
-              <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">12,480</div>
-              <div class="bv" style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">Volume (kg)</div>
-            </div>
-          </td>
-          <td style="width:33%; padding:0 3px;">
-            <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
-              <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">2</div>
-              <div class="bv" style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">New PRs Set</div>
-            </div>
-          </td>
-          <td style="width:33%; padding-left:6px;">
-            <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
-              <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">3h 12m</div>
-              <div class="bv" style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">Training</div>
-            </div>
-          </td>
-        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="width:33%; padding-right:6px;">
+              <div
+                style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
+                <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">12,480</div>
+                <div class="bv"
+                  style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">
+                  Volume (kg)</div>
+              </div>
+            </td>
+            <td style="width:33%; padding:0 3px;">
+              <div
+                style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
+                <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">2</div>
+                <div class="bv"
+                  style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">
+                  New PRs Set</div>
+              </div>
+            </td>
+            <td style="width:33%; padding-left:6px;">
+              <div
+                style="background:rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px; border:1px solid rgba(255,255,255,0.2);">
+                <div class="sg" style="font-size:22px; font-weight:700; color:#FFFFFF;">3h 12m</div>
+                <div class="bv"
+                  style="font-size:9px; color:rgba(255,255,255,0.6); margin-top:3px; letter-spacing:0.08em; text-transform:uppercase;">
+                  Training</div>
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- PERSONAL RECORDS -->
@@ -186,71 +279,135 @@
 
         <!-- PR Item 1 -->
         <div style="background:var(--surface-container); border-radius:16px; padding:16px 20px; margin-bottom:10px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td>
-              <div class="sg" style="font-size:16px; font-weight:700; color:var(--on-surface);">Bench Press</div>
-              <div class="bv" style="font-size:11px; color:var(--on-surface-variant); margin-top:2px;">Upper A · Wednesday</div>
-            </td>
-            <td style="text-align:right;">
-              <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">85 kg × 6</div>
-              <div class="bv" style="font-size:10px; font-weight:600; color:var(--primary-container); margin-top:2px;">↑ 2.5 kg from last week</div>
-            </td>
-          </tr></table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <div class="sg" style="font-size:16px; font-weight:700; color:var(--on-surface);">Bench Press</div>
+                <div class="bv" style="font-size:11px; color:var(--on-surface-variant); margin-top:2px;">Upper A ·
+                  Wednesday</div>
+              </td>
+              <td style="text-align:right;">
+                <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">85 kg × 6</div>
+                <div class="bv"
+                  style="font-size:10px; font-weight:600; color:var(--primary-container); margin-top:2px;">↑ 2.5 kg from
+                  last week</div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <!-- PR Item 2 -->
         <div style="background:var(--surface-container); border-radius:16px; padding:16px 20px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td>
-              <div class="sg" style="font-size:16px; font-weight:700; color:var(--on-surface);">Romanian Deadlift</div>
-              <div class="bv" style="font-size:11px; color:var(--on-surface-variant); margin-top:2px;">Lower A · Thursday</div>
-            </td>
-            <td style="text-align:right;">
-              <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">100 kg × 8</div>
-              <div class="bv" style="font-size:10px; font-weight:600; color:var(--primary-container); margin-top:2px;">↑ 5 kg from last week</div>
-            </td>
-          </tr></table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <div class="sg" style="font-size:16px; font-weight:700; color:var(--on-surface);">Romanian Deadlift
+                </div>
+                <div class="bv" style="font-size:11px; color:var(--on-surface-variant); margin-top:2px;">Lower A ·
+                  Thursday</div>
+              </td>
+              <td style="text-align:right;">
+                <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">100 kg × 8</div>
+                <div class="bv"
+                  style="font-size:10px; font-weight:600; color:var(--primary-container); margin-top:2px;">↑ 5 kg from
+                  last week</div>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
 
       <!-- OLYMPUS LEAGUE -->
       <div style="padding:20px 28px; background:var(--surface-container);">
         <div style="background:var(--surface-low); border-radius:24px; padding:20px 24px;">
-          <div class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">Olympus League</div>
-          <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">Silver II <span style="font-size:13px; font-weight:400; color:var(--on-surface-variant);">1,240 / 1,500 XP to Gold</span></div>
+          <div class="bv"
+            style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">
+            Olympus League</div>
+          <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">Silver II <span
+              style="font-size:13px; font-weight:400; color:var(--on-surface-variant);">1,240 / 1,500 XP to Gold</span>
+          </div>
           <!-- Progress bar -->
-          <div style="margin-top:12px; background:var(--surface-lowest); border-radius:6px; height:8px; overflow:hidden;">
+          <div
+            style="margin-top:12px; background:var(--surface-lowest); border-radius:6px; height:8px; overflow:hidden;">
             <div class="ember-gradient" style="width:83%; height:100%; border-radius:6px;"></div>
           </div>
           <div style="text-align:center; margin-top:12px;">
-            <span style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Be Vietnam Pro',sans-serif; font-size:12px; font-weight:700; padding:10px 24px; border-radius:12px; letter-spacing:0.06em; text-transform:uppercase;">260 XP TO GO</span>
+            <span
+              style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Be Vietnam Pro',sans-serif; font-size:12px; font-weight:700; padding:10px 24px; border-radius:12px; letter-spacing:0.06em; text-transform:uppercase;">260
+              XP TO GO</span>
           </div>
+        </div>
+
+        <!-- Top 5 Incentive -->
+        <div
+          style="margin-top:12px; background:linear-gradient(135deg,#1a1408,#261d0a); border-radius:20px; padding:20px 24px; border:1px solid rgba(255,193,7,0.25);">
+          <div class="bv"
+            style="font-size:10px; font-weight:700; color:#FFD54F; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:8px;">
+            🏆 MONTHLY PRIZE POOL</div>
+          <div class="sg"
+            style="font-size:16px; font-weight:700; color:#FFFFFF; line-height:1.4; margin-bottom:10px;">
+            Top 5 athletes this month win <span style="color:#FFD54F;">free supplements</span> — shipped to your door.
+          </div>
+          <div class="bv" style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:14px; line-height:1.5;">
+            Your rank: <strong
+              style="color:#FFD54F; font-family:'Space Grotesk',sans-serif; font-size:15px;">#3</strong> of 43
+            athletes — <span style="color:#4CAF50;">You're in the prize zone! 🔥</span>
+          </div>
+          <a href="#"
+            style="display:inline-block; background:linear-gradient(135deg,#FFD54F,#FF8F00); color:#1a1408; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.08em; text-transform:uppercase;">
+            See Full Leaderboard →
+          </a>
         </div>
       </div>
 
       <!-- ── RESEARCH VAULT ──────────────────────────────── -->
       <div style="padding:28px 28px 16px; background:var(--surface);">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td><div class="sg" style="font-size:24px; font-weight:700; color:var(--on-surface); text-transform:uppercase; letter-spacing:-0.02em;">Research Vault</div></td>
-          <td style="text-align:right;"><div class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.15em; text-transform:uppercase;">02 NEW PAPERS</div></td>
-        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <div class="sg"
+                style="font-size:24px; font-weight:700; color:var(--on-surface); text-transform:uppercase; letter-spacing:-0.02em;">
+                Research Vault</div>
+            </td>
+            <td style="text-align:right;">
+              <div class="bv"
+                style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.15em; text-transform:uppercase;">
+                02 NEW PAPERS</div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- Article 1: With Image -->
       <div style="padding:0 28px 16px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL" alt="High-intensity training research" style="width:100%; height:200px; object-fit:cover; display:block;">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL"
+            alt="High-intensity training research" style="width:100%; height:200px; object-fit:cover; display:block;">
           <div style="padding:20px 24px 24px;">
             <div style="margin-bottom:12px;">
-              <span class="bv" style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Hypertrophy</span>
-              <span class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Metabolism</span>
+              <span class="bv"
+                style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Hypertrophy</span>
+              <span class="bv"
+                style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Metabolism</span>
             </div>
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">The Anabolic Window: New Longitudinal Findings on Protein Timing</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Recent clinical data suggests that the 'anabolic window' is significantly wider than previously assumed, prioritizing total daily intake over immediate post-workout consumption.</div>
-            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-              <td style="padding-right:16px;"><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱ 8 MIN READ</span></td>
-              <td><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🔬 PEER REVIEWED</span></td>
-            </tr></table>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">The
+              Anabolic Window: New Longitudinal Findings on Protein Timing</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Recent
+              clinical data suggests that the 'anabolic window' is significantly wider than previously assumed,
+              prioritizing total daily intake over immediate post-workout consumption.</div>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right:16px;"><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱
+                    8 MIN READ</span></td>
+                <td><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🔬
+                    PEER REVIEWED</span></td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
@@ -258,18 +415,33 @@
       <!-- Article 2: With Image -->
       <div style="padding:0 28px 16px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB" alt="Neural drive and force production" style="width:100%; height:200px; object-fit:cover; display:block;">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB"
+            alt="Neural drive and force production" style="width:100%; height:200px; object-fit:cover; display:block;">
           <div style="padding:20px 24px 24px;">
             <div style="margin-bottom:12px;">
-              <span class="bv" style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Neurology</span>
-              <span class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Strength</span>
+              <span class="bv"
+                style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Neurology</span>
+              <span class="bv"
+                style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Strength</span>
             </div>
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">Neural Drive &amp; Force Production: Why Mind-Muscle Connection Matters</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Investigating the voluntary activation of motor units and how conscious focus can increase total force output by up to 12% in experienced lifters.</div>
-            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-              <td style="padding-right:16px;"><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱ 12 MIN READ</span></td>
-              <td><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🧠 NEURO-ELITE</span></td>
-            </tr></table>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">
+              Neural Drive &amp; Force Production: Why Mind-Muscle Connection Matters</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">
+              Investigating the voluntary activation of motor units and how conscious focus can increase total force
+              output by up to 12% in experienced lifters.</div>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right:16px;"><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱
+                    12 MIN READ</span></td>
+                <td><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🧠
+                    NEURO-ELITE</span></td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
@@ -277,18 +449,29 @@
       <!-- Archive Teaser (Last Week's Analytics) -->
       <div style="padding:0 28px 24px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Previous edition analytics" style="width:100%; height:160px; object-fit:cover; display:block; filter:grayscale(100%); opacity:0.7;">
+          <img
+            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            alt="Previous edition analytics"
+            style="width:100%; height:160px; object-fit:cover; display:block; filter:grayscale(100%); opacity:0.7;">
           <div style="padding:20px 24px;">
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); text-transform:uppercase; margin-bottom:8px;">Last Week's Analytics</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</div>
-            <a href="#" class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.1em; text-transform:uppercase;">Review Archive</a>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); text-transform:uppercase; margin-bottom:8px;">
+              Last Week's Analytics</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">We analyzed
+              performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your
+              RPE during high-volume hypertrophy blocks.</div>
+            <a href="#" class="bv"
+              style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.1em; text-transform:uppercase;">Review
+              Archive</a>
           </div>
         </div>
       </div>
 
       <!-- CTA -->
       <div style="padding:16px 28px 28px; text-align:center; background:var(--surface);">
-        <a href="#" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; padding:14px 40px; border-radius:12px; text-decoration:none; letter-spacing:0.06em; text-transform:uppercase;">
+        <a href="#"
+          style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; padding:14px 40px; border-radius:12px; text-decoration:none; letter-spacing:0.06em; text-transform:uppercase;">
           Open Dashboard
         </a>
       </div>
@@ -315,80 +498,122 @@
 
       <!-- HEADER (same) -->
       <div style="background:var(--surface-lowest); padding:24px 28px 20px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td>
-            <div class="eyebrow" style="color:var(--primary-container); margin-bottom:4px;">Weekly Digest</div>
-            <div class="sg" style="font-size:22px; font-weight:900; color:var(--on-surface); letter-spacing:0.05em; font-style:italic; text-transform:uppercase;">FITTRACK PRO</div>
-          </td>
-          <td style="text-align:right; vertical-align:top;">
-            <div class="bv" style="font-size:10px; color:rgba(227,191,179,0.5); letter-spacing:0.1em; text-transform:uppercase; line-height:1.6;">
-              May 12 – 18, 2026
-            </div>
-          </td>
-        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <div class="eyebrow" style="color:var(--primary-container); margin-bottom:4px;">Weekly Digest</div>
+              <div class="sg"
+                style="font-size:22px; font-weight:900; color:var(--on-surface); letter-spacing:0.05em; font-style:italic; text-transform:uppercase;">
+                KAAYA</div>
+            </td>
+            <td style="text-align:right; vertical-align:top;">
+              <div class="bv"
+                style="font-size:10px; color:rgba(227,191,179,0.5); letter-spacing:0.1em; text-transform:uppercase; line-height:1.6;">
+                May 12 – 18, 2026
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- HERO: MISSED WEEK -->
       <div style="padding:32px 28px 28px; background:var(--surface-low);">
-        <div class="bv" style="font-size:10px; font-weight:700; color:var(--on-surface-variant); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">THIS WEEK'S REPORT</div>
-        <div class="sg" style="font-size:28px; font-weight:900; color:var(--on-surface); letter-spacing:-0.03em; line-height:1.15; margin-bottom:8px;">
+        <div class="bv"
+          style="font-size:10px; font-weight:700; color:var(--on-surface-variant); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">
+          THIS WEEK'S REPORT</div>
+        <div class="sg"
+          style="font-size:28px; font-weight:900; color:var(--on-surface); letter-spacing:-0.03em; line-height:1.15; margin-bottom:8px;">
           No workouts this week.
         </div>
-        <div class="bv" style="font-size:14px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:24px; max-width:480px;">
+        <div class="bv"
+          style="font-size:14px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:24px; max-width:480px;">
           Consistency means showing up more often than not. One session this week resets the clock.
         </div>
 
         <!-- Consistency Protocol -->
-        <div style="padding:24px;background:var(--surface-container);border-radius:24px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.03);">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr>
-            <td>
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--on-surface-variant);letter-spacing:0.16em;text-transform:uppercase;">Consistency Protocol</div>
-            </td>
-            <td style="text-align:right;">
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;">0 DAYS</div>
-            </td>
-          </tr></table>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align:center;"><tr>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">M</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">T</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">W</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">T</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">F</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">S</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-            <td style="width:14.28%;">
-              <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">S</div>
-              <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;"></div>
-            </td>
-          </tr></table>
+        <div
+          style="padding:24px;background:var(--surface-container);border-radius:24px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.03);">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+            <tr>
+              <td>
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--on-surface-variant);letter-spacing:0.16em;text-transform:uppercase;">
+                  Consistency Protocol</div>
+              </td>
+              <td style="text-align:right;">
+                <div
+                  style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:var(--primary);letter-spacing:-0.02em;">
+                  0 DAYS</div>
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align:center;">
+            <tr>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  M</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  T</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  W</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  T</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  F</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  S</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+              <td style="width:14.28%;">
+                <div
+                  style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:var(--on-surface-variant);margin-bottom:8px;">
+                  S</div>
+                <div style="width:36px;height:36px;border-radius:18px;background:var(--surface-lowest);margin:0 auto;">
+                </div>
+              </td>
+            </tr>
+          </table>
         </div>
 
         <!-- Urgency card -->
-        <div style="background:var(--surface-container); border-radius:16px; padding:16px 20px; border-left:3px solid var(--primary-container); margin-bottom:24px;">
+        <div
+          style="background:var(--surface-container); border-radius:16px; padding:16px 20px; border-left:3px solid var(--primary-container); margin-bottom:24px;">
           <div class="bv" style="font-size:13px; color:var(--on-surface); line-height:1.6;">
             <strong>Your last best lift:</strong> Bench Press at 82.5 kg × 6<br>
-            <span style="color:var(--on-surface-variant);">Strength declines after ~10 days of inactivity. Don't lose momentum.</span>
+            <span style="color:var(--on-surface-variant);">Strength declines after ~10 days of inactivity. Don't lose
+              momentum.</span>
           </div>
         </div>
 
-        <a href="#" class="ember-gradient" style="display:inline-block; color:var(--on-primary); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; padding:14px 32px; border-radius:16px; text-decoration:none; letter-spacing:0.04em; text-transform:uppercase;">
+        <a href="#" class="ember-gradient"
+          style="display:inline-block; color:var(--on-primary); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; padding:14px 32px; border-radius:16px; text-decoration:none; letter-spacing:0.04em; text-transform:uppercase;">
           Log a Workout
         </a>
       </div>
@@ -396,41 +621,92 @@
       <!-- OLYMPUS LEAGUE (INACTIVE) -->
       <div style="padding:20px 28px; background:var(--surface-container);">
         <div style="background:var(--surface-low); border-radius:24px; padding:20px 24px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td>
-              <div class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">Olympus League</div>
-              <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">Silver II <span style="font-size:13px; font-weight:400; color:var(--on-surface-variant);">· 1,240 XP</span></div>
-            </td>
-            <td style="text-align:right;">
-              <div class="bv" style="font-size:11px; color:var(--on-surface-variant);">No XP earned</div>
-            </td>
-          </tr></table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <div class="bv"
+                  style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">
+                  Olympus League</div>
+                <div class="sg" style="font-size:18px; font-weight:700; color:var(--on-surface);">Silver II <span
+                    style="font-size:13px; font-weight:400; color:var(--on-surface-variant);">· 1,240 XP</span></div>
+              </td>
+              <td style="text-align:right;">
+                <div class="bv" style="font-size:11px; color:var(--on-surface-variant);">No XP earned</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Top 5 Incentive (inactive) -->
+        <div
+          style="margin-top:12px; background:linear-gradient(135deg,#1a1408,#261d0a); border-radius:20px; padding:20px 24px; border:1px solid rgba(255,193,7,0.25);">
+          <div class="bv"
+            style="font-size:10px; font-weight:700; color:#FFD54F; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:8px;">
+            🏆 MONTHLY PRIZE POOL</div>
+          <div class="sg"
+            style="font-size:16px; font-weight:700; color:#FFFFFF; line-height:1.4; margin-bottom:10px;">
+            Top 5 athletes this month win <span style="color:#FFD54F;">free supplements</span> — shipped to your door.
+          </div>
+          <div class="bv" style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:14px; line-height:1.5;">
+            Your rank: <strong
+              style="color:#FFD54F; font-family:'Space Grotesk',sans-serif; font-size:15px;">#12</strong> of 43
+            athletes — almost there, keep pushing!
+          </div>
+          <a href="#"
+            style="display:inline-block; background:linear-gradient(135deg,#FFD54F,#FF8F00); color:#1a1408; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.08em; text-transform:uppercase;">
+            See Full Leaderboard →
+          </a>
         </div>
       </div>
 
       <!-- ── RESEARCH VAULT ──────────────────────────────── -->
       <div style="padding:28px 28px 16px; background:var(--surface);">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td><div class="sg" style="font-size:24px; font-weight:700; color:var(--on-surface); text-transform:uppercase; letter-spacing:-0.02em;">Research Vault</div></td>
-          <td style="text-align:right;"><div class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.15em; text-transform:uppercase;">02 NEW PAPERS</div></td>
-        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <div class="sg"
+                style="font-size:24px; font-weight:700; color:var(--on-surface); text-transform:uppercase; letter-spacing:-0.02em;">
+                Research Vault</div>
+            </td>
+            <td style="text-align:right;">
+              <div class="bv"
+                style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.15em; text-transform:uppercase;">
+                02 NEW PAPERS</div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- Article 1: With Image -->
       <div style="padding:0 28px 16px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL" alt="High-intensity training research" style="width:100%; height:200px; object-fit:cover; display:block;">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL"
+            alt="High-intensity training research" style="width:100%; height:200px; object-fit:cover; display:block;">
           <div style="padding:20px 24px 24px;">
             <div style="margin-bottom:12px;">
-              <span class="bv" style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Hypertrophy</span>
-              <span class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Metabolism</span>
+              <span class="bv"
+                style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Hypertrophy</span>
+              <span class="bv"
+                style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Metabolism</span>
             </div>
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">The Anabolic Window: New Longitudinal Findings on Protein Timing</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Recent clinical data suggests that the 'anabolic window' is significantly wider than previously assumed, prioritizing total daily intake over immediate post-workout consumption.</div>
-            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-              <td style="padding-right:16px;"><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱ 8 MIN READ</span></td>
-              <td><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🔬 PEER REVIEWED</span></td>
-            </tr></table>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">The
+              Anabolic Window: New Longitudinal Findings on Protein Timing</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Recent
+              clinical data suggests that the 'anabolic window' is significantly wider than previously assumed,
+              prioritizing total daily intake over immediate post-workout consumption.</div>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right:16px;"><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱
+                    8 MIN READ</span></td>
+                <td><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🔬
+                    PEER REVIEWED</span></td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
@@ -438,18 +714,33 @@
       <!-- Article 2: With Image -->
       <div style="padding:0 28px 16px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB" alt="Neural drive and force production" style="width:100%; height:200px; object-fit:cover; display:block;">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB"
+            alt="Neural drive and force production" style="width:100%; height:200px; object-fit:cover; display:block;">
           <div style="padding:20px 24px 24px;">
             <div style="margin-bottom:12px;">
-              <span class="bv" style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Neurology</span>
-              <span class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Strength</span>
+              <span class="bv"
+                style="display:inline-block; background:rgba(255,181,155,0.1); color:var(--primary); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase; border:1px solid rgba(255,181,155,0.2); margin-right:6px;">Neurology</span>
+              <span class="bv"
+                style="display:inline-block; background:var(--surface-highest); color:var(--on-surface-variant); font-size:9px; font-weight:700; padding:5px 10px; border-radius:20px; letter-spacing:0.1em; text-transform:uppercase;">Strength</span>
             </div>
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">Neural Drive &amp; Force Production: Why Mind-Muscle Connection Matters</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">Investigating the voluntary activation of motor units and how conscious focus can increase total force output by up to 12% in experienced lifters.</div>
-            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-              <td style="padding-right:16px;"><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱ 12 MIN READ</span></td>
-              <td><span class="bv" style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🧠 NEURO-ELITE</span></td>
-            </tr></table>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); line-height:1.3; margin-bottom:10px;">
+              Neural Drive &amp; Force Production: Why Mind-Muscle Connection Matters</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">
+              Investigating the voluntary activation of motor units and how conscious focus can increase total force
+              output by up to 12% in experienced lifters.</div>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right:16px;"><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">⏱
+                    12 MIN READ</span></td>
+                <td><span class="bv"
+                    style="font-size:10px; color:var(--on-surface-variant); letter-spacing:0.08em; text-transform:uppercase;">🧠
+                    NEURO-ELITE</span></td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
@@ -457,18 +748,29 @@
       <!-- Archive Teaser (Last Week's Analytics) -->
       <div style="padding:0 28px 24px; background:var(--surface);">
         <div style="background:var(--surface-low); border-radius:20px; overflow:hidden;">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Previous edition analytics" style="width:100%; height:160px; object-fit:cover; display:block; filter:grayscale(100%); opacity:0.7;">
+          <img
+            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            alt="Previous edition analytics"
+            style="width:100%; height:160px; object-fit:cover; display:block; filter:grayscale(100%); opacity:0.7;">
           <div style="padding:20px 24px;">
-            <div class="sg" style="font-size:20px; font-weight:700; color:var(--on-surface); text-transform:uppercase; margin-bottom:8px;">Last Week's Analytics</div>
-            <div class="bv" style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</div>
-            <a href="#" class="bv" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.1em; text-transform:uppercase;">Review Archive</a>
+            <div class="sg"
+              style="font-size:20px; font-weight:700; color:var(--on-surface); text-transform:uppercase; margin-bottom:8px;">
+              Last Week's Analytics</div>
+            <div class="bv"
+              style="font-size:13px; color:var(--on-surface-variant); line-height:1.6; margin-bottom:14px;">We analyzed
+              performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your
+              RPE during high-volume hypertrophy blocks.</div>
+            <a href="#" class="bv"
+              style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-size:11px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; letter-spacing:0.1em; text-transform:uppercase;">Review
+              Archive</a>
           </div>
         </div>
       </div>
 
       <!-- CTA -->
       <div style="padding:16px 28px 28px; text-align:center; background:var(--surface);">
-        <a href="#" style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; padding:14px 40px; border-radius:12px; text-decoration:none; letter-spacing:0.06em; text-transform:uppercase;">
+        <a href="#"
+          style="display:inline-block; background:var(--surface-highest); color:var(--on-surface); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; padding:14px 40px; border-radius:12px; text-decoration:none; letter-spacing:0.06em; text-transform:uppercase;">
           Open Dashboard
         </a>
       </div>
@@ -496,4 +798,5 @@
   </script>
 
 </body>
+
 </html>

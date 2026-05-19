@@ -85,7 +85,9 @@ function buildEmailHtml(
   articles: Article[],
   xpData: ReturnType<typeof getRankData>,
   bestLifts: LiftSummary[],
-  weeklyStats: ReturnType<typeof getWeeklyStats>
+  weeklyStats: ReturnType<typeof getWeeklyStats>,
+  leaderboardRank: number,
+  totalUsers: number
 ) {
   const hasWorkedOut = workoutCount > 0;
   const consistencyProtocol = getConsistencyProtocolHtml(
@@ -135,7 +137,7 @@ function buildEmailHtml(
   `;
 
   const heroSection = hasWorkedOut ? `
-    <div style="background-color:${C.primaryContainer};background:linear-gradient(135deg,${C.primary},${C.primaryContainer});padding:32px 28px 28px;">
+    <div class="gm-hero-active" style="background-color:${C.primaryContainer} !important;background:linear-gradient(135deg,${C.primary},${C.primaryContainer}) !important;padding:32px 28px 28px;">
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onPrimary};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.15;margin:0 0 4px;">${escapeHtml(workoutLabel)}</h2>
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:15px;color:rgba(255,255,255,0.8);line-height:1.5;margin:0 0 24px;">
@@ -145,12 +147,12 @@ function buildEmailHtml(
       ${statsCardsHtml}
     </div>
     <!-- Personal Records -->
-    <div style="padding:24px 28px;background-color:${C.surfaceLow};background:${C.surfaceLow};">
+    <div class="gm-surface-low" style="padding:24px 28px;background-color:${C.surfaceLow} !important;background:${C.surfaceLow} !important;">
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer};letter-spacing:0.16em;text-transform:uppercase;margin:0 0 16px;">Highlights</p>
       ${bestLiftHtml}
     </div>
   ` : `
-    <div style="padding:32px 28px 28px;background-color:${C.surfaceLow};background:${C.surfaceLow};">
+    <div class="gm-hero-inactive" style="padding:32px 28px 28px;background-color:${C.surfaceLow} !important;background:${C.surfaceLow} !important;">
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onSurfaceVariant};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:900;color:${C.onSurface};letter-spacing:-0.03em;line-height:1.15;margin:0 0 8px;">No workouts last week.</h2>
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:14px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 24px;max-width:480px;">Consistency means showing up more often than not. One session this week resets the clock.</p>
@@ -207,41 +209,73 @@ function buildEmailHtml(
     </div>
   `;
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><title>Kaaya Weekly Digest</title><style>html,body,table,td,div,p,a{color-scheme:dark !important;}body{background-color:${C.surfaceLowest} !important;color:${C.onSurface} !important;}</style><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
-<body bgcolor="${C.surfaceLowest}" style="margin:0;padding:0;background-color:${C.surfaceLowest};background:${C.surfaceLowest};color:${C.onSurface};color-scheme:dark;">
-<table role="presentation" width="100%" bgcolor="${C.surfaceLowest}" cellpadding="0" cellspacing="0" style="background-color:${C.surfaceLowest};background:${C.surfaceLowest};"><tr><td align="center" bgcolor="${C.surfaceLowest}" style="padding: 20px 0;background-color:${C.surfaceLowest};background:${C.surfaceLowest};">
-<div style="max-width:600px;margin:0 auto;background-color:${C.surface};background:${C.surface};border-radius:4px;overflow:hidden;text-align:left;color:${C.onSurface};">
+  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark only"><meta name="supported-color-schemes" content="dark only"><title>Kaaya Weekly Digest</title>
+<!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+<style>
+:root{color-scheme:dark only !important;}
+html,body,table,td,div,p,a,span,h1,h2,h3,h4{color-scheme:dark only !important;}
+body{margin:0 !important;padding:0 !important;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;color:${C.onSurface} !important;}
+/* Gmail dark mode override prevention */
+u+.body{background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;}
+u+.body .gm-bg{background-color:${C.surfaceLowest} !important;}
+u+.body .gm-surface{background-color:${C.surface} !important;}
+u+.body .gm-surface-low{background-color:${C.surfaceLow} !important;}
+u+.body .gm-surface-container{background-color:${C.surfaceContainer} !important;}
+u+.body .gm-surface-highest{background-color:${C.surfaceHighest} !important;}
+u+.body .gm-hero-active{background-color:${C.primaryContainer} !important;}
+u+.body .gm-hero-inactive{background-color:${C.surfaceLow} !important;}
+u+.body .gm-incentive{background-color:#1a1408 !important;}
+/* Prevent auto dark mode in supported clients */
+@media (prefers-color-scheme:dark){
+  body,table,td,div{background-color:${C.surfaceLowest} !important;color:${C.onSurface} !important;}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
+<body class="body" bgcolor="${C.surfaceLowest}" style="margin:0 !important;padding:0 !important;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;color:${C.onSurface} !important;color-scheme:dark only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<!-- Preheader (hidden preview text) -->
+<div style="display:none;font-size:1px;color:${C.surfaceLowest};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+<!-- Outer wrapper table (Gmail-proof) -->
+<table role="presentation" width="100%" bgcolor="${C.surfaceLowest}" cellpadding="0" cellspacing="0" border="0" class="gm-bg" style="background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;width:100% !important;"><tr><td align="center" bgcolor="${C.surfaceLowest}" class="gm-bg" style="padding:20px 0;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;">
+<!-- Inner wrapper table (second layer of protection) -->
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="gm-surface" style="max-width:600px;width:100%;background-color:${C.surface} !important;background:${C.surface} !important;border-radius:4px;overflow:hidden;"><tr><td bgcolor="${C.surface}" class="gm-surface" style="background-color:${C.surface} !important;background:${C.surface} !important;color:${C.onSurface} !important;">
   <!-- Header -->
-  <div style="background-color:${C.surfaceLowest};background:${C.surfaceLowest};padding:24px 28px 20px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface};letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA</h1></td>
-      <td style="text-align:right;vertical-align:top;"><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.5);letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
+  <div class="gm-bg" style="background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;padding:24px 28px 20px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer} !important;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface} !important;letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA</h1></td>
+      <td style="text-align:right;vertical-align:top;"><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.5) !important;letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
     </tr></table>
   </div>
   ${heroSection}
   
   <!-- Olympus League -->
-  <div style="padding:20px 28px;background-color:${C.surfaceContainer};background:${C.surfaceContainer};">
-    <div style="background-color:${C.surfaceLow};background:${C.surfaceLow};border-radius:24px;padding:20px 24px;">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:${C.onSurfaceVariant};letter-spacing:0.12em;text-transform:uppercase;margin:0 0 4px;">Olympus League</p>
-      <p style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:${C.onSurface};margin:0;">${xpData.tier} <span style="font-size:13px;font-weight:400;color:${C.onSurfaceVariant};">${xpData.xp.toLocaleString()} / ${xpData.nextXp.toLocaleString()} XP to ${xpData.nextTierName}</span></p>
-      <div style="margin-top:12px;background-color:${C.surfaceLowest};background:${C.surfaceLowest};border-radius:6px;height:8px;overflow:hidden;">
-        <div style="width:${xpData.progressPct}%;height:100%;background-color:${C.primaryContainer};background:linear-gradient(135deg,${C.primary},${C.primaryContainer});border-radius:6px;"></div>
+  <div class="gm-surface-container" style="padding:20px 28px;background-color:${C.surfaceContainer} !important;background:${C.surfaceContainer} !important;">
+    <div class="gm-surface-low" style="background-color:${C.surfaceLow} !important;background:${C.surfaceLow} !important;border-radius:24px;padding:20px 24px;">
+      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:${C.onSurfaceVariant} !important;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 4px;">Olympus League</p>
+      <p style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:${C.onSurface} !important;margin:0;">${xpData.tier} <span style="font-size:13px;font-weight:400;color:${C.onSurfaceVariant} !important;">${xpData.xp.toLocaleString()} / ${xpData.nextXp.toLocaleString()} XP to ${xpData.nextTierName}</span></p>
+      <div style="margin-top:12px;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;border-radius:6px;height:8px;overflow:hidden;">
+        <div style="width:${xpData.progressPct}%;height:100%;background-color:${C.primaryContainer} !important;background:linear-gradient(135deg,${C.primary},${C.primaryContainer}) !important;border-radius:6px;"></div>
       </div>
-      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:700;padding:10px 24px;border-radius:12px;letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP TO GO</span></p>` : ''}
+      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${C.surfaceHighest} !important;background:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:700;padding:10px 24px;border-radius:12px;letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP TO GO</span></p>` : ''}
+    </div>
+    <!-- Top 5 Incentive -->
+    <div class="gm-incentive" style="margin-top:12px;background-color:#1a1408 !important;background:linear-gradient(135deg,#1a1408,#261d0a) !important;border-radius:20px;padding:20px 24px;border:1px solid rgba(255,193,7,0.25);">
+      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:#FFD54F !important;letter-spacing:0.16em;text-transform:uppercase;margin:0 0 8px;">🏆 MONTHLY PRIZE POOL</p>
+      <p style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#FFFFFF !important;line-height:1.4;margin:0 0 10px;">Top 5 athletes this month win <span style="color:#FFD54F !important;">free supplements</span> — shipped to your door.</p>
+      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:rgba(255,255,255,0.7) !important;margin:0 0 14px;line-height:1.5;">Your rank: <strong style="color:#FFD54F !important;font-family:'Space Grotesk',sans-serif;font-size:15px;">#${leaderboardRank}</strong> of ${totalUsers} athletes${leaderboardRank <= 5 ? ' — <span style="color:#4CAF50 !important;">In the prize zone! 🔥</span>' : leaderboardRank <= 10 ? ' — almost there, keep pushing!' : ''}</p>
+      <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:#FFD54F !important;background:linear-gradient(135deg,#FFD54F,#FF8F00) !important;color:#1a1408 !important;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">See Full Leaderboard →</a>
     </div>
   </div>
 
   ${researchVault}
   <!-- CTA -->
-  <div style="padding:16px 28px 28px;text-align:center;background-color:${C.surface};background:${C.surface};">
-    <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};background:${C.surfaceHighest};color:${C.onSurface};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
+  <div class="gm-surface" style="padding:16px 28px 28px;text-align:center;background-color:${C.surface} !important;background:${C.surface} !important;">
+    <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest} !important;background:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
   </div>
   <!-- Footer -->
-  <div style="padding:20px 28px 28px;background-color:${C.surfaceLowest};background:${C.surfaceLowest};">
-    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4);text-align:center;line-height:1.8;margin:0;">You're receiving this because you train with Kaaya.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant};text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant};text-decoration:underline;">Unsubscribe</a></p>
+  <div class="gm-bg" style="padding:20px 28px 28px;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;">
+    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4) !important;text-align:center;line-height:1.8;margin:0;">You're receiving this because you train with Kaaya.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Unsubscribe</a></p>
   </div>
-</div>
+</td></tr></table>
 </td></tr></table>
 </body></html>`;
 }
@@ -293,6 +327,16 @@ serve(async (req) => {
     const errors = [];
     const diagnostics = [];
 
+    // ── Compute global leaderboard for Top 5 incentive ──
+    const { data: allXpRows } = await supabase
+      .from("monthly_xp_cache").select("user_id, total_xp").eq("month", monthWindow.month);
+    const xpMap = new Map<string, number>();
+    for (const row of (allXpRows || [])) {
+      xpMap.set(row.user_id, toNumber(row.total_xp));
+    }
+    // Also count users who have workout data but no cache entry yet
+    const totalLeaderboardUsers = Math.max(users.length, xpMap.size);
+
     for (const user of users) {
       if (!user.email && !isDryRun) continue;
 
@@ -335,9 +379,25 @@ serve(async (req) => {
         continue;
       }
 
+      // Compute this user's leaderboard rank
+      const sortedXpList = Array.from(xpMap.entries())
+        .map(([uid, xp]) => ({ uid, xp }))
+        .sort((a, b) => b.xp - a.xp);
+      // If user not in cache, they still get a rank (at the bottom)
+      let userRank = sortedXpList.findIndex(r => r.uid === user.id) + 1;
+      if (userRank === 0) userRank = sortedXpList.length + 1; // not cached yet
+      // Ensure the user's live XP is considered
+      if (totalXP > 0 && !xpMap.has(user.id)) {
+        // Count how many have more XP
+        userRank = sortedXpList.filter(r => r.xp > totalXP).length + 1;
+      } else if (totalXP > (xpMap.get(user.id) || 0)) {
+        // Live XP is higher than cached, recalculate
+        userRank = sortedXpList.filter(r => r.uid !== user.id && r.xp > totalXP).length + 1;
+      }
+
       const htmlContent = buildEmailHtml(
         workoutCount, weekRange, allWorkoutDates, reportWeek.startDate, reportWeek.endDate,
-        articles, xpData, topLifts, weeklyStats
+        articles, xpData, topLifts, weeklyStats, userRank, totalLeaderboardUsers
       );
 
       const res = await fetch("https://api.resend.com/emails", {

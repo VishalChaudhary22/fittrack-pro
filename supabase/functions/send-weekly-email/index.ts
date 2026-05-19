@@ -362,7 +362,7 @@ serve(async (req) => {
       xpMap.set(row.user_id, toNumber(row.total_xp));
     }
     // Also count users who have workout data but no cache entry yet
-    const totalLeaderboardUsers = Math.max(users.length, xpMap.size);
+    const totalLeaderboardUsers = Math.max((dbUsers || []).length, xpMap.size);
 
     for (const user of users) {
       if (!user.email && !isDryRun) continue;

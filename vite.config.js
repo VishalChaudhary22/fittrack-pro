@@ -13,6 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
+        maximumFileSizeToCacheInBytes: 3000000,
       },
       manifest: {
         name: 'Kaaya',

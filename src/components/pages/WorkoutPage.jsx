@@ -1079,10 +1079,14 @@ export default function WorkoutPage() {
       exs: prev.exs.map((ex, i) => {
         if (i !== exerciseIndex) return ex;
 
+        // Preserve the true original name so we can always swap back
+        const trueOriginal = ex._originalName || ex.name;
+
         return {
           ...ex,
           sv: newName,
           name: newName, // Update the displayed name
+          _originalName: trueOriginal, // Always keep the real original
           _swapHistory: history ?? null,
           sets: ex.sets.map((set, si) => {
             if (set.done) return set;
@@ -1295,7 +1299,7 @@ export default function WorkoutPage() {
                     </h3>
                     {!ex.variants && (
                       <button
-                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex.name })}
+                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.name })}
                         aria-label={`Swap ${ex.name}`}
                         style={{
                           background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',

@@ -11,7 +11,6 @@ SELECT cron.schedule(
   '30 3 * * 1',  -- 03:30 UTC every Monday = 09:00 IST
   $$SELECT net.http_post(
     url := current_setting('app.supabase_url') || '/functions/v1/send-weekly-email',
-    headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
     body := '{}'::jsonb
   )$$
 );

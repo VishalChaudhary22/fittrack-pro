@@ -12,7 +12,6 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
       url:='https://zcmwenjvoeoikgxcjvhr.supabase.co/functions/v1/send-workout-reminder',
-      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
       body:='{}'::jsonb
   );
   $$
@@ -25,7 +24,6 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
       url:='https://zcmwenjvoeoikgxcjvhr.supabase.co/functions/v1/send-diet-reminder',
-      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
       body:='{}'::jsonb
   );
   $$
@@ -38,7 +36,6 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
       url:='https://zcmwenjvoeoikgxcjvhr.supabase.co/functions/v1/send-streak-alert',
-      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
       body:='{}'::jsonb
   );
   $$
@@ -51,7 +48,6 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
       url:='https://zcmwenjvoeoikgxcjvhr.supabase.co/functions/v1/send-olympus-weekly',
-      headers:='{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
       body:='{}'::jsonb
   );
   $$

@@ -1565,37 +1565,35 @@ export default function WorkoutPage() {
           return (
             <div key={ex.id} className="exercise-block">
               {/* Exercise Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, flex: 1, lineHeight: 1.1 }}>
-                      {ex.sv || ex.name}
-                    </h3>
-                    {!ex.variants && (
-                      <button
-                        onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}
-                        aria-label={`Swap ${ex.name}`}
-                        style={{
-                          background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
-                          cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
-                          color: 'var(--on-surface-variant)',
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                          transition: 'all 0.2s', flexShrink: 0
-                        }}
-                        onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
-                        onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
-                      >
-                        <ArrowRightLeft size={16} />
-                        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
-                      </button>
-                    )}
-                  </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, lineHeight: 1.1 }}>
+                    {ex.sv || ex.name}
+                  </h3>
                   {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 0, marginBottom: 4, fontSize: 11, padding: '2px 8px', width: 'auto', borderRadius: 6, background: 'var(--surface-container)', border: 'none' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
                   <p className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     {ex.muscle || 'Full Body'} • {focusType}
                   </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginTop: 2 }}>
+                  {!ex.variants && (
+                    <button
+                      onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}
+                      aria-label={`Swap ${ex.name}`}
+                      style={{
+                        background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
+                        cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
+                        color: 'var(--on-surface-variant)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                        transition: 'all 0.2s', flexShrink: 0
+                      }}
+                      onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
+                      onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
+                    >
+                      <ArrowRightLeft size={16} />
+                      <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       if (confirmRemoveIdx === ei) removeExercise(ei);

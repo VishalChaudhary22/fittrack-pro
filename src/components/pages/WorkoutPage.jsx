@@ -1603,16 +1603,30 @@ export default function WorkoutPage() {
                     }}
                     aria-label="Remove Exercise"
                     style={{
-                      minWidth: 44, minHeight: 44,
-                      background: confirmRemoveIdx === ei ? 'var(--error-container)' : 'none',
-                      border: 'none', borderRadius: 12,
+                      background: confirmRemoveIdx === ei ? 'var(--error-container)' : 'var(--surface-container-highest)',
+                      border: confirmRemoveIdx === ei ? '1px solid var(--error)' : '1px solid var(--surface-container)',
+                      cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
                       color: confirmRemoveIdx === ei ? 'var(--error)' : 'var(--on-surface-variant)',
-                      cursor: 'pointer', padding: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      transition: 'all 0.2s', flexShrink: 0
+                    }}
+                    onMouseOver={e => {
+                      if (confirmRemoveIdx !== ei) {
+                        e.currentTarget.style.color = 'var(--error)';
+                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                      }
+                    }}
+                    onMouseOut={e => {
+                      if (confirmRemoveIdx !== ei) {
+                        e.currentTarget.style.color = 'var(--on-surface-variant)';
+                        e.currentTarget.style.borderColor = 'var(--surface-container)';
+                      }
                     }}
                   >
-                    <Trash2 size={20} />
+                    <Trash2 size={16} />
+                    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                      {confirmRemoveIdx === ei ? 'Confirm' : 'Delete'}
+                    </span>
                   </button>
                   <button aria-label="Exercise options" style={{ minWidth: 44, minHeight: 44, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus } from 'lucide-react';
 import { getLastLiftedForExercise, getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
@@ -792,6 +792,200 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   );
 }
 
+const MUSCLE_DISPLAY_ORDER = [
+  'Chest', 'Back', 'Shoulders', 'Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves',
+  'Biceps', 'Triceps', 'Arms', 'Core', 'Full Body'
+];
+
+const getSortIndex = (muscle) => {
+  const index = MUSCLE_DISPLAY_ORDER.indexOf(muscle);
+  return index === -1 ? 999 : index;
+};
+
+const MUSCLE_COLOR_MAP = {
+  'Chest': 'var(--primary)',
+  'Back': 'var(--tertiary, #4CAF50)',
+  'Shoulders': 'var(--secondary, #FFC107)',
+  'Legs': 'var(--error, #F44336)',
+  'Quads': 'var(--error, #F44336)',
+  'Hamstrings': 'var(--error, #F44336)',
+  'Glutes': '#E91E63',
+  'Calves': '#9C27B0',
+  'Biceps': '#00BCD4',
+  'Triceps': '#03A9F4',
+  'Arms': '#00BCD4',
+  'Core': '#FF9800',
+  'Full Body': 'var(--on-surface)'
+};
+
+function ExercisePoolRow({ ex, onAdd, session }) {
+  const alreadyAdded = session?.exs?.some(e =>
+    e.name === ex.name || e._originalName === ex.name || e.originalName === ex.name
+  );
+  const accent = MUSCLE_COLOR_MAP[ex.primaryMuscle] || 'var(--on-surface-dim)';
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '16px', background: 'var(--surface-container)',
+      borderRadius: '16px', marginBottom: '8px',
+      borderLeft: `3px solid ${accent}`
+    }}>
+      <div>
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+          color: 'var(--on-surface)', fontSize: '15px', marginBottom: '4px'
+        }}>
+          {ex.name}
+        </div>
+        <div style={{
+          fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '11px',
+          color: 'var(--on-surface-variant)', textTransform: 'uppercase',
+          letterSpacing: '0.05em', fontWeight: 600, display: 'flex', gap: '8px'
+        }}>
+          <span style={{ color: accent }}>{ex.primaryMuscle}</span>
+          {ex.repsRange && <span>• {ex.repsRange}</span>}
+        </div>
+      </div>
+
+      <button
+        onClick={() => !alreadyAdded && onAdd(ex)}
+        disabled={alreadyAdded}
+        style={{
+          width: '40px', height: '40px', borderRadius: '12px', border: 'none',
+          background: alreadyAdded ? 'var(--surface-container-highest)' : 'var(--primary-container)',
+          color: alreadyAdded ? 'var(--on-surface-dim)' : 'var(--on-primary-container)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: alreadyAdded ? 'default' : 'pointer', transition: 'all 0.2s', flexShrink: 0
+        }}
+        onMouseDown={e => { if(!alreadyAdded) e.currentTarget.style.transform = 'scale(0.9)'; }}
+        onMouseUp={e => { if(!alreadyAdded) e.currentTarget.style.transform = 'scale(1)'; }}
+      >
+        {alreadyAdded ? <Check size={20} strokeWidth={3} /> : <Plus size={20} strokeWidth={2.5} />}
+      </button>
+    </div>
+  );
+}
+
+function AddExerciseSheet({
+  show, onClose, onAdd, session,
+  searchQuery, setSearchQuery, category, setCategory, exercisePool
+}) {
+  if (!show) return null;
+
+  const filteredPool = exercisePool.filter(ex => {
+    const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCat = category === 'all' || ex.primaryMuscle === category;
+    return matchesSearch && matchesCat;
+  });
+
+  const categories = ['all', ...Array.from(new Set(exercisePool.map(ex => ex.primaryMuscle))).sort((a, b) => getSortIndex(a) - getSortIndex(b))];
+
+  return (
+    <Portal>
+      <div
+        style={{
+          position: 'fixed', inset: 0, zIndex: 10000,
+          background: 'var(--glass-bg-heavy, rgba(0,0,0,0.7))',
+          backdropFilter: 'var(--glass-blur-sm, blur(8px))',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        }}
+        onClick={onClose}
+      >
+        <style>{`
+          @keyframes sheetUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+          }
+          .sheet-content { animation: sheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        `}</style>
+        <div
+          className="sheet-content"
+          style={{
+            background: 'var(--surface-container-low)',
+            borderRadius: '28px 28px 0 0', height: '88dvh',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '0 -10px 40px rgba(0,0,0,0.2)'
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Drag Handle & Header */}
+          <div style={{ padding: '16px 24px 0 24px', flexShrink: 0 }}>
+            <div style={{ width: '40px', height: '4px', background: 'var(--surface-container-highest)', borderRadius: '2px', margin: '0 auto 16px auto' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 700, color: 'var(--on-surface)' }}>
+                Add Exercise
+              </h2>
+              <button onClick={onClose} style={{ background: 'var(--surface-container)', border: 'none', width: '36px', height: '36px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-surface-variant)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div style={{ position: 'relative', marginBottom: '16px' }}>
+              <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--on-surface-dim)' }} />
+              <input
+                type="text"
+                placeholder="Search exercises..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%', padding: '14px 16px 14px 44px',
+                  background: 'var(--surface-container)', border: '1px solid var(--surface-container-highest)',
+                  borderRadius: '16px', color: 'var(--on-surface)', fontSize: '15px', fontFamily: "'Be Vietnam Pro', sans-serif"
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: '4px' }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Category Pills */}
+            <div style={{ display: 'flex', overflowX: 'auto', gap: '8px', paddingBottom: '16px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+              {categories.map(cat => {
+                const isSel = category === cat;
+                return (
+                  <button
+                    key={cat} onClick={() => setCategory(cat)}
+                    style={{
+                      whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: '999px',
+                      fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '13px', fontWeight: 600,
+                      textTransform: 'capitalize', border: 'none', cursor: 'pointer',
+                      background: isSel ? 'var(--primary-container)' : 'var(--surface-container)',
+                      color: isSel ? 'var(--on-primary-container)' : 'var(--on-surface-variant)',
+                      transition: 'background 0.2s'
+                    }}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Exercise List */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px 24px' }}>
+            {filteredPool.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--on-surface-dim)', fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '14px' }}>
+                No exercises found.
+              </div>
+            ) : (
+              filteredPool.map(ex => (
+                <ExercisePoolRow key={ex.id || ex.name} ex={ex} session={session} onAdd={onAdd} />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </Portal>
+  );
+}
+
 const workoutPageCache = { trackerScroll: 0 };
 
 export default function WorkoutPage() {
@@ -824,6 +1018,10 @@ export default function WorkoutPage() {
   });
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [swapTarget, setSwapTarget] = useState(null);
+  const [showAddEx, setShowAddEx] = useState(false);
+  const [addExSearch, setAddExSearch] = useState('');
+  const [addExCat, setAddExCat] = useState('all');
+  const [confirmRemoveIdx, setConfirmRemoveIdx] = useState(null);
 
   const prMap = useMemo(() => {
     const map = {};
@@ -1069,6 +1267,81 @@ export default function WorkoutPage() {
   const addS = ei => setSession(p => { const e = [...p.exs]; const ls = e[ei].sets[e[ei].sets.length - 1]; e[ei] = { ...e[ei], sets: [...e[ei].sets, { ...ls, done: false }] }; return { ...p, exs: e }; });
   const rmS = (ei, si) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sets: e[ei].sets.filter((_, i) => i !== si) }; return { ...p, exs: e }; });
   const setV = (ei, v) => setSession(p => { const e = [...p.exs]; e[ei] = { ...e[ei], sv: v }; return { ...p, exs: e }; });
+
+  const addExercise = useCallback((ex) => {
+    setSession(prev => {
+      if (!prev) return prev;
+      const newEx = {
+        id:              gId(),
+        exerciseId:      ex.exerciseId || null,
+        name:            ex.name,
+        muscle:          ex.muscle || '',
+        primaryMuscle:   ex.primaryMuscle || '',
+        secondaryMuscles: ex.secondaryMuscles || [],
+        repsRange:       ex.repsRange || '8-12',
+        focusType:       ex.focusType || '',
+        sets: Array.from({ length: ex.sets || 3 }, () => ({
+          reps: '', weight: '', done: false,
+          targetRep: ex.repsRange || '8-12',
+        })),
+        sv: null,
+      };
+      return { ...prev, exs: [...prev.exs, newEx] };
+    });
+    setAddExSearch('');
+    setAddExCat('all');
+    setShowAddEx(false);
+  }, []);
+
+  const removeExercise = useCallback((ei) => {
+    if (restTimerPosition) {
+      if (restTimerPosition.ei === ei) {
+        setRestActive(false);
+        setRestEndsAt(null);
+        setRestTimerPosition(null);
+        localStorage.removeItem(REST_TIMER_KEY);
+        localStorage.removeItem(REST_TIMER_POS_KEY);
+      } else if (restTimerPosition.ei > ei) {
+        const shifted = { ...restTimerPosition, ei: restTimerPosition.ei - 1 };
+        setRestTimerPosition(shifted);
+        localStorage.setItem(REST_TIMER_POS_KEY, JSON.stringify(shifted));
+      }
+    }
+
+    setSession(prev => {
+      if (!prev) return prev;
+      return { ...prev, exs: prev.exs.filter((_, i) => i !== ei) };
+    });
+    setConfirmRemoveIdx(null);
+  }, [restTimerPosition]);
+
+  useEffect(() => {
+    if (confirmRemoveIdx === null) return;
+    const timer = setTimeout(() => setConfirmRemoveIdx(null), 8000);
+    return () => clearTimeout(timer);
+  }, [confirmRemoveIdx]);
+
+  const exercisePool = useMemo(() => {
+    const seen = new Set();
+    const pool = [];
+
+    splits.forEach(split => {
+      split.days.forEach(day => {
+        if (day.type === 'rest' || day.type === 'yoga') return;
+        day.exercises.forEach(ex => {
+          if (!seen.has(ex.name)) {
+            seen.add(ex.name);
+            pool.push(ex);
+          }
+        });
+      });
+    });
+
+    return pool.sort((a, b) =>
+      a.primaryMuscle.localeCompare(b.primaryMuscle) ||
+      a.name.localeCompare(b.name)
+    );
+  }, [splits]);
 
   const swapExercise = (exerciseIndex, newName) => {
     const lastSession = getLastSessionSets(workoutLogs, newName);
@@ -1322,9 +1595,29 @@ export default function WorkoutPage() {
                     {ex.muscle || 'Full Body'} • {focusType}
                   </p>
                 </div>
-                <button aria-label="Exercise options" style={{ minWidth: 44, minHeight: 44, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      if (confirmRemoveIdx === ei) removeExercise(ei);
+                      else setConfirmRemoveIdx(ei);
+                    }}
+                    aria-label="Remove Exercise"
+                    style={{
+                      minWidth: 44, minHeight: 44,
+                      background: confirmRemoveIdx === ei ? 'var(--error-container)' : 'none',
+                      border: 'none', borderRadius: 12,
+                      color: confirmRemoveIdx === ei ? 'var(--error)' : 'var(--on-surface-variant)',
+                      cursor: 'pointer', padding: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                  <button aria-label="Exercise options" style={{ minWidth: 44, minHeight: 44, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                  </button>
+                </div>
               </div>
 
               {/* Previous Session Reference Row (cross-split lookup) */}
@@ -1434,6 +1727,34 @@ export default function WorkoutPage() {
           );
         })}
       </div>
+
+      <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+        <button
+          onClick={() => {
+            setAddExSearch('');
+            setAddExCat('all');
+            setShowAddEx(true);
+          }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '14px 24px', borderRadius: '999px',
+            border: '2px dashed var(--primary-container)',
+            background: 'var(--surface-container-low)',
+            color: 'var(--primary)', fontFamily: "'Be Vietnam Pro', sans-serif",
+            fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em',
+            textTransform: 'uppercase', cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container)'}
+          onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container-low)'}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Plus size={18} strokeWidth={3} />
+          Add Exercise
+        </button>
+      </div>
+
       {session.notes !== undefined && (
         <div className="card glass-card" style={{ marginTop: 32, padding: 16 }}>
           <label className="label-md" style={{ color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Session Notes</label>
@@ -1459,7 +1780,7 @@ export default function WorkoutPage() {
 
       {/* Floating Indicators */}
       <Portal>
-        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: showAddEx ? 'none' : 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
           {showFAB && (
             <button 
               onClick={finish}
@@ -1503,6 +1824,18 @@ export default function WorkoutPage() {
           />
         </Portal>
       )}
+      
+      <AddExerciseSheet
+        show={showAddEx}
+        onClose={() => setShowAddEx(false)}
+        onAdd={addExercise}
+        session={session}
+        searchQuery={addExSearch}
+        setSearchQuery={setAddExSearch}
+        category={addExCat}
+        setCategory={setAddExCat}
+        exercisePool={exercisePool}
+      />
     </div>
   );
   }

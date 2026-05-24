@@ -2,8 +2,13 @@
 -- Old: Sunday 02:30 UTC (08:00 IST)
 -- New: Monday 03:30 UTC (09:00 IST)
 
--- Remove old schedule
-SELECT cron.unschedule('weekly-email-sunday');
+-- Remove old schedule safely if it exists
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'weekly-email-sunday') THEN
+    PERFORM cron.unschedule('weekly-email-sunday');
+  END IF;
+END $$;
 
 -- Create new schedule: Monday 9 AM IST = 03:30 UTC
 SELECT cron.schedule(

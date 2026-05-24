@@ -61,7 +61,13 @@ fittrack-pro/
 │       ├── 02_cloud_sync.sql                            # Phase Auth-2: workout, health, food, measurements, readiness, splits sync
 │       ├── 20260409_add_leaderboard_rls.sql             # Public SELECT policies for leaderboard reads on user_profiles + workout_logs
 │       ├── 20260417_body_fat_logs.sql                   # body_fat_logs table + body_fat_goal column on user_profiles + RLS
-│       └── 20260501091225_schedule_push_notifications.sql # pg_cron scheduling for Edge Functions
+│       ├── 20260501091225_schedule_push_notifications.sql # pg_cron scheduling for Edge Functions
+│       ├── 20260522000000_food_expansion_schema.sql     # Schema changes (barcode, brand, allergens, last_verified columns)
+│       ├── 20260522000001_seed_supplement_db.sql        # Seeding brand-specific supplements
+│       ├── 20260522000002_seed_off_india.sql            # Seeding Open Food Facts India dataset
+│       ├── 20260522000003_seed_indb_deep_expansion.sql  # Seeding deep food database expansion
+│       ├── 20260522000004a_add_enum_values.sql          # Adding all custom/missing enum values (eggetarian, shivratri, etc.)
+│       └── 20260522000004_seed_final_751_foods.sql      # Seeds 751 deduplicated, schema-compliant food items (cascading wipe first)
 │   └── functions/
 │       ├── _shared/
 │       │   └── push.ts                             # Shared web-push logic for Edge Functions
@@ -70,7 +76,8 @@ fittrack-pro/
 │       ├── send-streak-alert/                       # Morning streak motivation
 │       └── send-olympus-weekly/                     # Weekly rank summary push
 ├── scripts/                     # Data population & validation scripts
-│   ├── generate_seed.js         # Generates SQL seed from JS food objects
+│   ├── generate_seed_sql.cjs    # Generates SQL seed from JS food listings
+│   ├── check_all_enums.cjs      # Scans and reports all unique/extra enum values across listings
 │   ├── validate_foods.cjs       # Schema validation (unique IDs, sane macros, valid categories)
 │   ├── add_batch4–7.cjs         # Batch insert scripts for indianFoods.js
 │   ├── generate_supplements.cjs # Generates supplement entries
@@ -124,7 +131,7 @@ fittrack-pro/
     │   ├── rankBenchmarks.js
     │   ├── sample.js
     │   └── foods/
-    │       ├── indianFoods.js    # ~261 food objects (v3.1 schema extended, 350KB+), including Phase 1-5 newly injected QSR/Niche DB
+    │       ├── indianFoods.js    # 362 food objects (v3.1 schema extended, 476KB), including Phase 1-5 newly injected QSR/Niche DB
     │       ├── foodCategories.js # 20 category definitions
     │       └── servingTypes.js   # 18 standardized serving types
     ├── hooks/
@@ -476,48 +483,50 @@ Feedback / support form.
 ### Data Layer
 
 **Dual storage**: The food database exists in two places simultaneously:
-1. **Local JS** — `src/data/foods/indianFoods.js` (~207 entries, 314KB). Used as the guaranteed fallback runtime data source via `searchLocalFoods()`.
-2. **Supabase (cloud)** — Full Postgres database with `foods` and `food_servings` tables. Populated via 7 migration files. Queryable via `searchRemoteFoods()` / `fetchAllFoods()` in `foodUtils.js`.
+1. **Local JS** — `src/data/foods/indianFoods.js` (362 entries, 476KB). Used as the guaranteed fallback runtime data source via `searchLocalFoods()`.
+2. **Supabase (cloud)** — Full Postgres database with `foods` and `food_servings` tables. Populated via 12 migration files. Queryable via `searchRemoteFoods()` / `fetchAllFoods()` in `foodUtils.js`. **Seeded database has exactly 751 unique, verified items.**
 
 The current runtime path is hybrid: `useFoodCache()` first attempts a one-time full Supabase fetch, then falls back to local `indianFoods.js` if that fetch fails or returns empty. All actual Diet search/filter UI runs synchronously against the cached in-memory array.
 
-**Supabase schema** (`20260402091350_init_indian_food_db.sql`):
-- `foods` table — stores all food entries with snake_case columns mapping to the v2.3 schema
+**Supabase schema** (`20260402091350_init_indian_food_db.sql` + `20260522000000_food_expansion_schema.sql`):
+- `foods` table — stores all food entries with snake_case columns mapping to the v2.4 schema
 - `food_servings` table — per-food serving options (FK to `foods.id`)
 - RLS policies — public read access enabled (`20260407033900_add_rls_public_read.sql`)
 - Client at `src/lib/supabaseClient.js`, credentials via `.env` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
 - `@supabase/supabase-js` v2.101.1 in dependencies
 
-### Schema (v2.3)
+### Schema (v2.4)
 
-Each food object follows this shape:
+Each food object in the database follows this shape:
 
 ```js
 {
   id, name, nameAlt, hindiName, searchTerms,
-  category,          // one of 20 category IDs
+  category,          // one of 22 category IDs
   subcategory, itemType, state, region,
   defaultServingGrams,
   per100g: { calories, protein, carbs, fat, fiber, sodium, vitaminB12, vitaminD, iron, calcium },
   servings: [{ id, label, grams }],
-  dietTypes,         // subset of ['vegan','veg','jain','egg','nonveg']
+  dietTypes,         // subset of ['vegan','veg','jain','egg','nonveg','eggetarian']
   tags,
   isProcessed, isFastingFood, fastingTypes, isGlutenFree, isRecipe,
   containsRootVeg,   // for Jain filter
   hasBeverageModifiers,
   supportedConsistencyTypes, consistencyMultipliers,
   gi, cookingOilNote, estimatedOilG,
-  source, confidence, notes
+  source, confidence, notes,
+  barcode,           // [NEW] String for barcode scanning support
+  brand,             // [NEW] Brand name (e.g., "AS-IT-IS", "Amul")
+  allergens,         // [NEW] String array of allergens (e.g., ['milk', 'nuts'])
+  lastVerified       // [NEW] Verification date
 }
 ```
 
-### Categories (20)
+### Categories (22)
+`grain-cereal`, `roti-bread`, `rice-dish`, `dal-legume`, `sabzi-veg`, `non-veg`, `egg`, `dairy`, `breakfast`, `snack-street`, `sweet-mithai`, `fruit`, `drink`, `oil-fat`, `condiment`, `supplement`, `packaged-food`, `millet`, `sprout-soy`, `fasting-food`, `veg-dish`, `meal-combo`, `raw-ingredient`
 
-`grain-cereal`, `roti-bread`, `rice-dish`, `dal-legume`, `sabzi-veg`, `non-veg`, `egg`, `dairy`, `breakfast`, `snack-street`, `sweet-mithai`, `fruit`, `drink`, `oil-fat`, `condiment`, `supplement`, `packaged-food`, `millet`, `sprout-soy`, `fasting-food`
-
-### Serving Library (18 types)
-
-`roti`, `paratha`, `katori`, `bowl`, `plate`, `piece`, `glass`, `cup`, `tbsp`, `scoop`, `slice`, `g100`, `custom`, `handful`, `medium`, `egg`, `takeaway-container`, `restaurant-portion`, `thali`
+### Serving Library (34 types)
+`roti`, `paratha`, `katori`, `bowl`, `plate`, `piece`, `glass`, `cup`, `tbsp`, `scoop`, `slice`, `g100`, `custom`, `handful`, `medium`, `egg`, `takeaway-container`, `restaurant-portion`, `thali`, `serving`, `burger`, `pizza`, `taco`, `sub-6inch`, `sandwich`, `bottle`, `bar`, `tetrapack`, `block`, `pancake`, `muffin`, `tub`, `sub`, `grande`
 
 Delivery-sized servings (`takeaway-container` 480g, `restaurant-portion` 600g, `thali` 900g) trigger an info chip in the food logger.
 
@@ -532,11 +541,11 @@ Delivery-sized servings (`takeaway-container` 480g, `restaurant-portion` 600g, `
 | `getRecentFoods(foodLog, n)` | Last N unique foods from the user's log |
 | `getFavoriteFoods(foodsList, favoriteIds)` | Returns foods matching the user's starred IDs |
 
-### Supplement Data (Phase 5 — Planned, Not Yet in DB)
-
-`TODO-supplement-db.md` documents 26 whey protein products and 10 mass gainer products with exact per-scoop label data. These cover major Indian brands (MuscleBlaze, AS-IT-IS, The Whole Truth, NAKPRO, AVVATAR, TrueBasics, Nutrabay, Amul, Naturaltein, Protyze, Tata 1mg) and imports (ON, MyProtein, Dymatize, MuscleTech, Bigmuscles, GNC, Kevin Levrone). The current `indianFoods.js` has 7 generic supplement entries; the brand-specific entries have not been added yet.
-
-Schema extensions for supplements include: `brand`, `productLine`, `scoopWeightG`, `proteinType`, `bcaaG`, `eaaG`, `certifications`, `priceINR`, `originCountry`. These fields exist in the plan but are not yet present on the generic entries in the codebase.
+### Branded Supplement & Packaged Food Data
+The database now contains high-fidelity branded data:
+- **Supplements**: 26 whey protein products and 10 mass gainer products with exact per-scoop label data from major Indian brands (AS-IT-IS, Amul, MuscleBlaze, Avvatar, etc.) and imports (ON, MyProtein, Dymatize, etc.) fully seeded into the database.
+- **Packaged Foods & QSR**: Major Indian packaged foods and fast-food chains (Starbucks, McDonald's, Domino's, Britannia, Lays, Haldiram's) fully populated and verified.
+- **Open Food Facts**: Integrated off-india dataset items with barcode keys.
 
 ---
 
@@ -894,8 +903,7 @@ Several rounds of mobile UX fixes on the food search modal:
 | Item | Notes |
 |------|-------|
 | Web Push Subscription Flow | Backend is ready, but frontend `ServiceWorker` and permission request UI are not yet implemented. |
-| Supplement brand entries | 26 whey + 10 mass gainer entries documented in `TODO-supplement-db.md` — not yet added to `indianFoods.js` |
-| Food count vs target | ~207 entries in `indianFoods.js` vs 350 target. Missing items mainly in sweets/mithai, fruits, and regional variants |
+| Barcode scanning UI | Backend database supports barcode fields, but front-end barcode scanning UI is not yet implemented. |
 | Steps / Calories data | Placeholder cards on Dashboard, no real data source wired |
 | `back-calves` / `back-forearms` | Not in `MUSCLE_IMAGES` map in `BodyMapSVG.jsx` |
 | `ProgressOrb` usage | Only on Dashboard goal card — not yet on other pages |

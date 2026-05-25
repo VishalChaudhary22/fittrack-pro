@@ -34,7 +34,7 @@ serve(async (req) => {
     if (error) throw error;
 
     return new Response(
-      `<html><body><h1>Successfully unsubscribed from ${type || 'all'} notifications.</h1><p>You can change this anytime in your Kaaya profile settings.</p></body></html>`, 
+      `<html><body><h1>Successfully unsubscribed from ${type || 'all'} notifications.</h1><p>You can change this anytime in your Kaaya Fit profile settings.</p></body></html>`, 
       {
         headers: { "Content-Type": "text/html" },
         status: 200,

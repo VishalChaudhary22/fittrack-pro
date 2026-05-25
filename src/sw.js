@@ -22,12 +22,12 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-      self.registration.showNotification(data.title || 'Kaaya', options)
+      self.registration.showNotification(data.title || 'Kaaya Fit', options)
     );
   } catch (err) {
     // Fallback if not JSON
     event.waitUntil(
-      self.registration.showNotification('Kaaya', {
+      self.registration.showNotification('Kaaya Fit', {
         body: event.data.text(),
         icon: '/kaaya-icon-192.png'
       })

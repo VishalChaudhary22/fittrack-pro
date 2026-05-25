@@ -16,8 +16,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 3000000,
       },
       manifest: {
-        name: 'Kaaya',
-        short_name: 'Kaaya',
+        name: 'Kaaya Fit',
+        short_name: 'Kaaya Fit',
         description: 'Kinetic Elite Fitness Tracker',
         theme_color: '#f85f1b',
         background_color: '#090a0f',

@@ -141,7 +141,7 @@ function buildEmailHtml(
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onPrimary};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.15;margin:0 0 4px;">${escapeHtml(workoutLabel)}</h2>
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:15px;color:rgba(255,255,255,0.8);line-height:1.5;margin:0 0 24px;">
-        ${workoutCount >= 4 ? "You are in the top 12% of Kaaya users this month." : "Keep building. Consistency compounds."}
+        ${workoutCount >= 4 ? "You are in the top 12% of Kaaya Fit users this month." : "Keep building. Consistency compounds."}
       </p>
       ${consistencyProtocol}
       ${statsCardsHtml}
@@ -207,7 +207,7 @@ function buildEmailHtml(
     </td></tr></table>
   `;
 
-  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark only"><meta name="supported-color-schemes" content="dark only"><title>Kaaya Weekly Digest</title>
+  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="dark only"><meta name="supported-color-schemes" content="dark only"><title>Kaaya Fit Weekly Digest</title>
 <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
 <style>
 :root{color-scheme:dark only !important;}
@@ -231,7 +231,7 @@ u+.body .gm-incentive{background-color:#1a1408 !important;}
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
 <body class="body" bgcolor="${C.surfaceLowest}" style="margin:0 !important;padding:0 !important;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;color:${C.onSurface} !important;color-scheme:dark only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
 <!-- Preheader (hidden preview text) -->
-<div style="display:none;font-size:1px;color:${C.surfaceLowest};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+<div style="display:none;font-size:1px;color:${C.surfaceLowest};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya Fit digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
 <!-- Outer wrapper table (Gmail-proof) -->
 <table role="presentation" width="100%" bgcolor="${C.surfaceLowest}" cellpadding="0" cellspacing="0" border="0" class="gm-bg" style="background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;width:100% !important;"><tr><td align="center" bgcolor="${C.surfaceLowest}" class="gm-bg" style="padding:20px 0;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;">
 <!-- Inner wrapper table (second layer of protection) -->
@@ -239,7 +239,7 @@ u+.body .gm-incentive{background-color:#1a1408 !important;}
   <!-- Header -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="background-color:${C.surfaceLowest} !important;padding:24px 28px 20px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer} !important;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface} !important;letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA</h1></td>
+      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer} !important;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface} !important;letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA FIT</h1></td>
       <td style="text-align:right;vertical-align:top;"><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.5) !important;letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
     </tr></table>
   </td></tr></table>
@@ -271,7 +271,7 @@ u+.body .gm-incentive{background-color:#1a1408 !important;}
   </td></tr></table>
   <!-- Footer -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="padding:20px 28px 28px;background-color:${C.surfaceLowest} !important;">
-    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4) !important;text-align:center;line-height:1.8;margin:0;">You receive this because you train with Kaaya.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Unsubscribe</a></p>
+    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4) !important;text-align:center;line-height:1.8;margin:0;">You receive this because you train with Kaaya Fit.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Unsubscribe</a></p>
   </td></tr></table>
 </td></tr></table>
 </td></tr></table>
@@ -431,11 +431,11 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendApiKey}` },
         body: JSON.stringify({
-          from: "Kaaya <updates@kaaya.fit>",
+          from: "Kaaya Fit <updates@kaaya.fit>",
           to: user.email,
           subject: workoutCount > 0
-            ? `${workoutCount} ${workoutCount === 1 ? "workout" : "workouts"} last week — your Kaaya digest`
-            : "No workouts last week — your Kaaya digest",
+            ? `${workoutCount} ${workoutCount === 1 ? "workout" : "workouts"} last week — your Kaaya Fit digest`
+            : "No workouts last week — your Kaaya Fit digest",
           html: htmlContent,
         }),
       });

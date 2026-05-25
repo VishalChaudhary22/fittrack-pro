@@ -36,7 +36,7 @@ function AppInner() {
             fontSize: 28, letterSpacing: '-0.04em', color: 'var(--primary)',
             textTransform: 'uppercase', marginBottom: 16,
           }}>
-            Kaaya
+            Kaaya Fit
           </div>
           <div style={{
             width: 48, height: 4, background: 'linear-gradient(135deg, var(--primary), #FF9A5C)',

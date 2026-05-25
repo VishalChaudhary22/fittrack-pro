@@ -185,11 +185,11 @@ export default function AuthModal() {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img 
             src="/kaaya-icon-192.png" 
-            alt="Kaaya Logo" 
+            alt="Kaaya Fit Logo" 
             style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 16px', display: 'block', boxShadow: '0 8px 24px rgba(232,84,13,.2)' }} 
           />
           <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.04em', color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>
-            Kaaya
+            Kaaya Fit
           </div>
           <div style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, letterSpacing: '.5px' }}>
              {mode === 'login' ? 'Welcome back' : 'Create your account'}

@@ -133,7 +133,7 @@ export default function ProfilePage() {
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
-          from_name:  user?.name   || 'Kaaya User',
+          from_name:  user?.name   || 'Kaaya Fit User',
           from_email: user?.email  || 'anonymous',
           subject:    feedbackSubject.trim() || 'General Feedback',
           message:    feedbackMessage.trim(),
@@ -585,7 +585,7 @@ export default function ProfilePage() {
             </div>
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)' }}>Feedback & Bugs</div>
-              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>Help us improve Kaaya</div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>Help us improve Kaaya Fit</div>
             </div>
           </div>
           <ChevronDown size={18} color="var(--on-surface-dim)" style={{ transform: feedbackOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -599,7 +599,7 @@ export default function ProfilePage() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>
                 <CheckCircle size={32} color="var(--primary)" />
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Feedback Sent</div>
-                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Thank you! Your input helps shape the future of Kaaya.</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Thank you! Your input helps shape the future of Kaaya Fit.</div>
               </div>
             ) : feedbackStatus === 'error' ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>

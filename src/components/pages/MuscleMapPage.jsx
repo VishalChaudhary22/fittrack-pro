@@ -450,9 +450,11 @@ export default function MuscleMapPage({ chatbot }) {
                     padding: '2px 10px', borderRadius: 20, fontSize: 10, fontWeight: 800,
                     fontFamily: "'Space Grotesk', sans-serif", textTransform: 'uppercase',
                     whiteSpace: 'nowrap',
-                    background: isCenter ? 'linear-gradient(135deg, #FFB59B, #F85F1B)' : `${medalColor}22`,
+                    background: isCenter ? 'linear-gradient(135deg, #FFB59B, #F85F1B)' : 'var(--surface)',
                     color: isCenter ? '#fff' : medalColor,
+                    border: isCenter ? 'none' : `1.5px solid ${medalColor}40`,
                     boxShadow: isCenter ? '0 4px 12px rgba(248,95,27,0.3)' : 'none',
+                    zIndex: 2,
                   }}>
                     {rankLabel}
                   </div>

@@ -817,21 +817,24 @@ export function AppProvider({ children }) {
     await updateProfile({ activeSplitId: id });
   }, [profile]);
 
-  const user = profile ? {
-    id: session?.user?.id, email: session?.user?.email, name: profile.name, gender: profile.gender, age: profile.age,
-    height: profile.height, weight: profile.weight, weightGoal: profile.weight_goal, weightGoalStart: profile.weight_goal_start,
-    goalWeeks: profile.goal_weeks, goalSetDate: profile.goal_set_date, activity: profile.activity, activityLevel: profile.activity, workoutDays: profile.workout_days,
-    dietType: profile.diet_type, units: profile.units, unitWeight: profile.unit_weight || 'kg', unitHeight: profile.unit_height || 'cm',
-    avatar: profile.avatar, avatarType: profile.avatar_type, avatarUrl: profile.avatar_url, activeSplitId: profile.active_split_id,
-    isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
-    stepGoal: profile.step_goal || 10000,
-    bodyFatGoal: profile.body_fat_goal || null,
-    customGoalKcal: profile.custom_goal_kcal || null,
-    customProteinG: profile.custom_protein_g || null,
-    lastKcalSuggestionDate: profile.last_kcal_suggestion_date || null,
-    manualTDEEOverride: tdeePreferences.manualTDEEOverride,
-    useEstimatedTDEE: tdeePreferences.useEstimatedTDEE,
-  } : null;
+  const user = useMemo(() => {
+    if (!profile) return null;
+    return {
+      id: session?.user?.id, email: session?.user?.email, name: profile.name, gender: profile.gender, age: profile.age,
+      height: profile.height, weight: profile.weight, weightGoal: profile.weight_goal, weightGoalStart: profile.weight_goal_start,
+      goalWeeks: profile.goal_weeks, goalSetDate: profile.goal_set_date, activity: profile.activity, activityLevel: profile.activity, workoutDays: profile.workout_days,
+      dietType: profile.diet_type, units: profile.units, unitWeight: profile.unit_weight || 'kg', unitHeight: profile.unit_height || 'cm',
+      avatar: profile.avatar, avatarType: profile.avatar_type, avatarUrl: profile.avatar_url, activeSplitId: profile.active_split_id,
+      isAdmin: profile.is_admin || false, purchasedPrograms: profile.purchased_programs || [], joinDate: profile.created_at?.split('T')[0],
+      stepGoal: profile.step_goal || 10000,
+      bodyFatGoal: profile.body_fat_goal || null,
+      customGoalKcal: profile.custom_goal_kcal || null,
+      customProteinG: profile.custom_protein_g || null,
+      lastKcalSuggestionDate: profile.last_kcal_suggestion_date || null,
+      manualTDEEOverride: tdeePreferences.manualTDEEOverride,
+      useEstimatedTDEE: tdeePreferences.useEstimatedTDEE,
+    };
+  }, [profile, session, tdeePreferences]);
 
   useEffect(() => {
     userRef.current = user;

@@ -29,7 +29,7 @@ export const useNotifications = () => {
   }, []);
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
@@ -64,7 +64,7 @@ export const useNotifications = () => {
       setLoading(false);
     };
     fetchPrefs();
-  }, [user]);
+  }, [user?.id]);
 
   const updatePreferences = async (newPrefs) => {
     if (!user) return;

@@ -783,8 +783,8 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
 }
 
 const MUSCLE_DISPLAY_ORDER = [
-  'Chest', 'Back', 'Shoulders', 'Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves',
-  'Biceps', 'Triceps', 'Arms', 'Core', 'Full Body'
+  'Chest', 'Back', 'Shoulders', 'Rear Delts', 'Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves',
+  'Abductors', 'Adductors', 'Biceps', 'Triceps', 'Arms', 'Core', 'Full Body'
 ];
 
 const getSortIndex = (muscle) => {
@@ -796,11 +796,14 @@ const MUSCLE_COLOR_MAP = {
   'Chest': 'var(--primary)',
   'Back': 'var(--tertiary, #4CAF50)',
   'Shoulders': 'var(--secondary, #FFC107)',
+  'Rear Delts': 'var(--secondary, #FFC107)',
   'Legs': 'var(--error, #F44336)',
   'Quads': 'var(--error, #F44336)',
   'Hamstrings': 'var(--error, #F44336)',
   'Glutes': '#E91E63',
   'Calves': '#9C27B0',
+  'Abductors': '#E91E63',
+  'Adductors': 'var(--error, #F44336)',
   'Biceps': '#00BCD4',
   'Triceps': '#03A9F4',
   'Arms': '#00BCD4',
@@ -812,7 +815,7 @@ function ExercisePoolRow({ ex, onAdd, session }) {
   const alreadyAdded = session?.exs?.some(e =>
     e.name === ex.name || e._originalName === ex.name || e.originalName === ex.name
   );
-  const accent = MUSCLE_COLOR_MAP[ex.primaryMuscle] || 'var(--on-surface-dim)';
+  const accent = MUSCLE_COLOR_MAP[ex.muscle] || 'var(--on-surface-dim)';
 
   return (
     <div style={{
@@ -833,7 +836,7 @@ function ExercisePoolRow({ ex, onAdd, session }) {
           color: 'var(--on-surface-variant)', textTransform: 'uppercase',
           letterSpacing: '0.05em', fontWeight: 600, display: 'flex', gap: '8px'
         }}>
-          <span style={{ color: accent }}>{ex.primaryMuscle}</span>
+          <span style={{ color: accent }}>{ex.muscle}</span>
           {ex.repsRange && <span>• {ex.repsRange}</span>}
         </div>
       </div>
@@ -865,11 +868,11 @@ function AddExerciseSheet({
 
   const filteredPool = exercisePool.filter(ex => {
     const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCat = category === 'all' || ex.primaryMuscle === category;
+    const matchesCat = category === 'all' || ex.muscle === category;
     return matchesSearch && matchesCat;
   });
 
-  const categories = ['all', ...Array.from(new Set(exercisePool.map(ex => ex.primaryMuscle))).sort((a, b) => getSortIndex(a) - getSortIndex(b))];
+  const categories = ['all', ...Array.from(new Set(exercisePool.map(ex => ex.muscle))).sort((a, b) => getSortIndex(a) - getSortIndex(b))];
 
   return (
     <Portal>
@@ -1312,26 +1315,15 @@ export default function WorkoutPage() {
   }, [confirmRemoveIdx]);
 
   const exercisePool = useMemo(() => {
-    const seen = new Set();
-    const pool = [];
-
-    splits.forEach(split => {
-      split.days.forEach(day => {
-        if (day.type === 'rest' || day.type === 'yoga') return;
-        day.exercises.forEach(ex => {
-          if (!seen.has(ex.name)) {
-            seen.add(ex.name);
-            pool.push(ex);
-          }
-        });
-      });
+    // Return a sorted copy of EXERCISE_LIBRARY excluding recovery/yoga poses
+    const pool = EXERCISE_LIBRARY.filter(ex => ex.primaryMuscle !== null && ex.primaryMuscle !== 'recovery');
+    
+    return pool.sort((a, b) => {
+      const pmA = a.muscle || '';
+      const pmB = b.muscle || '';
+      return pmA.localeCompare(pmB) || a.name.localeCompare(b.name);
     });
-
-    return pool.sort((a, b) =>
-      a.primaryMuscle.localeCompare(b.primaryMuscle) ||
-      a.name.localeCompare(b.name)
-    );
-  }, [splits]);
+  }, []);
 
   const swapExercise = (exerciseIndex, newName) => {
     const lastSession = getLastSessionSets(workoutLogs, newName);

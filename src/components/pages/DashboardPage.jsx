@@ -401,7 +401,9 @@ export default function DashboardPage() {
           </div>
           <div style={{ fontFamily: "'Space Grotesk'", fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
             {isNewUser ? 'WELCOME,' : 'WELCOME BACK,'}<br/>
-            <span className="text-gradient-primary">{user.name.split(' ')[0].toUpperCase()}</span>
+            <span className="text-gradient-primary">
+              {user.name.toLowerCase().startsWith('kaaya fit') ? 'KAAYA FIT' : user.name.split(' ')[0].toUpperCase()}
+            </span>
           </div>
           <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span>{new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>

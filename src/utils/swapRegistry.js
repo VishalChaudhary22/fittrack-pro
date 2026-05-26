@@ -56,7 +56,9 @@ export function getSwappedExercise(exercise, splitId, userId) {
       exerciseId: swapInfo.replacementId,
       isSwapped: true,
       originalId: exercise.exerciseId,
-      originalName: exercise.name
+      originalName: exercise.name,
+      _originalVariants: exercise.variants || null,
+      variants: null // Clear variants for the swapped state
     };
   }
   return exercise;

@@ -1347,36 +1347,56 @@ export default function WorkoutPage() {
     const lastSession = getLastSessionSets(workoutLogs, newName);
     const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 
-    setSession(prev => ({
-      ...prev,
-      exs: prev.exs.map((ex, i) => {
-        if (i !== exerciseIndex) return ex;
+    setSession(prev => {
+      const targetEx = prev.exs[exerciseIndex];
+      if (!targetEx) return prev;
 
-        // Preserve the true original name so we can always swap back
-        // Check both _originalName (in-session swap) and originalName (swap registry)
-        const trueOriginal = ex._originalName || ex.originalName || ex.name;
+      const trueOriginal = targetEx._originalName || targetEx.originalName || targetEx.name;
+      const originalId = targetEx.originalId || targetEx.exerciseId;
+      const isRestoringOriginal = newName === trueOriginal;
 
-        return {
-          ...ex,
-          sv: newName,
-          name: newName, // Update the displayed name
-          _originalName: trueOriginal, // Always keep the real original
-          _swapHistory: history ?? null,
-          sets: ex.sets.map((set, si) => {
-            if (set.done) return set;
-            // Map set-by-set: use matching index, fall back to last historical set
-            const histSet = lastSession
-              ? (lastSession.sets[si] ?? lastSession.sets[lastSession.sets.length - 1])
-              : null;
-            return {
-              ...set,
-              weight: histSet ? String(histSet.weight) : '',
-              reps:   histSet ? String(histSet.reps)   : '',
-            };
-          }),
-        };
-      }),
-    }));
+      // Update swap registry for cross-day persistence
+      if (isRestoringOriginal) {
+        removeSwap(originalId, activeSplit?.id, user.id);
+      } else {
+        const libEntry = EXERCISE_LIBRARY.find(e => e.name === newName);
+        const replacementId = libEntry ? libEntry.exerciseId : newName.toLowerCase().replace(/\s+/g, '-');
+        registerSwap(originalId, trueOriginal, replacementId, newName, activeSplit?.id, user.id);
+      }
+
+      return {
+        ...prev,
+        exs: prev.exs.map((ex, i) => {
+          if (i !== exerciseIndex) return ex;
+
+          // Preserve the true original name so we can always swap back
+          // Check both _originalName (in-session swap) and originalName (swap registry)
+          const origVariants = ex._originalVariants || ex.variants || null;
+
+          return {
+            ...ex,
+            sv: newName,
+            name: newName, // Update the displayed name
+            _originalName: trueOriginal, // Always keep the real original
+            _originalVariants: origVariants,
+            variants: isRestoringOriginal ? origVariants : null,
+            _swapHistory: history ?? null,
+            sets: ex.sets.map((set, si) => {
+              if (set.done) return set;
+              // Map set-by-set: use matching index, fall back to last historical set
+              const histSet = lastSession
+                ? (lastSession.sets[si] ?? lastSession.sets[lastSession.sets.length - 1])
+                : null;
+              return {
+                ...set,
+                weight: histSet ? String(histSet.weight) : '',
+                reps:   histSet ? String(histSet.reps)   : '',
+              };
+            }),
+          };
+        }),
+      };
+    });
   };
 
   const finish = () => {
@@ -1576,24 +1596,22 @@ export default function WorkoutPage() {
                   </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginTop: 2 }}>
-                  {!ex.variants && (
-                    <button
-                      onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}
-                      aria-label={`Swap ${ex.name}`}
-                      style={{
-                        background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
-                        cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
-                        color: 'var(--on-surface-variant)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                        transition: 'all 0.2s', flexShrink: 0
-                      }}
-                      onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
-                      onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
-                    >
-                      <ArrowRightLeft size={16} />
-                      <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}
+                    aria-label={`Swap ${ex.name}`}
+                    style={{
+                      background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
+                      cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
+                      color: 'var(--on-surface-variant)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      transition: 'all 0.2s', flexShrink: 0
+                    }}
+                    onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
+                    onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
+                  >
+                    <ArrowRightLeft size={16} />
+                    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
+                  </button>
                   <button
                     onClick={() => {
                       if (confirmRemoveIdx === ei) removeExercise(ei);

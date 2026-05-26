@@ -38,7 +38,7 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
     onClick();
   }, [showGreeting, dismissGreeting, onClick]);
 
-  const firstName = userName?.split(' ')[0] || 'there';
+  const firstName = userName?.toLowerCase().startsWith('kaaya fit') ? 'Kaaya Fit' : (userName?.split(' ')[0] || 'there');
 
   return (
     <>

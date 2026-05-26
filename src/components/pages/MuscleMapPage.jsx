@@ -442,6 +442,7 @@ export default function MuscleMapPage({ chatbot }) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
                     fontSize: isCenter ? 22 : 17, color: medalColor,
+                    position: 'relative', zIndex: 1,
                   }}>
                     {player.rank}
                   </div>
@@ -454,7 +455,7 @@ export default function MuscleMapPage({ chatbot }) {
                     color: isCenter ? '#fff' : medalColor,
                     border: isCenter ? 'none' : `1.5px solid ${medalColor}40`,
                     boxShadow: isCenter ? '0 4px 12px rgba(248,95,27,0.3)' : 'none',
-                    zIndex: 2,
+                    zIndex: 10,
                   }}>
                     {rankLabel}
                   </div>

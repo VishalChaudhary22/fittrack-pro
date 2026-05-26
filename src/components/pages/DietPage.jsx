@@ -464,7 +464,7 @@ export default function DietPage({ chatbot }) {
 
   return (
     <div className="pg-in">
-      <PageHeader title="Diet Guide & Log" sub={`Personalised for ${user.name.split(' ')[0]} | Target: ${goalKcal} kcal`} />
+      <PageHeader title="Diet Guide & Log" sub={`Personalised for ${user.name.toLowerCase().startsWith('kaaya fit') ? 'Kaaya Fit' : user.name.split(' ')[0]} | Target: ${goalKcal} kcal`} />
       
       {/* ──────────────────────────────────────────────────────────── */}
       {/* SECTION 1: DIET GUIDE (Kinetic Elite Restyle) */}

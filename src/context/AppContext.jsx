@@ -14,6 +14,7 @@ import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestion
 import { getBestTDEE, detectMetabolicAdaptation } from '../utils/adaptiveTDEE';
 import { calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../utils/calculations';
 import { loadSwapRegistryFromCloud } from '../utils/swapRegistry';
+import { buildMonthlyRankHistory } from '../utils/rankHistory';
 
 const AppContext = createContext(null);
 const SAMPLE = genSample();
@@ -347,11 +348,10 @@ export function AppProvider({ children }) {
 
   // --- Phase 3 / Non-Migrated Local State ---
   const [favoriteIds, setFavoriteIds] = useLocalStorage('fittrack_favoriteFoods', []);
-  const [monthlyRankHistory, setMonthlyRankHistory] = useLocalStorage('fittrack_monthlyRankHistory', [
-    { id: '2026-02', label: 'Feb 2026', xp: 175000 },
-    { id: '2026-01', label: 'Jan 2026', xp: 130000 },
-    { id: '2025-12', label: 'Dec 2025', xp: 98000 },
-  ]);
+  // Derived, not stored: the Olympus rank history is recomputed from the
+  // user's own workout logs with the same engine that scores the live
+  // leaderboard, so past months and the current month stay on one scale.
+  // (Placed after `user` is built — it needs the active split.)
   const [caloriesLog, setCaloriesLog] = useLocalStorage('fittrack_caloriesLog', []);
   const [waterLog, setWaterLog] = useLocalStorage('fittrack_waterLog', []);
   const [cardioLog, setCardioLog] = useLocalStorage('fittrack_cardioLog', []);
@@ -869,6 +869,14 @@ export function AppProvider({ children }) {
     userRef.current = user;
   }, [user]);
 
+  // Derived, not stored: the Olympus rank history is recomputed from the
+  // user's own workout logs with the same engine that scores the live
+  // leaderboard, so past months and the current month stay on one scale.
+  const monthlyRankHistory = useMemo(
+    () => buildMonthlyRankHistory(workoutLogs, splits, user?.id, user),
+    [workoutLogs, splits, user]
+  );
+
   const scheduleTDEERecompute = useCallback(() => {
     const cachedUserId = currentUserIdRef.current;
     if (!cachedUserId) return;
@@ -1166,7 +1174,7 @@ export function AppProvider({ children }) {
 
     caloriesLog, setCaloriesLog,
     favoriteIds, setFavoriteIds,
-    monthlyRankHistory, setMonthlyRankHistory,
+    monthlyRankHistory,
     theme, toggleTheme,
     toasts, addToast, removeToast,
     getStreak, getFoodStreak,

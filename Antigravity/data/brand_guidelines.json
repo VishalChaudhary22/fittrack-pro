@@ -1,0 +1,35 @@
+{
+  "brand_name": "Kaaya Fit",
+  "tagline": "Your Body. Your Data. Your Power.",
+  "origin": "Kaaya (काया) = Body in Sanskrit",
+  "colors": {
+    "primary": "#E8540D",
+    "gradient": "linear-gradient(135deg, #E8540D, #FF6B35)",
+    "dark_bg": "#0D0D0F",
+    "card_bg": "#1A1A1E",
+    "text": "#FFFFFF",
+    "muted": "#8A8A8F"
+  },
+  "typography": {
+    "headings": "Bebas Neue",
+    "body": "Inter / system-ui"
+  },
+  "voice": {
+    "tone": "Confident, data-driven, motivational but never preachy",
+    "language": "Hinglish (natural mix of Hindi and English)",
+    "personality": "Like a gym buddy who also understands science"
+  },
+  "content_pillars": [
+    "Education (workout science, nutrition facts)",
+    "Motivation (transformation stories, daily fire)",
+    "Product (feature highlights, tips & tricks)",
+    "Community (user stories, challenges)",
+    "Results (data visualizations, PR celebrations)"
+  ],
+  "forbidden_terms": ["FitTrack", "FitPact", "bet", "wager", "stake", "gamble"],
+  "preferred_terms": {
+    "challenge_feature": "Sankalp",
+    "ai_assistant": "Bodhi",
+    "app_name": "Kaaya Fit"
+  }
+}

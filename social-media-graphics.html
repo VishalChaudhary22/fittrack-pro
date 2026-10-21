@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0c;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    gap: 40px;
+    padding: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0E0E10 0%, #1a1a1e 100%);
+  }
+
+  /* SQUARE */
+  .square {
+    width: 1080px;
+    height: 1080px;
+    border-radius: 24px;
+  }
+
+  /* STORY */
+  .story {
+    width: 1080px;
+    height: 1920px;
+    border-radius: 32px;
+  }
+
+  .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .glow-1 { width: 600px; height: 600px; background: #F85F1B; top: -100px; left: -100px; }
+  .glow-2 { width: 500px; height: 500px; background: #F85F1B; bottom: -150px; right: -100px; opacity: 0.2; }
+  .glow-3 { width: 400px; height: 400px; background: #FF9A5C; top: 40%; left: 50%; transform: translate(-50%, -50%); opacity: 0.12; }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+
+  .icon-wrap {
+    position: relative;
+    margin-top: 120px;
+  }
+  .story .icon-wrap { margin-top: 200px; }
+
+  .icon-shadow {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(248,95,27,0.3) 0%, transparent 70%);
+    transform: scale(1.4);
+    filter: blur(30px);
+  }
+
+  .icon-img {
+    width: 220px;
+    height: 220px;
+    border-radius: 52px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    position: relative;
+    z-index: 1;
+  }
+  .story .icon-img { width: 300px; height: 300px; border-radius: 72px; }
+
+  .title {
+    margin-top: 40px;
+    font-size: 68px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+  }
+  .story .title { margin-top: 60px; font-size: 88px; }
+
+  .subtitle {
+    margin-top: 10px;
+    font-size: 28px;
+    font-weight: 500;
+    color: #FF9A5C;
+    letter-spacing: 0.02em;
+  }
+  .story .subtitle { margin-top: 16px; font-size: 38px; }
+
+  .divider {
+    width: 400px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(248,95,27,0.6), transparent);
+    margin-top: 30px;
+  }
+  .story .divider { width: 500px; margin-top: 40px; }
+
+  .features {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: flex-start;
+    width: 520px;
+  }
+  .story .features { margin-top: 80px; gap: 40px; width: 640px; }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 26px;
+    color: #e0e0e0;
+    font-weight: 500;
+  }
+  .story .feature-item { font-size: 34px; gap: 22px; }
+
+  .bullet {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: #F85F1B;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(248,95,27,0.5);
+  }
+  .story .bullet { width: 14px; height: 14px; border-radius: 4px; }
+
+  .cta {
+    margin-top: 60px;
+    background: linear-gradient(135deg, #F85F1B, #FF9A5C);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    padding: 22px 56px;
+    border-radius: 50px;
+    box-shadow: 0 12px 40px rgba(248,95,27,0.35);
+    letter-spacing: 0.02em;
+  }
+  .story .cta { margin-top: 100px; font-size: 36px; padding: 28px 72px; border-radius: 60px; }
+
+  .tagline {
+    margin-top: auto;
+    margin-bottom: 60px;
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .story .tagline { margin-bottom: 100px; font-size: 26px; }
+
+  .story-extra {
+    margin-top: 30px;
+    font-size: 22px;
+    color: rgba(255,255,255,0.45);
+  }
+  .story .story-extra { font-size: 28px; margin-top: 40px; }
+
+  /* Hide scrollbar, ensure crisp rendering */
+  html { scrollbar-width: none; }
+  ::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+<!-- SQUARE -->
+<div class="card square" id="square">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div class="content">
+    <div class="icon-wrap">
+      <div class="icon-shadow"></div>
+      <img class="icon-img" src="public/kaaya-icon-512.png" alt="Kaaya Fit">
+    </div>
+    <div class="title">Kaaya Fit</div>
+    <div class="subtitle">Your All-in-One Fitness Companion</div>
+    <div class="divider"></div>
+    <div class="features">
+      <div class="feature-item"><div class="bullet"></div>Workout Tracking & Splits</div>
+      <div class="feature-item"><div class="bullet"></div>Nutrition & Macro Logging</div>
+      <div class="feature-item"><div class="bullet"></div>Weight Trends & Analytics</div>
+      <div class="feature-item"><div class="bullet"></div>AI Coach & Insights</div>
+      <div class="feature-item"><div class="bullet"></div>Muscle Recovery Readiness</div>
+    </div>
+    <div class="cta">Start Your Transformation →</div>
+    <div class="tagline">Track. Progress. Achieve.</div>
+  </div>
+</div>
+
+<!-- STORY -->
+<div class="card story" id="story">
+  <div class="glow glow-1" style="width:700px;height:700px;top:-200px;left:-200px;"></div>
+  <div class="glow glow-2" style="width:600px;height:600px;bottom:-200px;right:-200px;"></div>
+  <div class="glow glow-3" style="width:500px;height:500px;"></div>
+  <div class="content">
+    <div class="icon-wrap">
+      <div class="icon-shadow"></div>
+      <img class="icon-img" src="public/kaaya-icon-512.png" alt="Kaaya Fit">
+    </div>
+    <div class="title">Kaaya Fit</div>
+    <div class="subtitle">All-in-One Fitness Tracker</div>
+    <div class="divider"></div>
+    <div class="features">
+      <div class="feature-item"><div class="bullet"></div>Workout Tracking & Splits</div>
+      <div class="feature-item"><div class="bullet"></div>Nutrition & Macro Logging</div>
+      <div class="feature-item"><div class="bullet"></div>Weight Trends & Body Analytics</div>
+      <div class="feature-item"><div class="bullet"></div>AI-Powered Coach</div>
+      <div class="feature-item"><div class="bullet"></div>Muscle Recovery Readiness</div>
+      <div class="feature-item"><div class="bullet"></div>Step & Water Tracking</div>
+    </div>
+    <div class="cta">Get Started Free →</div>
+    <div class="story-extra">PWA · Install on Any Device</div>
+    <div class="tagline">Track. Progress. Achieve.</div>
+  </div>
+</div>
+
+  <!-- BANNER -->
+  <div class="card banner" id="banner" style="width:1200px;height:627px;border-radius:16px;">
+    <div class="glow glow-1" style="width:500px;height:500px;top:-100px;left:-100px;"></div>
+    <div class="glow glow-2" style="width:600px;height:600px;bottom:-200px;right:-100px;"></div>
+    <div class="content" style="flex-direction:row;padding:0 80px;gap:60px;align-items:center;justify-content:center;">
+      <div style="position:relative;">
+        <div class="icon-shadow" style="transform:scale(1.6);"></div>
+        <img class="icon-img" src="public/kaaya-icon-512.png" alt="Kaaya Fit" style="width:220px;height:220px;border-radius:52px;">
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;max-width:600px;">
+        <div class="title" style="margin-top:0;font-size:56px;text-align:left;">Kaaya Fit</div>
+        <div class="subtitle" style="font-size:26px;text-align:left;margin-top:8px;">All-in-One Fitness Tracker</div>
+        <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:12px;">
+          <span style="background:rgba(248,95,27,0.15);color:#FF9A5C;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:600;">Workouts</span>
+          <span style="background:rgba(248,95,27,0.15);color:#FF9A5C;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:600;">Nutrition</span>
+          <span style="background:rgba(248,95,27,0.15);color:#FF9A5C;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:600;">AI Coach</span>
+          <span style="background:rgba(248,95,27,0.15);color:#FF9A5C;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:600;">Recovery</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
 import { getLastLiftedForExercise, getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';

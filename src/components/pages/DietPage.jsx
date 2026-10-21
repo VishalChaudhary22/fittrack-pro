@@ -675,7 +675,7 @@ export default function DietPage({ chatbot }) {
             if (wheyScoops >= 3 && meal.label === 'Mid-Morning') wheyLines.push(`+ Extra scoop protein (${protTarget}g target)`);
             if (wheyScoops >= 4 && meal.label === 'Before Bed') wheyLines.push('+ 1 scoop casein/whey before bed');
             const all = [...items, ...wheyLines];
-            const MIcon = CONSTANTS.MEAL_SLOTS.find(m => m.id === meal.label)?.icon || Activity;
+            const MIcon = CONSTANTS.MEAL_SLOTS.find(m => m.id === meal.label)?.icon || ActivityIcon;
             return (
               <div key={i} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: 20, borderRadius: 16 }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>

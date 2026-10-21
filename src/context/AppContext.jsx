@@ -360,7 +360,30 @@ export function AppProvider({ children }) {
   const [cycleConfig, setCycleConfig] = useLocalStorage('fp_cycle_config', { startDate: '', cycleLength: 28 });
   const [lastSuggestionDate, setLastSuggestionDate] = useLocalStorage('fittrack_last_suggestion_date', null);
   const [tdeePreferences, setTdeePreferences] = useLocalStorage('fittrack_tdee_preferences', { manualTDEEOverride: null, useEstimatedTDEE: false });
+  const tdeePreferencesRef = useRef(tdeePreferences);
 
+  useEffect(() => {
+    tdeePreferencesRef.current = tdeePreferences;
+  }, [tdeePreferences]);
+
+  // The TDEE switches live in the profile row so they follow the user across
+  // devices. localStorage stays as an offline mirror for the first paint.
+  const persistTdeePreferences = useCallback(async (next) => {
+    const prefs = typeof next === 'function' ? next(tdeePreferencesRef.current) : next;
+    setTdeePreferences(prefs);
+    if (!profile?.id) return;
+    try {
+      await supabase
+        .from('user_profiles')
+        .update({
+          use_estimated_tdee: Boolean(prefs.useEstimatedTDEE),
+          manual_tdee_override: prefs.manualTDEEOverride ?? null,
+        })
+        .eq('id', profile.id);
+    } catch (err) {
+      console.warn('[TDEE] Failed to persist preferences:', err?.message || err);
+    }
+  }, [profile?.id, setTdeePreferences]);
   const { theme, toggleTheme, initTheme } = useTheme();
   const { toasts, addToast, removeToast } = useToast();
 
@@ -773,6 +796,9 @@ export function AppProvider({ children }) {
       bodyFatGoal: 'body_fat_goal',
       customGoalKcal: 'custom_goal_kcal', customProteinG: 'custom_protein_g',
       lastKcalSuggestionDate: 'last_kcal_suggestion_date',
+      waterGoal: 'water_goal',
+      useEstimatedTDEE: 'use_estimated_tdee',
+      manualTDEEOverride: 'manual_tdee_override',
     };
     const snakeUpdates = {};
     for (const [camel, snake] of Object.entries(keyMap)) {
@@ -831,8 +857,11 @@ export function AppProvider({ children }) {
       customGoalKcal: profile.custom_goal_kcal || null,
       customProteinG: profile.custom_protein_g || null,
       lastKcalSuggestionDate: profile.last_kcal_suggestion_date || null,
-      manualTDEEOverride: tdeePreferences.manualTDEEOverride,
-      useEstimatedTDEE: tdeePreferences.useEstimatedTDEE,
+      waterGoal: profile.water_goal || 3000,
+      // Profile row is the source of truth for these; localStorage is only a
+      // fallback for the very first paint before the profile lands.
+      manualTDEEOverride: profile.manual_tdee_override ?? tdeePreferences.manualTDEEOverride ?? null,
+      useEstimatedTDEE: profile.use_estimated_tdee ?? tdeePreferences.useEstimatedTDEE ?? false,
     };
   }, [profile, session, tdeePreferences]);
 
@@ -1149,7 +1178,7 @@ export function AppProvider({ children }) {
     cycleConfig, setCycleConfig,
     // Adaptive Diet
     adaptiveSuggestion, acceptSuggestion, dismissSuggestion,
-    tdeeEstimate, tdeeHistory, tdeePreferences, setTdeePreferences
+    tdeeEstimate, tdeeHistory, tdeePreferences, setTdeePreferences: persistTdeePreferences
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

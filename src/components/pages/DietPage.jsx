@@ -66,8 +66,15 @@ export default function DietPage({ chatbot }) {
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   const [showTDEEDetails, setShowTDEEDetails] = useState(false);
   
-  const [diet, setDiet] = useState('nonveg');
+  const [diet, setDiet] = useState(() => user?.dietType || 'nonveg');
   const [dateStr, setDateStr] = useState(tod());
+
+  // The selected diet plan is a profile setting — persist it so it survives a
+  // reload and reaches the chatbot's system prompt.
+  const handleSetDiet = useCallback(async (next) => {
+    setDiet(next);
+    await updateProfile?.({ dietType: next });
+  }, [updateProfile]);
   
   useScrollRestoration('/diet');
   const [activeTab, setActiveTabRaw] = useState(dietTabCache.activeTab);
@@ -84,8 +91,8 @@ export default function DietPage({ chatbot }) {
      const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
      const computedKcal = goal === 'loss' ? newTdee - dailyDelta : goal === 'gain' ? newTdee + dailyDelta : newTdee;
      
-     setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
-     await updateProfile({ customGoalKcal: computedKcal, useEstimatedTDEE: true });
+     await setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
+     await updateProfile({ customGoalKcal: computedKcal });
      addToast('Targets successfully updated to adaptive TDEE! 🚀', 'success');
   };
 
@@ -655,7 +662,7 @@ export default function DietPage({ chatbot }) {
               </div>
               <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
                 {Object.values(DIET_TYPES).map(d => (
-                  <button key={d.id} onClick={() => setDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <button key={d.id} onClick={() => handleSetDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
                     {d.icon} {d.label}
                   </button>
                 ))}

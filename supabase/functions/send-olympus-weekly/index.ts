@@ -25,9 +25,9 @@ serve(async (req) => {
     const payload = {
       title: "Olympus League Update ⚡",
       body: "The weekly ranks are in! Check out where you stand on the leaderboard.",
-      icon: "/fittrack-icon-192.png",
-      badge: "/fittrack-icon-192.png",
-      data: { url: "/olympus" }
+      icon: "/kaaya-icon-192.png",
+      badge: "/kaaya-icon-192.png",
+      data: { url: "/muscle-map" }
     };
 
     // 2. Send notifications

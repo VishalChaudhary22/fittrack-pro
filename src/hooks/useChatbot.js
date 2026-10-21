@@ -5,6 +5,10 @@ import { buildForgeSystemPrompt, buildConversationHistory } from '../utils/chatb
 const STORAGE_KEY = (userId) => `fittrack_chat_${userId}`;
 const MAX_LOCAL_MESSAGES = 50;
 
+// Must match the deployed Edge Function directory under supabase/functions/.
+const CHATBOT_ENDPOINT = 'ai-chat';
+const CHATBOT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${CHATBOT_ENDPOINT}`;
+
 export function useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog }) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +63,7 @@ export function useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLo
       if (!session) throw new Error('Not authenticated');
 
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/smart-task`,
+        CHATBOT_URL,
         {
           method: 'POST',
           headers: {
@@ -102,7 +106,7 @@ export function useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLo
       const msg = err?.message || 'Unknown error';
       setError(`Connection failed: ${msg}`);
       console.error('Chatbot error:', err);
-      console.error('Edge Function URL:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`);
+      console.error('Edge Function URL:', CHATBOT_URL);
     } finally {
       setIsLoading(false);
     }

@@ -38,8 +38,8 @@ serve(async (req) => {
     const payload = {
       title: "Time to train! 💪",
       body: "You haven't logged your workout today. Keep the momentum going!",
-      icon: "/fittrack-icon-192.png",
-      badge: "/fittrack-icon-192.png",
+      icon: "/kaaya-icon-192.png",
+      badge: "/kaaya-icon-192.png",
       data: { url: "/workout" }
     };
 

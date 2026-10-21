@@ -52,10 +52,10 @@ serve(async (req) => {
           {
             title: "Rank Up! 🎉",
             body: `You just advanced to ${newTier} Tier! Keep up the great work!`,
-            icon: "/fittrack-icon-192.png",
-            badge: "/badge-72.png",
+            icon: "/kaaya-icon-192.png",
+            badge: "/kaaya-icon-192.png",
             tag: "olympus-tier",
-            data: { url: "/olympus" }
+            data: { url: "/muscle-map" }
           }, 
           'olympus_tier'
         );
@@ -99,10 +99,10 @@ serve(async (req) => {
             {
               title: "Rank Alert ⚠️",
               body: "A rival just overtook you in the Olympus League! Log a workout to reclaim your rank.",
-              icon: "/fittrack-icon-192.png",
-              badge: "/badge-72.png",
+              icon: "/kaaya-icon-192.png",
+              badge: "/kaaya-icon-192.png",
               tag: "olympus-overtaken",
-              data: { url: "/olympus" }
+              data: { url: "/muscle-map" }
             }, 
             'olympus_overtaken'
           );
@@ -146,10 +146,10 @@ serve(async (req) => {
             {
               title: "Podium Proximity 🏆",
               body: "You're within 500 XP of the podium! Keep pushing to reach the Top 3.",
-              icon: "/fittrack-icon-192.png",
-              badge: "/badge-72.png",
+              icon: "/kaaya-icon-192.png",
+              badge: "/kaaya-icon-192.png",
               tag: "podium-proximity",
-              data: { url: "/olympus" }
+              data: { url: "/muscle-map" }
             }, 
             'podium_proximity'
           );

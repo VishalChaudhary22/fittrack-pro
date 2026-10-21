@@ -54,8 +54,8 @@ serve(async (req) => {
     const payload = {
       title: "🔥 Keep your streak alive!",
       body: "You're at risk of losing your workout streak. Log a quick session to keep the fire burning!",
-      icon: "/fittrack-icon-192.png",
-      badge: "/fittrack-icon-192.png",
+      icon: "/kaaya-icon-192.png",
+      badge: "/kaaya-icon-192.png",
       data: { url: "/workout" }
     };
 

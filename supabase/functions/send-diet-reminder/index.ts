@@ -37,8 +37,8 @@ serve(async (req) => {
     const payload = {
       title: "Fuel your body! 🥗",
       body: "You haven't logged your meals today. Stay on track with your nutrition goals!",
-      icon: "/fittrack-icon-192.png",
-      badge: "/fittrack-icon-192.png",
+      icon: "/kaaya-icon-192.png",
+      badge: "/kaaya-icon-192.png",
       data: { url: "/diet" }
     };
 

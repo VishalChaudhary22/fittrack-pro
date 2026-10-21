@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
       body: data.body || 'You have a new notification.',
-      icon: data.icon || '/fittrack-icon-192.png',
-      badge: data.badge || '/badge-72.png',
+      icon: data.icon || '/kaaya-icon-192.png',
+      badge: data.badge || '/kaaya-icon-192.png',
       vibrate: data.vibrate || [100, 50, 100],
       tag: data.tag || data.type || 'fittrack-default', // Tag-based deduplication
       data: {

@@ -91,8 +91,8 @@ export const EXERCISE_LIBRARY = (() => {
     if (!ex.name) return;
     const key = ex.name.toLowerCase().trim();
     if (!map.has(key)) {
-      // Store a clean copy of the exercise for the builder
-      const { id, _swapHistory, isSwapped, originalId, originalName, variants, ...cleanEx } = ex;
+      // Store a clean copy of the exercise for the builder. Fields the builder
+      // does not use (ids, swap bookkeeping, variants) are deliberately dropped.
       map.set(key, {
         exerciseId: ex.exerciseId || key.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         name: ex.name.trim(),

@@ -8,7 +8,6 @@ import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, T
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { ACTIVITY } from '../../data/constants';
 import { gId, tod, fmt, clamp, mkWtItems, mkIntItems, kgToLbs, lbsToKg, mkWtItemsImperial } from '../../utils/helpers';
-import { calcAllMuscleXP } from '../../data/muscleData';
 import { getCyclePhase } from '../../utils/cycleCalculations';
 import { getActiveFestival } from '../../utils/festivals';
 import {
@@ -98,7 +97,7 @@ const ParticlesBackground = () => {
 export default function DashboardPage() {
   useScrollRestoration('/');
   const navigate = useNavigate();
-  const { user, authLoading, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, tdeeEstimate } = useApp();
+  const { user, dataLoaded, healthLogs, setHealthLogs, workoutLogs, splits, updateProfile, addToast, getStreak, readinessLog, foodLog, waterLog, cycleConfig, stepLogs, logSteps, cardioLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, tdeeEstimate } = useApp();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showStepModal, setShowStepModal] = useState(false);
   const [stepInputVal, setStepInputVal] = useState('');
@@ -120,8 +119,6 @@ export default function DashboardPage() {
     localStorage.removeItem(onboardingKey);
     localStorage.setItem(hasSeenWelcomeKey, 'true');
   }, [user?.id, isNewUser]);
-  
-  const muscleXP = useMemo(() => calcAllMuscleXP(workoutLogs, splits, user?.id), [workoutLogs, splits, user?.id]);
   
   const objectiveScoreObj = useMemo(() => calcObjectiveReadiness(workoutLogs, stepLogs, user), [workoutLogs, stepLogs, user]);
   const objectiveScore = objectiveScoreObj.score;
@@ -232,6 +229,9 @@ export default function DashboardPage() {
   const goalPct = useMemo(() => {
     if (!user.weightGoal || !user.weightGoalStart) return null;
     const total = Math.abs(user.weightGoalStart - user.weightGoal);
+    // A goal equal to the starting weight leaves nothing to travel, so there
+    // is no meaningful percentage to show.
+    if (total === 0) return null;
     const done = Math.abs(user.weightGoalStart - latestWeight);
     return clamp(Math.round(done / total * 100), 0, 100);
   }, [user, latestWeight]);
@@ -723,6 +723,15 @@ export default function DashboardPage() {
             <ChevronDown size={14} color="var(--on-surface-dim)" />
           </div>
           {user.weightGoal ? (<>
+          {goalPct !== null && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 6 }}>
+                <span>Progress to goal</span>
+                <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{goalPct}%</span>
+              </div>
+              <div className="pbar"><div className="pbar-fill" style={{ width: `${goalPct}%` }} /></div>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: 10, marginBottom: 0 }}>
               {[{ l: 'Target', v: isImpWeight ? `${kgToLbs(user.weightGoal)} lbs` : `${user.weightGoal} kg` }, { l: 'Remaining', v: `${kgLeft} ${isImpWeight ? 'lbs' : 'kg'} ${isLoss ? 'to lose' : 'to gain'}` }, { l: 'Weeks Left', v: weeksLeft !== null ? `${weeksLeft} wks` : '—' }].map(s => (
                 <div key={s.l} style={{ background: 'var(--surface-container-highest)', borderRadius: 10, padding: '10px 12px', border: 'none' }}>

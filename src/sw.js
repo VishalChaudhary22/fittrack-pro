@@ -24,7 +24,7 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification(data.title || 'Kaaya Fit', options)
     );
-  } catch (err) {
+  } catch {
     // Fallback if not JSON
     event.waitUntil(
       self.registration.showNotification('Kaaya Fit', {

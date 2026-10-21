@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Scale, Edit2, Trash2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
-import { fmt, gId, tod, kgToLbs } from '../../utils/helpers';
+import { fmt, kgToLbs } from '../../utils/helpers';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
 
 export default function WeightLogPage() {

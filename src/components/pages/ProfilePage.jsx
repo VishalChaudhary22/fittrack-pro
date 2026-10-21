@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcTDEESource } from '../../utils/calculations';
-import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
+import { kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
@@ -106,8 +106,8 @@ function AvatarPickerModal({ open, onClose }) {
 
 export default function ProfilePage() {
   useScrollRestoration('/profile');
-  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
-  const { permission, preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
+  const { user, updateProfile, logout, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
+  const { preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);

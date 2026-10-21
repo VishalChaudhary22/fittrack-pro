@@ -8,7 +8,7 @@ import { TDEEInsightCard } from '../shared/TDEEInsightCard';
 import { TDEEDetailSheet } from '../shared/TDEEDetailSheet';
 import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
-import { calcBMI, calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../../utils/calculations';
+import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
 import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
@@ -287,19 +287,23 @@ export default function DietPage({ chatbot }) {
     if (foodsLoading || !allFoods.length) return [];
     
     const q = searchQuery.trim();
-    const hasFilters = searchDiet !== 'All' || searchFasting;
-    
+    const hasFilters = searchDiet !== 'All' || searchFasting || searchCat !== 'All';
+
     // No query and no filters → show a sample of foods so the list isn't empty
     if (!q && !hasFilters) return allFoods.slice(0, 50);
-    
+
     // Run local search (with or without query)
     let results = searchLocalFoods(allFoods, q, {
       dietType: searchDiet !== 'All' ? searchDiet.replace('-', '').toLowerCase() : null,
       fastingType: searchFasting || null,
     });
-    
+
+    if (searchCat !== 'All') {
+      results = results.filter(f => f.category === searchCat);
+    }
+
     return results;
-  }, [searchQuery, searchDiet, searchFasting, allFoods, foodsLoading]);
+  }, [searchQuery, searchDiet, searchFasting, searchCat, allFoods, foodsLoading]);
 
 
   const recentFoods = useMemo(() => getRecentFoods(foodLog), [foodLog]);
@@ -463,10 +467,6 @@ export default function DietPage({ chatbot }) {
     const macrosToLog = { calories: 130, protein: 0, carbs: 0, fat: 15 };
     addFoodToLog(macrosToLog, 'Cooking Oil/Ghee (15g)', true);
     addToast('Cooking Oil (15g) added smoothly.', 'success');
-  };
-
-  const scrollToLog = () => {
-    document.getElementById('foodLogSection')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -1230,6 +1230,10 @@ export default function DietPage({ chatbot }) {
                 <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', minHeight: 44, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
                   {['All', 'Veg', 'Vegan', 'Egg', 'Non-Veg', 'Jain'].map(d => (
                     <button key={d} onClick={() => setSearchDiet(d)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchDiet === d ? 'var(--primary)' : 'var(--surface-container-low)', color: searchDiet === d ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{d}</button>
+                  ))}
+                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
+                  {[{ id: 'All', label: 'All categories' }, ...foodCategories].map(c => (
+                    <button key={c.id} onClick={() => setSearchCat(c.id)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchCat === c.id ? 'var(--primary)' : 'var(--surface-container-low)', color: searchCat === c.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{c.label}</button>
                   ))}
                   <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
                   {[{ id: '', label: 'Fasting: Off' }, ...CONSTANTS.FASTING_TYPES].filter(t=>t.label).map(t => {

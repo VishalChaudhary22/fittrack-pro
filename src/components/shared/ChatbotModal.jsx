@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Zap, X, Trash2, Send } from 'lucide-react';
-import { getOverallRank, MUSCLE_GROUPS, calcAllMuscleXP } from '../../data/muscleData';
 
 const QUICK_PROMPTS = [
   { icon: '🏋️', label: 'Last bench session', text: 'What weight did I do on Bench Press last time?' },
@@ -52,8 +51,6 @@ export default function ChatbotModal({ chatbot, user }) {
 
   // Render Welcome Card Context
   const latestWeight = user?.weight || '?';
-  const overallRank = getOverallRank({}); // Simplified for welcome card without full context, or we can use default if unknown
-  // Actually, we could use user data if passed, but since it's just a placeholder string, we'll use fallbacks.
   const streakDays = user?.streak || 0;
 
   return (

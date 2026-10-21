@@ -30,3 +30,6 @@ dist-ssr
 .venv/
 _temp/
 
+
+# Local editor/agent tooling state
+.claude/

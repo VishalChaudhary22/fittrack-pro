@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
-import { getLastLiftedForExercise, getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
+import { getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
@@ -38,7 +38,7 @@ function playRestCompleteChime() {
       osc.start(t);
       osc.stop(t + 0.55);
     });
-  } catch (e) {
+  } catch {
     // silently fail
   }
 }
@@ -59,7 +59,7 @@ function persistActiveSession(session) {
       ...session,
       lastUpdated: Date.now(),
     }));
-  } catch (e) {}
+  } catch { /* best effort */ }
 }
 
 function clearPersistedSession() {
@@ -118,7 +118,7 @@ const playBeep = (freq = 880, dur = 0.2) => {
     osc.connect(g); g.connect(ctx.destination);
     osc.frequency.value = freq; g.gain.value = 0.3;
     osc.start(); osc.stop(ctx.currentTime + dur);
-  } catch(e) {}
+  } catch { /* best effort */ }
 };
 
 const YogaSessionView = ({ day, onBack, onComplete }) => {
@@ -994,7 +994,7 @@ export default function WorkoutPage() {
       if (saved && (Date.now() - (saved.lastUpdated || saved.startTime)) < SESSION_STALE_MS) {
         return saved; // Fresh session — auto-resume
       }
-    } catch {}
+    } catch { /* best effort */ }
     return null;
   });
   const [done, setDone] = useState(null);
@@ -1006,7 +1006,7 @@ export default function WorkoutPage() {
       if (saved && (Date.now() - (saved.lastUpdated || saved.startTime)) >= SESSION_STALE_MS) {
         return saved; // Stale — show resume card
       }
-    } catch {}
+    } catch { /* best effort */ }
     return null;
   });
   const [confirmDiscard, setConfirmDiscard] = useState(false);
@@ -1072,7 +1072,7 @@ export default function WorkoutPage() {
           try {
             const posRaw = localStorage.getItem(REST_TIMER_POS_KEY);
             if (posRaw) setRestTimerPosition(JSON.parse(posRaw));
-          } catch {}
+          } catch { /* best effort */ }
        } else {
           localStorage.removeItem(REST_TIMER_KEY);
           localStorage.removeItem(REST_TIMER_POS_KEY);
@@ -1550,6 +1550,9 @@ export default function WorkoutPage() {
         <PulseIndicator color="var(--primary-container)" />
         <span className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--on-surface-variant)' }}>
           Active Session: {session.day.name}
+        </span>
+        <span className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', fontWeight: 700 }}>
+          {pct}% done
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <Timer size={16} color="var(--on-surface-dim)" />

@@ -109,7 +109,7 @@ const createMockSupabase = () => {
     let data = [];
     try {
       data = raw ? JSON.parse(raw) : [];
-    } catch (e) {
+    } catch {
       data = [];
     }
     return chain(data);
@@ -132,7 +132,7 @@ const createMockSupabase = () => {
 const isMockAuthEnabled = () => {
   try {
     return localStorage.getItem('fittrack_mock_auth') === 'true' || window.__mock_supabase === true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };

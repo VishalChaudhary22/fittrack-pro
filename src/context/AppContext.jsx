@@ -2,7 +2,6 @@ import { createContext, useContext, useCallback, useEffect, useState, useRef, us
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
 import { useToast } from '../hooks/useToast';
-import { genSample } from '../data/sample';
 import { INIT_SPLITS } from '../data/splits';
 
 // Supabase & Migration imports
@@ -10,14 +9,13 @@ import { supabase } from '../lib/supabaseClient';
 import { getOldUserIdIfEmailMatches, migrateLocalData, cleanupOldAuthStorage, uploadLocalDataToCloud } from '../utils/authMigration';
 import { calcStepsCalories } from '../utils/activityUtils';
 import { syncUserXPToCache } from '../utils/xpCacheSync';
-import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, computeNewTarget, recomputeMacros, isCoachingDismissed, dismissCoaching } from '../utils/adaptiveCalories';
+import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestionCooldown, isCoachingDismissed, dismissCoaching } from '../utils/adaptiveCalories';
 import { getBestTDEE, detectMetabolicAdaptation } from '../utils/adaptiveTDEE';
-import { calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../utils/calculations';
+import { calcDeficit, calcTDEESource } from '../utils/calculations';
 import { loadSwapRegistryFromCloud } from '../utils/swapRegistry';
 import { buildMonthlyRankHistory } from '../utils/rankHistory';
 
 const AppContext = createContext(null);
-const SAMPLE = genSample();
 const getProfileCacheKey = (userId) => `fittrack_profile_${userId}`;
 
 const readPersistedUserArray = (prefix, userId) => {
@@ -103,20 +101,21 @@ const buildFallbackProfile = (sessionUser, cachedProfile = null) => {
     || sessionUser.email?.split('@')[0]
     || 'User';
 
+  // Cached profile fields win, but `id` always comes from the session — the
+  // cached row can be stale (from a previous account on this device).
   return {
-    id: sessionUser.id,
-    name: displayName,
-    gender: cachedProfile?.gender || meta.gender || 'male',
-    avatar: cachedProfile?.avatar || getAvatarInitials(displayName),
-    avatar_type: cachedProfile?.avatar_type || null,
-    avatar_url: cachedProfile?.avatar_url || null,
-    active_split_id: cachedProfile?.active_split_id || null,
-    unit_weight: cachedProfile?.unit_weight || 'kg',
-    unit_height: cachedProfile?.unit_height || 'cm',
-    is_admin: cachedProfile?.is_admin || false,
-    created_at: cachedProfile?.created_at || sessionUser.created_at || null,
+    gender: meta.gender || 'male',
+    avatar: getAvatarInitials(displayName),
+    avatar_type: null,
+    avatar_url: null,
+    active_split_id: null,
+    unit_weight: 'kg',
+    unit_height: 'cm',
+    is_admin: false,
+    created_at: sessionUser.created_at || null,
     ...cachedProfile,
     id: sessionUser.id,
+    name: displayName,
   };
 };
 
@@ -399,6 +398,7 @@ export function AppProvider({ children }) {
   const cloudRefreshTimerRef = useRef(null);
   const tdeeRecomputeTimerRef = useRef(null);
   const healthLogsRef = useRef(healthLogs);
+  const tdeeHistoryRef = useRef(tdeeHistory);
   const userRef = useRef(null);
 
   useEffect(() => {
@@ -420,6 +420,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     healthLogsRef.current = healthLogs;
   }, [healthLogs]);
+
+  useEffect(() => {
+    tdeeHistoryRef.current = tdeeHistory;
+  }, [tdeeHistory]);
 
   useEffect(() => {
     currentUserIdRef.current = session?.user?.id || profile?.id || localStorage.getItem('fittrack_last_user_id') || null;
@@ -881,37 +885,58 @@ export function AppProvider({ children }) {
     const cachedUserId = currentUserIdRef.current;
     if (!cachedUserId) return;
     if (tdeeRecomputeTimerRef.current) clearTimeout(tdeeRecomputeTimerRef.current);
-    
+
     tdeeRecomputeTimerRef.current = setTimeout(() => {
       tdeeRecomputeTimerRef.current = null;
       try {
         if (!userRef.current) return;
-        
+
         const hl = healthLogsRef.current || [];
         const fl = foodLogRef.current || [];
-        
+
         const best = getBestTDEE(hl, fl, userRef.current, null);
         const est = best?.estimate;
-        
+
         if (est) {
           setTdeeEstimate(est);
-          try { localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(est)); } catch(e) {}
-          
+          try { localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(est)); } catch { /* storage full */ }
+
           if (est.confidence !== 'insufficient') {
             setTdeeHistory(prev => {
               const h = [...prev];
               const idx = h.findIndex(e => e.windowEnd === est.windowEnd);
               if (idx !== -1) {
                 h[idx] = est;
-                try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(h)); } catch(e) {}
+                try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(h)); } catch { /* storage full */ }
                 return h;
               }
               const updated = [...h, est].sort((a,b) => new Date(a.windowEnd) - new Date(b.windowEnd));
               const pruned = updated.slice(-12);
-              try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(pruned)); } catch(e) {}
+              try { localStorage.setItem(`fittrack_tdeeHistory_${cachedUserId}`, JSON.stringify(pruned)); } catch { /* storage full */ }
               return pruned;
             });
           }
+        }
+
+        // Flag metabolic adaptation once six consecutive weeks of deficit have
+        // driven the estimated TDEE down by 10% or more. The insight is
+        // surfaced on the Dashboard and drives the T3 coaching scenario.
+        const adaptation = detectMetabolicAdaptation(tdeeHistoryRef.current);
+        if (adaptation.detected && est && !est.insights?.some(i => i.type === 'metabolic-adaptation')) {
+          const withAdaptation = {
+            ...est,
+            metabolicAdaptation: true,
+            insights: [
+              ...(est.insights || []),
+              {
+                type: 'metabolic-adaptation',
+                deficitWeeks: adaptation.deficitWeeks,
+                adaptationPercent: adaptation.adaptationPercent,
+              },
+            ],
+          };
+          setTdeeEstimate(withAdaptation);
+          try { localStorage.setItem(`fittrack_tdeeEstimate_${cachedUserId}`, JSON.stringify(withAdaptation)); } catch { /* storage full */ }
         }
       } catch (err) {
         console.error('[TDEE] Recompute error:', err);
@@ -1118,7 +1143,6 @@ export function AppProvider({ children }) {
       const rateData = computeWeeklyRate(userLogs);
 
       // Determine goal from deficit calculation
-      const bmr = calcBMR(user.weight, user.height, user.age, user.gender);
       const tdeeSource = calcTDEESource(user, tdeeEstimate);
       const tdee = tdeeSource?.value || 2000;
       const deficitInfo = calcDeficit(user.weight, user.weightGoal, user.goalWeeks);

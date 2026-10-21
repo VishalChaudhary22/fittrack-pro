@@ -78,7 +78,9 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    const loadImg = (src) => new Promise((resolve, reject) => {
+    // Failures resolve with a 1x1 dummy image rather than rejecting, so the
+    // executor only needs `resolve`.
+    const loadImg = (src) => new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
@@ -203,23 +205,35 @@ const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label
   );
 
   return (
-    <div style={{ textAlign: 'center', width: '100%' }}>
+    <div style={{ textAlign: 'center', width: '100%', position: 'relative' }}>
       {label && (
         <div style={{
           fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700,
           textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1.5px',
         }}>{label}</div>
       )}
+      {/* The canvas must stay mounted — the effect draws into it. The
+          skeleton is an overlay, not a replacement. */}
       <canvas
         ref={canvasRef}
-        style={{ 
-          width: '100%', 
-          height: 'auto', 
-          display: 'block', 
+        style={{
+          width: '100%',
+          height: 'auto',
+          display: 'block',
           borderRadius: borderRadius,
-          backgroundColor: 'transparent'
+          backgroundColor: 'transparent',
+          opacity: loading ? 0 : 1,
+          transition: 'opacity .3s var(--ease-smooth)',
         }}
       />
+      {loading && (
+        // .skeleton-pulse carries the shimmer background and keyframe; the
+        // inline styles only position the overlay over the still-mounted canvas.
+        <div className="skeleton-pulse" style={{
+          position: 'absolute', inset: 0,
+          borderRadius: borderRadius,
+        }} />
+      )}
     </div>
   );
 };

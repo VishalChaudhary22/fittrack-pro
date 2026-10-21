@@ -94,7 +94,7 @@ export const migrateLocalData = (newUid, oldUid) => {
         if (changed) localStorage.setItem('fittrack_splits', JSON.stringify(rekeyed));
       }
     }
-  } catch {}
+  } catch { /* best effort */ }
 };
 
 export const cleanupOldAuthStorage = () => {

@@ -35,8 +35,6 @@ export default function MeasurementsPage() {
     addToast('Measurements saved!', 'success');
   };
 
-  const colors = ['#E8540D', '#FF7A3D', '#FF9A5C', '#FFB87D', '#E8540D', '#FF7A3D', '#FF9A5C', '#FFB87D'];
-
   return (
     <div className="pg-in">
       <PageHeader title="Body Measurements" sub="Track your physique changes"
@@ -45,7 +43,7 @@ export default function MeasurementsPage() {
       {/* Latest stats */}
       {userMeasurements.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: 12, marginBottom: 24 }}>
-          {MEASUREMENT_FIELDS.map((f, i) => (
+          {MEASUREMENT_FIELDS.map((f) => (
             <div key={f.key} className="card" style={{ padding: '12px', textAlign: 'center', cursor: 'pointer', border: 'none', background: chartField === f.key ? 'var(--primary)' : 'var(--surface-container-lowest)', boxShadow: chartField === f.key ? 'var(--shadow-md)' : 'none', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setChartField(f.key)}>
               <div style={{ fontSize: 10, color: chartField === f.key ? 'var(--on-primary)' : 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>{f.label}</div>
               <div className="headline-md" style={{ color: chartField === f.key ? 'var(--on-primary)' : 'var(--on-surface)' }}>{latest[f.key] || '—'}</div>

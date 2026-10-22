@@ -936,8 +936,8 @@ export default function MuscleMapPage({ chatbot }) {
                 </div>
               </div>
 
-              {/* Past months */}
-              {monthlyRankHistory.map(hist => {
+              {/* Past months — the current month is shown live above */}
+              {monthlyRankHistory.filter(hist => hist.id !== getCurrentMonth()).map(hist => {
                 const r = getOverallRank({ fake: hist.xp });
                 const isBest = bestMonth && hist.id === bestMonth.id;
                 return (

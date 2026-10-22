@@ -23,7 +23,21 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Core no-unused-vars does not track a capitalised binding rendered as
+      // an element (`<Icon />`): it only counts Identifier references, not
+      // JSXIdentifier ones. eslint-plugin-react is not installed, so the
+      // capitalised naming convention stands in for that detection — `Icon`
+      // destructured from a nav/services list is reported as unused otherwise.
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^[A-Z_]',
+      }],
     },
+  },
+  {
+    // One-off Node data-ingest scripts (they call `process`); not part of the
+    // browser bundle.
+    files: ['src/scripts/**/*.js'],
+    languageOptions: { globals: globals.node },
   },
 ])

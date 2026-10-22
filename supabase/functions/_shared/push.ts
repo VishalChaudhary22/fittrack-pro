@@ -30,7 +30,7 @@ export async function sendPushNotification(
   }
 
   webpush.setVapidDetails(
-    "mailto:hello@fittrack.com",
+    "mailto:hello@kaaya.fit",
     vapidPublicKey,
     vapidPrivateKey
   );

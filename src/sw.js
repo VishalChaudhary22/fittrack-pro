@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
       body: data.body || 'You have a new notification.',
-      icon: data.icon || '/fittrack-icon-192.png',
-      badge: data.badge || '/badge-72.png',
+      icon: data.icon || '/kaaya-icon-192.png',
+      badge: data.badge || '/kaaya-icon-192.png',
       vibrate: data.vibrate || [100, 50, 100],
       tag: data.tag || data.type || 'fittrack-default', // Tag-based deduplication
       data: {
@@ -24,7 +24,7 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification(data.title || 'Kaaya Fit', options)
     );
-  } catch (err) {
+  } catch {
     // Fallback if not JSON
     event.waitUntil(
       self.registration.showNotification('Kaaya Fit', {

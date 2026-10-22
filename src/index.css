@@ -42,14 +42,39 @@
 
   --shadow-ambient: 0 20px 40px rgba(0,0,0,0.4);
   --glow-primary: 0 0 20px rgba(255,181,155,0.10);
-  
+
   --glass-bg: rgba(53, 52, 55, 0.60);
+  --glass-bg-heavy: rgba(10, 10, 12, 0.78);
   --glass-blur: blur(20px);
   --glass-blur-sm: blur(12px);
 
   --success: #51CF66;
   --danger: #FF6B6B;
   --error: #FF3B30;
+  --warning: #F59E0B;
+  --secondary: #FFC107;
+
+  /* ─── LEGACY TOKEN ALIASES ──────────────────────────────────────
+     Older screens still reference the pre-rebrand token names.
+     These aliases keep them rendering instead of falling through to
+     an invalid value (which resolves to transparent / unset). */
+  --o: var(--primary-container);
+  --o2: rgba(248, 95, 27, 0.18);
+  --c2: var(--surface-container);
+  --bd: var(--outline-variant);
+  --bd2: rgba(255, 181, 155, 0.20);
+  --t2: var(--on-surface-variant);
+  --outline: var(--on-surface-dim);
+  --tertiary: var(--tertiary-container);
+  --error-container: rgba(255, 59, 48, 0.16);
+  --background: var(--surface);
+  --primary-dark: #C8460D;
+  --ember-start: #FFB59B;
+  --ember-end: #F85F1B;
+  --on-primary-container: #1A1A1E;
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.28);
+  --shadow-md: 0 10px 24px rgba(0,0,0,0.32);
+  --shadow-lg: 0 24px 48px rgba(0,0,0,0.42);
 
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,18 +109,42 @@
   --on-surface-variant: #7A6B62;
   --on-surface-dim: #9E9EA6;
 
+  --tertiary-container: #e76c37;
+
   --outline-variant: rgba(90, 65, 56, 0.15);
 
   --shadow-ambient: 0 8px 24px rgba(0,0,0,0.08);
   --glow-primary: 0 0 16px rgba(248,95,27,0.15);
-  
+
   --glass-bg: rgba(255, 255, 255, 0.60);
+  --glass-bg-heavy: rgba(20, 18, 17, 0.72);
   --glass-blur: blur(20px);
   --glass-blur-sm: blur(12px);
 
   --success: #51CF66;
   --danger: #FF6B6B;
   --error: #FF3B30;
+  --warning: #F59E0B;
+  --secondary: #FFC107;
+
+  /* ─── LEGACY TOKEN ALIASES (light) ──────────────────────────── */
+  --o: var(--primary-container);
+  --o2: rgba(248, 95, 27, 0.18);
+  --c2: var(--surface-container);
+  --bd: var(--outline-variant);
+  --bd2: rgba(248, 95, 27, 0.20);
+  --t2: var(--on-surface-variant);
+  --outline: var(--on-surface-dim);
+  --tertiary: #e76c37;
+  --error-container: rgba(255, 59, 48, 0.16);
+  --background: var(--surface);
+  --primary-dark: #C8460D;
+  --ember-start: #FFB59B;
+  --ember-end: #F85F1B;
+  --on-primary-container: #FFFFFF;
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.10);
+  --shadow-md: 0 10px 24px rgba(0,0,0,0.12);
+  --shadow-lg: 0 24px 48px rgba(0,0,0,0.16);
 
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);

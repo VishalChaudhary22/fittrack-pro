@@ -10,7 +10,7 @@ export function TDEEInsightCard({ tdeeEstimate, onUpdateTargets, onLearnMore }) 
   let tdeeScenario;
   try {
     tdeeScenario = classifyTDEEScenario(tdeeEstimate);
-  } catch (e) {
+  } catch {
     return null;
   }
   if (!tdeeScenario) return null;

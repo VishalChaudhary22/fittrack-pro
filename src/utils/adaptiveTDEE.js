@@ -217,18 +217,18 @@ export function getBestTDEE(weightLogs, foodLogs, profile, manualTDEEOverride = 
   return { value: staticTDEE, source: 'static', confidence: null, estimate };
 }
 
-export function detectMetabolicAdaptation(estimateHistory = [], profile) {
+export function detectMetabolicAdaptation(estimateHistory = []) {
   if (!estimateHistory || estimateHistory.length < 6) {
     return { detected: false, deficitWeeks: 0, adaptationPercent: 0 };
   }
-  
-  // Must be sorted oldest to newest. Let's assume estimateHistory is already so, 
-  // but let's grab the last 6 weeks
+
+  // History is sorted oldest → newest by the caller (AppContext prunes it to
+  // the last 12 estimates), so the tail is the most recent six weeks.
   const recent6 = estimateHistory.slice(-6);
   
   let deficitWeeks = 0;
   for (let i = recent6.length - 1; i >= 0; i--) {
-     if (recent6[i].avgIntake < recent6[i].estimatedTDEE) {
+     if (recent6[i].avgDailyIntake < recent6[i].estimatedTDEE) {
         deficitWeeks++;
      } else {
         break; // Chain broken

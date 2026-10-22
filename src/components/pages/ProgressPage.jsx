@@ -13,7 +13,7 @@ const progressFilterCache = { ss: null, sd: '', se: '' };
 
 export default function ProgressPage({ chatbot }) {
   useScrollRestoration('/progress');
-  const { user, workoutLogs, splits } = useApp();
+  const { user, workoutLogs, splits, addToast } = useApp();
   const act = splits.find(s => s.id === user.activeSplitId) || splits[0];
   const [ss, setSsRaw] = useState(progressFilterCache.ss || act?.id || splits[0]?.id);
   const [sd, setSdRaw] = useState(progressFilterCache.sd);

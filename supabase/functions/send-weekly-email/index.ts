@@ -201,7 +201,7 @@ function buildEmailHtml(
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="padding:20px 24px;background-color:${C.surfaceLow} !important;">
           <h4 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:${C.onSurface};text-transform:uppercase;margin:0 0 8px;">Last Week's Analytics</h4>
           <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
-          <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;">Review Archive</a>
+          <a href="https://kaaya.fit/" style="display:inline-block;background-color:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;">Review Archive</a>
         </td></tr></table>
       </td></tr></table>
     </td></tr></table>
@@ -260,14 +260,14 @@ u+.body .gm-incentive{background-color:#1a1408 !important;}
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:#FFD54F !important;letter-spacing:0.16em;text-transform:uppercase;margin:0 0 8px;">🏆 MONTHLY PRIZE POOL</p>
       <p style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#FFFFFF !important;line-height:1.4;margin:0 0 10px;">Top 5 athletes this month win <span style="color:#FFD54F !important;">free supplements</span> — shipped to your door.</p>
       <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:rgba(255,255,255,0.7) !important;margin:0 0 14px;line-height:1.5;">Your rank: <strong style="color:#FFD54F !important;font-family:'Space Grotesk',sans-serif;font-size:15px;">#${leaderboardRank}</strong> of ${totalUsers} athletes${leaderboardRank <= 5 ? ' — <span style="color:#4CAF50 !important;">In the prize zone! 🔥</span>' : leaderboardRank <= 10 ? ' — almost there, keep pushing!' : ''}</p>
-      <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:#FFD54F !important;color:#1a1408 !important;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">See Full Leaderboard →</a>
+      <a href="https://kaaya.fit/" style="display:inline-block;background-color:#FFD54F !important;color:#1a1408 !important;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">See Full Leaderboard →</a>
     </td></tr></table>
   </td></tr></table>
 
   ${researchVault}
   <!-- CTA -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surface}" style="padding:16px 28px 28px;text-align:center;background-color:${C.surface} !important;">
-    <a href="https://kaaya.fit/dashboard" style="display:inline-block;background-color:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
+    <a href="https://kaaya.fit/" style="display:inline-block;background-color:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
   </td></tr></table>
   <!-- Footer -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="padding:20px 28px 28px;background-color:${C.surfaceLowest} !important;">

@@ -12,7 +12,7 @@ const tod = () => {
 };
 
 export default function BodyFatLogModal({ open, onClose }) {
-  const { user, bodyFatLog, setBodyFatLog, updateProfile, addToast } = useApp();
+  const { user, setBodyFatLog, updateProfile, addToast } = useApp();
 
   const [bfForm, setBFForm] = useState({
     date: tod(),

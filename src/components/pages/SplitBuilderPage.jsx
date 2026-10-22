@@ -9,7 +9,7 @@ import { supabase } from '../../lib/supabaseClient';
 
 export default function SplitBuilderPage() {
   const navigate = useNavigate();
-  const { user, splits, setSplits, addToast } = useApp();
+  const { user, setSplits, addToast } = useApp();
 
   const [name, setName] = useState('My Custom Split');
   const [description, setDescription] = useState('A personalized training program');
@@ -152,7 +152,7 @@ export default function SplitBuilderPage() {
         <h2 className="headline-md" style={{ fontSize: 18, marginBottom: 16 }}>Schedule</h2>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {days.map((day, i) => (
+          {days.map((day) => (
             <div key={day.id} style={{ background: 'var(--surface-container-low)', borderRadius: 16, overflow: 'hidden' }}>
               <div style={{ padding: '12px 16px', background: 'var(--surface-container)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--surface-container-highest)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -177,7 +177,7 @@ export default function SplitBuilderPage() {
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-                      {day.exercises.map((ex, exIdx) => (
+                      {day.exercises.map((ex) => (
                         <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--surface-container-highest)', borderRadius: 12 }}>
                           <div>
                             <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--on-surface)' }}>{ex.name}</div>

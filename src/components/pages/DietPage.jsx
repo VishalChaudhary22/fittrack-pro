@@ -8,7 +8,7 @@ import { TDEEInsightCard } from '../shared/TDEEInsightCard';
 import { TDEEDetailSheet } from '../shared/TDEEDetailSheet';
 import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
-import { calcBMI, calcBMR, calcTDEE, calcDeficit, calcTDEESource } from '../../utils/calculations';
+import { calcBMI, calcBMR, calcTDEE, calcDeficit } from '../../utils/calculations';
 import { gId, tod, kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { foodCategories } from '../../data/foods/foodCategories';
 import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from '../../utils/foodUtils';
@@ -66,8 +66,15 @@ export default function DietPage({ chatbot }) {
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   const [showTDEEDetails, setShowTDEEDetails] = useState(false);
   
-  const [diet, setDiet] = useState('nonveg');
+  const [diet, setDiet] = useState(() => user?.dietType || 'nonveg');
   const [dateStr, setDateStr] = useState(tod());
+
+  // The selected diet plan is a profile setting — persist it so it survives a
+  // reload and reaches the chatbot's system prompt.
+  const handleSetDiet = useCallback(async (next) => {
+    setDiet(next);
+    await updateProfile?.({ dietType: next });
+  }, [updateProfile]);
   
   useScrollRestoration('/diet');
   const [activeTab, setActiveTabRaw] = useState(dietTabCache.activeTab);
@@ -84,8 +91,8 @@ export default function DietPage({ chatbot }) {
      const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
      const computedKcal = goal === 'loss' ? newTdee - dailyDelta : goal === 'gain' ? newTdee + dailyDelta : newTdee;
      
-     setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
-     await updateProfile({ customGoalKcal: computedKcal, useEstimatedTDEE: true });
+     await setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
+     await updateProfile({ customGoalKcal: computedKcal });
      addToast('Targets successfully updated to adaptive TDEE! 🚀', 'success');
   };
 
@@ -280,19 +287,23 @@ export default function DietPage({ chatbot }) {
     if (foodsLoading || !allFoods.length) return [];
     
     const q = searchQuery.trim();
-    const hasFilters = searchDiet !== 'All' || searchFasting;
-    
+    const hasFilters = searchDiet !== 'All' || searchFasting || searchCat !== 'All';
+
     // No query and no filters → show a sample of foods so the list isn't empty
     if (!q && !hasFilters) return allFoods.slice(0, 50);
-    
+
     // Run local search (with or without query)
     let results = searchLocalFoods(allFoods, q, {
       dietType: searchDiet !== 'All' ? searchDiet.replace('-', '').toLowerCase() : null,
       fastingType: searchFasting || null,
     });
-    
+
+    if (searchCat !== 'All') {
+      results = results.filter(f => f.category === searchCat);
+    }
+
     return results;
-  }, [searchQuery, searchDiet, searchFasting, allFoods, foodsLoading]);
+  }, [searchQuery, searchDiet, searchFasting, searchCat, allFoods, foodsLoading]);
 
 
   const recentFoods = useMemo(() => getRecentFoods(foodLog), [foodLog]);
@@ -456,10 +467,6 @@ export default function DietPage({ chatbot }) {
     const macrosToLog = { calories: 130, protein: 0, carbs: 0, fat: 15 };
     addFoodToLog(macrosToLog, 'Cooking Oil/Ghee (15g)', true);
     addToast('Cooking Oil (15g) added smoothly.', 'success');
-  };
-
-  const scrollToLog = () => {
-    document.getElementById('foodLogSection')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -655,7 +662,7 @@ export default function DietPage({ chatbot }) {
               </div>
               <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
                 {Object.values(DIET_TYPES).map(d => (
-                  <button key={d.id} onClick={() => setDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <button key={d.id} onClick={() => handleSetDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
                     {d.icon} {d.label}
                   </button>
                 ))}
@@ -675,7 +682,7 @@ export default function DietPage({ chatbot }) {
             if (wheyScoops >= 3 && meal.label === 'Mid-Morning') wheyLines.push(`+ Extra scoop protein (${protTarget}g target)`);
             if (wheyScoops >= 4 && meal.label === 'Before Bed') wheyLines.push('+ 1 scoop casein/whey before bed');
             const all = [...items, ...wheyLines];
-            const MIcon = CONSTANTS.MEAL_SLOTS.find(m => m.id === meal.label)?.icon || Activity;
+            const MIcon = CONSTANTS.MEAL_SLOTS.find(m => m.id === meal.label)?.icon || ActivityIcon;
             return (
               <div key={i} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: 20, borderRadius: 16 }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
@@ -1223,6 +1230,10 @@ export default function DietPage({ chatbot }) {
                 <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', minHeight: 44, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
                   {['All', 'Veg', 'Vegan', 'Egg', 'Non-Veg', 'Jain'].map(d => (
                     <button key={d} onClick={() => setSearchDiet(d)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchDiet === d ? 'var(--primary)' : 'var(--surface-container-low)', color: searchDiet === d ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{d}</button>
+                  ))}
+                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
+                  {[{ id: 'All', label: 'All categories' }, ...foodCategories].map(c => (
+                    <button key={c.id} onClick={() => setSearchCat(c.id)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchCat === c.id ? 'var(--primary)' : 'var(--surface-container-low)', color: searchCat === c.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{c.label}</button>
                   ))}
                   <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
                   {[{ id: '', label: 'Fasting: Off' }, ...CONSTANTS.FASTING_TYPES].filter(t=>t.label).map(t => {

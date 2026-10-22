@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcTDEESource } from '../../utils/calculations';
-import { fmt, kgToLbs, cmToFtIn, gId, tod } from '../../utils/helpers';
+import { kgToLbs, cmToFtIn } from '../../utils/helpers';
 import { exportData } from '../../utils/storage';
 import { calcAllMuscleXP, getRank, MUSCLE_GROUPS, getOverallRank } from '../../data/muscleData';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
@@ -106,8 +106,8 @@ function AvatarPickerModal({ open, onClose }) {
 
 export default function ProfilePage() {
   useScrollRestoration('/profile');
-  const { user, updateProfile, logout, toggleTheme, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, setBodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
-  const { permission, preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
+  const { user, updateProfile, logout, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
+  const { preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -167,6 +167,7 @@ export default function ProfilePage() {
         workoutDays: user.workoutDays ?? 4,
         dietType: user.dietType || 'veg',
         stepGoal: user.stepGoal ?? 10000,
+        waterGoal: user.waterGoal ?? 3000,
       });
     }
   }, [user?.id, user?.weight, user?.height, user?.name, user?.age]);
@@ -193,6 +194,8 @@ export default function ProfilePage() {
         activityLevel: f.activityLevel || f.activity || 'moderate',
         workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
         stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
+        waterGoal: safeParse(f.waterGoal, parseInt) ?? 3000,
+        dietType: f.dietType || 'veg',
       };
 
       const result = await updateProfile(sanitized);
@@ -404,7 +407,7 @@ export default function ProfilePage() {
 
           {/* Row 3: Workout Days, Steps, Activity */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
-            {[{ l: 'Workout Days/Week', k: 'workoutDays', t: 'number', min: 1, max: 7 }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number', placeholder: 'e.g. 10000' }].map(fld => {
+            {[{ l: 'Workout Days/Week', k: 'workoutDays', t: 'number', min: 1, max: 7 }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number', placeholder: 'e.g. 10000' }, { l: 'Daily Water Goal (ml)', k: 'waterGoal', t: 'number', placeholder: 'e.g. 3000' }].map(fld => {
               const dispVal = (!user[fld.k] && user[fld.k] !== 0) ? '—' : String(user[fld.k]);
               return (
                 <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -472,12 +475,12 @@ export default function ProfilePage() {
               <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Force a specific baseline</div>
            </div>
            <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowManualTDEEPicker(true)}>
-              {tdeePreferences?.manualTDEE ? `${tdeePreferences.manualTDEE} kcal` : 'Set manual'}
+              {tdeePreferences?.manualTDEEOverride ? `${tdeePreferences.manualTDEEOverride} kcal` : 'Set manual'}
            </button>
         </div>
-        {tdeePreferences?.manualTDEE && (
+        {tdeePreferences?.manualTDEEOverride && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-            <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setTdeePreferences(p => ({ ...p, manualTDEE: null }))}>Clear manual override</button>
+            <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setTdeePreferences(p => ({ ...p, manualTDEEOverride: null }))}>Clear manual override</button>
           </div>
         )}
       </div>
@@ -651,8 +654,8 @@ export default function ProfilePage() {
             <div className="headline-md" style={{ marginBottom: 8, color: 'var(--on-surface)' }}>Set Default TDEE</div>
             <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 16 }}>Choose your daily calorie target baseline</div>
             <ScrollPicker
-              value={tdeePreferences?.manualTDEE || tdee}
-              onChange={(v) => setTdeePreferences(p => ({ ...p, manualTDEE: v }))}
+              value={tdeePreferences?.manualTDEEOverride || tdee}
+              onChange={(v) => setTdeePreferences(p => ({ ...p, manualTDEEOverride: v }))}
               items={Array.from({ length: Math.floor((4500 - 1200) / 50) + 1 }, (_, i) => 1200 + i * 50)}
               unit="kcal"
             />

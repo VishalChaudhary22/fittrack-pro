@@ -79,8 +79,8 @@ export const computeWeeklyRate = (logs, windowDays = 28) => {
  * @returns {{ scenario: string, severity: 'info'|'warning'|'action', adjustKcal: number, message: string, reasoning: string }}
  */
 export const classifyScenario = (rateData, params) => {
-  const { rateKgPerWeek, confidence, logsUsed } = rateData;
-  const { goal, currentWeight, goalKcal, gender } = params;
+  const { rateKgPerWeek, logsUsed } = rateData;
+  const { goal, currentWeight } = params;
   const bwPct = currentWeight > 0 ? Math.abs(rateKgPerWeek) / currentWeight * 100 : 0;
 
   // S10: Insufficient data

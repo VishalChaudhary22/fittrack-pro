@@ -40,7 +40,7 @@ export const exportData = (payload = {}) => {
         csvContent += row.join(',') + '\n';
       });
       csvContent += '\n\n';
-    } catch (e) {
+    } catch {
       console.warn(`Could not parse ${key} for CSV export`);
     }
   });
@@ -72,7 +72,7 @@ export const importData = (file) => {
           localStorage.setItem(key, JSON.stringify(data[key]));
         });
         resolve(validKeys.length);
-      } catch (err) {
+      } catch {
         reject(new Error('Failed to parse backup file'));
       }
     };

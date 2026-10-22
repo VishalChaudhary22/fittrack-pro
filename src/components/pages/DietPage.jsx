@@ -1,10 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader } from '../shared/SharedComponents';
-import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
-import { TDEEInsightCard } from '../shared/TDEEInsightCard';
 import { TDEEDetailSheet } from '../shared/TDEEDetailSheet';
 import { computeNewTarget, recomputeMacros } from '../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../data/diets';
@@ -15,29 +10,8 @@ import { calcMacros, calcBeverageMacros, searchLocalFoods, getRecentFoods } from
 import { useFoodCache } from '../../hooks/useFoodCache';
 import { calcWorkoutCalories, calcCardioCalories } from '../../data/metValues';
 import { getDisplayStepLog } from '../../utils/activityUtils';
-
-function MacroRing({ label, value, max, unit, color, size = 112, strokeWidth = 6 }) {
-  const radius = (size - strokeWidth) / 2;
-  const circum = 2 * Math.PI * radius;
-  const pct = Math.min(Math.max(value / (max || 1), 0), 1);
-  const offset = circum - pct * circum;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }} className="group">
-      <div style={{ width: size, height: size, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg fill="transparent" width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={size/2} cy={size/2} r={radius} stroke="var(--surface-container-highest)" strokeWidth={strokeWidth} />
-          <circle cx={size/2} cy={size/2} r={radius} stroke={color} strokeWidth={strokeWidth} strokeDasharray={circum} strokeDashoffset={offset} strokeLinecap="butt" style={{ transition: 'stroke-dashoffset 0.6s ease-in-out' }} />
-        </svg>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <span className="headline-md" style={{ fontSize: 20, color: 'var(--on-surface)', letterSpacing: '-1px' }}>{Math.round(value)}</span>
-          <span style={{ fontSize: 8, color: 'var(--outline)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '2px', marginTop: 2 }}>{unit}</span>
-        </div>
-      </div>
-      <div style={{ marginTop: 12, fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--on-surface-variant)' }}>{label}</div>
-    </div>
-  );
-}
+import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+import { Screen, Sec, Hero, LedgerRow, Amp, One, Note, Action, Word, TLink, Ticks } from '../shared/Margin';
 
 const CONSTANTS = {
   FASTING_TYPES: [
@@ -49,23 +23,32 @@ const CONSTANTS = {
     { id: 'maha-shivratri', label: 'Maha Shivratri' },
   ],
   MEAL_SLOTS: [
-    { id: 'Breakfast', icon: TrendingUp, targetPct: 0.25 },
-    { id: 'Mid-Morning', icon: ActivityIcon, targetPct: 0.05 },
-    { id: 'Lunch', icon: Salad, targetPct: 0.35 },
-    { id: 'Pre-Workout', icon: Flame, targetPct: 0.05 },
-    { id: 'Post-Workout Dinner', icon: Salad, targetPct: 0.25 },
-    { id: 'Before Bed', icon: ActivityIcon, targetPct: 0.05 },
-  ]
+    { id: 'Breakfast', targetPct: 0.25 },
+    { id: 'Mid-Morning', targetPct: 0.05 },
+    { id: 'Lunch', targetPct: 0.35 },
+    { id: 'Pre-Workout', targetPct: 0.05 },
+    { id: 'Post-Workout Dinner', targetPct: 0.25 },
+    { id: 'Before Bed', targetPct: 0.05 },
+  ],
 };
 
+// The quick-add button logs here. It used to be a slot with no section on the
+// page, so anything added through it counted toward the day and then vanished.
+const SNACK_SLOT = { id: 'Snack/General', targetPct: 0.05 };
+
 const dietTabCache = { activeTab: 'tracker' };
-import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+
+const plain = { background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit', textAlign: 'left', cursor: 'pointer' };
+
+// Declared at module scope: a component defined inside the page would remount
+// on every keystroke and take the caret with it.
+const Field = (props) => <input {...props} className="field" />;
 
 export default function DietPage({ chatbot }) {
   const { user, foodLog, setFoodLog, addToast, favoriteIds, toggleFavoriteFood, getFoodStreak, waterLog, setWaterLog, supplementLog, setSupplementLog, supplementConfig, workoutLogs, cardioLog, stepLogs, bodyFatLog, adaptiveSuggestion, acceptSuggestion, dismissSuggestion, updateProfile, tdeeEstimate, setTdeePreferences } = useApp();
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   const [showTDEEDetails, setShowTDEEDetails] = useState(false);
-  
+
   const [diet, setDiet] = useState(() => user?.dietType || 'nonveg');
   const [dateStr, setDateStr] = useState(tod());
 
@@ -75,7 +58,7 @@ export default function DietPage({ chatbot }) {
     setDiet(next);
     await updateProfile?.({ dietType: next });
   }, [updateProfile]);
-  
+
   useScrollRestoration('/diet');
   const [activeTab, setActiveTabRaw] = useState(dietTabCache.activeTab);
   const setActiveTab = useCallback((tab) => {
@@ -90,7 +73,7 @@ export default function DietPage({ chatbot }) {
      const goal = deficitInfo.goal;
      const dailyDelta = deficitInfo.dailyDelta || (goal === 'loss' ? 500 : goal === 'gain' ? 400 : 0);
      const computedKcal = goal === 'loss' ? newTdee - dailyDelta : goal === 'gain' ? newTdee + dailyDelta : newTdee;
-     
+
      await setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
      await updateProfile({ customGoalKcal: computedKcal });
      addToast('Targets successfully updated to adaptive TDEE! 🚀', 'success');
@@ -103,13 +86,13 @@ export default function DietPage({ chatbot }) {
   const [searchCat, setSearchCat] = useState('All');
   const [searchDiet, setSearchDiet] = useState('All');
   const [searchFasting, setSearchFasting] = useState('');
-  
+
   // Detail Pane
   const [selectedFood, setSelectedFood] = useState(null);
   const [servingId, setServingId] = useState('');
   const [qty, setQty] = useState(1);
   const [qtyInput, setQtyInput] = useState('1');
-  
+
   useEffect(() => {
     setQtyInput(String(qty));
   }, [qty]);
@@ -140,7 +123,7 @@ export default function DietPage({ chatbot }) {
   const [consistency, setConsistency] = useState('standard');
   const [milkMod, setMilkMod] = useState('none');
   const [sweetMods, setSweetMods] = useState([]);
-  
+
   // Custom Form
   const [showCustom, setShowCustom] = useState(false);
   const [customInput, setCustomInput] = useState({ name: '', cals: '', p: '', c: '', f: '' });
@@ -174,25 +157,25 @@ export default function DietPage({ chatbot }) {
   const goalKcal = user?.customGoalKcal || computedGoalKcal;
   const isCustomTarget = !!user?.customGoalKcal;
   const latestBF = bodyFatLog?.filter(e => e.userId === user?.id)?.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-  
+
   const baseWeightForProtein = (goal === 'loss' && user.weightGoal && user.weightGoal < user.weight) ? user.weightGoal : user.weight;
-  
+
   const isHeavyCut = user.workoutDays >= 5 && goal === 'loss';
   const protMultiplier = isHeavyCut ? 2.0 : 1.8;
   const protTarget = user?.customProteinG || Math.round(baseWeightForProtein * protMultiplier);
   const carbsTarget = Math.round((goalKcal * (goal === 'loss' ? .38 : .44)) / 4);
   const fatTarget = Math.round((goalKcal * .26) / 9);
-  
+
   const wheyScoops = protTarget >= 180 ? Math.min(Math.ceil((protTarget - 100) / 25), 4) : 2;
   const wheyProt = wheyScoops * 25;
   const foodProt = protTarget - wheyProt;
-  
+
   const dt = DIET_TYPES[diet];
   const gKey = goal === 'loss' ? 'loss' : goal === 'gain' ? 'gain' : 'maintain';
 
   // Log calculation logic
   const dailyLog = useMemo(() => foodLog.filter(l => l.date === dateStr && l.userId === user.id), [foodLog, dateStr, user.id]);
-  
+
   const selectedDateWater = useMemo(() => (waterLog || []).filter(l => l.userId === user.id && l.date === dateStr), [waterLog, user.id, dateStr]);
   const selectedDateWaterTotal = useMemo(() => selectedDateWater.reduce((acc, curr) => acc + curr.ml, 0), [selectedDateWater]);
   const waterGoal = user.waterGoal || 3000;
@@ -242,7 +225,7 @@ export default function DietPage({ chatbot }) {
   // Phase 4 - Weekly Analysis Logic
   const last7Days = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(tod()); 
+      const d = new Date(tod());
       d.setDate(d.getDate() - 6 + i);
       return d.toISOString().split('T')[0];
     });
@@ -260,12 +243,12 @@ export default function DietPage({ chatbot }) {
         vitaminB12: acc.vitaminB12 + (curr.macros?.vitaminB12 || 0),
         vitaminD: acc.vitaminD + (curr.macros?.vitaminD || 0)
       }), { calories: 0, protein: 0, carbs: 0, fat: 0, iron: 0, vitaminB12: 0, vitaminD: 0 });
-      return { 
-        date: d, 
+      return {
+        date: d,
         dayName: new Date(d).toLocaleDateString('en-US', { weekday: 'short' }),
         calories: Math.round(t.calories),
-        protein: Math.round(t.protein), 
-        carbs: Math.round(t.carbs), 
+        protein: Math.round(t.protein),
+        carbs: Math.round(t.carbs),
         fat: Math.round(t.fat),
         iron: t.iron,
         vitaminB12: t.vitaminB12,
@@ -285,7 +268,7 @@ export default function DietPage({ chatbot }) {
   // Synchronous local search against cached allFoods (hybrid approach)
   const searchResults = useMemo(() => {
     if (foodsLoading || !allFoods.length) return [];
-    
+
     const q = searchQuery.trim();
     const hasFilters = searchDiet !== 'All' || searchFasting || searchCat !== 'All';
 
@@ -338,6 +321,8 @@ export default function DietPage({ chatbot }) {
 
   // Ref for delayed search input focus (H2a)
   const searchInputRef = useRef(null);
+  // Where the page was scrolled when the sheet opened, restored on close.
+  const trackerScrollRef = useRef(0);
 
   // Lock body+html scroll when modal opens, and handle visualViewport (H1b, H1c, H1d)
   useEffect(() => {
@@ -381,11 +366,11 @@ export default function DietPage({ chatbot }) {
 
   const closeSearch = () => {
     setShowSearch(false);
-    setTimeout(() => window.scrollTo({ top: dietTabCache.trackerScroll || 0, behavior: 'instant' }), 0);
+    setTimeout(() => window.scrollTo({ top: trackerScrollRef.current || 0, behavior: 'instant' }), 0);
   };
 
   const handleOpenSearch = (slot) => {
-    dietTabCache.trackerScroll = window.scrollY;
+    trackerScrollRef.current = window.scrollY;
     setSearchMealSlot(slot);
     setShowSearch(true);
     setSelectedFood(null);
@@ -462,862 +447,773 @@ export default function DietPage({ chatbot }) {
     setEditingEntry(entry.id);
     setShowSearch(true);
   };
-  
+
   const addCookingOil = () => {
     const macrosToLog = { calories: 130, protein: 0, carbs: 0, fat: 15 };
     addFoodToLog(macrosToLog, 'Cooking Oil/Ghee (15g)', true);
     addToast('Cooking Oil (15g) added smoothly.', 'success');
   };
 
+  /* ─── derived display values ─────────────────────────────────────────── */
+  const remainingKcal = Math.max(0, Math.round(goalKcal - todayTotals.calories));
+  const protGap = Math.max(0, Math.round(protTarget - todayTotals.protein));
+  const carbGap = Math.max(0, Math.round(carbsTarget - todayTotals.carbs));
+  const fatGap = Math.max(0, Math.round(fatTarget - todayTotals.fat));
+  const calPct = Math.min(100, Math.round((todayTotals.calories / (goalKcal || 1)) * 100) || 0);
+  const foodStreak = getFoodStreak();
+
+  // Every slot in the plan, plus the quick-add slot and anything already
+  // logged against a slot name the plan doesn't know about.
+  const slots = useMemo(() => {
+    const base = [...CONSTANTS.MEAL_SLOTS, SNACK_SLOT];
+    const known = new Set(base.map(s => s.id));
+    const orphans = [...new Set(dailyLog.map(l => l.slot).filter(s => s && !known.has(s)))];
+    return [...base, ...orphans.map(id => ({ id, label: id, targetPct: 0 }))];
+  }, [dailyLog]);
+
+  const phaseLabel = goal === 'loss' ? 'cut' : goal === 'gain' ? 'bulk' : 'maintain';
+  const dateLabel = dateStr === tod()
+    ? 'Today'
+    : new Date(dateStr).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+
+  const MODES = [
+    { id: 'tracker', label: 'Log' },
+    { id: 'guide', label: 'Plan' },
+    { id: 'analysis', label: 'Week' },
+  ];
+
+  /* ─── shared bits ────────────────────────────────────────────────────── */
+  const MacroNote = () => {
+    if (!isUnset && protGap > 30) {
+      return (
+        <Note>
+          <b>Protein first.</b> {protGap} g to go — that's the only line worth thinking about tonight.
+        </Note>
+      );
+    }
+    if (!isUnset && protGap > 0) {
+      return <Note><b>{protGap} g of protein left.</b> Close it and the day is done.</Note>;
+    }
+    if (!isUnset) {
+      return <Note><b>Protein is covered.</b> Everything else is within range.</Note>;
+    }
+    return null;
+  };
+
   return (
-    <div className="pg-in">
-      <PageHeader title="Diet Guide & Log" sub={`Personalised for ${user.name.toLowerCase().startsWith('kaaya fit') ? 'Kaaya Fit' : user.name.split(' ')[0]} | Target: ${goalKcal} kcal`} />
-      
-      {/* ──────────────────────────────────────────────────────────── */}
-      {/* SECTION 1: DIET GUIDE (Kinetic Elite Restyle) */}
-      {/* ──────────────────────────────────────────────────────────── */}
-      <section style={{ marginBottom: 40 }}>
-        {/* STATS ROW */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
-          {[{ l: 'Weight', v: user?.weight ? (isImpWeight ? `${kgToLbs(user.weight)}lbs` : `${user.weight}kg`) : '—', i: Scale },
-            { l: 'Height', v: user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height}cm`) : '—', i: Ruler },
-            { l: 'BMI Score', v: (!bmi || isNaN(bmi) || bmi === 0) ? '—' : bmi, i: Calculator },
-            { l: 'Body Fat', v: latestBF ? `${latestBF.percentage}%` : '—', i: ActivityIcon },
-            { l: 'TDEE', v: (!tdee || isNaN(tdee) || tdee === 0) ? '—' : `${tdee} kcal`, i: Zap },
-            { l: 'Activity', v: (user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1), i: PersonStanding }].map(s => {
-            const Icon = s.i;
-            return (
-              <div key={s.l} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: 'var(--surface-container-low)', padding: '8px 16px', borderRadius: 20, border: '1px solid var(--surface-container-highest)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--on-surface-variant)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 500 }}>
-                  <Icon size={12} color="var(--on-surface-variant)" /> {s.l}
-                </span>
-                <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 800 }}>{s.v}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ADAPTIVE DIET BANNER */}
-        {adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && adaptiveSuggestion.adjustKcal !== 0 && (() => {
-          const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
-          const newMacros = recomputeMacros({
-            goal: adaptiveSuggestion.goal,
-            currentWeight: user.weight,
-            goalWeight: user.weightGoal,
-            newKcal,
-            workoutDays: user.workoutDays,
-          });
-          return (
-            <AdaptiveDietBanner
-              suggestion={adaptiveSuggestion}
-              currentKcal={adaptiveSuggestion.goalKcal}
-              newKcal={newKcal}
-              newMacros={newMacros}
-              onAccept={acceptSuggestion}
-              onDismiss={dismissSuggestion}
-            />
-          );
-        })()}
-        {/* On-track banner */}
-        {adaptiveSuggestion && adaptiveSuggestion.scenario === 'S6' && (
-          <AdaptiveDietBanner
-            suggestion={adaptiveSuggestion}
-            currentKcal={goalKcal}
-            newKcal={goalKcal}
-            onAccept={acceptSuggestion}
-            onDismiss={dismissSuggestion}
-          />
-        )}
-        
-        <TDEEInsightCard 
-          tdeeEstimate={tdeeEstimate}
-          onUpdateTargets={handleUpdateTDEETargets}
-          onLearnMore={() => setShowTDEEDetails(true)}
-        />
-        {!isUnset && tdeeEstimate?.confidence === 'insufficient' && (
-           <div style={{ background: 'var(--surface-container-low)', borderRadius: 12, padding: '12px 16px', marginBottom: 24, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <Info size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
-              <div>
-                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', marginBottom: 4 }}>Learning your metabolism...</div>
-                 <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', lineHeight: 1.4 }}>Log your weight and food consistently for at least 10 days to unlock Adaptive TDEE targets.</div>
-              </div>
-           </div>
-        )}
-
-        {/* GOAL SECTION WRAPPER */}
-        <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)', boxShadow: 'var(--glow-primary)', marginBottom: 24, position: 'relative' }}>
-          {isUnset ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <span className="headline-md" style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🎯</span>
-              <h2 className="headline-lg" style={{ fontSize: 24, marginBottom: 12, color: 'var(--on-surface)' }}>Targets Locked</h2>
-              <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
-                Complete your profile with your age, height, current weight, and target weight to generate your personalized macros.
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button className="btn-p" onClick={() => window.location.hash = '#/profile'} style={{ width: 'auto', padding: '12px 32px' }}>
-                  Update Profile
-                </button>
-              </div>
-            </div>
-          ) : (<>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-end', gap: 16, marginBottom: 32 }}>
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ color: 'var(--primary-container)', fontSize: 9, letterSpacing: '3px', fontWeight: 900, textTransform: 'uppercase' }}>Phase Status</span>
-              <h2 className="headline-lg" style={{ fontSize: 36, fontWeight: 900, fontStyle: 'italic', marginTop: 4, textTransform: 'uppercase', color: 'var(--on-surface)' }}>
-                GOAL: {goal === 'loss' ? 'CUT' : goal === 'gain' ? 'BULK' : 'MAINTAIN'}
-              </h2>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap', background: 'var(--surface-container-highest)', padding: '8px 16px', borderRadius: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🔥 </span>{goalKcal} kcal{isCustomTarget ? ' ✦' : ''}</div>
-            <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>💪 </span>{protTarget}g P</div>
-            <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🌾 </span>{carbsTarget}g C</div>
-            <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🧈 </span>{fatTarget}g F</div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 24, justifyContent: 'center' }}>
-            <MacroRing label="Daily Energy" value={todayTotals.calories} max={goalKcal} unit="Kcal" color="var(--primary-container)" />
-            <MacroRing label="Protein" value={todayTotals.protein} max={protTarget} unit="Grams" color="var(--primary)" />
-            <MacroRing label="Carbs" value={todayTotals.carbs} max={carbsTarget} unit="Grams" color="var(--tertiary-container)" />
-            <MacroRing label="Fats" value={todayTotals.fat} max={fatTarget} unit="Grams" color="#FACC15" />
-          </div>
-
-          <div style={{ background: 'var(--surface-container-highest)', borderRadius: 16, padding: '16px 20px', marginTop: 24, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 10, uppercase: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700, letterSpacing: '1px' }}>ENERGY BALANCE</div>
-              <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4 }}>
-                In: <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{Math.round(todayTotals.calories)}</span> - Out: <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{Math.round(todayCaloriesBurned)}</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <div className="headline-md" style={{ fontSize: 24, color: energyBalance > goalKcal ? 'var(--error)' : 'var(--primary)' }}>
-                {Math.round(energyBalance)} <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', textTransform: 'uppercase' }}>Kcal Net</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 16, textAlign: 'center' }}>
-            ℹ️ Protein calculated from {goal === 'loss' && user.weightGoal && user.weightGoal < user.weight ? 'goal weight' : 'current weight'} ({isImpWeight ? kgToLbs(baseWeightForProtein) + ' lbs' : baseWeightForProtein + 'kg'}) × {protMultiplier}g/kg
-          </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
-            <button onClick={() => setActiveTab('tracker')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--surface-container-highest)', border: 'none', borderRadius: 20, padding: '6px 16px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--on-surface)', cursor: 'pointer' }}>
-              TRACK TODAY <ArrowDown size={14} color="var(--primary)" />
-            </button>
-          </div>
-          {isCustomTarget && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
-              <button
-                onClick={() => updateProfile({ customGoalKcal: null, customProteinG: null })}
-                style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface-dim)', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+    <>
+      <Screen
+        kicker="Food"
+        right={
+          <div className="rowf g12">
+            {MODES.map(m => (
+              <TLink
+                key={m.id}
+                onClick={() => setActiveTab(m.id)}
+                style={{ color: activeTab === m.id ? 'var(--ink)' : 'var(--ash-dim)' }}
               >
-                ✦ Custom target active · <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Reset to calculated</span>
-              </button>
-            </div>
-          )}
-          </>)}
-        </div>
-
-        {/* TAB SWITCHER */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-          <div style={{ display: 'flex', background: 'var(--surface-container-highest)', borderRadius: 24, padding: 4 }}>
-            <button onClick={() => setActiveTab('tracker')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'tracker' ? 'var(--primary)' : 'transparent', color: activeTab === 'tracker' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              🍽 Daily Tracker
-            </button>
-            <button onClick={() => setActiveTab('guide')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'guide' ? 'var(--primary)' : 'transparent', color: activeTab === 'guide' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              📋 Meal Guide
-            </button>
-            <button onClick={() => setActiveTab('analysis')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'analysis' ? 'var(--primary)' : 'transparent', color: activeTab === 'analysis' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              📊 Analysis
-            </button>
+                {m.label}
+              </TLink>
+            ))}
           </div>
-        </div>
+        }
+      >
+        {isUnset ? (
+          <Sec n="01" label="Targets" right="locked">
+            <One
+              title="Targets need your body metrics."
+              sub="Add age, height, current weight and a goal weight and the app can size your day."
+            />
+            <Action onClick={() => { window.location.hash = '#/profile'; }}>Update profile</Action>
+          </Sec>
+        ) : (
+          <>
+            {/* ── 01 THE BUDGET ─────────────────────────────────────── */}
+            <Sec
+              n="01"
+              label="Remaining"
+              right={
+                <span className="rowf g10" style={{ alignItems: 'center' }}>
+                  <TLink onClick={() => changeDate(-1)} aria-label="Previous day">←</TLink>
+                  <span onClick={() => setDateStr(tod())} style={{ cursor: 'pointer' }}>{dateLabel}</span>
+                  <TLink onClick={() => changeDate(1)} aria-label="Next day">→</TLink>
+                </span>
+              }
+            >
+              <Hero value={remainingKcal.toLocaleString()} unit="kcal" />
 
-        {activeTab === 'guide' && (
-          <div>
-            {/* BLUEPRINT HEADER CARD */}
-            <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, borderLeft: '4px solid var(--primary)', marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span className="headline-md" style={{ fontSize: 20, color: 'var(--on-surface)' }}>📋 Your Personalised Meal Blueprint</span>
+              <div className="rowf between">
+                <span className="kicker" style={{ color: 'var(--ash-dim)' }}>
+                  {Math.round(todayTotals.calories).toLocaleString()} eaten
+                </span>
+                <span className="kicker" style={{ color: 'var(--bone)' }}>
+                  {Math.round(goalKcal).toLocaleString()} target
+                </span>
               </div>
-              <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>These are AI-curated meal suggestions based on your {goal === 'loss' ? 'cut' : goal === 'gain' ? 'bulk' : 'maintenance'} goal and {DIET_TYPES[diet].label} diet. Use these as a daily reference — log your actual intake in the Daily Tracker.</p>
-            </div>
 
-            {/* DIET TYPE & WHEY CARD */}
-            <div style={{ background: 'var(--surface-container-low)', padding: 16, borderRadius: 16, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: 24 }}>
-              <div style={{ flex: 1, minWidth: 280 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--glow-primary)' }}>
-                    <ActivityIcon size={20} color="var(--primary)" />
-                  </div>
-                  <div>
-                    <div className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Whey Protein — {wheyScoops} scoop{wheyScoops > 1 ? 's' : ''}/day ({wheyProt}g)</div>
-                    <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>{foodProt}g from food + {wheyProt}g from whey = {protTarget}g target.</div>
-                  </div>
-                </div>
+              <Amp pct={calPct} cap style={{ marginTop: 12 }} />
+
+              <div className="rowf g16 mt10" style={{ flexWrap: 'wrap' }}>
+                <span className="meta">{Math.round(todayCaloriesBurned)} burned</span>
+                <span className="meta" style={{ color: 'var(--ash)' }}>
+                  {Math.abs(Math.round(energyBalance))} {energyBalance > 0 ? 'in' : 'deficit'}
+                </span>
+                <span className="meta" style={{ color: todayTotals.calories > goalKcal ? 'var(--warn)' : 'var(--ok)', marginLeft: 'auto' }}>
+                  {todayTotals.calories > goalKcal ? 'Over' : 'On pace'}
+                </span>
               </div>
-              <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
-                {Object.values(DIET_TYPES).map(d => (
-                  <button key={d.id} onClick={() => handleSetDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {d.icon} {d.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {/* MEAL PLANS (DIET GUIDE) */}
-            <div style={{ fontSize: 9, letterSpacing: '3px', color: 'var(--outline)', textTransform: 'uppercase', fontWeight: 800, marginBottom: 12 }}>
-              Blueprint
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 16 }}>
-              {dt.meals.map((meal, i) => {
-            const items = meal.items[gKey] || meal.items.maintain || [];
-            const wheyLines = [];
-            if (meal.label === 'Breakfast') wheyLines.push(`+ 1 scoop ${diet === 'vegan' ? 'plant protein (pea+rice)' : 'whey'} — complete protein`);
-            if (meal.label === 'Post-Workout Dinner') wheyLines.push('+ 1 scoop whey within 30 min post-workout');
-            if (wheyScoops >= 3 && meal.label === 'Mid-Morning') wheyLines.push(`+ Extra scoop protein (${protTarget}g target)`);
-            if (wheyScoops >= 4 && meal.label === 'Before Bed') wheyLines.push('+ 1 scoop casein/whey before bed');
-            const all = [...items, ...wheyLines];
-            const MIcon = CONSTANTS.MEAL_SLOTS.find(m => m.id === meal.label)?.icon || ActivityIcon;
-            return (
-              <div key={i} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: 20, borderRadius: 16 }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><MIcon size={16} color="var(--primary)" /></div>
-                  <div style={{ flex: 1 }}><div className="headline-md" style={{ color: 'var(--on-surface)', fontSize: 16 }}>{meal.label}</div></div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {all.map((item, j) => {
-                    const isW = item.startsWith('+');
-                    return (
-                      <div key={j} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: isW ? '8px 10px' : '4px 0', fontSize: 13, color: isW ? 'var(--primary)' : 'var(--on-surface-variant)', background: isW ? 'var(--surface-container-highest)' : 'transparent', borderRadius: isW ? 8 : 0 }}>
-                        {!isW && <span style={{ color: 'var(--primary)', flexShrink: 0 }}>·</span>}
-                        <span>{item}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{ marginTop: 16, paddingTop: 16 }}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-                    {[{ l: 'P', v: meal.macros.p }, { l: 'C', v: meal.macros.c }, { l: 'F', v: meal.macros.f }].map(m => (
-                      <div key={m.l} style={{ padding: '4px 10px', background: 'var(--surface-container-highest)', borderRadius: 8, fontSize: 11, border: 'none', color: 'var(--on-surface)' }}>
-                        <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{m.l}</span><span style={{ color: 'var(--on-surface-dim)', marginLeft: 4 }}>{m.v}g</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--on-surface-dim)' }}><span style={{ color: 'var(--primary)', fontWeight: 700 }}>Micros: </span>{meal.micros.join(' · ')}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              {foodStreak.current >= 3 && (
+                <LedgerRow k="Logging streak" v={`${foodStreak.current} d`} tone="sm" />
+              )}
 
-        {/* Protein Sources Footer */}
-        {dt.proteinSources && (
-          <div style={{ padding: '16px 20px', marginTop: 16, background: 'var(--surface-container-lowest)', borderRadius: 16, borderLeft: '4px solid var(--primary-container)' }}>
-            <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 10 }}>Best Protein Sources — {dt.label}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{dt.proteinSources.map(s => <span key={s} style={{ padding: '4px 10px', background: 'var(--surface-container-highest)', color: 'var(--primary)', borderRadius: 20, fontSize: 12, fontWeight: 500 }}>{s}</span>)}</div>
-          </div>
-        )}
-        <div style={{ marginTop: 12, padding: '14px 18px', background: 'var(--surface-container-highest)', borderRadius: 12, fontSize: 12, color: 'var(--on-surface-variant)' }}>
-          <strong style={{ color: 'var(--primary)' }}>Complete Protein Tip:</strong> Combine legumes + grains per meal (dal+rice, chana+roti) to cover all 9 essential amino acids. Whey protein already contains all 9 EAAs in every scoop.
-        </div>
-      </div>
-      )}
-
-      {/* ──────────────────────────────────────────────────────────── */}
-      {/* SECTION: ANALYSIS TAB */}
-      {/* ──────────────────────────────────────────────────────────── */}
-      {activeTab === 'analysis' && (
-        <div style={{ marginBottom: 24 }}>
-          {/* VITAMIN ALERTS */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-            {(diet === 'veg' || diet === 'vegan' || diet === 'jain') && weeklyMicros.vitaminB12 < 1.5 && (
-              <div style={{ padding: 16, borderRadius: 12, background: 'rgba(232,84,13,0.1)', border: '1px solid var(--primary-container)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <AlertTriangle size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <div>
-                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--primary)', marginBottom: 4 }}>Low B12 Logged This Week</h5>
-                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Vegetarians can't get sufficient B12 from plants alone. Consider fortified milk, or discuss a B12 supplement with a professional.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            {weeklyMicros.vitaminD < 200 * 7 && (
-              <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-container-highest)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <Zap size={18} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <div>
-                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--on-surface)', marginBottom: 4 }}>Low Vitamin D3 Detected</h5>
-                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Top food sources are egg yolk, fatty fish, and fortified milk. A D3 supplement is recommended for most Indians.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            {user.gender === 'female' && weeklyMicros.iron < 18 * 7 && (
-              <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-container-highest)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <ActivityIcon size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <div>
-                    <h5 className="headline-md" style={{ fontSize: 14, color: 'var(--on-surface)', marginBottom: 4 }}>Low Iron Intake</h5>
-                    <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Your iron intake looks low this week. Top sources: palak, rajma, chana, ragi, dates, and non-veg options.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* MACRO CHART */}
-          <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)' }}>
-            <h4 className="headline-md" style={{ fontSize: 18, marginBottom: 24, textTransform: 'uppercase', letterSpacing: '-0.5px' }}>Weekly Macro Adherence</h4>
-            <div style={{ width: '100%', height: 350 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" vertical={false} />
-                  <XAxis dataKey="dayName" stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
-                  <RechartsTooltip cursor={{ fill: 'var(--surface-container-highest)' }} contentStyle={{ background: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', borderRadius: 8, fontSize: 12, color: 'var(--on-surface)' }} itemStyle={{ fontSize: 13, fontWeight: 700 }} />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 16 }} />
-                  <Bar dataKey="protein" stackId="a" fill="var(--primary)" name="Protein (g)" radius={[0, 0, 4, 4]} />
-                  <Bar dataKey="carbs" stackId="a" fill="var(--tertiary-container)" name="Carbs (g)" />
-                  <Bar dataKey="fat" stackId="a" fill="#FACC15" name="Fat (g)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      )}
-      </section>
-
-
-      {/* ──────────────────────────────────────────────────────────── */}
-      {/* SECTION 2: FOOD LOG */}
-      {/* ──────────────────────────────────────────────────────────── */}
-      <section id="foodLogSection">
-        {activeTab === 'tracker' && (
-          <div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 className="headline-md" style={{ fontSize: 22, textTransform: 'uppercase', letterSpacing: '-1px', margin: 0, lineHeight: 1 }}>Daily Tracker</h4>
-                {getFoodStreak().current >= 3 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(248, 95, 27, 0.1)', border: '1px solid rgba(248, 95, 27, 0.25)', padding: '6px 12px', borderRadius: 20 }}>
-                     <Flame size={14} color="var(--primary-container)" />
-                     <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary-container)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{getFoodStreak().current} Day</span>
-                  </div>
+              <div className="rowf g16 mt18" style={{ flexWrap: 'wrap' }}>
+                <TLink onClick={handleCopyYesterday}>Copy yesterday</TLink>
+                {isCustomTarget && (
+                  <TLink onClick={() => updateProfile({ customGoalKcal: null, customProteinG: null })}>
+                    Reset to calculated
+                  </TLink>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, width: '100%' }}>
-                <div style={{ flex: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container-highest)', borderRadius: 12, padding: '4px' }}>
-                  <button onClick={() => changeDate(-1)} style={{ padding: '8px', background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', display: 'flex' }}><ChevronLeft size={16}/></button>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)', textAlign: 'center', whiteSpace: 'nowrap' }}>{dateStr === tod() ? 'Today' : dateStr}</span>
-                  <button onClick={() => changeDate(1)} style={{ padding: '8px', background: 'transparent', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', display: 'flex' }}><ChevronRight size={16}/></button>
-                </div>
-                <button 
-                  onClick={handleCopyYesterday} 
-                  style={{ flex: 1, padding: '0 12px', fontSize: 12, fontWeight: 700, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', borderRadius: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                  onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container)'}
-                  onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container-highest)'}
-                >
-                  <Copy size={14} style={{ color: 'var(--on-surface-variant)' }}/> Copy Y'day
-                </button>
-              </div>
-            </div>
+            </Sec>
 
-            {/* Removed Redundant Today's Tracker Progress Card */}
-
-            {protTarget - todayTotals.protein > 30 && new Date().getHours() >= 18 && (
-               <div style={{ background: 'rgba(232,84,13,0.1)', padding: 16, borderRadius: 12, marginBottom: 24, border: '1px solid var(--primary-container)' }}>
-                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-                   <Zap size={16} color="var(--primary)" />
-                   <span style={{ fontSize: 12, color: 'var(--primary-container)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>High-Impact Nudge</span> 
-                 </div>
-                 <p style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 4, marginBottom: 12 }}>You're <strong>{Math.round(protTarget - todayTotals.protein)}g</strong> short on protein today.</p>
-                 <button
-                   onClick={() => {
-                     if (chatbot) {
-                       chatbot.openChat();
-                       setTimeout(() => chatbot.sendMessage(`I need ${Math.round(protTarget - todayTotals.protein)}g more protein today. What are some quick meal ideas?`), 300);
-                     }
-                   }}
-                   style={{
-                     background: 'var(--primary)', border: 'none', borderRadius: 8,
-                     padding: '8px 12px', color: 'var(--on-primary)', fontSize: 12, fontWeight: 700,
-                     display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', transition: '0.2s'
-                   }}
-                 >
-                   <Bot size={14} /> Ask FORGE for protein meal ideas
-                 </button>
-               </div>
+            {/* ── 02 MACROS ─────────────────────────────────────────── */}
+            {activeTab === 'tracker' && (
+              <Sec n="02" label="Macros" right={`${phaseLabel} · ${todayTotals.calories > goalKcal ? 'over' : 'in budget'}`}>
+                <LedgerRow
+                  k="Protein"
+                  v={protGap}
+                  sub={` / ${protTarget}g`}
+                  tone="em"
+                  emberLead
+                />
+                <LedgerRow k="Carbs" v={carbGap} sub={` / ${carbsTarget}g`} />
+                <LedgerRow k="Fat" v={fatGap} sub={` / ${fatTarget}g`} dim />
+                <MacroNote />
+              </Sec>
             )}
 
-            {/* HYDRATION WIDGET */}
-            <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16, marginBottom: 24, border: '1px solid var(--outline-variant)' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                   <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Droplet size={18} color="#3b82f6" fill="#3b82f6" fillOpacity={0.2} /></div>
-                   <div>
-                     <h4 className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Hydration</h4>
-                     <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{selectedDateWaterTotal} / {waterGoal} ml</p>
-                   </div>
-                 </div>
-                 <div style={{ padding: '4px 10px', background: 'var(--surface-container-highest)', borderRadius: 20, fontSize: 11, fontWeight: 800, color: '#3b82f6' }}>{waterPct}%</div>
-               </div>
-               
-               <div style={{ height: 6, background: 'var(--surface-container-highest)', borderRadius: 4, overflow: 'hidden', marginBottom: 16 }}>
-                  <div style={{ height: '100%', width: `${waterPct}%`, background: '#3b82f6', borderRadius: 4, transition: 'width 0.5s ease-out' }} />
-               </div>
+            {/* ── MEALS ─────────────────────────────────────────────── */}
+            {activeTab === 'tracker' && slots.map((slot, idx) => {
+              const items = dailyLog.filter(l => l.slot === slot.id);
+              const slotTotal = Math.round(items.reduce((s, i) => s + (i.macros?.calories || 0), 0));
+              const slotProt = Math.round(items.reduce((s, i) => s + (i.macros?.protein || 0), 0));
+              const planned = Math.round(goalKcal * (slot.targetPct || 0));
 
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                 {[{ ml: 250, label: 'Glass' }, { ml: 500, label: 'Bottle' }, { ml: 750, label: 'Shaker' }].map(preset => (
-                   <button key={preset.ml} onClick={() => addWater(preset.ml)} style={{ padding: '8px 4px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'transform 0.1s' }} className="active:scale-95">
-                     <div style={{ fontSize: 13, fontWeight: 800, color: '#3b82f6' }}>+{preset.ml}</div>
-                     <div style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>{preset.label}</div>
-                   </button>
-                 ))}
-               </div>
-            </div>
-
-            {/* SUPPLEMENTS WIDGET */}
-            <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16, marginBottom: 24, border: '1px solid var(--outline-variant)' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                 <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Pill size={18} color="#8b5cf6" /></div>
-                 <div>
-                   <h4 className="headline-md" style={{ fontSize: 16, color: 'var(--on-surface)' }}>Supplements</h4>
-                   <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', fontWeight: 600 }}>Daily Stack</p>
-                 </div>
-               </div>
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-                 {userSupps.map(supp => {
-                   const isTaken = selectedDateSuppLog.some(l => l.suppId === supp.id);
-                   return (
-                     <div key={supp.id} onClick={() => toggleSupplement(supp.id)} style={{ padding: 12, borderRadius: 12, background: isTaken ? 'rgba(139, 92, 246, 0.1)' : 'var(--surface-container-highest)', border: isTaken ? '1px solid #8b5cf6' : '1px solid transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
-                       <div>
-                         <div style={{ fontSize: 13, fontWeight: 700, color: isTaken ? '#8b5cf6' : 'var(--on-surface)' }}>{supp.name}</div>
-                         <div style={{ fontSize: 11, color: isTaken ? '#8b5cf6' : 'var(--on-surface-variant)', opacity: 0.8 }}>{supp.dose}</div>
-                       </div>
-                       <div style={{ width: 20, height: 20, borderRadius: '50%', background: isTaken ? '#8b5cf6' : 'var(--surface-container)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         {isTaken && <Check size={12} color="#fff" strokeWidth={3} />}
-                       </div>
-                     </div>
-                   );
-                 })}
-               </div>
-            </div>
-
-            {/* MEAL SLOTS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {CONSTANTS.MEAL_SLOTS.map(slot => {
-                const SIcon = slot.icon;
-                const slotCals = Math.round(goalKcal * slot.targetPct);
-                const items = dailyLog.filter(l => l.slot === slot.id);
-                const slotTotal = Math.round(items.reduce((s,i) => s + (i.macros?.calories||0), 0));
-                return (
-                  <div key={slot.id} style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', borderRadius: 16, padding: 16, border: '1px solid transparent', cursor: 'pointer', transition: 'border-color 0.2s' }} className="group hover:border-primary">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} onClick={() => handleOpenSearch(slot.id)}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-                          <SIcon size={24} />
+              return (
+                <Sec
+                  key={slot.id}
+                  n={String(idx + 3).padStart(2, '0')}
+                  label={slot.id}
+                  right={items.length ? `${slotTotal} kcal` : planned ? `${planned} planned` : 'empty'}
+                >
+                  {items.length === 0 ? (
+                    <p className="body-dim" style={{ paddingBottom: 4 }}>
+                      {planned ? `About ${planned} kcal and ${Math.round(protTarget * (slot.targetPct || 0))} g protein.` : 'Nothing logged.'}
+                    </p>
+                  ) : (
+                    <>
+                      {items.map(i => (
+                        <div className="row" key={i.id}>
+                          <button
+                            className="k"
+                            style={{ ...plain, cursor: i.food ? 'pointer' : 'default' }}
+                            onClick={() => i.food && editEntry(i)}
+                          >
+                            {i.name}
+                            {i.food && <span className="sub" style={{ marginLeft: 4 }}>edit</span>}
+                          </button>
+                          <span className="lead" />
+                          <span className="v sm">{Math.round(i.macros?.calories || 0)}</span>
+                          <TLink
+                            onClick={() => removeEntry(i.id)}
+                            aria-label={`Remove ${i.name}`}
+                            style={{ marginLeft: 10, color: 'var(--ash-dim)' }}
+                          >
+                            ×
+                          </TLink>
                         </div>
-                        <div>
-                          <h4 className="headline-md" style={{ fontSize: 18, margin: 0 }}>{slot.id}</h4>
-                          <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 4 }}>🔥 ~ {slotCals} Kcal • {Math.round(slot.targetPct * 100)}%</p>
-                        </div>
+                      ))}
+                      <div className="meta mt10" style={{ gap: 14 }}>
+                        <span>P {slotProt}</span>
+                        <span style={{ color: 'var(--ash-dim)' }}>
+                          C {Math.round(items.reduce((s, i) => s + (i.macros?.carbs || 0), 0))}
+                        </span>
+                        <span style={{ color: 'var(--ash-dim)' }}>
+                          F {Math.round(items.reduce((s, i) => s + (i.macros?.fat || 0), 0))}
+                        </span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                          <span className="headline-md" style={{ fontSize: 20, color: slotTotal > 0 ? 'var(--primary)' : 'var(--outline)' }}>{slotTotal}</span>
-                          <span style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--outline-variant)', fontWeight: 700 }}>Kcal</span>
+                    </>
+                  )}
+
+                  <TLink onClick={() => handleOpenSearch(slot.id)} style={{ marginTop: 14 }}>
+                    + Add {slot.id.toLowerCase()}
+                  </TLink>
+                </Sec>
+              );
+            })}
+
+            {/* ── WATER ─────────────────────────────────────────────── */}
+            {activeTab === 'tracker' && (
+              <Sec
+                n={String(slots.length + 3).padStart(2, '0')}
+                label="Water"
+                right={`${(selectedDateWaterTotal / 1000).toFixed(1)} / ${(waterGoal / 1000).toFixed(1)} L`}
+              >
+                <Amp pct={waterPct} soft />
+                <div className="rowf g16 mt14">
+                  {[250, 500, 750].map(ml => (
+                    <TLink key={ml} onClick={() => addWater(ml)}>+{ml}</TLink>
+                  ))}
+                  <span className="meta" style={{ marginLeft: 'auto', color: 'var(--bone)' }}>
+                    {Math.max(0, ((waterGoal - selectedDateWaterTotal) / 1000)).toFixed(1)} L left
+                  </span>
+                </div>
+              </Sec>
+            )}
+
+            {/* ── SUPPLEMENTS ───────────────────────────────────────── */}
+            {activeTab === 'tracker' && userSupps.length > 0 && (
+              <Sec
+                n={String(slots.length + 4).padStart(2, '0')}
+                label="Supplements"
+                right={`${selectedDateSuppLog.length} / ${userSupps.length} taken`}
+              >
+                {userSupps.map(supp => {
+                  const isTaken = selectedDateSuppLog.some(l => l.suppId === supp.id);
+                  return (
+                    <LedgerRow
+                      key={supp.id}
+                      k={supp.name}
+                      v={<Word tone={isTaken ? 'ok' : 'idle'}>{isTaken ? 'Taken' : supp.dose}</Word>}
+                      onClick={() => toggleSupplement(supp.id)}
+                    />
+                  );
+                })}
+              </Sec>
+            )}
+
+            {/* ── ADAPTIVE + METABOLISM ─────────────────────────────── */}
+            {activeTab === 'tracker' && adaptiveSuggestion && adaptiveSuggestion.scenario !== 'S10' && adaptiveSuggestion.adjustKcal !== 0 && (() => {
+              const { newKcal } = computeNewTarget(adaptiveSuggestion.goalKcal, adaptiveSuggestion.adjustKcal, user.gender, adaptiveSuggestion.tdee);
+              const newMacros = recomputeMacros({
+                goal: adaptiveSuggestion.goal,
+                currentWeight: user.weight,
+                goalWeight: user.weightGoal,
+                newKcal,
+                workoutDays: user.workoutDays,
+              });
+              return (
+                <Sec n={String(slots.length + 5).padStart(2, '0')} label="Coach" right="adaptive">
+                  <One title={adaptiveSuggestion.message} sub={adaptiveSuggestion.reasoning} />
+                  <LedgerRow k="Current target" v={adaptiveSuggestion.goalKcal} sub=" kcal" tone="sm" />
+                  <LedgerRow k="Suggested" v={newKcal} sub=" kcal" />
+                  {newMacros && (
+                    <LedgerRow
+                      k="New macros"
+                      v={`${newMacros.protein}P · ${newMacros.carbs}C · ${newMacros.fat}F`}
+                      tone="sm"
+                    />
+                  )}
+                  <Action onClick={() => acceptSuggestion(newKcal, newMacros?.protein)}>Apply new targets</Action>
+                  <TLink onClick={() => dismissSuggestion()} style={{ marginTop: 14 }}>Not now</TLink>
+                </Sec>
+              );
+            })()}
+
+            {activeTab === 'tracker' && tdeeEstimate && (
+              <Sec n={String(slots.length + 6).padStart(2, '0')} label="Metabolism" right={tdeeEstimate.confidence}>
+                <LedgerRow k="Calculated" v={tdeeEstimate.staticTDEE} sub=" kcal" tone="sm" />
+                <LedgerRow k="Adaptive" v={tdeeEstimate.estimatedTDEE} sub=" kcal" />
+                <div className="rowf g16 mt18" style={{ flexWrap: 'wrap' }}>
+                  <TLink onClick={handleUpdateTDEETargets}>Use adaptive</TLink>
+                  <TLink onClick={() => setShowTDEEDetails(true)}>Details</TLink>
+                </div>
+              </Sec>
+            )}
+
+            {/* ── PLAN ──────────────────────────────────────────────── */}
+            {activeTab === 'guide' && (
+              <>
+                <Sec n="02" label="Diet" right={dt.label}>
+                  {Object.values(DIET_TYPES).map(d => (
+                    <LedgerRow
+                      key={d.id}
+                      k={d.label}
+                      dim={diet !== d.id}
+                      onClick={() => handleSetDiet(d.id)}
+                      v={diet === d.id
+                        ? <Word tone="ok">Selected</Word>
+                        : <span className="v sm">→</span>}
+                    />
+                  ))}
+                  <Note>
+                    <b>Whey — {wheyScoops} scoop{wheyScoops > 1 ? 's' : ''} a day ({wheyProt} g).</b>{' '}
+                    {foodProt} g comes from food, the rest from a scoop.
+                  </Note>
+                </Sec>
+
+                {dt.meals.map((meal, i) => {
+                  const items = meal.items[gKey] || meal.items.maintain || [];
+                  const wheyLines = [];
+                  if (meal.label === 'Breakfast') wheyLines.push(`+ 1 scoop ${diet === 'vegan' ? 'plant protein (pea+rice)' : 'whey'} — complete protein`);
+                  if (meal.label === 'Post-Workout Dinner') wheyLines.push('+ 1 scoop whey within 30 min post-workout');
+                  if (wheyScoops >= 3 && meal.label === 'Mid-Morning') wheyLines.push(`+ Extra scoop protein (${protTarget} g target)`);
+                  if (wheyScoops >= 4 && meal.label === 'Before Bed') wheyLines.push('+ 1 scoop casein/whey before bed');
+
+                  return (
+                    <Sec key={i} n={String(i + 3).padStart(2, '0')} label={meal.label} right={`P ${meal.macros.p} · C ${meal.macros.c} · F ${meal.macros.f}`}>
+                      {[...items, ...wheyLines].map((item, j) => (
+                        <div
+                          key={j}
+                          className="row"
+                          style={{ alignItems: 'flex-start', fontSize: 12.5 }}
+                        >
+                          <span
+                            style={{
+                              color: item.startsWith('+') ? 'var(--ember-soft)' : 'var(--bone)',
+                              lineHeight: 1.55,
+                              flex: 1,
+                            }}
+                          >
+                            {item}
+                          </span>
                         </div>
-                        <button style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--outline-variant)', background: 'transparent', color: 'var(--primary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                          <Plus size={20} />
-                        </button>
+                      ))}
+                      <div className="meta mt10" style={{ flexWrap: 'wrap', gap: 8 }}>
+                        {meal.micros.map(m => <span key={m}>{m}</span>)}
                       </div>
+                    </Sec>
+                  );
+                })}
+
+                {dt.proteinSources && (
+                  <Sec n={String(dt.meals.length + 3).padStart(2, '0')} label="Protein sources" right={dt.label}>
+                    <p className="body-dim">{dt.proteinSources.join(' · ')}</p>
+                    <Note>
+                      <b>Complete protein.</b> Pair legumes with grains per meal (dal + rice, chana + roti)
+                      to cover all nine amino acids. Whey already carries them.
+                    </Note>
+                  </Sec>
+                )}
+
+                <Sec n={String(dt.meals.length + 4).padStart(2, '0')} label="Body">
+                  <LedgerRow k="Weight" v={user?.weight ? (isImpWeight ? `${kgToLbs(user.weight)} lbs` : `${user.weight} kg`) : '—'} />
+                  <LedgerRow k="Height" v={user?.height ? (isImpHeight ? cmToFtIn(user.height) : `${user.height} cm`) : '—'} tone="sm" />
+                  <LedgerRow k="BMI" v={bmi && !isNaN(bmi) ? bmi : '—'} tone="sm" />
+                  {latestBF && <LedgerRow k="Body fat" v={`${latestBF.percentage}%`} tone="sm" />}
+                  <LedgerRow k="TDEE" v={`${tdee} kcal`} tone="sm" />
+                  <LedgerRow k="Activity" v={(user?.activityLevel || 'moderate').charAt(0).toUpperCase() + (user?.activityLevel || 'moderate').slice(1)} tone="sm" />
+                </Sec>
+              </>
+            )}
+
+            {/* ── WEEK ──────────────────────────────────────────────── */}
+            {activeTab === 'analysis' && (
+              <>
+                <Sec n="02" label="Seven days" right={`${Math.round(weeklyData.reduce((a, d) => a + d.calories, 0) / 7)} avg kcal`}>
+                  {weeklyData.map(d => (
+                    <LedgerRow
+                      key={d.date}
+                      k={d.dayName}
+                      v={d.calories ? `${d.calories}` : '—'}
+                      sub={d.calories ? ` / ${Math.round(goalKcal)}` : ''}
+                      tone={d.calories === 0 ? 'sm' : ''}
+                    />
+                  ))}
+                  <Amp pct={calPct} cap style={{ marginTop: 18 }} />
+                  <div className="rowf between">
+                    <span className="kicker" style={{ color: 'var(--ash-dim)' }}>protein</span>
+                    <span className="kicker" style={{ color: 'var(--bone)' }}>{protTarget} g target</span>
+                  </div>
+                  <Ticks
+                    height={40}
+                    values={weeklyData.map(d => ({
+                      kind: d.protein === 0 ? 'rest' : d.protein >= protTarget * 0.9 ? 'full' : 'on',
+                    }))}
+                  />
+                </Sec>
+
+                <Sec n="03" label="Micros" right="7-day total">
+                  <LedgerRow
+                    k="Vitamin B12"
+                    v={<Word tone={weeklyMicros.vitaminB12 < 1.5 ? 'warn' : 'ok'}>
+                      {weeklyMicros.vitaminB12 < 1.5 ? 'Low' : 'Fine'}
+                    </Word>}
+                  />
+                  <LedgerRow
+                    k="Vitamin D"
+                    v={<Word tone={weeklyMicros.vitaminD < 1400 ? 'warn' : 'ok'}>
+                      {weeklyMicros.vitaminD < 1400 ? 'Low' : 'Fine'}
+                    </Word>}
+                  />
+                  <LedgerRow
+                    k="Iron"
+                    v={<Word tone={user.gender === 'female' && weeklyMicros.iron < 126 ? 'warn' : 'ok'}>
+                      {user.gender === 'female' && weeklyMicros.iron < 126 ? 'Low' : 'Fine'}
+                    </Word>}
+                  />
+                  {(weeklyMicros.vitaminB12 < 1.5 || weeklyMicros.vitaminD < 1400 || (user.gender === 'female' && weeklyMicros.iron < 126)) && (
+                    <Note>
+                      <b>What's missing.</b>{' '}
+                      {weeklyMicros.vitaminB12 < 1.5 ? 'B12 comes from dairy, eggs or a supplement — not plants. ' : ''}
+                      {weeklyMicros.vitaminD < 1400 ? 'D3 is mostly sun and fatty fish; most people here need a supplement. ' : ''}
+                      {user.gender === 'female' && weeklyMicros.iron < 126 ? 'Iron: palak, rajma, chana, ragi and dates.' : ''}
+                    </Note>
+                  )}
+                </Sec>
+
+                <Sec n="04" label="Macros, averaged">
+                  <LedgerRow k="Protein" v={`${Math.round(weeklyData.reduce((a, d) => a + d.protein, 0) / 7)} g`} sub={` / ${protTarget}`} />
+                  <LedgerRow k="Carbs" v={`${Math.round(weeklyData.reduce((a, d) => a + d.carbs, 0) / 7)} g`} sub={` / ${carbsTarget}`} tone="sm" />
+                  <LedgerRow k="Fat" v={`${Math.round(weeklyData.reduce((a, d) => a + d.fat, 0) / 7)} g`} sub={` / ${fatTarget}`} tone="sm" />
+                  <Action
+                    onClick={() => {
+                      if (chatbot) {
+                        chatbot.openChat();
+                        setTimeout(() => chatbot.sendMessage(`Looking at my last 7 days of food, where am I falling short and what should I change?`), 300);
+                      }
+                    }}
+                  >
+                    Ask FORGE about the week
+                  </Action>
+                </Sec>
+              </>
+            )}
+
+            <div className="foot">
+              <span>Kaaya Fit</span>
+              <span>{phaseLabel}</span>
+            </div>
+          </>
+        )}
+      </Screen>
+
+      {/* ─── SEARCH / LOG SHEET ─────────────────────────────────────── */}
+      {showSearch && (
+        <div className="mo" style={{ alignItems: 'stretch', padding: 0 }}>
+          <div
+            style={{
+              width: '100%', maxWidth: 430, margin: '0 auto',
+              background: 'var(--canvas)', height: '100dvh',
+              display: 'flex', flexDirection: 'column',
+            }}
+          >
+            {selectedFood || showCustom ? (
+              /* ─── DETAIL / CUSTOM ─── */
+              <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: '0 22px 24px' }}>
+                <div className="head" style={{ paddingLeft: 0, paddingRight: 0 }}>
+                  <div className="head-l">
+                    <TLink onClick={() => { setSelectedFood(null); setShowCustom(false); }}>← back</TLink>
+                  </div>
+                  <div className="head-r">
+                    <TLink onClick={closeSearch}>Close</TLink>
+                  </div>
+                </div>
+
+                {showCustom ? (
+                  <div style={{ marginTop: 28 }}>
+                    <div className="h1" style={{ marginBottom: 24 }}>Custom food</div>
+                    <label className="kicker">Name</label>
+                    <Field placeholder="Homemade cookie" value={customInput.name} onChange={e => setCustomInput({ ...customInput, name: e.target.value })} />
+                    <label className="kicker" style={{ display: 'block', marginTop: 20 }}>Calories</label>
+                    <Field type="number" placeholder="0" value={customInput.cals} onChange={e => setCustomInput({ ...customInput, cals: e.target.value })} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginTop: 20 }}>
+                      {[['p', 'Protein'], ['c', 'Carbs'], ['f', 'Fat']].map(([key, label]) => (
+                        <div key={key}>
+                          <label className="kicker">{label}</label>
+                          <Field type="number" placeholder="0" value={customInput[key]} onChange={e => setCustomInput({ ...customInput, [key]: e.target.value })} />
+                        </div>
+                      ))}
                     </div>
-                    {/* Expand logged items */}
-                    {items.length > 0 && (
-                      <div style={{ marginTop: 16, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {items.map(i => (
-                          <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: 8, borderRadius: 8, background: 'var(--surface-container-low)' }}>
-                            <div>
-                              <p style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 600 }}>{i.name}</p>
-                              <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 4, display: 'flex', gap: 10 }}>
-                                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>P: {Math.round(i.macros?.protein||0)}g</span>
-                                <span style={{ color: 'var(--tertiary-container)', fontWeight: 600 }}>C: {Math.round(i.macros?.carbs||0)}g</span>
-                                <span style={{ color: 'var(--outline)', fontWeight: 600 }}>F: {Math.round(i.macros?.fat||0)}g</span>
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                              <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--on-surface)' }}>{Math.round(i.macros?.calories||0)}</span>
-                              {i.food && <button onClick={(e) => { e.stopPropagation(); editEntry(i); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><Edit2 size={14}/></button>}
-                              <button aria-label="Remove food entry" onClick={(e) => { e.stopPropagation(); removeEntry(i.id); }} style={{ background: 'var(--surface-container-highest)', borderRadius: '50%', padding: 4, border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><X size={14}/></button>
-                            </div>
-                          </div>
-                        ))}
+                    <Action onClick={saveCustomFood}>Add custom food</Action>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 20, paddingBottom: 120 }}>
+                    <div className="kicker" style={{ color: 'var(--ash-dim)' }}>
+                      {foodCategories.find(c => c.id === selectedFood.category)?.label || 'Food'}
+                    </div>
+                    <div className="h1" style={{ marginTop: 8, marginBottom: 24 }}>{selectedFood.name}</div>
+
+                    <Hero
+                      value={Math.round(previewMacros?.calories || 0)}
+                      unit="kcal"
+                      size="sm"
+                    />
+                    <div className="rowf g16">
+                      <span className="meta ember">P {Math.round(previewMacros?.protein || 0)}</span>
+                      <span className="meta">C {Math.round(previewMacros?.carbs || 0)}</span>
+                      <span className="meta" style={{ color: 'var(--ash-dim)' }}>F {Math.round(previewMacros?.fat || 0)}</span>
+                    </div>
+
+                    {selectedFood.servings?.length > 0 && (
+                      <div style={{ marginTop: 32 }}>
+                        <div className="sec-label" style={{ marginBottom: 10 }}>Serving</div>
+                        {selectedFood.servings.map(s => {
+                          const on = servingId === s.id && !customGrams;
+                          return (
+                            <LedgerRow
+                              key={s.id}
+                              k={`${s.isDeliveryPortion ? 'Delivery · ' : ''}${s.label} · ${s.grams}g`}
+                              dim={!on}
+                              onClick={() => { setServingId(s.id); setCustomGrams(''); }}
+                              v={on ? <Word tone="ok">Selected</Word> : <span className="v sm">→</span>}
+                            />
+                          );
+                        })}
+                        <div style={{ marginTop: 18 }}>
+                          <label className="kicker">Or exact grams</label>
+                          <Field
+                            type="number"
+                            inputMode="decimal"
+                            placeholder="e.g. 150"
+                            value={customGrams}
+                            onChange={e => { setCustomGrams(e.target.value); setServingId('custom'); }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {!customGrams && (
+                      <div style={{ marginTop: 24 }}>
+                        <label className="kicker">Quantity</label>
+                        <div className="rowf g16" style={{ marginTop: 8 }}>
+                          <TLink onClick={handleQtyMinus} disabled={qty <= 0.25} style={{ opacity: qty <= 0.25 ? 0.35 : 1 }}>−</TLink>
+                          <input
+                            className="field-inline"
+                            style={{ width: 72 }}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.25"
+                            min="0.25"
+                            value={qtyInput}
+                            onChange={handleQtyInputChange}
+                            onBlur={handleQtyInputBlur}
+                            onFocus={e => e.target.select()}
+                            aria-label="Quantity"
+                          />
+                          <TLink onClick={handleQtyPlus}>+</TLink>
+                          {totalGrams != null && (
+                            <span className="meta" style={{ marginLeft: 'auto', color: 'var(--bone)' }}>
+                              {Math.round(totalGrams * 10) / 10} g total
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedFood.supportedConsistencyTypes?.length > 0 && (
+                      <div style={{ marginTop: 28 }}>
+                        <div className="sec-label" style={{ marginBottom: 10 }}>Consistency</div>
+                        {[['standard', 'Normal'], ['thin', 'Watery'], ['thick', 'Restaurant']]
+                          .filter(([k]) => k === 'standard' || selectedFood.supportedConsistencyTypes.includes(k))
+                          .map(([k, label]) => (
+                            <LedgerRow
+                              key={k}
+                              k={label}
+                              dim={consistency !== k}
+                              onClick={() => setConsistency(k)}
+                              v={consistency === k ? <Word tone="ok">Selected</Word> : <span className="v sm">→</span>}
+                            />
+                          ))}
+                      </div>
+                    )}
+
+                    {user.weightGoal && user.weightGoal < user.weight && selectedFood.gi && selectedFood.gi > 70 && (
+                      <Note>
+                        <b>Glycemic index {selectedFood.gi}.</b> This one spikes blood sugar fast.
+                        Smaller portion, or swap for jowar, bajra or brown rice.
+                      </Note>
+                    )}
+
+                    {selectedFood.hasBeverageModifiers && (
+                      <div style={{ marginTop: 28 }}>
+                        <div className="sec-label" style={{ marginBottom: 10 }}>Milk</div>
+                        <select
+                          className="field"
+                          value={milkMod}
+                          onChange={e => setMilkMod(e.target.value)}
+                        >
+                          <option value="none">No milk / black (water base)</option>
+                          <option value="milk-full-fat">Full-fat milk (150 ml)</option>
+                          <option value="milk-toned">Toned milk (150 ml)</option>
+                          <option value="milk-soy">Soy milk (150 ml)</option>
+                          <option value="milk-almond">Almond milk (150 ml)</option>
+                        </select>
+
+                        <div className="sec-label" style={{ marginTop: 22, marginBottom: 10 }}>Sweetener</div>
+                        {['sugar-white', 'jaggery', 'honey'].map(sw => {
+                          const sel = sweetMods.includes(sw);
+                          return (
+                            <LedgerRow
+                              key={sw}
+                              k={sw.replace('-', ' ')}
+                              dim={!sel}
+                              onClick={() => setSweetMods(p => sel ? p.filter(x => x !== sw) : [...p, sw])}
+                              v={sel ? <Word tone="ok">Added</Word> : <span className="v sm">→</span>}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {(selectedFood.itemType === 'dish' || selectedFood.itemType === 'sabzi-veg' || selectedFood.itemType === 'dal-legume') && (
+                      <div style={{ marginTop: 28 }}>
+                        <Note>
+                          <b>Cooked in oil?</b> Indian dishes absorb a variable amount of fat. If this is homemade,
+                          add a 15 g oil entry.
+                        </Note>
+                        <TLink onClick={addCookingOil} style={{ marginTop: 12 }}>
+                          + Add 15 g oil — 130 kcal
+                        </TLink>
                       </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-            
-            {/* FAB: + Log Food */}
-            <div style={{ position: 'sticky', bottom: 24, display: 'flex', justifyContent: 'flex-end', marginTop: 24, zIndex: 5, pointerEvents: 'none' }}>
-              <button 
-                onClick={() => handleOpenSearch('Snack/General')}
-                style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--primary)', color: 'var(--on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 8px 24px rgba(255,181,155,0.4)', cursor: 'pointer', pointerEvents: 'auto' }}
-              >
-                <Plus size={28} />
-              </button>
-            </div>
-          </div>
-        )}
-      </section>
+                )}
 
-      {/* ──────────────────────────────────────────────────────────── */}
-      {/* SEARCH / LOG MODAL (BottomSheet) */}
-      {/* ──────────────────────────────────────────────────────────── */}
-      {showSearch && (
-        <div className="mo" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '100dvh', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 0, overflow: 'hidden', touchAction: 'none' }}>
-          <div className="md cascade-item" style={{ maxWidth: '100%', width: '100%', margin: 0, borderRadius: '0 0 24px 24px', height: '90dvh', maxHeight: '90dvh', display: 'flex', flexDirection: 'column', padding: 0, background: 'var(--surface)', overflow: 'hidden' }}>
-            
-            {/* DETAIL / CUSTOM PANE */}
-            {selectedFood || showCustom ? (
-              <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: 16, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-                  <button className="btn-g" style={{ padding: 8 }} onClick={() => { setSelectedFood(null); setShowCustom(false); }}><ChevronLeft size={20}/></button>
-                  <button className="btn-g" aria-label="Close search" style={{ padding: 8 }} onClick={closeSearch}><X size={20}/></button>
-                </div>
-                
-                {showCustom ? (
-                  <div style={{ flex: 1 }}>
-                    <h3 className="headline-md" style={{ marginBottom: 24 }}>Add Custom Info</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      <div><label>Name</label><input placeholder="E.g. Homemade Cookie" value={customInput.name} onChange={e=>setCustomInput({...customInput, name: e.target.value})} /></div>
-                      <div><label>Calories (Kcal)</label><input type="number" placeholder="0" value={customInput.cals} onChange={e=>setCustomInput({...customInput, cals: e.target.value})} /></div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                        <div><label>Pro (g)</label><input type="number" placeholder="0" value={customInput.p} onChange={e=>setCustomInput({...customInput, p: e.target.value})} /></div>
-                        <div><label>Carbs (g)</label><input type="number" placeholder="0" value={customInput.c} onChange={e=>setCustomInput({...customInput, c: e.target.value})} /></div>
-                        <div><label>Fat (g)</label><input type="number" placeholder="0" value={customInput.f} onChange={e=>setCustomInput({...customInput, f: e.target.value})} /></div>
-                      </div>
-                      <button className="btn-p" style={{ marginTop: 24 }} onClick={saveCustomFood}>Add Custom Food</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ flex: 1, paddingBottom: 16 }}>
-                    <span className="tag" style={{ marginBottom: 8 }}>{foodCategories.find(c => c.id === selectedFood.category)?.label || 'Food'}</span>
-                    <h3 className="headline-md" style={{ fontSize: 22, marginBottom: 12, color: 'var(--on-surface)' }}>{selectedFood.name}</h3>
-                    
-                    <div style={{ background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 16 }}>
-                      <label>Serving Selection</label>
-                      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
-                        {selectedFood.servings?.map(s => (
-                          <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                            {s.isDeliveryPortion && '📦 '} {s.label} ({s.grams}g)
-                            {servingId === s.id && s.grams && qty !== 1 && (
-                              <span style={{ opacity: 0.8, marginLeft: 4 }}>
-                                → {Math.round(s.grams * qty * 10) / 10}g
-                              </span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      
-                      <label>Or enter exact grams</label>
-                      <input type="number" placeholder="e.g. 150" value={customGrams} onChange={e => {setCustomGrams(e.target.value); setServingId('custom');}} style={{ marginBottom: 16, background: 'var(--surface-container-high)', borderRadius: 12 }} />
-
-                      {!customGrams && (
-                        <>
-                          <label>Multiplier (Qty)</label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, background: 'var(--surface-container-high)', width: 'fit-content', padding: 6, borderRadius: 12 }}>
-                            <button
-                              onClick={handleQtyMinus}
-                              style={{
-                                width: 36, height: 36, borderRadius: 8, border: 'none',
-                                background: qty <= 0.25 ? 'transparent' : 'var(--surface-container-highest)',
-                                color: qty <= 0.25 ? 'var(--on-surface-dim)' : 'var(--on-surface)',
-                                cursor: qty <= 0.25 ? 'not-allowed' : 'pointer',
-                                fontSize: 18, fontWeight: 700,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'background .15s',
-                              }}
-                              disabled={qty <= 0.25}
-                              aria-label="Decrease quantity"
-                            >
-                              −
-                            </button>
-
-                            <input
-                              type="number"
-                              value={qtyInput}
-                              onChange={handleQtyInputChange}
-                              onBlur={handleQtyInputBlur}
-                              onFocus={e => e.target.select()}
-                              inputMode="decimal"
-                              step="0.25"
-                              min="0.25"
-                              style={{
-                                width: 60,
-                                textAlign: 'center',
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                fontFamily: "'Space Grotesk', sans-serif",
-                                fontWeight: 800,
-                                fontSize: 18,
-                                color: 'var(--on-surface)',
-                                padding: '4px 0',
-                                MozAppearance: 'textfield',
-                              }}
-                              aria-label="Quantity"
-                            />
-
-                            <button
-                              onClick={handleQtyPlus}
-                              style={{
-                                width: 36, height: 36, borderRadius: 8, border: 'none',
-                                background: 'var(--surface-container-highest)',
-                                color: 'var(--on-surface)',
-                                cursor: 'pointer',
-                                fontSize: 18, fontWeight: 700,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'background .15s',
-                              }}
-                              aria-label="Increase quantity"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Gravy Consistency Toggle */}
-                      {selectedFood.supportedConsistencyTypes && selectedFood.supportedConsistencyTypes.length > 0 && (
-                        <div style={{ marginBottom: 16 }}>
-                          <label>Consistency / Thickness</label>
-                          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
-                            <button onClick={() => setConsistency('standard')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'standard' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'standard' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🥣 Normal</button>
-                            {selectedFood.supportedConsistencyTypes.includes('thin') && (
-                              <button onClick={() => setConsistency('thin')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thin' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thin' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>💧 Watery (Thin)</button>
-                            )}
-                            {selectedFood.supportedConsistencyTypes.includes('thick') && (
-                              <button onClick={() => setConsistency('thick')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thick' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thick' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🍲 Restaurant (Thick)</button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* GI-Aware Nudge */}
-                      {user.weightGoal && user.weightGoal < user.weight && selectedFood.gi && selectedFood.gi > 70 && (
-                        <div style={{ padding: 12, borderRadius: 12, background: 'rgba(232,84,13,0.1)', border: '1px solid var(--primary-container)', marginBottom: 16 }}>
-                           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                             <AlertTriangle size={14} color="var(--primary)" />
-                             <span style={{ fontSize: 11, color: 'var(--primary-container)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>High Glycemic Index ({selectedFood.gi})</span> 
-                           </div>
-                           <p style={{ fontSize: 12, color: 'var(--on-surface)' }}>This food may rapidly spike blood sugar. For your fat-loss goal, consider smaller portions or alternatives like Jowar, Bajra, or Brown Rice.</p>
-                        </div>
-                      )}
-
-                      {/* Beverage Builder */}
-                      {selectedFood.hasBeverageModifiers && (
-                        <div style={{ marginTop: 24, paddingTop: 24 }}>
-                          <label>Milk Choice (Beverage Builder)</label>
-                          <select value={milkMod} onChange={e => setMilkMod(e.target.value)} style={{ marginBottom: 16, background: 'var(--surface-container-high)', borderRadius: 12 }}>
-                            <option value="none">No Milk / Black (water base)</option>
-                            <option value="milk-full-fat">Full-Fat Milk (150ml)</option>
-                            <option value="milk-toned">Toned Milk (150ml)</option>
-                            <option value="milk-soy">Soy Milk (150ml)</option>
-                            <option value="milk-almond">Almond Milk (150ml)</option>
-                          </select>
-                          <label>Sweeteners & Add-ins</label>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {['sugar-white', 'jaggery', 'honey'].map(sw => {
-                              const sel = sweetMods.includes(sw);
-                              return (
-                                <button key={sw} onClick={() => {
-                                  if (sel) setSweetMods(p => p.filter(x => x !== sw));
-                                  else setSweetMods(p => [...p, sw]);
-                                }} style={{ padding: '8px 16px', fontSize: 13, fontWeight: 600, background: sel ? 'var(--tertiary-container)' : 'var(--surface-container-highest)', color: sel ? 'var(--on-primary)' : 'var(--on-surface)', border: 'none', borderRadius: 12 }}>{sw.replace('-', ' ').toUpperCase()}</button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Consistency Toggle */}
-                      {selectedFood.supportedConsistencyTypes?.length > 0 && (
-                        <div style={{ marginTop: 24 }}>
-                          <label>Gravy Consistency</label>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            {selectedFood.supportedConsistencyTypes.map(cType => (
-                              <button key={cType} onClick={() => setConsistency(cType)} className="btn-g" style={{ flex: 1, background: consistency === cType ? 'var(--primary-container)' : 'var(--surface-container-highest)', color: consistency === cType ? 'var(--on-primary)' : 'var(--on-surface)' }}>{cType}</button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Cooked Oil Chip */}
-                      {(selectedFood.itemType === 'dish' || selectedFood.itemType === 'sabzi-veg' || selectedFood.itemType === 'dal-legume') && (
-                        <div style={{ marginTop: 24, padding: 16, background: 'var(--surface-container-high)', borderRadius: 12 }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>🫙 Cooked in Oil/Ghee?</span>
-                          <p style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 4, lineHeight: 1.5 }}>Indian dishes absorb variable amounts of fat. If this is a homemade dish cooked in oil, add a secondary 15g entry.</p>
-                          <button className="btn-g" style={{ marginTop: 12, width: '100%', background: 'var(--surface-container-highest)' }} onClick={addCookingOil}>
-                            + Add Cooking Oil/Ghee (130 Kcal)
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sticky Bottom Save Action */}
-                    <div style={{ position: 'sticky', bottom: 0, left: 0, right: 0, background: 'var(--surface-container-lowest)', padding: '12px 16px', boxShadow: '0 -4px 20px rgba(0,0,0,0.4)', zIndex: 10, flexShrink: 0, borderTop: '1px solid var(--surface-container-highest)' }}>
-                      {totalGrams != null && (
-                        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--on-surface-variant)', marginBottom: 6, fontWeight: 600 }}>
-                          {qty !== 1 && (
-                            <span style={{ color: 'var(--on-surface-dim)', marginRight: 4 }}>
-                              {qty} × {selectedFood?.servings?.find(s => s.id === servingId)?.grams ?? customGrams}g =
-                            </span>
-                          )}
-                          <span style={{ color: 'var(--primary)', fontWeight: 800 }}>
-                            {Math.round(totalGrams * 10) / 10}g
-                          </span>
-                          {' '}total
-                        </div>
-                      )}
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 10 }}>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Kcal</div>
-                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary-container)' }}>{Math.round(previewMacros?.calories || 0)}</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Pro</div>
-                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)' }}>{Math.round(previewMacros?.protein || 0)}g</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Carb</div>
-                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--tertiary-container)' }}>{Math.round(previewMacros?.carbs || 0)}g</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Fat</div>
-                          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--outline)' }}>{Math.round(previewMacros?.fat || 0)}g</div>
-                        </div>
-                      </div>
-                      <button className="btn-p" style={{ width: '100%', height: 48, fontSize: 14 }} onClick={() => addFoodToLog(previewMacros)}>
-                        Log in {searchMealSlot}
-                      </button>
-                    </div>
-
+                {/* sticky commit bar */}
+                {!showCustom && (
+                  <div
+                    style={{
+                      position: 'sticky', bottom: 0,
+                      background: 'var(--canvas)',
+                      borderTop: '1px solid var(--hair)',
+                      paddingTop: 14, marginTop: 24,
+                    }}
+                  >
+                    <Action ember onClick={() => addFoodToLog(previewMacros)}>
+                      Log in {searchMealSlot}
+                    </Action>
                   </div>
                 )}
               </div>
             ) : (
-              // SEARCH PANE (List)
+              /* ─── SEARCH ─── */
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ padding: '16px 24px 12px', background: 'var(--surface-container-lowest)', flexShrink: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <h3 className="headline-md" style={{ margin: 0, fontSize: 20 }}>Add to <span style={{ color: 'var(--primary)' }}>{searchMealSlot}</span></h3>
-                    <button className="btn-g" aria-label="Close meal search" style={{ padding: 8 }} onClick={closeSearch}><X size={20}/></button>
+                <div style={{ padding: '0 22px 12px', flexShrink: 0 }}>
+                  <div className="head" style={{ paddingLeft: 0, paddingRight: 0 }}>
+                    <div className="head-l">
+                      <span className="kicker">Add to {searchMealSlot}</span>
+                    </div>
+                    <div className="head-r">
+                      <TLink onClick={closeSearch}>Close</TLink>
+                    </div>
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <Search style={{ position: 'absolute', top: 14, left: 16, color: 'var(--on-surface-dim)' }} size={18} />
-                    <input ref={searchInputRef} placeholder="Search dal, paneer, roti..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ paddingLeft: 44, borderRadius: 14, fontSize: 15, background: 'var(--surface-container-high)', border: 'none', height: 48 }} />
-                  </div>
+                  <input
+                    ref={searchInputRef}
+                    className="field"
+                    placeholder="Search dal, paneer, roti…"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    style={{ marginTop: 12, fontSize: 17 }}
+                  />
                 </div>
-                
-                {/* Horizontal Filter Scroll */}
-                <div style={{ display: 'flex', gap: 6, padding: '8px 24px', overflowX: 'auto', minHeight: 44, alignItems: 'center', background: 'var(--surface-container-lowest)', flexShrink: 0 }} className="hide-scrollbar">
+
+                {/* filters: words, not pills */}
+                <div style={{ display: 'flex', gap: 16, padding: '10px 22px', overflowX: 'auto', flexShrink: 0, borderBottom: '1px solid var(--hair-soft)' }} className="hide-scrollbar">
                   {['All', 'Veg', 'Vegan', 'Egg', 'Non-Veg', 'Jain'].map(d => (
-                    <button key={d} onClick={() => setSearchDiet(d)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchDiet === d ? 'var(--primary)' : 'var(--surface-container-low)', color: searchDiet === d ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{d}</button>
+                    <TLink
+                      key={d}
+                      onClick={() => setSearchDiet(d)}
+                      style={{ color: searchDiet === d ? 'var(--ink)' : 'var(--ash-dim)', whiteSpace: 'nowrap' }}
+                    >
+                      {d}
+                    </TLink>
                   ))}
-                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
-                  {[{ id: 'All', label: 'All categories' }, ...foodCategories].map(c => (
-                    <button key={c.id} onClick={() => setSearchCat(c.id)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: searchCat === c.id ? 'var(--primary)' : 'var(--surface-container-low)', color: searchCat === c.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer' }}>{c.label}</button>
-                  ))}
-                  <div style={{ width: 1, height: 24, background: 'var(--surface-container-highest)', margin: '0 4px', flexShrink: 0 }} />
-                  {[{ id: '', label: 'Fasting: Off' }, ...CONSTANTS.FASTING_TYPES].filter(t=>t.label).map(t => {
-                    const sel = searchFasting === t.id;
-                    return (
-                      <button key={t.id || 'none'} onClick={() => setSearchFasting(t.id)} style={{ whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, border: 'none', background: sel ? (t.id ? 'var(--primary)' : 'var(--surface-container-low)') : 'var(--surface-container-low)', color: sel ? (t.id ? 'var(--on-primary)' : 'var(--on-surface)') : 'var(--on-surface-variant)', cursor: 'pointer' }}>{t.label}</button>
-                    );
-                  })}
+                  <TLink
+                    onClick={() => setSearchFasting(searchFasting ? '' : 'navratri')}
+                    style={{ color: searchFasting ? 'var(--ink)' : 'var(--ash-dim)', whiteSpace: 'nowrap' }}
+                  >
+                    Fasting
+                  </TLink>
                 </div>
 
+                <div style={{ display: 'flex', gap: 16, padding: '10px 22px', overflowX: 'auto', flexShrink: 0, borderBottom: '1px solid var(--hair-soft)' }} className="hide-scrollbar">
+                  {[{ id: 'All', label: 'All' }, ...foodCategories].map(c => (
+                    <TLink
+                      key={c.id}
+                      onClick={() => setSearchCat(c.id)}
+                      style={{ color: searchCat === c.id ? 'var(--ink)' : 'var(--ash-dim)', whiteSpace: 'nowrap' }}
+                    >
+                      {c.label}
+                    </TLink>
+                  ))}
+                </div>
 
-
-                {/* Results List */}
-                <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y', padding: '16px 24px', paddingBottom: 40 }}>
+                <div style={{ overflowY: 'auto', flex: 1, overscrollBehavior: 'contain', touchAction: 'pan-y', padding: '20px 22px 40px' }}>
                   {!searchQuery && recentFoods.length > 0 && (
-                    <div style={{ marginBottom: 32 }}>
-                      <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Recent (Quick Add)</p>
+                    <div style={{ marginBottom: 28 }}>
+                      <div className="sec-label" style={{ marginBottom: 6 }}>Recent</div>
                       {recentFoods.map(rf => (
-                        <div key={rf.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(rf); }} className="tag-d" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 8px 8px 0', padding: '10px 16px', borderRadius: 24, cursor: 'pointer', background: 'var(--surface-container-low)' }}>
-                          <Clock size={14} color="var(--primary)" />
-                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)' }}>{rf.name}</span>
-                        </div>
+                        <LedgerRow
+                          key={rf.id}
+                          k={rf.name}
+                          v="→"
+                          tone="sm"
+                          onClick={() => handleSelectFood(rf)}
+                        />
                       ))}
                     </div>
                   )}
 
-                  {/* FAVORITES */}
                   {!searchQuery && favoriteIds.length > 0 && (
-                    <div style={{ marginBottom: 32 }}>
-                      <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>⭐️ Favorites</p>
+                    <div style={{ marginBottom: 28 }}>
+                      <div className="sec-label" style={{ marginBottom: 6 }}>Favourites</div>
                       {favoriteIds.map(fId => {
-                         const food = allFoods.find(f => f.id === fId);
-                         if (!food) return null;
-                         return (
-                          <div key={food.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(food); }} className="tag-d group hover:bg-surface-container-highest transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 8px 8px 0', padding: '10px 16px', borderRadius: 24, cursor: 'pointer', background: 'var(--surface-container-low)' }}>
-                            <Star size={14} color="var(--primary)" fill="var(--primary)" />
-                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)' }}>{food.name}</span>
-                          </div>
-                         );
+                        const food = allFoods.find(f => f.id === fId);
+                        if (!food) return null;
+                        return (
+                          <LedgerRow key={food.id} k={food.name} v="→" tone="sm" onClick={() => handleSelectFood(food)} />
+                        );
                       })}
                     </div>
                   )}
 
-                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--outline)', marginBottom: 16 }}>Results</p>
-
-                  {foodsLoading && (
-                    <div style={{ padding: 40, textAlign: 'center', color: 'var(--on-surface-variant)' }}>
-                      <ActivityIcon size={32} color="var(--primary)" style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-                      <p style={{ fontSize: 14, fontWeight: 600 }}>Loading foods...</p>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {searchResults.map(f => (
-                      <div key={f.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(f); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'var(--surface-container-low)', borderRadius: 16, cursor: 'pointer' }} className="group hover:bg-surface-container-high transition-colors">
-                        <div style={{ flex: 1 }}>
-                          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && ' 🕉️'}</p>
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings?.[0]?.label || 'Serving'}</span>
-                            {f.hasBeverageModifiers && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--tertiary-container)', background: 'rgba(231, 108, 55, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Build Drink</span>}
-                            {f.category === 'dish' && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)', background: 'rgba(255, 181, 155, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Dish</span>}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                          <button onClick={(e) => { e.stopPropagation(); toggleFavoriteFood(f.id); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
-                            <Star size={20} color={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "var(--on-surface-dim)"} fill={favoriteIds && favoriteIds.includes(f.id) ? "var(--primary)" : "transparent"} className="transition-colors" />
-                          </button>
-                          <ChevronRight size={20} color="var(--on-surface-dim)" className="group-hover:text-primary transition-colors" />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="sec-label" style={{ marginBottom: 6 }}>
+                    <span>Results</span>
+                    <span className="r">{searchResults.length}</span>
                   </div>
-                  
-                  {searchResults.length === 0 && searchQuery.trim().length >= 2 && (
-                    <div style={{ textAlign: 'center', padding: 60, color: 'var(--on-surface-variant)' }}>
-                      <Search size={48} color="var(--surface-container-highest)" style={{ margin: '0 auto 16px' }} />
-                      <p style={{ fontSize: 16, fontWeight: 500 }}>No results found.</p>
-                      <button className="btn-d" style={{ marginTop: 24, fontSize: 14, padding: '10px 20px' }} onClick={() => setShowCustom(true)}>+ Add Custom Food</button>
+
+                  {foodsLoading && <p className="body-dim">Loading foods…</p>}
+
+                  {searchResults.map(f => {
+                    const fav = favoriteIds?.includes(f.id);
+                    const firstServing = f.servings?.[0];
+                    const servingKcal = Math.round(calcMacros(f, firstServing?.id, 1)?.calories || 0);
+                    return (
+                      <div className="row" key={f.id} style={{ alignItems: 'flex-start' }}>
+                        <button className="k" style={{ ...plain }} onClick={() => handleSelectFood(f)}>
+                          {f.name} {f.isFastingFood && '· fasting'}
+                          <span className="sub" style={{ display: 'block', marginLeft: 0 }}>
+                            {firstServing?.label || 'Serving'}
+                            {f.hasBeverageModifiers ? ' · build drink' : ''}
+                            {f.category === 'dish' ? ' · dish' : ''}
+                          </span>
+                        </button>
+                        <span className="lead" />
+                        <span className="v sm" style={{ marginRight: 12 }}>{servingKcal}</span>
+                        <TLink
+                          onClick={() => toggleFavoriteFood(f.id)}
+                          aria-label={fav ? `Unfavourite ${f.name}` : `Favourite ${f.name}`}
+                          style={{ color: fav ? 'var(--ember)' : 'var(--ash-dim)' }}
+                        >
+                          {fav ? '★' : '☆'}
+                        </TLink>
+                      </div>
+                    );
+                  })}
+
+                  {searchResults.length === 0 && !foodsLoading && searchQuery.trim().length >= 2 && (
+                    <div style={{ marginTop: 40 }}>
+                      <p className="body-dim">Nothing matched “{searchQuery}”.</p>
+                      <Action onClick={() => setShowCustom(true)}>Add it as a custom food</Action>
                     </div>
                   )}
+
                   {searchResults.length > 0 && (
-                    <div style={{ textAlign: 'center', marginTop: 32 }}>
-                      <button className="btn-g" onClick={() => setShowCustom(true)}>Can't find it? Add Custom Info</button>
-                    </div>
+                    <TLink onClick={() => setShowCustom(true)} style={{ marginTop: 28 }}>
+                      Can't find it? Add custom
+                    </TLink>
                   )}
                 </div>
               </div>
@@ -1325,7 +1221,8 @@ export default function DietPage({ chatbot }) {
           </div>
         </div>
       )}
+
       <TDEEDetailSheet isOpen={showTDEEDetails} onClose={() => setShowTDEEDetails(false)} tdeeEstimate={tdeeEstimate} />
-    </div>
+    </>
   );
 }

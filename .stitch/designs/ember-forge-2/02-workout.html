@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ember Forge 2.0 — Workout</title>
+<link rel="stylesheet" href="forge.css"/>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" style="--spine:80%">
+    <div class="rail-mark">K</div>
+    <nav class="rail-nav">
+      <button class="rail-item" title="Home" data-icon="dash" data-size="19"></button>
+      <button class="rail-item" title="Splits" data-icon="splits" data-size="19"></button>
+      <button class="rail-item on" title="Tracker" data-icon="target" data-size="19"></button>
+      <button class="rail-item" title="Diet" data-icon="salad" data-size="19"></button>
+      <button class="rail-item" title="Analytics" data-icon="trend" data-size="19"></button>
+      <button class="rail-item" title="Olympus League" data-icon="trophy" data-size="19"></button>
+    </nav>
+    <div class="rail-foot">
+      <button class="rail-item" title="Theme" data-icon="sun" data-size="17"></button>
+      <button class="rail-item" title="Profile" data-icon="user" data-size="17"></button>
+      <div class="rail-avatar">VC</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-quiet only-desk" style="padding-left:0" data-icon="left" data-size="15" data-sw="2"></button>
+        <span class="crumb">Upper push · Day 3</span>
+        <span class="chip chip-ember only-desk">In session</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="rowf g8" style="font-family:'Space Grotesk';font-variant-numeric:tabular-nums;
+              font-size:15px;font-weight:600;color:var(--bone);letter-spacing:.02em">
+          <span data-icon="timer" data-size="15" data-sw="1.8" style="color:var(--ash)"></span>00:42:18
+        </span>
+        <button class="btn btn-ember btn-sm">Finish</button>
+      </div>
+    </div>
+
+    <!-- SESSION PROGRESS -->
+    <div class="mb16">
+      <div class="rowf between mb12">
+        <span class="nano" style="color:var(--bone)">Session progress</span>
+        <span class="micro" style="color:var(--ember-100)">4 / 5 exercises</span>
+      </div>
+      <div data-notches="80" data-segs="24"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:start" class="wk-grid">
+
+      <!-- LEFT: exercise stack -->
+      <div class="stack g14">
+
+        <!-- ④ ACTIVE EXERCISE = EMBER CURSOR -->
+        <div class="panel panel-ember">
+          <div class="panel-body" style="padding:16px 18px 14px 22px">
+            <div class="rowf between" style="align-items:flex-start">
+              <div>
+                <div class="h2" style="color:var(--chalk)">Bench press</div>
+                <div class="rowf g6 mt8">
+                  <span class="chip chip-quiet">Chest</span>
+                  <span class="chip chip-quiet">Barbell</span>
+                </div>
+              </div>
+              <button class="btn btn-quiet" data-icon="kebab" data-size="15" data-sw="2"></button>
+            </div>
+
+            <div class="settable mt16">
+              <div class="sth">
+                <span>Set</span><span>Weight</span><span>Reps</span><span>RPE</span><span></span>
+              </div>
+
+              <div class="srow done">
+                <span class="sidx">1</span>
+                <span class="sval">80.0 <em>kg</em></span>
+                <span class="sval">8</span>
+                <span class="sval dim">7</span>
+                <span class="smark" data-icon="check" data-size="14" data-sw="2.6"></span>
+              </div>
+
+              <div class="srow done pr">
+                <span class="sidx">2</span>
+                <span class="sval">82.5 <em>kg</em></span>
+                <span class="sval">8</span>
+                <span class="sval dim">8</span>
+                <span class="smark" data-icon="check" data-size="14" data-sw="2.6"></span>
+              </div>
+
+              <div class="srow done">
+                <span class="sidx">3</span>
+                <span class="sval">82.5 <em>kg</em></span>
+                <span class="sval">7</span>
+                <span class="sval dim">9</span>
+                <span class="smark" data-icon="check" data-size="14" data-sw="2.6"></span>
+              </div>
+
+              <div class="srow next">
+                <span class="sidx">4</span>
+                <input class="field" value="82.5" aria-label="Weight"/>
+                <input class="field" value="8" aria-label="Reps"/>
+                <input class="field" value="9" aria-label="RPE"/>
+                <span class="smark" data-icon="circle" data-size="14" data-sw="1.8"></span>
+              </div>
+            </div>
+
+            <div class="rowf between mt12">
+              <span class="rowf g6">
+                <span class="plaque pl-gold" style="font-size:9px;padding:4px 8px;letter-spacing:.1em">
+                  <span data-icon="star" data-size="9" data-sw="2.4"></span>PR set
+                </span>
+                <span class="body-sm" style="font-size:11px">best 82.5 kg × 8</span>
+              </span>
+              <button class="btn btn-ghost btn-sm"><span data-icon="plus" data-size="11" data-sw="2.6"></span>Add set</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-l"><span class="nano" style="color:var(--bone)">Up next</span></div>
+            <div class="panel-head-r"><span class="micro">2 remaining</span></div>
+          </div>
+          <div class="panel-body flush">
+            <div class="row">
+              <div class="row-mark" data-icon="circle" data-size="14" data-sw="1.8"></div>
+              <div class="row-grow">
+                <div class="row-title">Overhead press</div>
+                <div class="row-sub">3 × 10 · 42.5 kg · last 3 × 10</div>
+              </div>
+              <div class="row-end"><button class="btn btn-ghost btn-sm">Log</button></div>
+            </div>
+            <div class="row">
+              <div class="row-mark" data-icon="circle" data-size="14" data-sw="1.8"></div>
+              <div class="row-grow">
+                <div class="row-title">Incline dumbbell fly</div>
+                <div class="row-sub">3 × 12 · 14.0 kg · last 3 × 12</div>
+              </div>
+              <div class="row-end"><button class="btn btn-ghost btn-sm">Log</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPLETED -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-l"><span class="nano" style="color:var(--bone)">Completed</span></div>
+            <div class="panel-head-r"><span class="micro">2 exercises</span></div>
+          </div>
+          <div class="panel-body flush">
+            <div class="row done">
+              <div class="row-mark done" data-icon="check" data-size="14" data-sw="2.6"></div>
+              <div class="row-grow">
+                <div class="row-title">Incline dumbbell press</div>
+                <div class="row-sub">3 × 10 · 30.0 kg</div>
+              </div>
+            </div>
+            <div class="row done">
+              <div class="row-mark done" data-icon="check" data-size="14" data-sw="2.6"></div>
+              <div class="row-grow">
+                <div class="row-title">Cable lateral raise</div>
+                <div class="row-sub">3 × 15 · 10.0 kg</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: rest timer + session stats -->
+      <div class="stack g14">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-l">
+              <span class="dot live"></span>
+              <span class="nano" style="color:var(--bone)">Rest</span>
+            </div>
+            <div class="panel-head-r">
+              <button class="btn btn-quiet" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">Skip</button>
+            </div>
+          </div>
+          <div class="panel-body center">
+            <div class="rowf" style="justify-content:center">
+              <div data-gauge="62" data-size="176" data-sw="9" data-ticks="5"
+                   data-inner='<div class="display-sm" style="font-size:2.6rem;letter-spacing:-.05em">1:24</div><div class="nano" style="margin-top:6px">remaining</div>'></div>
+            </div>
+            <div class="rowf g8 mt16" style="justify-content:center">
+              <button class="btn btn-ghost btn-sm">−30s</button>
+              <button class="btn btn-ghost btn-sm">+15s</button>
+              <button class="btn btn-ember btn-sm">+30s</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-l"><span class="nano" style="color:var(--bone)">Session</span></div>
+          </div>
+          <div class="panel-body">
+            <div class="statrow">
+              <span class="micro">Volume</span>
+              <span class="statnum">4,120 <em>kg</em></span>
+            </div>
+            <div class="statrow">
+              <span class="micro">Sets</span>
+              <span class="statnum">11 <em>/ 16</em></span>
+            </div>
+            <div class="statrow">
+              <span class="micro">Avg RPE</span>
+              <span class="statnum">8.0</span>
+            </div>
+            <div class="statrow">
+              <span class="micro">Elapsed</span>
+              <span class="statnum">42 <em>min</em></span>
+            </div>
+            <div class="divider" style="margin:14px 0"></div>
+            <div class="rowf between mb12">
+              <span class="micro">Calories</span>
+              <span class="micro" style="color:var(--ember-100)">310 est.</span>
+            </div>
+            <div data-notches="55" data-segs="14"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-l"><span class="nano" style="color:var(--bone)">Muscles hit</span></div>
+          </div>
+          <div class="panel-body flush">
+            <div class="row">
+              <div class="dot ok"></div>
+              <div class="row-grow"><div class="row-title" style="font-size:12px">Chest</div></div>
+              <div class="row-end"><span class="micro">7 sets</span></div>
+            </div>
+            <div class="row">
+              <div class="dot ok"></div>
+              <div class="row-grow"><div class="row-title" style="font-size:12px">Deltoids</div></div>
+              <div class="row-end"><span class="micro">3 sets</span></div>
+            </div>
+            <div class="row">
+              <div class="dot ok"></div>
+              <div class="row-grow"><div class="row-title" style="font-size:12px">Triceps</div></div>
+              <div class="row-end"><span class="micro">1 set</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="botnav">
+  <div class="botnav-in">
+    <button class="botnav-item" data-icon="dash" data-size="19"><span>Home</span></button>
+    <button class="botnav-item" data-icon="splits" data-size="19"><span>Splits</span></button>
+    <div style="flex:1;display:grid;place-items:center"><button class="fab" data-icon="check" data-size="22" data-sw="2.6"></button></div>
+    <button class="botnav-item on" data-icon="target" data-size="19"><span>Tracker</span></button>
+    <button class="botnav-item" data-icon="clock" data-size="19"><span>History</span></button>
+  </div>
+</nav>
+
+<style>
+  /* set table */
+  .settable { display:flex; flex-direction:column; }
+  .sth, .srow {
+    display:grid;
+    grid-template-columns:34px 1fr 1fr 1fr 26px;
+    gap:8px; align-items:center;
+  }
+  .sth {
+    padding:0 2px 8px;
+    font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ash);
+  }
+  .sth span:nth-child(n+2):nth-child(-n+4) { text-align:center; }
+  .srow {
+    padding:7px 2px; border-radius:8px;
+    box-shadow:inset 0 1px 0 rgba(227,191,179,.05);
+  }
+  .sidx {
+    font-family:'Space Grotesk'; font-size:12px; font-weight:600;
+    color:var(--ash); text-align:center; font-variant-numeric:tabular-nums;
+  }
+  .sval {
+    font-family:'Space Grotesk'; font-size:15px; font-weight:600;
+    color:var(--chalk); text-align:center; font-variant-numeric:tabular-nums;
+    letter-spacing:-.01em;
+  }
+  .sval em { font-style:normal; font-size:10px; font-weight:600; color:var(--ash); letter-spacing:.04em; }
+  .sval.dim { color:var(--bone); opacity:.72; }
+  .smark { color:var(--ash); display:grid; place-items:center; }
+  .srow.done .smark { color:var(--ok); }
+  .srow.pr .sval { color:var(--ember-100); }
+  .srow.pr { background:rgba(255,122,69,.055); }
+  .srow.next .field { padding:7px 6px; font-size:14px; }
+
+  /* session stat rows */
+  .statrow { display:flex; align-items:baseline; justify-content:space-between; padding:7px 0; }
+  .statrow + .statrow { box-shadow:inset 0 1px 0 rgba(227,191,179,.045); }
+  .statnum {
+    font-family:'Space Grotesk'; font-size:16px; font-weight:700;
+    color:var(--chalk); font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+  }
+  .statnum em { font-style:normal; font-size:10px; font-weight:600; color:var(--ash); letter-spacing:.06em; text-transform:uppercase; }
+
+  @media (max-width:1000px) { .wk-grid { grid-template-columns:1fr !important; } }
+  @media (max-width:480px) {
+    .sth, .srow { grid-template-columns:26px 1fr 1fr 1fr 22px; gap:6px; }
+    .sval { font-size:14px; }
+  }
+</style>
+
+<script src="forge.js"></script>
+</body>
+</html>

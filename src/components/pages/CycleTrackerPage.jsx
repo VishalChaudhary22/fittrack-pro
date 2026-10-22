@@ -1,73 +1,87 @@
-import { useState } from 'react';
-import { Settings, Save, Sparkles, Calendar } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader } from '../shared/SharedComponents';
 import { getCyclePhase } from '../../utils/cycleCalculations';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+import { Screen, Sec, LedgerRow, Action, Note, Word } from '../shared/Margin';
 
 export default function CycleTrackerPage() {
   useScrollRestoration('/cycle');
-  const { cycleConfig, setCycleConfig, addToast } = useApp();
-  
+  const { user, cycleConfig, setCycleConfig } = useApp();
   const [startDate, setStartDate] = useState(cycleConfig?.startDate || '');
   const [cycleLength, setCycleLength] = useState(cycleConfig?.cycleLength || 28);
-  
-  const handleSave = () => {
-    setCycleConfig({ startDate, cycleLength });
-    addToast('Cycle info updated', 'success');
+
+  const phaseInfo = useMemo(() => {
+    if (!cycleConfig?.startDate) return null;
+    return getCyclePhase(cycleConfig.startDate, cycleConfig.cycleLength);
+  }, [cycleConfig]);
+
+  const save = () => {
+    if (!startDate) return;
+    setCycleConfig({ startDate, cycleLength: parseInt(cycleLength) });
   };
 
-  const currentPhase = getCyclePhase(cycleConfig?.startDate, cycleConfig?.cycleLength);
+  const clear = () => {
+    setCycleConfig(null);
+    setStartDate('');
+  };
 
   return (
-    <div className="pg-in">
-      <PageHeader title="Cycle Syncing" sub="Align workouts with your physiology" />
-
-      <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', marginBottom: 24 }}>
-        <h3 className="headline-md" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <Settings size={20} color="var(--primary)" /> Settings
-        </h3>
-        
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
-           <div style={{ flex: 1, minWidth: 150 }}>
-             <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--on-surface-variant)', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>Last Period Start</label>
-             <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: 12, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
-           </div>
-           <div style={{ flex: 1, minWidth: 150 }}>
-             <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--on-surface-variant)', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>Cycle Length (Days)</label>
-             <input type="number" value={cycleLength} onChange={e => setCycleLength(parseInt(e.target.value) || 28)} style={{ width: '100%', padding: '12px', borderRadius: 12, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
-           </div>
-        </div>
-        
-        <button onClick={handleSave} style={{ padding: '12px 24px', background: 'var(--primary)', color: 'var(--on-primary)', border: 'none', borderRadius: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-          <Save size={16} /> Save Cycle Info
-        </button>
-      </div>
-
-      {currentPhase ? (
-        <div className="card" style={{ padding: '32px 24px', background: 'var(--surface-container-low)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 250, height: 250, background: currentPhase.theme, filter: 'blur(100px)', opacity: 0.15, pointerEvents: 'none' }} />
-          
-          <div className="label-md" style={{ color: currentPhase.theme, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Calendar size={16} /> DAY {currentPhase.currentDay}
+    <Screen kicker="Cycle" right={<span className="kicker" style={{ color: 'var(--bone)' }}>Training</span>}>
+      {!cycleConfig?.startDate ? (
+        <Sec n="01" label="Setup">
+          <Note>
+            <b>Train with your cycle.</b> Track your phase to adjust intensity and recovery.
+          </Note>
+          <div style={{ marginTop: 18 }}>
+            <label className="kicker">Last period start date</label>
+            <input className="field" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
           </div>
-          <h2 className="display-md" style={{ color: 'var(--on-surface)', marginBottom: 4 }}>{currentPhase.phase} Phase</h2>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: 14, fontWeight: 500, marginBottom: 24 }}>Next period in ~{currentPhase.nextPeriodIn} days</p>
-
-          <div style={{ padding: 16, borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: `1px solid ${currentPhase.theme}40` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: currentPhase.theme, fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '1px' }}>
-              <Sparkles size={16} /> Training Advice
-            </div>
-            <p style={{ color: 'var(--on-surface)', fontSize: 14, lineHeight: 1.5 }}>
-              {currentPhase.advice}
-            </p>
+          <div style={{ marginTop: 18 }}>
+            <label className="kicker">Cycle length (days)</label>
+            <input className="field" type="number" min="21" max="40" value={cycleLength} onChange={e => setCycleLength(e.target.value)} />
           </div>
-        </div>
+          <Action onClick={save}>Start tracking</Action>
+        </Sec>
       ) : (
-        <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--on-surface-dim)' }}>
-           Enter your cycle details above to receive synced training advice.
-        </div>
+        <>
+          <Sec n="01" label="Today" right={`Day ${phaseInfo?.currentDay || '—'} of ${cycleConfig.cycleLength}`}>
+            <div className="h1" style={{ marginTop: 4 }}>{phaseInfo?.phase || '—'}</div>
+            <p className="body-dim" style={{ marginTop: 10 }}>{phaseInfo?.advice}</p>
+            <div className="rowf g16 mt14">
+              <span className="meta">{phaseInfo?.nextPeriodIn} days to next period</span>
+            </div>
+          </Sec>
+
+          <Sec n="02" label="Training advice">
+            <Note>
+              <b>Focus.</b> {phaseInfo?.advice}
+            </Note>
+            <LedgerRow
+              k="Energy"
+              v={<Word tone={phaseInfo?.phase === 'Follicular' || phaseInfo?.phase === 'Ovulation' ? 'ok' : phaseInfo?.phase === 'Menstruation' ? 'idle' : 'warn'}>
+                {phaseInfo?.phase === 'Follicular' || phaseInfo?.phase === 'Ovulation' ? 'Higher' : phaseInfo?.phase === 'Menstruation' ? 'Lower' : 'Moderate'}
+              </Word>}
+            />
+            <LedgerRow
+              k="Recovery"
+              v={<Word tone={phaseInfo?.phase === 'Luteal' ? 'warn' : phaseInfo?.phase === 'Menstruation' ? 'bad' : 'ok'}>
+                {phaseInfo?.phase === 'Luteal' ? 'Prioritize' : phaseInfo?.phase === 'Menstruation' ? 'Take care' : 'Normal'}
+              </Word>}
+            />
+          </Sec>
+
+          <Sec n="04" label="Settings">
+            <LedgerRow k="Start date" v={cycleConfig.startDate} tone="sm" />
+            <LedgerRow k="Cycle length" v={`${cycleConfig.cycleLength} days`} tone="sm" />
+            <Action onClick={clear}>Reset cycle tracking</Action>
+          </Sec>
+        </>
       )}
-    </div>
+
+      <div className="foot">
+        <span>Kaaya Fit</span>
+        <span>Cycle</span>
+      </div>
+    </Screen>
   );
 }

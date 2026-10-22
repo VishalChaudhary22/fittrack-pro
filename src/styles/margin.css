@@ -436,6 +436,13 @@ body {
   max-width: 62%;
 }
 .row .k.dim { color: var(--ash); }
+.row .k .sub {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--ash-dim);
+  margin-top: 2px;
+}
 .row .v {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 15px;
@@ -885,6 +892,32 @@ body {
   gap: 0 !important;
   width: 100%;
 }
+
+/* ── FORM FIELD ──────────────────────────────────────────────────────────── */
+/* A label above, a hairline under. No fills, no radius — same as everything
+   else in the language. */
+.field {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  padding: 9px 0;
+  margin-top: 4px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 140ms var(--ease-forge);
+}
+.field:focus { border-bottom-color: var(--ember); }
+.field::placeholder { color: var(--ash-dim); }
+select.field { cursor: pointer; padding-right: 18px; }
+select.field option { background: var(--canvas); color: var(--ink); }
 
 /* ── UTILITY ─────────────────────────────────────────────────────────────── */
 .stack { display: flex; flex-direction: column; }

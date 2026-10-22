@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
-import { Sidebar, BottomNav } from './components/layout/Layout';
+import { Tabs } from './components/shared/Margin';
 import { ToastContainer } from './components/shared/SharedComponents';
+import MorePage from './components/pages/MorePage';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import AuthModal from './components/pages/AuthModal';
 import DashboardPage from './components/pages/DashboardPage';
@@ -58,9 +59,8 @@ function AppInner() {
   if (!user) return <AuthModal />;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main className="mc" style={{ flex: 1, padding: '22px 24px', overflowY: 'auto' }}>
+    <div className="app">
+      <main className="screen" style={{ paddingRight: 22 }}>
         <Routes>
           <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
           <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
@@ -75,10 +75,11 @@ function AppInner() {
           <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
           <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage chatbot={chatbot} /></ErrorBoundary>} />
           <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
+          <Route path="/more" element={<ErrorBoundary><MorePage /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <BottomNav />
+      <Tabs />
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <NotificationPrompt />
       <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
 import { getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
+import { Portal, ConfirmDialog } from '../shared/SharedComponents';
+import { Screen, Sec, Hero, LedgerRow, Amp, One, Note, Action, TLink } from '../shared/Margin';
 import { gId, tod, fmt, formatTimeAgo } from '../../utils/helpers';
 import BodyMapSVG from '../shared/BodyMapSVG';
 import { calcAllMuscleXP } from '../../data/muscleData';
@@ -327,151 +328,40 @@ const RestTimer = ({ secondsLeft, totalDuration, onSkip, onExtend }) => {
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
 
-  const RING_SIZE = window.innerWidth < 360 ? 180 : 220;
-  const STROKE_W = 8;
-  const RADIUS = (RING_SIZE - STROKE_W) / 2;
-  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-  // Track the highest time we've seen so the ring drains properly when extended
+  // track the highest time seen so extending the rest drains correctly
   const [maxObserved, setMaxObserved] = useState(totalDuration || 90);
 
   useEffect(() => {
-    if (secondsLeft > maxObserved) {
-      setMaxObserved(secondsLeft);
-    }
+    if (secondsLeft > maxObserved) setMaxObserved(secondsLeft);
   }, [secondsLeft, maxObserved]);
 
-  const progress = maxObserved > 0 ? secondsLeft / maxObserved : 0;
-  const dashOffset = CIRCUMFERENCE * (1 - progress);
+  const progress = maxObserved > 0 ? (secondsLeft / maxObserved) * 100 : 0;
   const isLowTime = secondsLeft <= 10;
 
   return (
-    <section style={{ marginBottom: 40, position: 'relative' }}>
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 24, background: 'var(--surface-container-low)', padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '2px solid rgba(248, 95, 27, 0.2)' }}>
-        <div style={{ position: 'absolute', top: -48, right: -48, width: 192, height: 192, background: 'rgba(248, 95, 27, 0.05)', borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }}></div>
-        <h2 className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--on-surface-variant)', marginBottom: 24 }}>Rest Timer</h2>
-
-        {/* CENTER — SVG Ring Timer with Number */}
-        <div style={{ position: 'relative', flexShrink: 0, marginBottom: 32 }}>
-          <svg
-            width={RING_SIZE}
-            height={RING_SIZE}
-            style={{
-              transform: 'rotate(-90deg)',
-              display: 'block',
-              animation: isLowTime ? 'restTimerPulse 1s var(--ease-smooth) infinite' : 'none',
-            }}
-          >
-            {/* Track ring — static grey background */}
-            <circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RADIUS}
-              fill="none"
-              stroke="var(--surface-container-highest)"
-              strokeWidth={STROKE_W}
-            />
-            {/* Progress ring — drains clockwise */}
-            <circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RADIUS}
-              fill="none"
-              stroke={isLowTime ? 'var(--primary)' : 'var(--primary-container)'}
-              strokeWidth={STROKE_W}
-              strokeLinecap="round"
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={dashOffset}
-              style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
-            />
-          </svg>
-
-          {/* Number + label centered over the SVG ring */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 'clamp(3.5rem, 10vw, 4rem)',
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              lineHeight: 1,
-              color: isLowTime ? 'var(--primary)' : 'var(--on-surface)',
-              transition: 'color 0.3s',
-            }}>
-              {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
-              <span style={{ fontSize: '2rem', fontWeight: 300, color: 'var(--primary)', letterSpacing: 0 }}>s</span>
-            </span>
-          </div>
-        </div>
-
-        {/* BOTTOM — +30s and Skip stacked horizontally */}
-        <div style={{
-          display: 'flex',
-          gap: 16,
-          zIndex: 1,
-        }}>
-
-          {/* +30s ghost pill */}
-          <button
-            onClick={() => onExtend(30)}
-            style={{
-              padding: '8px 24px',
-              borderRadius: 999,
-              border: 'none',
-              cursor: 'pointer',
-              background: 'var(--surface-container-highest)',
-              color: 'var(--on-surface)',
-              fontFamily: "'Be Vietnam Pro', sans-serif",
-              fontSize: 12,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              transition: 'transform 0.1s var(--ease-smooth)',
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
-            onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            +30s
-          </button>
-
-          {/* Skip ember pill */}
-          <button
-            onClick={onSkip}
-            style={{
-              padding: '8px 32px',
-              borderRadius: 999,
-              border: 'none',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, var(--primary), var(--primary-container))',
-              color: '#fff',
-              fontFamily: "'Be Vietnam Pro', sans-serif",
-              fontSize: 14,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              boxShadow: '0 10px 20px rgba(248,95,27,0.2)',
-              transition: 'transform 0.1s var(--ease-smooth)',
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
-            onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Skip
-          </button>
-        </div>
-
+    <div className="sec" style={{ marginTop: 20 }}>
+      <div className="rowf between" style={{ marginBottom: 4 }}>
+        <span className="kicker" style={{ color: 'var(--ash-dim)' }}>Rest</span>
+        <span className="kicker" style={{ color: isLowTime ? 'var(--ember)' : 'var(--bone)' }}>
+          {isLowTime ? 'almost up' : 'until next set'}
+        </span>
       </div>
-    </section>
+
+      <span
+        className="hero hero-sm"
+        style={{ color: isLowTime ? 'var(--ember)' : 'var(--ink)', marginBottom: 10 }}
+      >
+        {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
+      </span>
+
+      <Amp pct={progress} cap style={{ marginBottom: 14 }} />
+
+      <div className="rowf g16">
+        <TLink onClick={() => onExtend(30)}>+30s</TLink>
+        <TLink onClick={() => onExtend(-30)}>−30s</TLink>
+        <TLink onClick={onSkip} ember style={{ marginLeft: 'auto' }}>Skip</TLink>
+      </div>
+    </div>
   );
 };
 
@@ -1542,283 +1432,252 @@ export default function WorkoutPage() {
         setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0); 
       }} onComplete={handleYogaComplete} />;
     }
-    const pct = Math.round((session.exs.flatMap(e => e.sets).filter(s => s.done).length / session.exs.flatMap(e => e.sets).length) * 100) || 0;
+    const totalSets = session.exs.flatMap(e => e.sets).length;
+    const doneSets = session.exs.flatMap(e => e.sets).filter(s => s.done).length;
+    const pct = Math.round((doneSets / totalSets) * 100) || 0;
+
     return (
-    <div className="pg-in">
-      {/* Top Header Status */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8, marginTop: 8 }}>
-        <PulseIndicator color="var(--primary-container)" />
-        <span className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--on-surface-variant)' }}>
-          Active Session: {session.day.name}
-        </span>
-        <span className="label-md" style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', fontWeight: 700 }}>
-          {pct}% done
-        </span>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Timer size={16} color="var(--on-surface-dim)" />
-          <select value={restDuration} onChange={e => handleRestDurationChange(parseInt(e.target.value))} style={{ width: 'auto', fontSize: 11, padding: '2px 6px', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 6, color: 'var(--on-surface)', letterSpacing: '0.05em' }}>
-            {[30, 60, 90, 120, 180, 300].map(s => <option key={s} value={s}>{s < 60 ? `${s}s` : `${s / 60}m`}</option>)}
+    <Screen
+      kicker={`${session.day.name} · ${activeSplit.name}`}
+      right={<span className="kicker" style={{ color: 'var(--bone)' }}>{fmtElapsed(elapsed)}</span>}
+    >
+      <Sec n="01" label="Session" right={`${doneSets} of ${totalSets} sets`}>
+        <Amp pct={pct} cap style={{ marginTop: 0 }} />
+        <div className="rowf between" style={{ marginTop: 8 }}>
+          <span className="kicker" style={{ color: 'var(--ash-dim)' }}>{session.day.name}</span>
+          <span className="kicker" style={{ color: 'var(--bone)' }}>{pct}%</span>
+        </div>
+
+        <div className="rowf between" style={{ marginTop: 16 }}>
+          <label className="kicker" style={{ color: 'var(--ash-dim)' }}>Rest between sets</label>
+          <select
+            value={restDuration}
+            onChange={e => handleRestDurationChange(parseInt(e.target.value))}
+            style={{
+              width: 'auto', fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
+              padding: '2px 0', background: 'transparent', border: 'none',
+              borderBottom: '1px solid var(--hair)', borderRadius: 0, color: 'var(--bone)',
+            }}
+          >
+            {[30, 60, 90, 120, 180, 300].map(sec => (
+              <option key={sec} value={sec}>{sec < 60 ? `${sec}s` : `${sec / 60}m`}</option>
+            ))}
           </select>
         </div>
-      </div>
-      
-      {/* Rest Timer (moved inline to sets) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 16 }}>
-        {session.exs.map((ex, ei) => {
-          const focusType = ex.repsRange === '1-5' ? 'Strength' : (ex.repsRange === '15-20' || ex.repsRange === '12+') ? 'Endurance' : 'Hypertrophy';
-          
-          return (
-            <div key={ex.id} className="exercise-block">
-              {/* Exercise Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 16 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--on-surface)', marginBottom: 4, lineHeight: 1.1 }}>
-                    {ex.sv || ex.name}
-                  </h3>
-                  {ex.variants && <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} style={{ marginTop: 0, marginBottom: 4, fontSize: 11, padding: '2px 8px', width: 'auto', borderRadius: 6, background: 'var(--surface-container)', border: 'none' }}>{ex.variants.map(v => <option key={v} value={v}>{v}</option>)}</select>}
-                  <p className="label-md" style={{ fontSize: 10, color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                    {ex.muscle || 'Full Body'} • {focusType}
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginTop: 2 }}>
-                  <button
-                    onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}
-                    aria-label={`Swap ${ex.name}`}
+      </Sec>
+
+      {session.exs.map((ex, ei) => {
+        const focusType = ex.repsRange === '1-5' ? 'Strength'
+          : (ex.repsRange === '15-20' || ex.repsRange === '12+') ? 'Endurance' : 'Hypertrophy';
+
+        // previous-session reference, cross-split
+        const exName = ex.sv || ex.name;
+        const allNames = [exName, ...(ex.variants || [])];
+        const sorted = [...workoutLogs]
+          .filter(l => l.userId === user.id)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+        let prevLog = null;
+        let pe = null;
+        for (const log of sorted) {
+          for (const logEx of (log.exercises || [])) {
+            if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
+              prevLog = log; pe = logEx; break;
+            }
+          }
+          if (pe) break;
+        }
+
+        const exDone = ex.sets.filter(st => st.done).length;
+        const isActiveEx = exDone < ex.sets.length;
+
+        return (
+          <Sec key={ex.id} n={String(ei + 2).padStart(2, '0')} label={focusType} right={`${exDone} / ${ex.sets.length}`}>
+            <div className="rowf between" style={{ alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ minWidth: 0 }}>
+                <div className="h2">{ex.sv || ex.name}</div>
+                <div className="meta mt6">{ex.muscle || 'Full body'}</div>
+              </div>
+              <div className="rowf g8" style={{ flexShrink: 0 }}>
+                {ex.variants && (
+                  <select
+                    value={ex.sv || ex.variants[0]}
+                    onChange={e => setV(ei, e.target.value)}
                     style={{
-                      background: 'var(--surface-container-highest)', border: '1px solid var(--surface-container)',
-                      cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
-                      color: 'var(--on-surface-variant)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                      transition: 'all 0.2s', flexShrink: 0
-                    }}
-                    onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary-container)'; }}
-                    onMouseOut={e => { e.currentTarget.style.color = 'var(--on-surface-variant)'; e.currentTarget.style.borderColor = 'var(--surface-container)'; }}
-                  >
-                    <ArrowRightLeft size={16} />
-                    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Swap</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirmRemoveIdx === ei) removeExercise(ei);
-                      else setConfirmRemoveIdx(ei);
-                    }}
-                    aria-label="Remove Exercise"
-                    style={{
-                      background: confirmRemoveIdx === ei ? 'var(--error-container)' : 'var(--surface-container-highest)',
-                      border: confirmRemoveIdx === ei ? '1px solid var(--error)' : '1px solid var(--surface-container)',
-                      cursor: 'pointer', padding: '6px 10px', borderRadius: 10,
-                      color: confirmRemoveIdx === ei ? 'var(--error)' : 'var(--on-surface-variant)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                      transition: 'all 0.2s', flexShrink: 0
-                    }}
-                    onMouseOver={e => {
-                      if (confirmRemoveIdx !== ei) {
-                        e.currentTarget.style.color = 'var(--error)';
-                        e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-                      }
-                    }}
-                    onMouseOut={e => {
-                      if (confirmRemoveIdx !== ei) {
-                        e.currentTarget.style.color = 'var(--on-surface-variant)';
-                        e.currentTarget.style.borderColor = 'var(--surface-container)';
-                      }
+                      width: 'auto', fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
+                      padding: '2px 0', background: 'transparent', border: 'none',
+                      borderBottom: '1px solid var(--hair)', borderRadius: 0, color: 'var(--ash)',
                     }}
                   >
-                    <Trash2 size={16} />
-                    <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                      {confirmRemoveIdx === ei ? 'Confirm' : 'Delete'}
-                    </span>
-                  </button>
-                  <button aria-label="Exercise options" style={{ minWidth: 44, minHeight: 44, background: 'none', border: 'none', color: 'var(--on-surface-variant)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-                  </button>
-                </div>
+                    {ex.variants.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                )}
+                <TLink onClick={() => setSwapTarget({ exerciseIndex: ei, name: ex.sv || ex.name, originalName: ex._originalName || ex.originalName || ex.name })}>
+                  Swap
+                </TLink>
+                <TLink
+                  onClick={() => {
+                    if (confirmRemoveIdx === ei) removeExercise(ei);
+                    else setConfirmRemoveIdx(ei);
+                  }}
+                  style={{ color: confirmRemoveIdx === ei ? 'var(--bad)' : undefined }}
+                >
+                  {confirmRemoveIdx === ei ? 'Sure?' : 'Remove'}
+                </TLink>
               </div>
-
-              {/* Previous Session Reference Row (cross-split lookup) */}
-              {(() => {
-                const exName = ex.sv || ex.name;
-                const allNames = [exName, ...(ex.variants || [])];
-                const sorted = [...workoutLogs]
-                  .filter(l => l.userId === user.id)
-                  .sort((a, b) => new Date(b.date) - new Date(a.date));
-                let prevLog = null;
-                let pe = null;
-                for (const log of sorted) {
-                  for (const logEx of (log.exercises || [])) {
-                    if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
-                      prevLog = log;
-                      pe = logEx;
-                      break;
-                    }
-                  }
-                  if (pe) break;
-                }
-                if (!pe?.sets?.length) return null;
-                const displaySets = pe.sets.slice(0, 3);
-                return (
-                  <div style={{ padding: '6px 12px', marginBottom: 8, background: 'var(--surface-container)', borderRadius: 10, borderLeft: '2px solid var(--primary-container)', fontSize: 11, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
-                    <span style={{ color: 'var(--on-surface-dim)', fontWeight: 700, marginRight: 4 }}>PREV ({fmt(prevLog.date)}):</span>
-                    {displaySets.map((s, i) => (
-                      <span key={i} style={{ color: 'var(--on-surface-variant)' }}>{s.reps}r × {s.weight}kg{i < displaySets.length - 1 ? ',' : ''}</span>
-                    ))}
-                    {pe.sets.length > 3 && <span style={{ color: 'var(--outline)' }}>+{pe.sets.length - 3} more</span>}
-                  </div>
-                );
-              })()}
-              {/* Set Grid Headers */}
-              <div className="set-row" style={{ padding: '0 12px', marginBottom: 8 }}>
-                {['SET', 'REPS', 'KG', 'DONE'].map((h, i) => (
-                  <div key={h} style={{ fontSize: 9, color: 'var(--outline)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: i === 3 ? 'right' : 'left' }}>{h}</div>
-                ))}
-              </div>
-
-              {/* Set Rows */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {ex.sets.map((s, si) => {
-                  const exName    = ex.sv || ex.name;
-                  const pr        = prMap[exName] ?? null;
-                  const isPR      = s.done && beatsAllTimePR(pr, parseFloat(s.weight) || 0, parseFloat(s.reps) || 0);
-
-
-
-                  return (
-                  <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {restActive && restTimerPosition?.ei === ei && restTimerPosition?.si === si && (
-                      <RestTimer secondsLeft={restSecondsLeft} totalDuration={restDuration} onSkip={skipRestTimer} onExtend={extendRestTimer} />
-                    )}
-                    <div className={`set-row ${isPR ? 'is-pr' : ''}`} style={{ 
-                      background: isPR ? 'var(--surface-container-high)' : 'var(--surface-container-low)',
-                      padding: 12, borderRadius: 12, transition: 'all 0.2s', position: 'relative',
-                      opacity: s.done ? (isPR ? 1 : 0.7) : 1, filter: s.done ? (isPR ? 'none' : 'grayscale(50%)') : 'none',
-                      borderLeft: isPR ? '2.5px solid var(--primary-container)' : 'none'
-                    }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseLeave={e => e.currentTarget.style.background = isPR ? 'var(--surface-container-high)' : 'var(--surface-container-low)'}>
-                    
-                    <div style={{ fontSize: 14, color: 'var(--on-surface)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {isPR ? (
-                        <div className="pr-badge-pill" title="Personal Record">
-                          PR
-                        </div>
-                      ) : (
-                        si + 1
-                      )}
-                    </div>
-                    
-                    <div style={{ paddingRight: 8 }}>
-                      <input type="number" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} style={{ width: '100%', minHeight: 44, background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
-                    </div>
-                    
-                    <div style={{ paddingRight: 8 }}>
-                      <input type="number" step=".5" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} style={{ width: '100%', minHeight: 44, background: 'var(--surface-container-lowest)', border: 'none', borderBottom: '2px solid transparent', textAlign: 'center', fontSize: 16, fontWeight: 700, padding: '8px 4px', borderRadius: 8, color: 'var(--on-surface)', transition: 'border-color 0.2s' }} onFocus={e => e.target.style.borderBottomColor = 'var(--primary-container)'} onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
-                    </div>
-                    
-                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <button onClick={() => upd(ei, si, 'done', !s.done)} style={{
-                        width: 44, height: 44, borderRadius: 10,
-                        background: s.done ? 'var(--surface-container-highest)' : 'var(--surface-container-highest)',
-                        color: s.done ? 'var(--primary)' : 'var(--on-surface-variant)',
-                        border: 'none',
-                        outline: s.done ? '1.5px solid var(--primary-container)' : '1.5px solid transparent',
-                        outlineOffset: '-1.5px',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all .2s'
-                      }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = s.done ? 'var(--primary)' : 'var(--on-surface-variant)'}>
-                        <Check size={18} strokeWidth={s.done ? 3 : 2} />
-                      </button>
-                      {ex.sets.length > 1 && (
-                        <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
-                      )}
-                    </div>
-
-                  </div>
-                  </div>
-                  );
-                })}
-              </div>
-              
-              <button className="add-set-btn" onClick={() => addS(ei)}>+ Add Set</button>
-              {ex.notes && <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 8, fontStyle: 'italic', paddingLeft: 4 }}>{ex.notes}</div>}
             </div>
-          );
-        })}
-      </div>
 
-      <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+            {pe?.sets?.length > 0 && (
+              <div className="meta mt10" style={{ flexWrap: 'wrap', gap: 8 }}>
+                <span style={{ color: 'var(--ash-dim)' }}>prev {fmt(prevLog.date)}</span>
+                {pe.sets.slice(0, 3).map((st, i) => (
+                  <span key={i} style={{ color: 'var(--bone)' }}>{st.reps}×{st.weight}</span>
+                ))}
+                {pe.sets.length > 3 && <span style={{ color: 'var(--ash-dim)' }}>+{pe.sets.length - 3}</span>}
+              </div>
+            )}
+
+            <div className="colhead" style={{ marginTop: 16 }}>
+              <span></span><span>Weight</span><span>Reps</span><span>RPE</span><span></span>
+            </div>
+
+            {ex.sets.map((st, si) => {
+              const pr = prMap[exName] ?? null;
+              const isPR = st.done && beatsAllTimePR(pr, parseFloat(st.weight) || 0, parseFloat(st.reps) || 0);
+
+              return (
+                <div key={si}>
+                  {restActive && restTimerPosition?.ei === ei && restTimerPosition?.si === si && (
+                    <RestTimer
+                      secondsLeft={restSecondsLeft}
+                      totalDuration={restDuration}
+                      onSkip={skipRestTimer}
+                      onExtend={extendRestTimer}
+                    />
+                  )}
+
+                  <div className={`setrow${st.done ? ' done' : ''}${isPR ? ' pr' : ''}${!st.done && isActiveEx && si === exDone ? ' next' : ''}`}>
+                    <span className="idx">{String(si + 1).padStart(2, '0')}</span>
+                    <input
+                      className="field-inline"
+                      type="number"
+                      step=".5"
+                      placeholder="—"
+                      aria-label={`Set ${si + 1} weight`}
+                      value={st.weight}
+                      onChange={e => upd(ei, si, 'weight', e.target.value)}
+                    />
+                    <input
+                      className="field-inline"
+                      type="number"
+                      placeholder={st.targetRep || '—'}
+                      aria-label={`Set ${si + 1} reps`}
+                      value={st.reps}
+                      onChange={e => upd(ei, si, 'reps', e.target.value)}
+                    />
+                    <span className="val mute">—</span>
+                    <button
+                      onClick={() => upd(ei, si, 'done', !st.done)}
+                      aria-label={st.done ? `Mark set ${si + 1} not done` : `Mark set ${si + 1} done`}
+                      style={{
+                        width: 18, height: 18, padding: 0, background: 'none', border: 'none',
+                        cursor: 'pointer', display: 'grid', placeItems: 'center',
+                        color: st.done ? 'var(--ok)' : 'var(--ash-dim)',
+                      }}
+                    >
+                      {st.done ? <Check size={13} strokeWidth={3} /> : <span style={{ fontSize: 11 }}>○</span>}
+                    </button>
+                  </div>
+
+                  {isPR && (
+                    <Note><b>New best.</b> {st.weight} kg × {st.reps} beats your previous record for this lift.</Note>
+                  )}
+
+                  {ex.sets.length > 1 && (
+                    <button
+                      onClick={() => rmS(ei, si)}
+                      aria-label={`Remove set ${si + 1}`}
+                      style={{
+                        background: 'none', border: 'none', padding: '2px 0 6px auto', cursor: 'pointer',
+                        display: 'block', marginLeft: 'auto', color: 'var(--ash-dim)',
+                        fontSize: 11, lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+
+            <TLink onClick={() => addS(ei)} style={{ marginTop: 12 }}>+ Add set</TLink>
+            {ex.notes && <p className="body-dim mt10" style={{ fontStyle: 'italic' }}>{ex.notes}</p>}
+          </Sec>
+        );
+      })}
+
+      <Sec n={String(session.exs.length + 2).padStart(2, '0')} label="Build the session">
+        <Action onClick={() => { setAddExSearch(''); setAddExCat('all'); setShowAddEx(true); }}>
+          Add exercise
+        </Action>
+
+        <label className="kicker" style={{ color: 'var(--ash-dim)', display: 'block', marginTop: 24, marginBottom: 6 }}>
+          Session notes
+        </label>
+        <textarea
+          rows={2}
+          placeholder="How it felt, form cues, anything to remember"
+          value={session.notes || ''}
+          onChange={e => setSession(p => ({ ...p, notes: e.target.value }))}
+          style={{
+            width: '100%', background: 'transparent', border: 'none',
+            borderBottom: '1px solid var(--hair)', borderRadius: 0,
+            color: 'var(--ink)', fontSize: 13, padding: '8px 0', resize: 'vertical',
+          }}
+        />
+      </Sec>
+
+      <section ref={finishBtnRef} style={{ marginTop: 42 }}>
+        <Action ember onClick={finish}>Finish workout</Action>
         <button
           onClick={() => {
-            setAddExSearch('');
-            setAddExCat('all');
-            setShowAddEx(true);
+            clearPersistedSession();
+            startTimeRef.current = null;
+            setElapsed(0);
+            setSession(null); skipRestTimer();
+            setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0);
           }}
           style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '14px 24px', borderRadius: '999px',
-            border: '2px dashed var(--primary-container)',
-            background: 'var(--surface-container-low)',
-            color: 'var(--primary)', fontFamily: "'Be Vietnam Pro', sans-serif",
-            fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em',
-            textTransform: 'uppercase', cursor: 'pointer',
-            transition: 'all 0.2s',
+            width: '100%', background: 'none', border: 'none', padding: '14px 0', cursor: 'pointer',
+            fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ash-dim)',
           }}
-          onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container)'}
-          onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container-low)'}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <Plus size={18} strokeWidth={3} />
-          Add Exercise
-        </button>
-      </div>
-
-      {session.notes !== undefined && (
-        <div className="card glass-card" style={{ marginTop: 32, padding: 16 }}>
-          <label className="label-md" style={{ color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Session Notes</label>
-          <textarea rows={2} placeholder="PRs, form notes, how it felt..." value={session.notes} onChange={e => setSession(p => ({ ...p, notes: e.target.value }))} style={{ resize: 'vertical', width: '100%', background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 12, border: 'none', color: 'var(--on-surface)', fontSize: 13 }} />
-        </div>
-      )}
-
-      {/* Stacked Finish / Discard */}
-      <section ref={finishBtnRef} style={{ paddingTop: 32, paddingBottom: 64 }}>
-        <button onClick={finish} style={{ width: '100%', padding: '20px', fontSize: 18, borderRadius: 16, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(248,95,27,0.3)', transition: 'transform 0.1s' }} onMouseDown={e => e.currentTarget.style.transform='scale(0.98)'} onMouseUp={e => e.currentTarget.style.transform='scale(1)'}>
-          Finish Workout
-        </button>
-        <button onClick={() => {
-          clearPersistedSession();
-          startTimeRef.current = null;
-          setElapsed(0);
-          setSession(null); skipRestTimer();
-          setTimeout(() => window.scrollTo({ top: workoutPageCache.trackerScroll || 0, behavior: 'instant' }), 0);
-        }} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', padding: 12, cursor: 'pointer', fontSize: '0.75rem', fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--error)', opacity: 0.8, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}>
-          Discard Workout
+          Discard workout
         </button>
       </section>
 
-      {/* Floating Indicators */}
       <Portal>
-        <div style={{ position: 'fixed', bottom: 88, right: 24, zIndex: 9998, display: showAddEx ? 'none' : 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+        <div style={{ position: 'fixed', bottom: 78, right: 22, zIndex: 9998, display: showAddEx ? 'none' : 'flex', alignItems: 'baseline', gap: 8 }}>
           {showFAB && (
-            <button 
+            <button
               onClick={finish}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '6px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', cursor: 'pointer', width: 130 }}>
-              <div style={{ display: 'flex', width: 8, height: 8, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Check size={10} color="var(--primary)" strokeWidth={3} />
-              </div>
-              <span className="label-md" style={{ color: 'var(--on-surface)', fontSize: 9, whiteSpace: 'nowrap' }}>Finish Workout</span>
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, fontWeight: 700,
+                letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ash)',
+              }}
+            >
+              Finish
             </button>
           )}
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(248, 95, 27, 0.2)', boxShadow: 'var(--shadow-ambient)', width: 130 }}>
-            <span style={{ position: 'relative', display: 'flex', width: 8, height: 8, flexShrink: 0 }}>
-              <span style={{ animation: 'pulse 2s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '50%', background: 'var(--primary-container)', opacity: 0.75 }}></span>
-              <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '50%', height: 8, width: 8, background: 'var(--primary)' }}></span>
-            </span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <span style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--on-surface-variant)', lineHeight: 1 }}>Live</span>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 13, letterSpacing: '-0.02em', color: 'var(--primary)', lineHeight: 1 }}>{fmtElapsed(elapsed)}</span>
-            </div>
-          </div>
+          <span className="n" style={{ fontSize: 12, fontWeight: 600, color: 'var(--bone)' }}>
+            {fmtElapsed(elapsed)}
+          </span>
         </div>
       </Portal>
+
       <ConfirmDialog
         open={confirmFinish}
         title="Unfinished Sets"
@@ -1851,62 +1710,45 @@ export default function WorkoutPage() {
         setCategory={setAddExCat}
         exercisePool={exercisePool}
       />
-    </div>
+    </Screen>
   );
   }
 
 
   return (
-    <div className="pg-in">
-      <PageHeader
-        title="Workout Tracker"
-        sub={activeSplit ? activeSplit.name : 'Select a split first'}
-        action={
-          !session && (
-            <input
-              type="date"
-              value={pastDate}
-              max={tod()}
-              onChange={e => setPastDate(e.target.value)}
-              style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontSize: 12, fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif" }}
-            />
-          )
-        }
-      />
-      {!activeSplit ? <EmptyState Icon={Trophy} title="No Split Selected" message="Go to Splits to select a workout program first" /> :
+    <Screen
+      kicker="Session"
+      right={<span className="kicker" style={{ color: 'var(--bone)' }}>{activeSplit ? activeSplit.name : 'no split'}</span>}
+    >
+      {!activeSplit ? (
+        <Sec n="01" label="No split selected">
+          <p className="body-dim">Pick a training split and your days will appear here.</p>
+          <Action ember onClick={() => nav('/splits')}>Choose a split</Action>
+        </Sec>
+      ) : (
         <>
           {persistedSession && !session && (() => {
             const exerciseCount = persistedSession.exs?.length || 0;
-            const completedSets = persistedSession.exs?.flatMap(e => e.sets).filter(s => s.done).length || 0;
+            const completedSets = persistedSession.exs?.flatMap(e => e.sets).filter(st => st.done).length || 0;
             const timeAgo = formatTimeAgo(persistedSession.startTime);
             const hoursAgo = Math.floor((Date.now() - persistedSession.startTime) / 3600000);
-            
+
             return (
-              <div style={{ background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary-container)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 14 }}>⚠️</span>
-                  <span className="label-md" style={{ color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                    {`SESSION FROM ${hoursAgo}H AGO`}
-                  </span>
-                </div>
-                <div className="title-md" style={{ color: 'var(--on-surface)', marginBottom: 4 }}>
-                  {persistedSession.day?.name} • {activeSplit.name}
-                </div>
-                <div className="body-md" style={{ color: 'var(--on-surface-variant)', marginBottom: 16 }}>
-                  Started {timeAgo} • {exerciseCount} exercises • {completedSets} sets done
-                </div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <button onClick={() => {
-                    setSession(persistedSession);
-                    startTimeRef.current = persistedSession.startTime;
-                    setPersistedSession(null);
-                  }} style={{ padding: '10px 20px', borderRadius: 999, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%)', color: 'var(--on-primary-container)', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: 13, letterSpacing: '0.05em' }}>
-                    RESUME SESSION
-                  </button>
-                  <button onClick={() => setConfirmDiscard(true)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Discard
-                  </button>
-                </div>
+              <Sec n="01" label="Unfinished session" right={`${hoursAgo}h ago`}>
+                <One
+                  title={`${persistedSession.day?.name} is still open.`}
+                  sub={`Started ${timeAgo} · ${exerciseCount} exercises · ${completedSets} sets logged`}
+                />
+                <Action ember onClick={() => {
+                  setSession(persistedSession);
+                  startTimeRef.current = persistedSession.startTime;
+                  setPersistedSession(null);
+                }}>
+                  Resume session
+                </Action>
+                <TLink onClick={() => setConfirmDiscard(true)} style={{ marginTop: 14 }}>
+                  Discard
+                </TLink>
                 <ConfirmDialog
                   open={confirmDiscard}
                   title="Discard Session?"
@@ -1921,28 +1763,76 @@ export default function WorkoutPage() {
                   }}
                   onCancel={() => setConfirmDiscard(false)}
                 />
-              </div>
+              </Sec>
             );
           })()}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 10 }}>
-          {wDays.map(day => {
-            const last = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-            return (
-              <div key={day.id} className="card stripe" style={{ padding: 16, cursor: 'pointer', transition: 'all .2s var(--ease-smooth)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}><span className="tag" style={{ fontSize: 9, minWidth: 'fit-content' }}>{(day.subtype || day.type).toUpperCase()}</span>{last && <span style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Last: {fmt(last.date)}</span>}</div>
-                <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 8 }}>{day.name}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {day.exercises.slice(0, 4).map(ex => <div key={ex.id} className="tonal-break" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--on-surface-variant)', padding: '6px 8px', background: 'var(--surface-container-lowest)', borderRadius: 8 }}><span>{ex.name}</span><span style={{ color: 'var(--on-surface-dim)' }}>{ex.sets}×{ex.repsRange}</span></div>)}
-                </div>
-                {day.exercises.length > 4 && <div style={{ fontSize: 10, color: 'var(--on-surface-dim)', marginTop: 8 }}>+{day.exercises.length - 4} more</div>}
-                <button className="btn-p" style={{ width: '100%', marginTop: 12, padding: '10px' }} onClick={() => start(day)}>Start Session →</button>
-              </div>
-            );
-          })}
-        </div>
-        </>
-      }
 
-    </div>
+          <Sec
+            n={persistedSession ? '02' : '01'}
+            label="Log for"
+            right={pastDate === tod() ? 'today' : fmt(pastDate)}
+          >
+            <input
+              type="date"
+              value={pastDate}
+              max={tod()}
+              onChange={e => setPastDate(e.target.value)}
+              style={{
+                width: '100%', background: 'transparent', border: 'none',
+                borderBottom: '1px solid var(--hair)', borderRadius: 0,
+                color: 'var(--ink)', fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 15, fontWeight: 600, padding: '8px 0',
+              }}
+            />
+            <p className="body-dim mt10">
+              Backdating a session is allowed. It is logged against the date you pick.
+            </p>
+          </Sec>
+
+          <Sec n={persistedSession ? '03' : '02'} label="Splits" right={`${wDays.length} days`}>
+            {wDays.map(day => {
+              const last = workoutLogs.filter(l => l.userId === user.id && l.dayId === day.id)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+              return (
+                <div key={day.id} style={{ paddingTop: 18, paddingBottom: 18, borderTop: '1px solid var(--hair-soft)' }}>
+                  <div className="rowf between" style={{ alignItems: 'baseline' }}>
+                    <div className="h2" style={{ fontSize: 17 }}>{day.name}</div>
+                    <span className="kicker" style={{ color: 'var(--ash-dim)' }}>
+                      {last ? fmt(last.date) : 'new'}
+                    </span>
+                  </div>
+
+                  <div className="meta mt6" style={{ marginBottom: 10 }}>
+                    {(day.subtype || day.type || '').toUpperCase()} · {day.exercises.length} exercises
+                  </div>
+
+                  {day.exercises.slice(0, 4).map(ex => (
+                    <div key={ex.id} className="row" style={{ padding: '6px 0', borderTop: 'none' }}>
+                      <span className="k" style={{ fontSize: 12, maxWidth: '70%' }}>{ex.name}</span>
+                      <span className="lead" />
+                      <span className="v sm">{ex.sets}×{ex.repsRange}</span>
+                    </div>
+                  ))}
+                  {day.exercises.length > 4 && (
+                    <div className="kicker" style={{ color: 'var(--ash-dim)', marginTop: 6 }}>
+                      +{day.exercises.length - 4} more
+                    </div>
+                  )}
+
+                  <TLink onClick={() => start(day)} ember style={{ marginTop: 14 }}>
+                    Start session →
+                  </TLink>
+                </div>
+              );
+            })}
+          </Sec>
+        </>
+      )}
+
+      <div className="foot">
+        <span>Kaaya Fit</span>
+        <span>Session</span>
+      </div>
+    </Screen>
   );
 }

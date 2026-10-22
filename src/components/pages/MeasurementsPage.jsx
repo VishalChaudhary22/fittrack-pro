@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Ruler, X, Plus, Activity } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageHeader, EmptyState, ModalPortal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../data/constants';
 import { gId, tod, fmt } from '../../utils/helpers';
 import { useScrollRestoration } from '../../hooks/useScrollRestoration';
+import { Screen, Sec, LedgerRow, Action, Note, TLink } from '../shared/Margin';
 
 export default function MeasurementsPage() {
   useScrollRestoration('/measurements');
@@ -35,101 +34,149 @@ export default function MeasurementsPage() {
     addToast('Measurements saved!', 'success');
   };
 
+  const activeField = MEASUREMENT_FIELDS.find(f => f.key === chartField);
+
   return (
-    <div className="pg-in">
-      <PageHeader title="Body Measurements" sub="Track your physique changes"
-        action={<button className="btn-p" style={{ padding: '9px 16px', fontSize: 13 }} onClick={() => setShowAdd(true)}><Plus size={14} style={{ marginRight: 4 }} /> Log Measurements</button>} />
+    <>
+      <Screen
+        kicker="Body"
+        right={<span className="kicker" style={{ color: 'var(--bone)' }}>{userMeasurements.length} entries</span>}
+      >
+        {userMeasurements.length === 0 ? (
+          <Sec n="01" label="Measurements">
+            <Note>
+              <b>No measurements yet.</b> Log chest, waist, arms and legs to track changes over time.
+            </Note>
+            <Action onClick={() => setShowAdd(true)}>Log measurements</Action>
+          </Sec>
+        ) : (
+          <>
+            <Sec n="01" label="Latest" right={activeField?.unit}>
+              {MEASUREMENT_FIELDS.map((f) => (
+                <LedgerRow
+                  key={f.key}
+                  k={f.label}
+                  dim={chartField !== f.key}
+                  onClick={() => setChartField(f.key)}
+                  v={latest[f.key] || '—'}
+                  sub={chartField === f.key ? ` ${f.unit}` : ` ${f.unit}`}
+                />
+              ))}
+            </Sec>
 
-      {/* Latest stats */}
-      {userMeasurements.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: 12, marginBottom: 24 }}>
-          {MEASUREMENT_FIELDS.map((f) => (
-            <div key={f.key} className="card" style={{ padding: '12px', textAlign: 'center', cursor: 'pointer', border: 'none', background: chartField === f.key ? 'var(--primary)' : 'var(--surface-container-lowest)', boxShadow: chartField === f.key ? 'var(--shadow-md)' : 'none', transition: 'all .2s var(--ease-smooth)' }} onClick={() => setChartField(f.key)}>
-              <div style={{ fontSize: 10, color: chartField === f.key ? 'var(--on-primary)' : 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>{f.label}</div>
-              <div className="headline-md" style={{ color: chartField === f.key ? 'var(--on-primary)' : 'var(--on-surface)' }}>{latest[f.key] || '—'}</div>
-              <div style={{ fontSize: 10, color: chartField === f.key ? 'var(--on-primary)' : 'var(--on-surface-variant)', opacity: 0.8, marginTop: 2 }}>{f.unit}</div>
-            </div>
-          ))}
-        </div>
-      )}
+            <Sec n="02" label={activeField?.label || 'Trend'} right={chartData.length >= 2 ? 'history' : 'need more'}>
+              {chartData.length >= 2 ? (
+                <div style={{ marginTop: 8 }}>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 6, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="2 4" stroke="var(--hair)" vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fill: 'var(--ash-dim)', fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }}
+                        tickLine={false}
+                        axisLine={false}
+                        dy={8}
+                      />
+                      <YAxis
+                        tick={{ fill: 'var(--ash-dim)', fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }}
+                        domain={['auto', 'auto']}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-4}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'var(--canvas)',
+                          border: '1px solid var(--hair)',
+                          borderRadius: 0,
+                          fontSize: 11,
+                          color: 'var(--ink)',
+                          fontFamily: "'Space Grotesk', sans-serif",
+                        }}
+                        labelStyle={{ color: 'var(--ash-dim)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+                        itemStyle={{ color: 'var(--ember-soft)' }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="var(--ember)"
+                        strokeWidth={1}
+                        dot={{ fill: 'var(--ember)', r: 2, strokeWidth: 0 }}
+                        activeDot={{ r: 3, strokeWidth: 0 }}
+                        name={activeField?.label}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <Note>
+                  <b>Need more points.</b> Log {activeField?.label?.toLowerCase()} again on another day to see the trend.
+                </Note>
+              )}
+            </Sec>
 
-      {/* Chart */}
-      {chartData.length > 1 ? (
-        <div className="card" style={{ padding: 20, marginBottom: 24, border: 'none' }}>
-          <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>{MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label} Over Time</div>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
-              <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
-              <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} domain={['auto', 'auto']} tickLine={false} axisLine={false} dx={-10} />
-              <Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
-              <Line type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} name={MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      ) : userMeasurements.length === 0 ? (
-        <EmptyState Icon={Ruler} title="No Measurements" message="Log your body measurements to track physique changes over time" action={() => setShowAdd(true)} actionLabel="Log First Measurement" />
-      ) : (
-        <div className="card" style={{ padding: 40, marginBottom: 24, border: 'none', textAlign: 'center', color: 'var(--on-surface-variant)' }}>
-          <Activity size={32} color="var(--primary)" style={{ opacity: 0.8, marginBottom: 12, margin: '0 auto', filter: 'drop-shadow(var(--glow-primary))' }} />
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Insufficient Data</div>
-          <div style={{ fontSize: 12, marginTop: 4, maxWidth: 220, margin: '0 auto' }}>Log {MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label.toLowerCase()} for at least two days to see your trend chart.</div>
-          <button className="btn-g" style={{ marginTop: 20, padding: '10px 20px', fontSize: 13 }} onClick={() => setShowAdd(true)}>Log Measurement</button>
-        </div>
-      )}
-
-      {/* History table */}
-      {userMeasurements.length > 0 && (
-        <div className="card" style={{ overflow: 'hidden', border: 'none' }}>
-          <div className="tonal-break" style={{ padding: '16px 20px', background: 'var(--surface-container-highest)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>History</div>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: '12px 20px', fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textAlign: 'left', borderBottom: 'none', textTransform: 'uppercase', letterSpacing: '.5px', background: 'var(--surface-container-lowest)' }}>Date</th>
-                  {MEASUREMENT_FIELDS.map(f => (
-                    <th key={f.key} style={{ padding: '12px 10px', fontSize: 10, color: 'var(--on-surface-dim)', fontWeight: 700, textAlign: 'center', borderBottom: 'none', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '.5px', background: 'var(--surface-container-lowest)' }}>{f.label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {userMeasurements.map(m => (
-                  <tr key={m.id} className="stripe">
-                    <td style={{ padding: '14px 20px', fontSize: 13, borderBottom: 'none', fontWeight: 600, color: 'var(--on-surface)' }}>{fmt(m.date)}</td>
-                    {MEASUREMENT_FIELDS.map(f => (
-                      <td key={f.key} style={{ padding: '14px 10px', fontSize: 13, textAlign: 'center', fontWeight: 600, borderBottom: 'none', color: m[f.key] ? 'var(--on-surface)' : 'var(--on-surface-dim)' }}>{m[f.key] || '—'}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Add Modal */}
-      {showAdd && (
-        <ModalPortal>
-        <div className="mo">
-          <div className="md" style={{ maxWidth: 460 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <div className="headline-lg">Log Measurements</div>
-              <button className="btn-g" aria-label="Close add measurement" style={{ padding: '8px', borderRadius: 12 }} onClick={() => setShowAdd(false)}><X size={18} /></button>
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 20 }}>Enter measurements in cm. Leave blank for any you don't want to track.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 16, marginBottom: 24 }}>
-              {MEASUREMENT_FIELDS.map(f => (
-                <div key={f.key} className="input-group">
-                  <label style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6, display: 'block' }}>{f.label} ({f.unit})</label>
-                  <input type="number" step=".1" placeholder="—" value={form[f.key] || ''} onChange={e => setForm(p => ({ ...p, [f.key]: parseFloat(e.target.value) || '' }))} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 15 }} />
+            <Sec n="03" label="History">
+              {userMeasurements.slice(0, 12).map((m, i) => (
+                <div key={m.id}>
+                  <div className="rowf between" style={{ padding: '10px 0' }}>
+                    <span className="kicker" style={{ color: 'var(--ash-dim)' }}>{fmt(m.date)}</span>
+                    <span className="meta" style={{ gap: 12 }}>
+                      {MEASUREMENT_FIELDS.filter(f => m[f.key]).map(f => (
+                        <span key={f.key}>{f.label} {m[f.key]}{f.unit}</span>
+                      ))}
+                    </span>
+                  </div>
+                  {i < Math.min(userMeasurements.length, 12) - 1 && <div style={{ height: 1, background: 'var(--hair-soft)' }} />}
                 </div>
               ))}
+              {userMeasurements.length > 12 && (
+                <p className="body-dim" style={{ marginTop: 12 }}>Showing 12 most recent entries.</p>
+              )}
+            </Sec>
+          </>
+        )}
+
+        <Sec n={userMeasurements.length === 0 ? '02' : '04'} label="Log">
+          <Action onClick={() => setShowAdd(true)}>Log measurements</Action>
+        </Sec>
+
+        <div className="foot">
+          <span>Kaaya Fit</span>
+          <span>Measurements</span>
+        </div>
+      </Screen>
+
+      {showAdd && (
+        <div className="mo" style={{ alignItems: 'stretch', padding: 0 }}>
+          <div style={{ width: '100%', maxWidth: 430, margin: '0 auto', background: 'var(--canvas)', height: '100dvh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '0 22px 16px', flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
+              <div className="head" style={{ paddingLeft: 0, paddingRight: 0 }}>
+                <div className="head-l"><span className="kicker">Log measurements</span></div>
+                <div className="head-r"><TLink onClick={() => setShowAdd(false)}>Close</TLink></div>
+              </div>
+              <p className="body-dim" style={{ marginTop: 16 }}>Enter values in cm. Leave blank anything you don't want to track.</p>
+
+              <div style={{ marginTop: 24 }}>
+                {MEASUREMENT_FIELDS.map((f) => (
+                  <div key={f.key} style={{ marginTop: 18 }}>
+                    <label className="kicker">{f.label} · {f.unit}</label>
+                    <input
+                      className="field"
+                      type="number"
+                      step=".1"
+                      placeholder="—"
+                      value={form[f.key] || ''}
+                      onChange={e => setForm(p => ({ ...p, [f.key]: parseFloat(e.target.value) || '' }))}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <Action onClick={saveMeasurement} style={{ marginTop: 32 }}>Save measurements</Action>
             </div>
-            <button className="btn-p" style={{ width: '100%', padding: '16px', fontSize: 15, borderRadius: 12 }} onClick={saveMeasurement}>Save Measurements</button>
           </div>
         </div>
-        </ModalPortal>
       )}
-    </div>
+    </>
   );
 }

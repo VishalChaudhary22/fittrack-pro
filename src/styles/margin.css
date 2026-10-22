@@ -344,6 +344,7 @@ body {
   margin-left: -34px;
   margin-bottom: 16px;
   display: block;
+  white-space: nowrap;
 }
 .hero .u {
   font-family: 'Be Vietnam Pro', sans-serif;

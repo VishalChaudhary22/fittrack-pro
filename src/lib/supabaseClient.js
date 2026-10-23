@@ -1,15 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const realSupabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+// A build made without the Supabase env vars used to fall back to a fake
+// host, so sign-in quietly redirected to placeholder.supabase.co instead of
+// failing. Flag it here and let the UI say so plainly.
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+if (!isSupabaseConfigured) {
+  console.error(
+    '[Supabase] VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are not set for this build. ' +
+    'Auth and cloud sync will not work. Set them in the build environment and redeploy.'
+  );
+}
+
+const realSupabase = createClient(
+  supabaseUrl || 'https://unconfigured.supabase.co',
+  supabaseAnonKey || 'unconfigured-anon-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
 
 // Mock Supabase Client for headless screenshot capture
 const createMockSupabase = () => {

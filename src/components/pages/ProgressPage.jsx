@@ -126,8 +126,8 @@ export default function ProgressPage({ chatbot }) {
   const hasData = se && cd.length > 0;
 
   return (
-    <Screen title="Progress">
-      <Sec title="Filters">
+    <Screen kicker="Progress">
+      <Sec n="01" label="Filters">
         <div className="field">
           <span>Split</span>
           <select className="input" value={ss} onChange={e => { setSs(e.target.value); setSd(''); setSe(''); }}>
@@ -143,12 +143,11 @@ export default function ProgressPage({ chatbot }) {
         </div>
       </Sec>
 
-      <Sec title="Estimated 1RM">
-        <Hero
-          main={active1RM}
-          unit="KG"
-          sub={(rmWt && rmRp) ? 'Calculated from your entry' : se ? 'Best estimate from your history' : 'Select a lift to sync from history'}
-        />
+      <Sec n="02" label="Estimated 1RM">
+        <Hero value={active1RM} unit="KG" />
+        <p className="meta" style={{ marginTop: 6 }}>
+          {(rmWt && rmRp) ? 'Calculated from your entry' : se ? 'Best estimate from your history' : 'Select a lift to sync from history'}
+        </p>
         <div className="field">
           <span>Lift</span>
           <select className="input" value={se} onChange={e => {
@@ -169,32 +168,33 @@ export default function ProgressPage({ chatbot }) {
         </div>
       </Sec>
 
-      <Sec title="Activity">
-        <LedgerRow label="Sessions · 7 days" value={weeklySummary.sessions} meta={`previous 7 days · ${weeklySummary.lastSessions}`} />
+      <Sec n="03" label="Activity">
+        <LedgerRow k="Sessions · 7 days" v={weeklySummary.sessions} sub={` · prev ${weeklySummary.lastSessions}`} />
         <LedgerRow
-          label="Volume · 7 days"
-          value={`${Math.round(weeklySummary.volume / 1000)}k kg`}
-          meta={weeklySummary.volChange !== 0 ? `${weeklySummary.volChange > 0 ? '+' : ''}${weeklySummary.volChange}% vs last week` : undefined}
+          k="Volume · 7 days"
+          v={`${Math.round(weeklySummary.volume / 1000)}k kg`}
+          sub={weeklySummary.volChange !== 0 ? ` · ${weeklySummary.volChange > 0 ? '+' : ''}${weeklySummary.volChange}% vs last week` : ''}
         />
-        <LedgerRow label="Sessions · 30 days" value={monthlySummary.sessions} meta={`≈ ${monthlySummary.avgPerWeek} per week`} />
+        <LedgerRow k="Sessions · 30 days" v={monthlySummary.sessions} sub={` · ≈ ${monthlySummary.avgPerWeek} per week`} />
       </Sec>
 
       {hasData ? (<>
-        <Sec title="Performance analytics">
-          <Hero main={se} sub={`${cd.length} sessions logged`} />
+        <Sec n="04" label="Performance analytics">
+          <Hero value={se} />
+          <p className="meta" style={{ marginTop: 6 }}>{cd.length} sessions logged</p>
         </Sec>
 
-        <Sec title="Numbers">
-          <LedgerRow label="1RM history max" value={`${history1RM} kg`} meta={`${delta1RM >= 0 ? '+' : ''}${delta1RM.toFixed(1)} kg vs first session`} />
+        <Sec n="05" label="Numbers">
+          <LedgerRow k="1RM history max" v={`${history1RM} kg`} sub={` · ${delta1RM >= 0 ? '+' : ''}${delta1RM.toFixed(1)} kg vs first session`} />
           <LedgerRow
-            label="Personal record"
-            value={`${pr} kg`}
-            meta={`Achieved ${prData?.rawDate ? new Date(prData.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'unknown'}${allTimePR && allTimePR.weight > pr ? ` · all-time ${allTimePR.weight} kg${allTimePR.isBodyweight ? ` (${allTimePR.reps} reps)` : ''}` : ''}`}
+            k="Personal record"
+            v={`${pr} kg`}
+            sub={` · achieved ${prData?.rawDate ? new Date(prData.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'unknown'}${allTimePR && allTimePR.weight > pr ? ` · all-time ${allTimePR.weight} kg${allTimePR.isBodyweight ? ` (${allTimePR.reps} reps)` : ''}` : ''}`}
           />
-          <LedgerRow label="Total sessions" value={cd.length} />
+          <LedgerRow k="Total sessions" v={cd.length} />
         </Sec>
 
-        <Sec title="Volume trend">
+        <Sec n="06" label="Volume trend">
           {cd.length >= 2 ? (
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={cd} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
@@ -216,37 +216,40 @@ export default function ProgressPage({ chatbot }) {
         </Sec>
 
         <div ref={pbCardRef}>
-          <Sec title="Personal best">
-            <Hero main={pr} unit="KG" sub={se} />
-            <LedgerRow label="At the record" value={prData ? `${prData.avgReps} avg reps · ${prData.sets} sets` : 'No sets data'} />
-            <LedgerRow label="Date achieved" value={prData?.rawDate ? new Date(prData.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'} />
-            <div className="row-gap">
+          <Sec n="07" label="Personal best">
+            <Hero value={pr} unit="KG" />
+            <p className="meta" style={{ marginTop: 6 }}>{se}</p>
+            <LedgerRow k="At the record" v={prData ? `${prData.avgReps} avg reps · ${prData.sets} sets` : 'No sets data'} />
+            <LedgerRow k="Date achieved" v={prData?.rawDate ? new Date(prData.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'} />
+            <div className="rowf g12" style={{ marginTop: 12 }}>
               <TLink onClick={sharePB}>Share this PB</TLink>
               {pr > 0 && <TLink onClick={askForge}>Ask FORGE how to beat this PR</TLink>}
             </div>
           </Sec>
         </div>
 
-        <Sec title="Focus groups">
+        <Sec n="08" label="Focus groups">
           <p className="meta">{focusLine}</p>
         </Sec>
 
-        <Sec title="Session log">
+        <Sec n="09" label="Session log">
           {[...cd].reverse().slice(0, 5).map((entry, idx) => (
-            <LedgerRow
-              key={idx}
-              label={entry.dayName}
-              meta={`${new Date(entry.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · ${entry.sets} sets · ${entry.volume.toLocaleString()} kg`}
-            >
-              <div style={{ textAlign: 'right' }}>
-                <div className="lr-val">{entry.maxWeight} × {entry.avgReps}</div>
-                <div className="lr-meta">{entry.maxWeight === pr ? 'New PB' : idx === 0 ? 'Latest' : 'Session'}</div>
+            <div key={idx}>
+              <LedgerRow
+                k={entry.dayName}
+                v={`${entry.maxWeight} × ${entry.avgReps}`}
+                sub={entry.maxWeight === pr ? ' · New PB' : idx === 0 ? ' · Latest' : ''}
+              />
+              <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
+                <span className="meta">
+                  {new Date(entry.rawDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · {entry.sets} sets · {entry.volume.toLocaleString()} kg volume
+                </span>
               </div>
-            </LedgerRow>
+            </div>
           ))}
         </Sec>
 
-        <Sec title="Est. 1RM over time">
+        <Sec n="10" label="Est. 1RM over time">
           {cd.length >= 2 ? (
             <ResponsiveContainer width="100%" height={160}>
               <AreaChart data={cd} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
@@ -267,7 +270,7 @@ export default function ProgressPage({ chatbot }) {
           )}
         </Sec>
 
-        <Sec title="Avg reps per set">
+        <Sec n="11" label="Avg reps per set">
           {cd.length >= 2 ? (
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={cd} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>

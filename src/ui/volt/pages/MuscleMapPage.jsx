@@ -13,9 +13,8 @@ import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 // Same brain as V1's MuscleMapPage (useOlympus — leaderboard fetch + realtime
 // refresh live in the hook, so both skins share one subscription), Volt
 // presentation. Rank colors stay semantic (they ARE the game's language).
-// The body map reuses V1's BodyMapSVG canvas composite, re-lit into Volt
-// with the same hue shift as the Lab's body scans (hue −92°, sat ×1.12) via
-// a wrapper filter — no new assets, V1's component untouched.
+// The body map reuses V1's BodyMapSVG canvas composite in its native
+// colors, exactly like the workout-complete screen.
 // PlayerDetailModal is V1's shared component (Volt skin = V-7 popup pack).
 
 function VoltRankBadge({ rank, size = 'md' }) {
@@ -64,14 +63,15 @@ function VoltMuscleCard({ muscle, xp }) {
   );
 }
 
-// BodyMapSVG re-lit into Volt (same transform as the Lab body scans).
+// BodyMapSVG in its native colors — identical to the map on the workout-
+// complete screen. (A hue-rotate re-light was tried in V-5 and rejected by
+// Vishal on sight 2026-10-26: it turned highlights purple and the base
+// olive. The Lab's body scans keep their re-lit JPGs — different asset.)
 function RelitBodyMap({ muscleXP, gender }) {
   return (
-    <div style={{ filter: 'hue-rotate(-92deg) saturate(1.12)' }}>
-      <ErrorBoundary>
-        <BodyMapSVG muscleXP={muscleXP} gender={gender} />
-      </ErrorBoundary>
-    </div>
+    <ErrorBoundary>
+      <BodyMapSVG muscleXP={muscleXP} gender={gender} />
+    </ErrorBoundary>
   );
 }
 

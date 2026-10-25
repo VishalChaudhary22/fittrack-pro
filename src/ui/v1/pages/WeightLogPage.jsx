@@ -1,44 +1,10 @@
-import { useState, useMemo } from 'react';
 import { Scale, Edit2, Trash2, X } from 'lucide-react';
-import { useApp } from '../../../core/context/AppContext';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
 import { fmt, kgToLbs } from '../../../utils/helpers';
-import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
+import { useWeightLog } from '../../../core/hooks/useWeightLog';
 
 export default function WeightLogPage() {
-  useScrollRestoration('/weight-log');
-  const { user, healthLogs, setHealthLogs, addToast } = useApp();
-  const unitWeight = user.unitWeight || 'kg';
-  const isImpWeight = unitWeight === 'lbs';
-  const [editId, setEditId] = useState(null);
-  const [editVal, setEditVal] = useState({ weight: '', notes: '' });
-  const [confirm, setConfirm] = useState(null);
-
-  const userLogs = useMemo(() =>
-    [...healthLogs]
-      .filter(l => l.userId === user.id)
-      .sort((a, b) => new Date(b.date) - new Date(a.date)),
-    [healthLogs, user.id]);
-
-  const startEdit = (log) => { setEditId(log.id); setEditVal({ weight: log.weight, notes: log.notes || '' }); };
-  const saveEdit = () => {
-    setHealthLogs(p => p.map(l => l.id === editId ? { ...l, weight: parseFloat(editVal.weight), notes: editVal.notes } : l));
-    setEditId(null);
-    addToast('Weight entry updated', 'success');
-  };
-
-  const deleteLog = (id) => {
-    setConfirm({
-      title: 'Delete Entry?', message: 'This weight log entry will be permanently removed.',
-      danger: true, confirmLabel: 'Delete',
-      onConfirm: () => {
-        setHealthLogs(p => p.filter(l => l.id !== id));
-        setConfirm(null);
-        addToast('Entry deleted', 'info');
-      },
-    });
-  };
-
+  const { confirm, deleteLog, editId, editVal, isImpWeight, saveEdit, setConfirm, setEditId, setEditVal, startEdit, userLogs } = useWeightLog();
   return (
     <div className="pg-in">
       <PageHeader title="Weight Log" sub={`${userLogs.length} entries`} />

@@ -1,24 +1,9 @@
-import { useState } from 'react';
 import { Settings, Save, Sparkles, Calendar } from 'lucide-react';
-import { useApp } from '../../../core/context/AppContext';
 import { PageHeader } from '../shared/SharedComponents';
-import { getCyclePhase } from '../../../utils/cycleCalculations';
-import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
+import { useCycle } from '../../../core/hooks/useCycle';
 
 export default function CycleTrackerPage() {
-  useScrollRestoration('/cycle');
-  const { cycleConfig, setCycleConfig, addToast } = useApp();
-  
-  const [startDate, setStartDate] = useState(cycleConfig?.startDate || '');
-  const [cycleLength, setCycleLength] = useState(cycleConfig?.cycleLength || 28);
-  
-  const handleSave = () => {
-    setCycleConfig({ startDate, cycleLength });
-    addToast('Cycle info updated', 'success');
-  };
-
-  const currentPhase = getCyclePhase(cycleConfig?.startDate, cycleConfig?.cycleLength);
-
+  const { currentPhase, cycleLength, handleSave, setCycleLength, setStartDate, startDate } = useCycle();
   return (
     <div className="pg-in">
       <PageHeader title="Cycle Syncing" sub="Align workouts with your physiology" />

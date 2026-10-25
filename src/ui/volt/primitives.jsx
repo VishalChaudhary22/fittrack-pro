@@ -7,12 +7,13 @@ import './volt.css';
 // Styles live in volt.css under the .v-* classes; tokens switch with
 // [data-design="volt"] + [data-theme]. Max one Sticker per screen.
 
-export function VoltBlock({ variant, hero = false, quiet = false, style, children, ...rest }) {
+export function VoltBlock({ variant, hero = false, quiet = false, className, style, children, ...rest }) {
   const cls = [
     'v-block',
     variant ? `v-block--${variant}` : '',
     hero ? 'v-block--hero' : '',
     quiet ? 'v-block--quiet' : '',
+    className || '',
   ].filter(Boolean).join(' ');
   return (
     <section className={cls} style={style} {...rest}>

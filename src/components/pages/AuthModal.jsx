@@ -218,21 +218,21 @@ export default function AuthModal() {
             {mode === 'register' && (
               <div className="field">
                 <span>Full name *</span>
-                <input className="input" value={f.name} onChange={sf('name')} />
+                <input className="input" value={f.name} onChange={sf('name')} aria-label="Full Name" />
               </div>
             )}
 
             <div className="field">
               <span>Email address *</span>
-              <input className="input" type="email" value={f.email} onChange={sf('email')} onBlur={validateEmail} />
+              <input className="input" type="email" value={f.email} onChange={sf('email')} onBlur={validateEmail} aria-label="Email address" />
             </div>
             {emailErr && <p className="meta" style={{ color: 'var(--bad)', marginTop: -4 }}>{emailErr}</p>}
 
             <div className="field">
               <span>Password (min 8 chars) *</span>
               <div style={{ position: 'relative' }}>
-                <input className="input" type={sp ? 'text' : 'password'} value={f.password} onChange={sf('password')} style={{ width: '100%' }} />
-                <button onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer' }} aria-label={sp ? 'Hide password' : 'Show password'}>
+                <input className="input" type={sp ? 'text' : 'password'} value={f.password} onChange={sf('password')} style={{ width: '100%' }} aria-label="Password" />
+                <button type="button" onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer' }} aria-label={sp ? 'Hide password' : 'Show password'}>
                   {sp ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -261,25 +261,25 @@ export default function AuthModal() {
 
               <div className="field">
                 <span>Age</span>
-                <input className="input" type="number" value={f.age} onChange={sf('age')} />
+                <input className="input" type="number" value={f.age} onChange={sf('age')} aria-label="Age" />
               </div>
               <div className="field">
                 <span>Weight (kg)</span>
-                <input className="input" type="number" value={f.weight} onChange={sf('weight')} />
+                <input className="input" type="number" value={f.weight} onChange={sf('weight')} aria-label="Weight in kilograms" />
               </div>
               <div className="field">
                 <span>Height (cm)</span>
-                <input className="input" type="number" value={f.height} onChange={sf('height')} />
+                <input className="input" type="number" value={f.height} onChange={sf('height')} aria-label="Height in centimeters" />
               </div>
               <div className="field">
                 <span>Activity level</span>
-                <select className="input" value={f.activityLevel} onChange={sf('activityLevel')}>
+                <select className="input" value={f.activityLevel} onChange={sf('activityLevel')} aria-label="Activity Level">
                   {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
               </div>
               <div className="field">
                 <span>Workout days</span>
-                <select className="input" value={f.workoutDays} onChange={sf('workoutDays')}>
+                <select className="input" value={f.workoutDays} onChange={sf('workoutDays')} aria-label="Workout days per week">
                   {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d} days/week</option>)}
                 </select>
               </div>

@@ -712,7 +712,7 @@ function ExercisePoolRow({ ex, onAdd, session }) {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '16px', background: 'var(--surface-container)',
       borderRadius: '16px', marginBottom: '8px',
-      borderLeft: `3px solid ${accent}`
+      border: '1px solid var(--outline-variant)'
     }}>
       <div>
         <div style={{

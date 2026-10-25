@@ -126,9 +126,9 @@ export default function ChatbotModal({ chatbot, user }) {
               {/* Welcome Card */}
               <div style={{
                 background: 'var(--surface-container)',
-                borderLeft: '4px solid var(--primary)',
+                border: '1px solid var(--outline-variant)',
                 padding: '16px',
-                borderRadius: '8px 12px 12px 8px',
+                borderRadius: '16px',
                 marginBottom: 24,
                 color: 'var(--on-surface)',
                 fontSize: 14,

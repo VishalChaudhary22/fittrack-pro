@@ -31,6 +31,7 @@ const VOLT_PAGES = {
   '/': lazy(() => import('./ui/volt/pages/TodayPage')),
   '/workout': lazy(() => import('./ui/volt/pages/WorkoutPage')),
   '/diet': lazy(() => import('./ui/volt/pages/DietPage')),
+  '/progress': lazy(() => import('./ui/volt/pages/ProgressPage')),
 };
 
 function SkinFallback() {

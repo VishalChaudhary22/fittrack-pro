@@ -319,6 +319,18 @@
   animation: v-dot 1.6s ease-in-out infinite;
 }
 
+@keyframes v-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.v-draw {
+  stroke-dasharray: 1;
+  animation: v-draw 900ms var(--v-ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-draw { animation: none; }
+}
+
 /* ─── Reduced motion: movement off, 150ms fades stay ───────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

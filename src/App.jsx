@@ -1,7 +1,8 @@
 import { AppProvider, useApp } from './core/context/AppContext';
-import { DesignVersionProvider } from './core/context/DesignVersionContext';
+import { DesignVersionProvider, useDesignVersion } from './core/context/DesignVersionContext';
 import { AppRoutes } from './routes';
 import { Sidebar, BottomNav } from './ui/v1/layout/Layout';
+import VoltShellNav from './ui/volt/VoltShell';
 import { ToastContainer } from './ui/v1/shared/SharedComponents';
 import AuthModal from './ui/v1/pages/AuthModal';
 import NotificationPrompt from './ui/v1/shared/NotificationPrompt';
@@ -11,6 +12,7 @@ import ChatbotModal from './ui/v1/shared/ChatbotModal';
 
 function AppInner() {
   const { user, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
+  const { isVolt } = useDesignVersion();
 
   const chatbot = useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog });
 
@@ -46,11 +48,16 @@ function AppInner() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main className="mc" style={{ flex: 1, padding: '22px 24px', overflowY: 'auto' }}>
+      {!isVolt && <Sidebar />}
+      <main
+        className="mc"
+        style={isVolt
+          ? { flex: 1, padding: '24px 24px 96px', overflowY: 'auto', background: 'var(--v-canvas)' }
+          : { flex: 1, padding: '22px 24px', overflowY: 'auto' }}
+      >
         <AppRoutes chatbot={chatbot} />
       </main>
-      <BottomNav />
+      {isVolt ? <VoltShellNav /> : <BottomNav />}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <NotificationPrompt />
       <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />

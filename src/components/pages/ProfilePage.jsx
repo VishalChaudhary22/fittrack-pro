@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell, Edit2, Settings, Activity, Target, Moon, Sun, Monitor } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useDesignVersion } from '../../context/DesignVersionContext';
 import { supabase } from '../../lib/supabaseClient';
 import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
@@ -108,6 +109,7 @@ export default function ProfilePage() {
   useScrollRestoration('/profile');
   const { user, updateProfile, logout, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
   const { preferences, updatePreferences, loading: prefsLoading, pushEnabled, enablePush, disablePush } = useNotifications();
+  const { version: designVersion, setVersion: setDesignVersion } = useDesignVersion();
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...user });
   const [confirm, setConfirm] = useState(false);
@@ -565,6 +567,15 @@ export default function ProfilePage() {
              <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
                <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'cm' ? 'var(--primary)' : 'transparent', color: unitHeight === 'cm' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>CM</button>
                <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'ft' ? 'var(--primary)' : 'transparent', color: unitHeight === 'ft' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>FT/IN</button>
+             </div>
+          </div>
+          <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />
+          {/* App Design (Kaaya Volt toggle) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>App Design</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Original Kaaya or the new Volt look</div></div>
+             <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+               <button onClick={() => setDesignVersion('v1')} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: designVersion === 'v1' ? 'var(--primary)' : 'transparent', color: designVersion === 'v1' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ORIGINAL</button>
+               <button onClick={() => setDesignVersion('volt')} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: designVersion === 'volt' ? 'var(--primary)' : 'transparent', color: designVersion === 'volt' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>VOLT</button>
              </div>
           </div>
           <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />

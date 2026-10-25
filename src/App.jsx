@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
+import { DesignVersionProvider } from './context/DesignVersionContext';
 import { Sidebar, BottomNav } from './components/layout/Layout';
 import { ToastContainer } from './components/shared/SharedComponents';
 import ErrorBoundary from './components/shared/ErrorBoundary';
@@ -92,7 +93,9 @@ function AppInner() {
 export default function App() {
   return (
     <AppProvider>
-      <AppInner />
+      <DesignVersionProvider>
+        <AppInner />
+      </DesignVersionProvider>
     </AppProvider>
   );
 }

@@ -1,27 +1,38 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Tabs } from './components/shared/Margin';
 import { ToastContainer } from './components/shared/SharedComponents';
-import MorePage from './components/pages/MorePage';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import AuthModal from './components/pages/AuthModal';
-import DashboardPage from './components/pages/DashboardPage';
-import SplitsPage from './components/pages/SplitsPage';
-import SplitBuilderPage from './components/pages/SplitBuilderPage';
 import NotificationPrompt from './components/shared/NotificationPrompt';
-import WorkoutPage from './components/pages/WorkoutPage';
-import DietPage from './components/pages/DietPage';
-import ProgressPage from './components/pages/ProgressPage';
-import ContactPage from './components/pages/ContactPage';
-import ProfilePage from './components/pages/ProfilePage';
-import WorkoutHistoryPage from './components/pages/WorkoutHistoryPage';
-import WeightLogPage from './components/pages/WeightLogPage';
-import MeasurementsPage from './components/pages/MeasurementsPage';
-import MuscleMapPage from './components/pages/MuscleMapPage';
-import CycleTrackerPage from './components/pages/CycleTrackerPage';
 import { useChatbot } from './hooks/useChatbot';
 import ChatbotButton from './components/shared/ChatbotButton';
 import ChatbotModal from './components/shared/ChatbotModal';
+
+// ─── LAZY-LOADED ROUTE CHUNKS ──────────────────────────────────────────────
+const DashboardPage = lazy(() => import('./components/pages/DashboardPage'));
+const SplitsPage = lazy(() => import('./components/pages/SplitsPage'));
+const SplitBuilderPage = lazy(() => import('./components/pages/SplitBuilderPage'));
+const WorkoutPage = lazy(() => import('./components/pages/WorkoutPage'));
+const DietPage = lazy(() => import('./components/pages/DietPage'));
+const ProgressPage = lazy(() => import('./components/pages/ProgressPage'));
+const ContactPage = lazy(() => import('./components/pages/ContactPage'));
+const ProfilePage = lazy(() => import('./components/pages/ProfilePage'));
+const WorkoutHistoryPage = lazy(() => import('./components/pages/WorkoutHistoryPage'));
+const WeightLogPage = lazy(() => import('./components/pages/WeightLogPage'));
+const MeasurementsPage = lazy(() => import('./components/pages/MeasurementsPage'));
+const MuscleMapPage = lazy(() => import('./components/pages/MuscleMapPage'));
+const CycleTrackerPage = lazy(() => import('./components/pages/CycleTrackerPage'));
+const MorePage = lazy(() => import('./components/pages/MorePage'));
+
+function PageLoadingFallback() {
+  return (
+    <div style={{ padding: '40px 20px', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="skeleton-pulse" style={{ width: 140, height: 16, borderRadius: 8 }} />
+    </div>
+  );
+}
 
 function AppInner() {
   const { user, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
@@ -61,23 +72,25 @@ function AppInner() {
   return (
     <div className="app">
       <main className="screen" style={{ paddingRight: 22 }}>
-        <Routes>
-          <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
-          <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
-          <Route path="/split-builder" element={<ErrorBoundary><SplitBuilderPage /></ErrorBoundary>} />
-          <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
-          <Route path="/diet" element={<ErrorBoundary><DietPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/progress" element={<ErrorBoundary><ProgressPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/contact" element={<ErrorBoundary><ContactPage /></ErrorBoundary>} />
-          <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
-          <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/weight-log" element={<ErrorBoundary><WeightLogPage /></ErrorBoundary>} />
-          <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
-          <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
-          <Route path="/more" element={<ErrorBoundary><MorePage /></ErrorBoundary>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+            <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
+            <Route path="/split-builder" element={<ErrorBoundary><SplitBuilderPage /></ErrorBoundary>} />
+            <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
+            <Route path="/diet" element={<ErrorBoundary><DietPage chatbot={chatbot} /></ErrorBoundary>} />
+            <Route path="/progress" element={<ErrorBoundary><ProgressPage chatbot={chatbot} /></ErrorBoundary>} />
+            <Route path="/contact" element={<ErrorBoundary><ContactPage /></ErrorBoundary>} />
+            <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
+            <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage chatbot={chatbot} /></ErrorBoundary>} />
+            <Route path="/weight-log" element={<ErrorBoundary><WeightLogPage /></ErrorBoundary>} />
+            <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
+            <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage chatbot={chatbot} /></ErrorBoundary>} />
+            <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
+            <Route path="/more" element={<ErrorBoundary><MorePage /></ErrorBoundary>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
       <Tabs />
       <ToastContainer toasts={toasts} removeToast={removeToast} />

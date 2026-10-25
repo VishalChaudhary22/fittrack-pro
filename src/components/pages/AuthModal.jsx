@@ -222,19 +222,19 @@ export default function AuthModal() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {mode === 'register' && (
               <div className="input-group">
-                <input placeholder="Full Name *" value={f.name} onChange={sf('name')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+                <input placeholder="Full Name *" aria-label="Full Name" value={f.name} onChange={sf('name')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
               </div>
             )}
             
             <div className="input-group">
-              <input type="email" placeholder="Email address *" value={f.email} onChange={sf('email')} onBlur={validateEmail} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+              <input type="email" placeholder="Email address *" aria-label="Email address" value={f.email} onChange={sf('email')} onBlur={validateEmail} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
               {emailErr && <div style={{ fontSize: 11, color: '#FF6B6B', marginTop: 4 }}>{emailErr}</div>}
             </div>
 
             <div className="input-group">
               <div style={{ position: 'relative' }}>
-                <input type={sp ? 'text' : 'password'} placeholder="Password (min 8 chars) *" value={f.password} onChange={sf('password')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
-                <button onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--on-surface-dim)', cursor: 'pointer' }}>
+                <input type={sp ? 'text' : 'password'} placeholder="Password (min 8 chars) *" aria-label="Password" value={f.password} onChange={sf('password')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
+                <button type="button" aria-label={sp ? "Hide password" : "Show password"} onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 4 }}>
                   {sp ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -254,21 +254,21 @@ export default function AuthModal() {
             {mode === 'register' && (<>
               <div style={{ display: 'flex', gap: 8 }}>
                 {['male', 'female', 'other'].map(g => (
-                  <button key={g} onClick={() => setF(p => ({ ...p, gender: g }))} style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', cursor: 'pointer', background: f.gender === g ? 'var(--primary-container)' : 'var(--surface-container-highest)', color: f.gender === g ? '#fff' : 'var(--on-surface-variant)', fontSize: 12, fontWeight: 700, textTransform: 'capitalize', transition: 'all .2s' }}>
+                  <button key={g} type="button" onClick={() => setF(p => ({ ...p, gender: g }))} style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', cursor: 'pointer', background: f.gender === g ? 'var(--primary-container)' : 'var(--surface-container-highest)', color: f.gender === g ? '#fff' : 'var(--on-surface-variant)', fontSize: 13, fontWeight: 700, textTransform: 'capitalize', transition: 'all .2s' }}>
                     {g}
                   </button>
                 ))}
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <input type="number" placeholder="Age" value={f.age} onChange={sf('age')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
-                <input type="number" placeholder="Weight (kg)" value={f.weight} onChange={sf('weight')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
-                <input type="number" placeholder="Height (cm)" value={f.height} onChange={sf('height')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
-                <select value={f.activityLevel} onChange={sf('activityLevel')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+                <input type="number" placeholder="Age" aria-label="Age" value={f.age} onChange={sf('age')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
+                <input type="number" placeholder="Weight (kg)" aria-label="Weight in kilograms" value={f.weight} onChange={sf('weight')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
+                <input type="number" placeholder="Height (cm)" aria-label="Height in centimeters" value={f.height} onChange={sf('height')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }} />
+                <select aria-label="Activity Level" value={f.activityLevel} onChange={sf('activityLevel')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }}>
                   {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
               </div>
-              <select value={f.workoutDays} onChange={sf('workoutDays')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+              <select aria-label="Workout days per week" value={f.workoutDays} onChange={sf('workoutDays')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 16 }}>
                 {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d} days/week</option>)}
               </select>
             </>)}

@@ -56,7 +56,7 @@
 
   --primary:                var(--ember-soft);
   --primary-container:      var(--ember);
-  --on-primary:             #2A0E02;
+  --on-primary:             #FFFFFF;
   --signature-gradient:     linear-gradient(135deg, #FFB59B, #F85F1B);
 
   --outline-variant:        var(--hair);
@@ -94,7 +94,9 @@
   --ember-end:              #F85F1B;
   --on-primary-container:   #1A1A1E;
 
-  --ease-spring:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out:     cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-press:   cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
   --ease-decel:   cubic-bezier(0, 0, 0.2, 1);
   --ease-accel:   cubic-bezier(0.4, 0, 1, 1);
@@ -975,12 +977,17 @@ input, select, textarea {
   font-family: 'Be Vietnam Pro', sans-serif;
 }
 
-/* ── REDUCED MOTION ──────────────────────────────────────────────────────── */
+/* ── INTENTIONAL REDUCED MOTION (Preserving State Continuity) ─────── */
 @media (prefers-reduced-motion: reduce) {
+  /* Suppress aggressive spatial movement and translations */
   *, *::before, *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Preserve gentle opacity and background transitions so visual feedback is maintained */
+  button, a, input, select, [role="button"], .card, .picker-item, .tag {
+    transition: opacity 0.15s ease, background-color 0.15s ease !important;
+    transform: none !important;
   }
 }

@@ -46,7 +46,7 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
         position: 'relative', overflow: 'hidden',
         padding: '16px 20px', borderRadius: 16,
         background: 'var(--surface-container-low)',
-        borderLeft: `4px solid ${severityColor}`,
+        border: '1px solid var(--outline-variant)',
         marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12,
         animation: 'cascadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       }}>
@@ -113,7 +113,7 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
       position: 'relative', overflow: 'hidden',
       padding: '24px', borderRadius: 24, marginBottom: 24,
       background: 'var(--surface-container-low)',
-      borderLeft: `4px solid ${severityColor}`,
+      border: '1px solid var(--outline-variant)',
       animation: 'cascadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
     }}>
       {/* Radial glow accent */}

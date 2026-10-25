@@ -1,0 +1,339 @@
+import { useMemo, useEffect, useRef, useState } from 'react';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CANVAS-BASED MUSCLE MAP — Getty/pop_jop style
+
+   Uses pre-generated anatomical illustrations per muscle group.
+   Base image shows all muscles in teal-blue.
+   Trained muscles use their corresponding highlight images (where only that
+   muscle is colored coral-red).
+   
+   To avoid CSS blend mode color mixing (which causes pinkish hues), we use
+   HTML5 Canvas to extract only the red/coral pixels from the highlight layers
+   and draw them precisely over the base image.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+const MUSCLE_IMAGES = {
+  // Front view muscles
+  shoulders:  { view: 'front', file: 'front-shoulders.png' },
+  chest:      { view: 'front', file: 'front-chest.png' },
+  abs:        { view: 'front', file: 'front-abs.png' },
+  biceps:     { view: 'front', file: 'front-biceps.png' },
+  forearms:   { view: 'front', file: 'front-forearms.png' },
+  quads:      { view: 'front', file: 'front-quads.png' },
+  calves:     { view: 'front', file: 'front-calves.png' },
+  // Back view muscles
+  traps:      { view: 'back',  file: 'back-traps.png' },
+  back:       { view: 'back',  file: 'back-back.png' },
+  triceps:    { view: 'back',  file: 'back-triceps.png' },
+  glutes:     { view: 'back',  file: 'back-glutes.png' },
+  hamstrings: { view: 'back',  file: 'back-hamstrings.png' },
+};
+
+const BACK_SHOULDER_IMG = 'back-shoulders.png';
+const BACK_CALVES_IMG = 'back-calves.png';
+const BACK_FOREARMS_IMG = 'back-forearms.png';
+
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const RENDER_W = 640;
+const RENDER_H = 1280;
+
+// ─── BACKGROUND STRIP (fixes AI-generated PNGs with baked-in checkerboard) ──
+const stripBackground = (ctx, w, h) => {
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    // Strip solid black background pixels to make them transparent
+    if (r < 60 && g < 60 && b < 60) {
+      d[i+3] = 0;
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+};
+
+// ─── BUILD BODY MASK (prevents highlight leaking outside base silhouette) ────
+const buildBodyMask = (imageData) => {
+  const d = imageData.data;
+  const mask = new Uint8Array(d.length / 4);
+  for (let i = 0; i < d.length; i += 4) {
+    // A pixel is "body" if it's opaque and not near-black (background)
+    mask[i / 4] = (d[i+3] > 128 && (d[i] > 50 || d[i+1] > 50 || d[i+2] > 50)) ? 1 : 0;
+  }
+  return mask;
+};
+
+// ─── CANVAS COMPONENT ────────────────────────────────────────────────────────
+const CanvasBodyMap = ({ baseSrc, layerSrcs = [], secondaryLayerSrcs = [], label, borderRadius = 8 }) => {
+  const canvasRef = useRef(null);
+  const [loadError, setLoadError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError(false);
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Failures resolve with a 1x1 dummy image rather than rejecting, so the
+    // executor only needs `resolve`.
+    const loadImg = (src) => new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        console.warn(`Failed to load image: ${src}`);
+        const dummy = new Image();
+        dummy.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        dummy.onload = () => resolve(dummy);
+      };
+      img.src = src;
+    });
+
+    Promise.all([
+      loadImg(baseSrc),
+      ...layerSrcs.map(loadImg),
+      ...secondaryLayerSrcs.map(loadImg)
+    ]).then(([baseImg, ...allLayerImgs]) => {
+      if (!active) return;
+      
+      // If base image is the 1x1 dummy, treat as an error
+      if (baseImg.width <= 1 || baseImg.height <= 1) {
+        setLoadError(true);
+        setLoading(false);
+        return;
+      }
+      
+      const isFemale = baseSrc.includes('/female/');
+      
+      // Normalize all canvases to a fixed render size
+      // Male assets are 640x640 — draw at native height (640)
+      // Female assets are 640x1280 — draw at native height (1280)
+      canvas.width = RENDER_W;
+      canvas.height = isFemale ? RENDER_H : baseImg.height;
+      
+      // Compute vertical offset
+      const drawImg = (targetCtx, img) => {
+        const yOffset = isFemale ? Math.round((RENDER_H - img.height) / 2) : 0;
+        targetCtx.drawImage(img, 0, yOffset);
+      };
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawImg(ctx, baseImg);
+      
+      // Strip baked-in checkered/black background & text labels
+      stripBackground(ctx, canvas.width, canvas.height);
+      
+      // Build a body silhouette mask from the base — only pixels inside
+      // this mask will accept highlight colors (prevents leaking)
+      const baseData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const bodyMask = buildBodyMask(baseData);
+      
+      if (allLayerImgs.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const primaryImgs = allLayerImgs.slice(0, layerSrcs.length);
+      const secondaryImgs = allLayerImgs.slice(layerSrcs.length);
+      
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = canvas.width;
+      offCanvas.height = canvas.height;
+      const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+      const processLayer = (img, isSecondary) => {
+        offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+        drawImg(offCtx, img);
+        stripBackground(offCtx, offCanvas.width, offCanvas.height);
+        const layerData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+        
+        for (let i = 0; i < layerData.data.length; i += 4) {
+          const px = i / 4;
+          // Skip pixels outside the base body silhouette
+          if (!bodyMask[px]) continue;
+          
+          const r = layerData.data[i];
+          const g = layerData.data[i+1];
+          const b = layerData.data[i+2];
+          const a = layerData.data[i+3];
+          
+          if (r > 130 && r > g + 20 && r > b + 20 && a > 0) {
+            if (isSecondary) {
+              const alpha = 0.4;
+              baseData.data[i]   = Math.round(r * alpha + baseData.data[i] * (1 - alpha));
+              baseData.data[i+1] = Math.round(g * alpha + baseData.data[i+1] * (1 - alpha));
+              baseData.data[i+2] = Math.round(b * alpha + baseData.data[i+2] * (1 - alpha));
+            } else {
+              baseData.data[i] = r;
+              baseData.data[i+1] = g;
+              baseData.data[i+2] = b;
+              baseData.data[i+3] = a;
+            }
+          }
+        }
+      };
+
+      // Draw secondary layers first, then primary on top
+      secondaryImgs.forEach(img => processLayer(img, true));
+      primaryImgs.forEach(img => processLayer(img, false));
+      
+      ctx.putImageData(baseData, 0, 0);
+      setLoading(false);
+    }).catch(err => {
+      console.error("Canvas compositing error:", err);
+      setLoadError(true);
+      setLoading(false);
+    });
+
+    return () => { active = false; };
+  }, [baseSrc, layerSrcs, secondaryLayerSrcs]);
+
+  if (loadError) return (
+    <div style={{
+      width: '100%', aspectRatio: '1/2', borderRadius,
+      background: 'var(--surface-container-high)', border: 'none',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 6,
+    }}>
+      {label && <div style={{ fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{label}</div>}
+      <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>Image unavailable</div>
+    </div>
+  );
+
+  return (
+    <div style={{ textAlign: 'center', width: '100%', position: 'relative' }}>
+      {label && (
+        <div style={{
+          fontSize: 9, color: 'var(--on-surface-dim)', fontWeight: 700,
+          textTransform: 'uppercase', marginBottom: 6, letterSpacing: '1.5px',
+        }}>{label}</div>
+      )}
+      {/* The canvas must stay mounted — the effect draws into it. The
+          skeleton is an overlay, not a replacement. */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: 'auto',
+          display: 'block',
+          borderRadius: borderRadius,
+          backgroundColor: 'transparent',
+          opacity: loading ? 0 : 1,
+          transition: 'opacity .3s var(--ease-smooth)',
+        }}
+      />
+      {loading && (
+        // .skeleton-pulse carries the shimmer background and keyframe; the
+        // inline styles only position the overlay over the still-mounted canvas.
+        <div className="skeleton-pulse" style={{
+          position: 'absolute', inset: 0,
+          borderRadius: borderRadius,
+        }} />
+      )}
+    </div>
+  );
+};
+
+// ─── EXPORTED MAIN COMPONENT ─────────────────────────────────────────────────
+export default function BodyMapSVG({ muscleXP = {}, primaryMuscles = null, secondaryMuscles = null, mini = false, gender = 'male' }) {
+  const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
+
+  const { pMuscles, sMuscles } = useMemo(() => {
+    if (primaryMuscles || secondaryMuscles) {
+      return { pMuscles: primaryMuscles || [], sMuscles: secondaryMuscles || [] };
+    }
+    // Fallback: use all active from muscleXP as primary if specific lists aren't provided
+    return { 
+      pMuscles: Object.entries(muscleXP).filter(([, xp]) => xp > 0).map(([k]) => k),
+      sMuscles: []
+    };
+  }, [muscleXP, primaryMuscles, secondaryMuscles]);
+
+  const mapToLayers = (muscles) => {
+    const front = [];
+    const back = [];
+    muscles.forEach(muscle => {
+      const info = MUSCLE_IMAGES[muscle];
+      if (info) {
+        if (info.view === 'front') front.push(getAssetUrl(info.file));
+        if (info.view === 'back') back.push(getAssetUrl(info.file));
+      }
+      if (muscle === 'shoulders') {
+        const bg = getAssetUrl(BACK_SHOULDER_IMG);
+        if (!back.includes(bg)) back.push(bg);
+      }
+      if (muscle === 'calves') {
+        const bg = getAssetUrl(BACK_CALVES_IMG);
+        if (!back.includes(bg)) back.push(bg);
+      }
+      if (muscle === 'forearms') {
+        const bg = getAssetUrl(BACK_FOREARMS_IMG);
+        if (!back.includes(bg)) back.push(bg);
+      }
+    });
+    return { frontLayers: front, backLayers: back };
+  };
+
+  const { frontLayers, backLayers } = useMemo(() => mapToLayers(pMuscles), [pMuscles, gender]);
+  const { frontLayers: frontSecondary, backLayers: backSecondary } = useMemo(() => mapToLayers(sMuscles), [sMuscles, gender]);
+
+  if (mini) {
+    return (
+      <div style={{ width: 55, height: 'auto', flexShrink: 0 }}>
+        <CanvasBodyMap 
+          baseSrc={getAssetUrl('front-base.png')} 
+          layerSrcs={frontLayers} 
+          secondaryLayerSrcs={frontSecondary}
+          borderRadius={6}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'flex-start' }}>
+      <div style={{ flex: '0 0 auto', width: '42%', maxWidth: 180 }}>
+        <CanvasBodyMap 
+          baseSrc={getAssetUrl('front-base.png')} 
+          layerSrcs={frontLayers} 
+          secondaryLayerSrcs={frontSecondary}
+          label="Front" 
+        />
+      </div>
+      <div style={{ flex: '0 0 auto', width: '42%', maxWidth: 180 }}>
+        <CanvasBodyMap 
+          baseSrc={getAssetUrl('back-base.png')} 
+          layerSrcs={backLayers} 
+          secondaryLayerSrcs={backSecondary}
+          label="Back" 
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── MINI VERSION FOR DASHBOARD ──────────────────────────────────────────────
+export const MiniBodyMap = ({ weeklyMuscles = [], gender = 'male' }) => {
+  const getAssetUrl = (file) => gender === 'female' ? `/muscles/female/female-${file}` : `/muscles/${file}`;
+
+  const frontLayers = useMemo(() => {
+    return weeklyMuscles
+      .map(m => MUSCLE_IMAGES[m])
+      .filter(info => info && info.view === 'front')
+      .map(info => getAssetUrl(info.file));
+  }, [weeklyMuscles, gender]);
+
+  return (
+    <div style={{ width: 50, height: 'auto', flexShrink: 0 }}>
+      <CanvasBodyMap 
+        baseSrc={getAssetUrl('front-base.png')} 
+        layerSrcs={frontLayers} 
+        borderRadius={6}
+      />
+    </div>
+  );
+};

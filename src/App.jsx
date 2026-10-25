@@ -1,27 +1,13 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider, useApp } from './context/AppContext';
-import { DesignVersionProvider } from './context/DesignVersionContext';
-import { Sidebar, BottomNav } from './components/layout/Layout';
-import { ToastContainer } from './components/shared/SharedComponents';
-import ErrorBoundary from './components/shared/ErrorBoundary';
-import AuthModal from './components/pages/AuthModal';
-import DashboardPage from './components/pages/DashboardPage';
-import SplitsPage from './components/pages/SplitsPage';
-import SplitBuilderPage from './components/pages/SplitBuilderPage';
-import NotificationPrompt from './components/shared/NotificationPrompt';
-import WorkoutPage from './components/pages/WorkoutPage';
-import DietPage from './components/pages/DietPage';
-import ProgressPage from './components/pages/ProgressPage';
-import ContactPage from './components/pages/ContactPage';
-import ProfilePage from './components/pages/ProfilePage';
-import WorkoutHistoryPage from './components/pages/WorkoutHistoryPage';
-import WeightLogPage from './components/pages/WeightLogPage';
-import MeasurementsPage from './components/pages/MeasurementsPage';
-import MuscleMapPage from './components/pages/MuscleMapPage';
-import CycleTrackerPage from './components/pages/CycleTrackerPage';
-import { useChatbot } from './hooks/useChatbot';
-import ChatbotButton from './components/shared/ChatbotButton';
-import ChatbotModal from './components/shared/ChatbotModal';
+import { AppProvider, useApp } from './core/context/AppContext';
+import { DesignVersionProvider } from './core/context/DesignVersionContext';
+import { AppRoutes } from './routes';
+import { Sidebar, BottomNav } from './ui/v1/layout/Layout';
+import { ToastContainer } from './ui/v1/shared/SharedComponents';
+import AuthModal from './ui/v1/pages/AuthModal';
+import NotificationPrompt from './ui/v1/shared/NotificationPrompt';
+import { useChatbot } from './core/hooks/useChatbot';
+import ChatbotButton from './ui/v1/shared/ChatbotButton';
+import ChatbotModal from './ui/v1/shared/ChatbotModal';
 
 function AppInner() {
   const { user, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
@@ -62,22 +48,7 @@ function AppInner() {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
       <main className="mc" style={{ flex: 1, padding: '22px 24px', overflowY: 'auto' }}>
-        <Routes>
-          <Route path="/" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
-          <Route path="/splits" element={<ErrorBoundary><SplitsPage /></ErrorBoundary>} />
-          <Route path="/split-builder" element={<ErrorBoundary><SplitBuilderPage /></ErrorBoundary>} />
-          <Route path="/workout" element={<ErrorBoundary><WorkoutPage /></ErrorBoundary>} />
-          <Route path="/diet" element={<ErrorBoundary><DietPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/progress" element={<ErrorBoundary><ProgressPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/contact" element={<ErrorBoundary><ContactPage /></ErrorBoundary>} />
-          <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
-          <Route path="/history" element={<ErrorBoundary><WorkoutHistoryPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/weight-log" element={<ErrorBoundary><WeightLogPage /></ErrorBoundary>} />
-          <Route path="/measurements" element={<ErrorBoundary><MeasurementsPage /></ErrorBoundary>} />
-          <Route path="/muscle-map" element={<ErrorBoundary><MuscleMapPage chatbot={chatbot} /></ErrorBoundary>} />
-          <Route path="/cycle" element={<ErrorBoundary><CycleTrackerPage /></ErrorBoundary>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppRoutes chatbot={chatbot} />
       </main>
       <BottomNav />
       <ToastContainer toasts={toasts} removeToast={removeToast} />

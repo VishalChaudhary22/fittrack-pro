@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ─── Kaaya Volt design tokens ────────────────────────────────────────────────
+   Scoped to the Volt skin: [data-design="volt"] is set on <html> by
+   DesignVersionContext. Dark values are the locked "Blackboard" spec
+   (plan §5.1) and are the base because the app's default theme is dark;
+   light values apply under [data-theme="light"] (the paper spec).       */
+
+[data-design='volt'] {
+  --v-canvas: #0a0a09;
+  --v-panel: #131311;
+  --v-ink: #f4f5e9;
+  --v-dim: #b9bfa8;
+  --v-volt: #c9f158;
+  --v-volt-text: #c9f158;
+  --v-cobalt: #7d9bff;
+  --v-coral: #ff5c38;
+  --v-coral-text: #ff7a5c;
+  --v-success: #7fe0a8;
+  --v-success-text: #7fe0a8;
+  --v-edge: #f4f5e9;
+  --v-edge-quiet: rgba(244, 245, 233, 0.55);
+  --v-shadow: #000000;
+  --v-shadow-hero: rgba(201, 241, 88, 0.9);
+  --v-chamber: #04060a;
+  --v-pill-bg: #c9f158;
+  --v-pill-fg: #141416;
+  --v-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --v-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[data-design='volt'][data-theme='light'] {
+  --v-canvas: #f7f4ed;
+  --v-panel: #ffffff;
+  --v-ink: #141416;
+  --v-dim: #6e6a5e;
+  --v-volt: #c9f158;
+  --v-volt-text: #4c6b00;
+  --v-cobalt: #2e4bff;
+  --v-coral: #ff5c38;
+  --v-coral-text: #c93a1c;
+  --v-success: #1e9e57;
+  --v-success-text: #147a41;
+  --v-edge: #141416;
+  --v-edge-quiet: #141416;
+  --v-shadow: #141416;
+  --v-shadow-hero: #141416;
+  --v-chamber: #0b0e12;
+  --v-pill-bg: #141416;
+  --v-pill-fg: #c9f158;
+}
+
+/* ─── Screen + type ─────────────────────────────────────────────────────────── */
+
+.v-screen {
+  background: var(--v-canvas);
+  color: var(--v-ink);
+  font-family: 'Archivo', system-ui, sans-serif;
+  min-height: 100%;
+}
+
+.v-num {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.v-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--v-dim);
+}
+
+.v-label--volt {
+  color: var(--v-volt-text);
+}
+
+/* ─── Blocks (sections are blocks — colour decides structure) ───────────────── */
+
+.v-block {
+  background: var(--v-panel);
+  border: 2.5px solid var(--v-edge);
+  border-radius: 20px;
+  box-shadow: 5px 5px 0 var(--v-shadow);
+  padding: 18px;
+  color: var(--v-ink);
+}
+
+.v-block--hero {
+  box-shadow: 5px 5px 0 var(--v-shadow-hero);
+}
+
+.v-block--quiet {
+  border-color: var(--v-edge-quiet);
+}
+
+.v-block--volt {
+  background: var(--v-volt);
+  color: #141416;
+}
+
+.v-block--ink {
+  background: var(--v-ink);
+  color: var(--v-canvas);
+}
+
+/* ─── Actions ───────────────────────────────────────────────────────────────── */
+
+.v-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 26px;
+  border-radius: 999px;
+  border: 2.5px solid var(--v-edge);
+  background: var(--v-pill-bg);
+  color: var(--v-pill-fg);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 160ms var(--v-ease-out), background-color 200ms var(--v-ease-out), color 200ms var(--v-ease-out);
+}
+
+.v-pill:active {
+  transform: scale(0.97);
+}
+
+.v-pill--ghost {
+  min-height: 48px;
+  background: transparent;
+  color: var(--v-ink);
+  font-size: 14px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .v-pill:hover {
+    transform: translateY(-1px);
+  }
+  .v-pill:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ─── Chips + stickers ──────────────────────────────────────────────────────── */
+
+.v-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 2px solid var(--v-edge);
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--v-ink);
+  background: var(--v-panel);
+}
+
+.v-sticker {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border: 2px solid #141416;
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 #141416;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #141416;
+  transform: rotate(-3deg);
+}
+
+.v-sticker--volt { background: var(--v-volt); }
+.v-sticker--coral { background: var(--v-coral); }
+.v-sticker--cobalt { background: var(--v-cobalt); color: #f4f5e9; }
+
+/* ─── Bars (fill by scaleX only — never width) ──────────────────────────────── */
+
+.v-bar {
+  height: 12px;
+  border: 2px solid var(--v-edge);
+  border-radius: 999px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.v-bar-fill {
+  height: 100%;
+  transform-origin: left center;
+  background: var(--v-volt);
+}
+
+.v-bar-fill--cobalt { background: var(--v-cobalt); }
+.v-bar-fill--coral { background: var(--v-coral); }
+
+/* ─── The Lab (scanner chamber) ─────────────────────────────────────────────── */
+
+.v-lab {
+  background: var(--v-chamber);
+  border: 2.5px solid var(--v-edge);
+  border-radius: 22px;
+  box-shadow: 5px 5px 0 var(--v-shadow-hero);
+  color: #f4f5e9;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Bottom nav ────────────────────────────────────────────────────────────── */
+
+.v-nav {
+  display: flex;
+  background: var(--v-canvas);
+  border-top: 2.5px solid var(--v-edge);
+}
+
+.v-nav-item {
+  flex: 1;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--v-dim);
+  transition: transform 160ms var(--v-ease-out), color 200ms var(--v-ease-out);
+}
+
+.v-nav-item:active {
+  transform: scale(0.97);
+}
+
+.v-nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+.v-nav-item--active {
+  color: var(--v-ink);
+}
+
+.v-nav-item--active .v-nav-pill {
+  background: var(--v-volt);
+  border-color: var(--v-edge);
+  color: #141416;
+}
+
+/* ─── Reduced motion: movement off, 150ms fades stay ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .v-pill,
+  .v-nav-item {
+    transition: opacity 150ms ease;
+  }
+  .v-pill:active,
+  .v-nav-item:active {
+    transform: none;
+  }
+}

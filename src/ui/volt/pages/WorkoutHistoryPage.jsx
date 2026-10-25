@@ -2,7 +2,7 @@ import { Trash2, ChevronDown, Search, Edit2, Bot } from 'lucide-react';
 import { useWorkoutHistory, fmtDuration, calcVolume } from '../../../core/hooks/useWorkoutHistory';
 import { fmt } from '../../../utils/helpers';
 import EditWorkoutModal from '../../v1/shared/EditWorkoutModal';
-import { ConfirmDialog } from '../../v1/shared/SharedComponents';
+import { VoltConfirmDialog } from '../shared/VoltShared';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 
 // ─── Kaaya Volt · Workout History (V-6a) ────────────────────────────────────
@@ -265,7 +265,7 @@ export default function VoltWorkoutHistoryPage({ chatbot }) {
         />
       )}
 
-      <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
+      <VoltConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>
   );
 }

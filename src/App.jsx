@@ -4,6 +4,7 @@ import { AppRoutes } from './routes';
 import { Sidebar, BottomNav } from './ui/v1/layout/Layout';
 import VoltShellNav from './ui/volt/VoltShell';
 import { ToastContainer } from './ui/v1/shared/SharedComponents';
+import { VoltToastContainer } from './ui/volt/shared/VoltShared';
 import AuthModal from './ui/v1/pages/AuthModal';
 import NotificationPrompt from './ui/v1/shared/NotificationPrompt';
 import { useChatbot } from './core/hooks/useChatbot';
@@ -58,7 +59,7 @@ function AppInner() {
         <AppRoutes chatbot={chatbot} />
       </main>
       {isVolt ? <VoltShellNav /> : <BottomNav />}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      {isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
       <NotificationPrompt />
       <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />
       {chatbot.isOpen && (

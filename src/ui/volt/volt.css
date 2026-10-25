@@ -346,3 +346,22 @@
     transform: none;
   }
 }
+
+/* ─── V-7 popup pack: scroll picker + toasts ───────────────────────────────── */
+
+.v-picker-wrap{position:relative;height:240px;overflow:hidden;border-radius:16px;background:var(--v-canvas);border:2.5px solid var(--v-edge)}
+.v-picker-fade-top{position:absolute;top:0;left:0;right:0;height:88px;background:linear-gradient(to bottom,var(--v-canvas) 20%,transparent);z-index:2;pointer-events:none}
+.v-picker-fade-bot{position:absolute;bottom:0;left:0;right:0;height:88px;background:linear-gradient(to top,var(--v-canvas) 20%,transparent);z-index:2;pointer-events:none}
+.v-picker-sel{position:absolute;top:96px;left:14px;right:14px;height:48px;border-radius:12px;background:color-mix(in srgb, var(--v-volt) 16%, transparent);border:2px solid var(--v-edge);z-index:1;pointer-events:none}
+.v-picker-scroll{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+.v-picker-scroll::-webkit-scrollbar{display:none}
+.v-picker-item{height:48px;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:font-size .15s ease,color .15s ease;user-select:none}
+
+@keyframes v-toast-in {
+  from { opacity: 0; transform: translateY(-8px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.v-toast { animation: v-toast-in 220ms var(--v-ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+  .v-toast { animation: v-fade 150ms ease both; }
+}

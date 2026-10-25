@@ -1,6 +1,6 @@
 import { ChevronDown, X, Edit2, Trash2, Check, Dumbbell, AlertCircle } from 'lucide-react';
 import { useSplits } from '../../../core/hooks/useSplits';
-import { ConfirmDialog } from '../../v1/shared/SharedComponents';
+import { VoltConfirmDialog } from '../shared/VoltShared';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 
 // ─── Kaaya Volt · Splits (V-6a) ─────────────────────────────────────────────
@@ -242,7 +242,7 @@ export default function VoltSplitsPage() {
         </div>
       )}
 
-      <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={confirm?.onCancel} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
+      <VoltConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={confirm?.onCancel} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>
   );
 }

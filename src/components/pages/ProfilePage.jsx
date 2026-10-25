@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Flame, Dumbbell, Trophy, Clock, Camera } from 'lucide-react';
-import emailjs from '@emailjs/browser';
 import { useApp } from '../../context/AppContext';
+import { supabase } from '../../lib/supabaseClient';
 import { ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { Screen, Sec, Hero, LedgerRow, Note, TLink, Action, Balance } from '../shared/Margin';
 import { ACTIVITY } from '../../data/constants';
@@ -140,25 +140,31 @@ export default function ProfilePage() {
       : 'Not shared';
 
     try {
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not signed in');
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-feedback`,
         {
-          from_name:  user?.name   || 'Kaaya Fit User',
-          from_email: user?.email  || 'anonymous',
-          subject:    feedbackSubject.trim() || 'General Feedback',
-          message:    feedbackMessage.trim(),
-          user_id:    user?.id     || 'unknown',
-          meta,
-        },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            subject: feedbackSubject.trim() || 'General Feedback',
+            message: feedbackMessage.trim(),
+            meta,
+          }),
+        }
       );
+      if (!res.ok) throw new Error(`Feedback request failed (${res.status})`);
       setFeedbackStatus('sent');
       setFeedbackSubject('');
       setFeedbackMessage('');
       setTimeout(() => setFeedbackStatus('idle'), 4500);
     } catch (err) {
-      console.error('[Feedback] EmailJS error:', err);
+      console.error('[Feedback] Send error:', err);
       setFeedbackStatus('error');
       setTimeout(() => setFeedbackStatus('idle'), 4500);
     }

@@ -1,40 +1,12 @@
-import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Ruler, X, Plus, Activity } from 'lucide-react';
-import { useApp } from '../../../core/context/AppContext';
 import { PageHeader, EmptyState, ModalPortal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../../data/constants';
-import { gId, tod, fmt } from '../../../utils/helpers';
-import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
+import { fmt } from '../../../utils/helpers';
+import { useMeasurements } from '../../../core/hooks/useMeasurements';
 
 export default function MeasurementsPage() {
-  useScrollRestoration('/measurements');
-  const { user, measurements, setMeasurements, addToast } = useApp();
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({});
-  const [chartField, setChartField] = useState('chest');
-
-  const userMeasurements = useMemo(() =>
-    [...measurements].filter(m => m.userId === user.id).sort((a, b) => new Date(b.date) - new Date(a.date)),
-    [measurements, user.id]);
-
-  const chartData = useMemo(() =>
-    [...userMeasurements].reverse().map(m => ({
-      date: fmt(m.date),
-      value: m[chartField] || null,
-    })).filter(d => d.value !== null),
-    [userMeasurements, chartField]);
-
-  const latest = userMeasurements[0] || {};
-
-  const saveMeasurement = () => {
-    const entry = { id: gId(), userId: user.id, date: tod(), ...form };
-    setMeasurements(p => [...p, entry]);
-    setForm({});
-    setShowAdd(false);
-    addToast('Measurements saved!', 'success');
-  };
-
+  const { chartData, chartField, form, latest, saveMeasurement, setChartField, setForm, setShowAdd, showAdd, userMeasurements } = useMeasurements();
   return (
     <div className="pg-in">
       <PageHeader title="Body Measurements" sub="Track your physique changes"

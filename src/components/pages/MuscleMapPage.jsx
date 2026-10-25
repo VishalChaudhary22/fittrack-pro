@@ -240,14 +240,18 @@ export default function MuscleMapPage({ chatbot }) {
   ];
 
   const standingLine = leaderboardLoading
-    ? 'Fetching your rank…'
+    ? 'Loading…'
     : myRank === undefined
-      ? 'Syncing to leaderboard…'
+      ? 'Syncing…'
       : myRank === 1
         ? 'You are #1!'
         : topPercent <= 50
           ? `You are in the top ${topPercent}%`
           : `You are rank #${myRank}`;
+
+  // The hero never wraps, so step its size down as the line gets longer —
+  // at 54px the longer standings clipped at the right edge of the shell.
+  const standingSize = standingLine.length <= 12 ? 'sm' : standingLine.length <= 18 ? 'xs' : null;
 
   return (
     <>
@@ -264,7 +268,7 @@ export default function MuscleMapPage({ chatbot }) {
       {/* ACHIEVEMENT BANNER (Global Only) */}
       {activeTab === 'leaderboard' && (
         <Sec n="01" label="Olympus standing">
-          <Hero size="sm" value={standingLine} />
+          <Hero size={standingSize || undefined} style={standingSize ? undefined : { fontSize: 30 }} value={standingLine} />
           <p className="meta" style={{ marginTop: 8 }}>
             {overall.progress < 1
               ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to reach the next tier`

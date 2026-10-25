@@ -36,6 +36,11 @@ const VOLT_PAGES = {
   '/splits': lazy(() => import('./ui/volt/pages/SplitsPage')),
   '/split-builder': lazy(() => import('./ui/volt/pages/SplitBuilderPage')),
   '/history': lazy(() => import('./ui/volt/pages/WorkoutHistoryPage')),
+  '/weight-log': lazy(() => import('./ui/volt/pages/WeightLogPage')),
+  '/measurements': lazy(() => import('./ui/volt/pages/MeasurementsPage')),
+  '/cycle': lazy(() => import('./ui/volt/pages/CycleTrackerPage')),
+  '/profile': lazy(() => import('./ui/volt/pages/ProfilePage')),
+  '/contact': lazy(() => import('./ui/volt/pages/ContactPage')),
 };
 
 function SkinFallback() {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
-import { Hero, Amp, TLink, Action } from '../shared/Margin';
+import { Dumbbell, Eye, EyeOff } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 import { ACTIVITY } from '../../data/constants';
 
 export default function AuthModal() {
@@ -11,7 +10,7 @@ export default function AuthModal() {
   const [emailErr, setEmailErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [sp, setSp] = useState(false); // show password
-
+  
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
   // UX-12.2: Password strength meter
@@ -139,19 +138,23 @@ export default function AuthModal() {
 
   if (mode === 'verify') {
     return (
-      <div className="mo" style={{ background: 'var(--canvas)' }}>
-        <div style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center' }}>
-          <p className="kicker" style={{ marginBottom: 14 }}>Kaaya Fit</p>
-          <Hero size="sm" value="Check your inbox" />
-          <p className="meta" style={{ margin: '18px 0 26px', lineHeight: 1.6 }}>
-            We sent a verification link to <strong style={{ color: 'var(--ink)' }}>{f.email}</strong>.
+      <div className="mo" style={{ background: 'radial-gradient(ellipse at 50% 100%,rgba(232,84,13,.15) 0%,var(--surface-container-lowest) 70%)' }}>
+        <div className="md" style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center', background: 'var(--surface-container-lowest)', borderRadius: 24, border: '1px solid var(--surface-container-highest)', boxShadow: 'var(--shadow-lg)' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
+          <div className="headline-md" style={{ marginBottom: 12 }}>Check your inbox</div>
+          <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 24, lineHeight: 1.6 }}>
+            We sent a verification link to <strong style={{ color: 'var(--primary)' }}>{f.email}</strong>.
             Click it to activate your account.
-          </p>
-          <Action onClick={() => setMode('login')}>Back to Sign In</Action>
-          <p className="meta" style={{ marginTop: 16 }}>
+          </div>
+          <button className="btn-g" style={{ width: '100%', padding: '12px', fontSize: 14 }} onClick={() => setMode('login')}>
+            Back to Sign In
+          </button>
+          <div style={{ marginTop: 12, fontSize: 12, color: 'var(--on-surface-dim)' }}>
             Didn't receive it? Check your spam folder, or{' '}
-            <TLink onClick={() => { if (!loading) handleRegister(); }}>resend email</TLink>
-          </p>
+            <button onClick={handleRegister} disabled={loading} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 12 }}>
+              resend email
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -159,164 +162,141 @@ export default function AuthModal() {
 
   if (mode === 'forgot-sent') {
     return (
-      <div className="mo" style={{ background: 'var(--canvas)' }}>
-        <div style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center' }}>
-          <p className="kicker" style={{ marginBottom: 14 }}>Kaaya Fit</p>
-          <Hero size="sm" value="Reset link sent" />
-          <p className="meta" style={{ margin: '18px 0 26px', lineHeight: 1.6 }}>
-            We sent password reset instructions to <strong style={{ color: 'var(--ink)' }}>{f.email}</strong>.
-          </p>
-          <Action onClick={() => setMode('login')}>Back to Sign In</Action>
+      <div className="mo" style={{ background: 'radial-gradient(ellipse at 50% 100%,rgba(232,84,13,.15) 0%,var(--surface-container-lowest) 70%)' }}>
+        <div className="md" style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center', background: 'var(--surface-container-lowest)', borderRadius: 24, border: '1px solid var(--surface-container-highest)', boxShadow: 'var(--shadow-lg)' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🔑</div>
+          <div className="headline-md" style={{ marginBottom: 12 }}>Reset link sent</div>
+          <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 24, lineHeight: 1.6 }}>
+            We sent password reset instructions to <strong style={{ color: 'var(--primary)' }}>{f.email}</strong>.
+          </div>
+          <button className="btn-g" style={{ width: '100%', padding: '12px', fontSize: 14 }} onClick={() => setMode('login')}>
+            Back to Sign In
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mo" style={{ background: 'var(--canvas)' }}>
+    <div className="mo" style={{ background: 'radial-gradient(ellipse at 50% 100%,rgba(232,84,13,.15) 0%,var(--surface-container-lowest) 70%)' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
-
+        
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img
-            src="/kaaya-icon-192.png"
-            alt="Kaaya Fit Logo"
-            style={{ width: 56, height: 56, margin: '0 auto 14px', display: 'block' }}
+          <img 
+            src="/kaaya-icon-192.png" 
+            alt="Kaaya Fit Logo" 
+            style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 16px', display: 'block', boxShadow: '0 8px 24px rgba(232,84,13,.2)' }} 
           />
-          <Hero size="sm" value="KAAYA FIT" />
-          <p className="meta" style={{ marginTop: 8 }}>
-            {mode === 'login' ? 'Welcome back' : 'Create your account'}
-          </p>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.04em', color: 'var(--on-surface)', textTransform: 'uppercase', marginBottom: 4 }}>
+            Kaaya Fit
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 700, letterSpacing: '.5px' }}>
+             {mode === 'login' ? 'Welcome back' : 'Create your account'}
+          </div>
         </div>
 
-        <div style={{ maxHeight: '84vh', padding: '6px 28px 28px', overflowY: 'auto' }}>
-
-          {!isSupabaseConfigured && (
-            <p className="meta" style={{ color: 'var(--bad)', lineHeight: 1.5, marginBottom: 16 }}>
-              This build has no Supabase credentials, so sign-in is disabled.
-              Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in
-              the build environment and redeploy.
-            </p>
-          )}
-
+        <div className="md" style={{ maxHeight: '84vh', background: 'var(--surface-container-lowest)', border: '1px solid var(--surface-container-highest)', boxShadow: 'var(--shadow-lg)', padding: '24px 28px', borderRadius: 24, overflowY: 'auto' }}>
+          
           {/* Main Google CTA */}
-          <Action onClick={handleGoogleSignIn} disabled={loading || !isSupabaseConfigured} arrow="">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.5 30.2 0 24 0 14.8 0 7 5.4 3.2 13.3l7.9 6.1C13 13.2 18.1 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/><path fill="#FBBC05" d="M11.1 28.6A14.9 14.9 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.6-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-5.9 0-11-3.7-12.9-9.2l-8.6 6.1C7 42.6 14.8 48 24 48z"/></svg>
-              Continue with Google
-            </span>
-          </Action>
+          <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'background .2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface-container)'} onMouseOut={e => e.currentTarget.style.background = 'var(--surface-container-highest)'}>
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.5 30.2 0 24 0 14.8 0 7 5.4 3.2 13.3l7.9 6.1C13 13.2 18.1 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/><path fill="#FBBC05" d="M11.1 28.6A14.9 14.9 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.6-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-5.9 0-11-3.7-12.9-9.2l-8.6 6.1C7 42.6 14.8 48 24 48z"/></svg>
+            Continue with Google
+          </button>
 
           {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0 6px' }}>
-            <div className="hairline" style={{ flex: 1 }} />
-            <span className="meta">Or email</span>
-            <div className="hairline" style={{ flex: 1 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--surface-container-highest)' }} />
+            <span style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 600 }}>OR EMAIL</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--surface-container-highest)' }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {mode === 'register' && (
-              <div className="field">
-                <span>Full name *</span>
-                <input className="input" value={f.name} onChange={sf('name')} aria-label="Full Name" />
+              <div className="input-group">
+                <input placeholder="Full Name *" value={f.name} onChange={sf('name')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
               </div>
             )}
-
-            <div className="field">
-              <span>Email address *</span>
-              <input className="input" type="email" value={f.email} onChange={sf('email')} onBlur={validateEmail} aria-label="Email address" />
+            
+            <div className="input-group">
+              <input type="email" placeholder="Email address *" value={f.email} onChange={sf('email')} onBlur={validateEmail} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+              {emailErr && <div style={{ fontSize: 11, color: '#FF6B6B', marginTop: 4 }}>{emailErr}</div>}
             </div>
-            {emailErr && <p className="meta" style={{ color: 'var(--bad)', marginTop: -4 }}>{emailErr}</p>}
 
-            <div className="field">
-              <span>Password (min 8 chars) *</span>
+            <div className="input-group">
               <div style={{ position: 'relative' }}>
-                <input className="input" type={sp ? 'text' : 'password'} value={f.password} onChange={sf('password')} style={{ width: '100%' }} aria-label="Password" />
-                <button type="button" onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer' }} aria-label={sp ? 'Hide password' : 'Show password'}>
+                <input type={sp ? 'text' : 'password'} placeholder="Password (min 8 chars) *" value={f.password} onChange={sf('password')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+                <button onClick={() => setSp(!sp)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--on-surface-dim)', cursor: 'pointer' }}>
                   {sp ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {/* Strength meter for register */}
+              {mode === 'register' && f.password && (
+                <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i <= strength ? strengthColors[strength] : 'var(--surface-container-highest)', transition: 'background .2s' }} />
+                  ))}
+                  <span style={{ fontSize: 10, color: strengthColors[strength], fontWeight: 700, marginLeft: 6, minWidth: 40, textAlign: 'right' }}>
+                    {strengthLabels[strength]}
+                  </span>
+                </div>
+              )}
             </div>
-            {/* Strength meter for register */}
-            {mode === 'register' && f.password && (
-              <div style={{ marginTop: 2 }}>
-                <Amp pct={(strength / 3) * 100} />
-                <p className="meta" style={{ textAlign: 'right', marginTop: 4, color: strengthColors[strength] }}>
-                  {strengthLabels[strength]}
-                </p>
-              </div>
-            )}
 
             {mode === 'register' && (<>
-              <div className="field">
-                <span>Gender</span>
-                <div className="rowf g12">
-                  {['male', 'female', 'other'].map(g => (
-                    <TLink key={g} ember={f.gender === g} onClick={() => setF(p => ({ ...p, gender: g }))}>
-                      {g.charAt(0).toUpperCase() + g.slice(1)}
-                    </TLink>
-                  ))}
-                </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {['male', 'female', 'other'].map(g => (
+                  <button key={g} onClick={() => setF(p => ({ ...p, gender: g }))} style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', cursor: 'pointer', background: f.gender === g ? 'var(--primary-container)' : 'var(--surface-container-highest)', color: f.gender === g ? '#fff' : 'var(--on-surface-variant)', fontSize: 12, fontWeight: 700, textTransform: 'capitalize', transition: 'all .2s' }}>
+                    {g}
+                  </button>
+                ))}
               </div>
-
-              <div className="field">
-                <span>Age</span>
-                <input className="input" type="number" value={f.age} onChange={sf('age')} aria-label="Age" />
-              </div>
-              <div className="field">
-                <span>Weight (kg)</span>
-                <input className="input" type="number" value={f.weight} onChange={sf('weight')} aria-label="Weight in kilograms" />
-              </div>
-              <div className="field">
-                <span>Height (cm)</span>
-                <input className="input" type="number" value={f.height} onChange={sf('height')} aria-label="Height in centimeters" />
-              </div>
-              <div className="field">
-                <span>Activity level</span>
-                <select className="input" value={f.activityLevel} onChange={sf('activityLevel')} aria-label="Activity Level">
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <input type="number" placeholder="Age" value={f.age} onChange={sf('age')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+                <input type="number" placeholder="Weight (kg)" value={f.weight} onChange={sf('weight')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+                <input type="number" placeholder="Height (cm)" value={f.height} onChange={sf('height')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }} />
+                <select value={f.activityLevel} onChange={sf('activityLevel')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
                   {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
               </div>
-              <div className="field">
-                <span>Workout days</span>
-                <select className="input" value={f.workoutDays} onChange={sf('workoutDays')} aria-label="Workout days per week">
-                  {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d} days/week</option>)}
-                </select>
-              </div>
+              <select value={f.workoutDays} onChange={sf('workoutDays')} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--surface-container-highest)', border: 'none', color: 'var(--on-surface)', fontWeight: 600, fontSize: 14 }}>
+                {[1, 2, 3, 4, 5, 6, 7].map(d => <option key={d} value={d}>{d} days/week</option>)}
+              </select>
             </>)}
 
             {authError && (
-              <p className="meta" style={{ color: 'var(--bad)', marginTop: 10 }}>{authError}</p>
+              <div style={{ fontSize: 12, color: 'var(--error)', padding: '10px 14px', background: 'rgba(255,59,48,0.08)', borderRadius: 10, fontWeight: 600 }}>
+                {authError}
+              </div>
             )}
 
             {/* Try demo button */}
             {mode === 'login' && (
-              <div style={{ marginTop: 18 }}>
-                <Action onClick={handleDemo} disabled={loading || !isSupabaseConfigured} arrow="">
-                  Try Demo Account
-                </Action>
-              </div>
+              <button className="btn-g" disabled={loading} style={{ width: '100%', padding: '11px', borderRadius: 12, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700 }} onClick={handleDemo}>
+                ⚡ Try Demo Account
+              </button>
             )}
 
-            <div style={{ marginTop: 12 }}>
-              <Action ember onClick={mode === 'login' ? handleLogin : handleRegister} disabled={loading || !isSupabaseConfigured}>
-                {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
-              </Action>
-            </div>
-
+            <button className="btn-p" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 12, fontSize: 15, position: 'relative' }} onClick={mode === 'login' ? handleLogin : handleRegister}>
+              {loading ? 'Please wait...' : mode === 'login' ? 'Sign In →' : 'Create Account →'}
+            </button>
+            
             {mode === 'login' && (
-              <div className="rowf" style={{ justifyContent: 'center', marginTop: 14 }}>
-                <TLink onClick={() => { if (!loading) handleForgotPassword(); }}>Forgot Password?</TLink>
+              <div style={{ textAlign: 'center', marginTop: -4 }}>
+                <button onClick={handleForgotPassword} disabled={loading} style={{ background: 'none', border: 'none', color: 'var(--on-surface-dim)', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
+                  Forgot Password?
+                </button>
               </div>
             )}
 
-            <p className="meta" style={{ textAlign: 'center', marginTop: 18 }}>
+            <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--on-surface-variant)' }}>
               {mode === 'login' ? (
-                <>Don't have an account? <TLink onClick={() => { setMode('register'); setAuthError(''); }}>Sign Up</TLink></>
+                <>Don't have an account? <button onClick={() => { setMode('register'); setAuthError(''); }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Sign Up</button></>
               ) : (
-                <>Already have an account? <TLink onClick={() => { setMode('login'); setAuthError(''); }}>Sign In</TLink></>
+                <>Already have an account? <button onClick={() => { setMode('login'); setAuthError(''); }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Sign In</button></>
               )}
-            </p>
+            </div>
 
           </div>
         </div>

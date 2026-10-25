@@ -29,7 +29,6 @@ dist-ssr
 *.sw?
 .venv/
 _temp/
-graphify-out/
 
 
 # Local editor/agent tooling state

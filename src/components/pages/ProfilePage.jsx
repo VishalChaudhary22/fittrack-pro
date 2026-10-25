@@ -1,9 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Flame, Dumbbell, Trophy, Clock, Camera } from 'lucide-react';
+import { LogOut, Download, Share2, Flame, Dumbbell, Trophy, Clock, Camera, Zap, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell, Edit2, Settings, Activity, Target, Moon, Sun, Monitor } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { useApp } from '../../context/AppContext';
-import { supabase } from '../../lib/supabaseClient';
-import { ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
-import { Screen, Sec, Hero, LedgerRow, Note, TLink, Action, Balance } from '../shared/Margin';
+import { PageHeader, ConfirmDialog, ThemeTogglePill, ScrollPicker, ModalPortal } from '../shared/SharedComponents';
 import { ACTIVITY } from '../../data/constants';
 import { calcBMI, getBMICat, calcBMR, calcTDEE, calcTDEESource } from '../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../utils/helpers';
@@ -31,7 +30,7 @@ const PRESETS = [
 function AvatarPickerModal({ open, onClose }) {
   const [tab, setTab] = useState('Marvel');
   const { user, updateProfile } = useApp();
-
+  
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     if (open) window.addEventListener('keydown', handleEsc);
@@ -105,16 +104,6 @@ function AvatarPickerModal({ open, onClose }) {
   );
 }
 
-/* Two-word toggle rendered as text links; the active word carries the ember.
-   Each option keeps its own handler so existing toggle semantics are preserved. */
-const SegToggle = ({ options }) => (
-  <div className="rowf g12">
-    {options.map(o => (
-      <TLink key={o.label} ember={o.active} onClick={o.onClick}>{o.label}</TLink>
-    ))}
-  </div>
-);
-
 export default function ProfilePage() {
   useScrollRestoration('/profile');
   const { user, updateProfile, logout, addToast, workoutLogs, splits, getStreak, healthLogs, foodLog, measurements, readinessLog, stepLogs, bodyFatLog, tdeeEstimate, tdeePreferences, setTdeePreferences } = useApp();
@@ -140,36 +129,30 @@ export default function ProfilePage() {
       : 'Not shared';
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not signed in');
-
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-feedback`,
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            subject: feedbackSubject.trim() || 'General Feedback',
-            message: feedbackMessage.trim(),
-            meta,
-          }),
-        }
+          from_name:  user?.name   || 'Kaaya Fit User',
+          from_email: user?.email  || 'anonymous',
+          subject:    feedbackSubject.trim() || 'General Feedback',
+          message:    feedbackMessage.trim(),
+          user_id:    user?.id     || 'unknown',
+          meta,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
-      if (!res.ok) throw new Error(`Feedback request failed (${res.status})`);
       setFeedbackStatus('sent');
       setFeedbackSubject('');
       setFeedbackMessage('');
       setTimeout(() => setFeedbackStatus('idle'), 4500);
     } catch (err) {
-      console.error('[Feedback] Send error:', err);
+      console.error('[Feedback] EmailJS error:', err);
       setFeedbackStatus('error');
       setTimeout(() => setFeedbackStatus('idle'), 4500);
     }
   };
-
+  
   useEffect(() => {
     if (user && !ed) {
       setF({
@@ -188,7 +171,7 @@ export default function ProfilePage() {
       });
     }
   }, [user?.id, user?.weight, user?.height, user?.name, user?.age]);
-
+  
   const unitWeight = user.unitWeight || 'kg';
   const unitHeight = user.unitHeight || 'cm';
   const toggleUnitWeight = async () => await updateProfile({ unitWeight: unitWeight === 'kg' ? 'lbs' : 'kg' });
@@ -229,7 +212,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = () => { 
     exportData({
       workoutLogs,
       splits,
@@ -263,7 +246,7 @@ export default function ProfilePage() {
   // Elite Achievements Data
   const streak = getStreak();
   const achievements = useMemo(() => {
-    const isHeavyHitter = workoutLogs.filter(l => l.userId === user.id).some(log =>
+    const isHeavyHitter = workoutLogs.filter(l => l.userId === user.id).some(log => 
       log.exercises?.some(ex => ex.sets?.some(s => s.weight >= user.weight * 2.5))
     );
     const monthlyVol = workoutLogs.filter(l => l.userId === user.id).filter(l => {
@@ -283,268 +266,384 @@ export default function ProfilePage() {
     ];
   }, [streak, workoutLogs, user]);
 
-  // Personal-details field groups (same fields, order and edit semantics as before)
-  const textFields = [
-    { l: 'Full Name', k: 'name', t: 'text' },
-    { l: 'Email', k: 'email', t: 'email' },
-  ];
-  const bodyFields = [
-    { l: 'Age', k: 'age', t: 'number', min: 10, max: 100 },
-    { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' },
-    { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' },
-  ];
-  const bodyDisp = (fld) => {
-    const v = user[fld.k];
-    if (!v && v !== 0) return '—';
-    if (v && unitWeight === 'lbs' && fld.k === 'weight') return kgToLbs(v);
-    if (v && unitHeight === 'ft' && fld.k === 'height') return cmToFtIn(v);
-    return String(v);
-  };
-  const goalFields = [
-    { l: 'Workout Days/Week', k: 'workoutDays', t: 'number', min: 1, max: 7 },
-    { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number', placeholder: 'e.g. 10000' },
-    { l: 'Daily Water Goal (ml)', k: 'waterGoal', t: 'number', placeholder: 'e.g. 3000' },
-  ];
-
-  const fieldRow = (fld, dispVal) => ed ? (
-    <div className="field" key={fld.k}>
-      <span>{fld.l}</span>
-      <input className="input" id={`input-${fld.k}`} type={fld.t} min={fld.min} max={fld.max} placeholder={fld.placeholder} value={f[fld.k] || ''} onChange={sf(fld.k)} />
-    </div>
-  ) : (
-    <LedgerRow key={fld.k} k={fld.l} v={dispVal} />
-  );
-
   return (
     <>
-    <Screen kicker="Body">
-      <Sec n="01" label="Profile">
-        <button onClick={() => setShowAvatarPicker(true)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'block' }} aria-label="Change avatar">
-          {user.avatarUrl
-            ? <img src={user.avatarUrl} alt="" style={{ width: 96, height: 96, objectFit: 'cover', display: 'block' }} />
-            : <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 700, color: 'var(--ash)' }}>{user.avatar}</span>}
-        </button>
-        <p className="meta" style={{ marginTop: 8 }}>Tap avatar to change</p>
-        <Hero value={user.name} />
-        <LedgerRow k="Level" v={lvl} />
-        <LedgerRow k="Olympus League" v={overall.name} />
-        <div className="rowf g12" style={{ marginTop: 12 }}>
-          <TLink onClick={() => { document.getElementById('personal-details')?.scrollIntoView({ behavior: 'smooth' }); setEd(true); }}>Edit profile</TLink>
-          <TLink onClick={() => addToast('Profile shared!', 'success')}>Share</TLink>
+    <div className="pg-in" style={{ paddingBottom: 60 }}>
+      <PageHeader title="My Profile" />
+
+      {/* Avatar Hero (9.2) */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32, position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 250, height: 250, background: 'radial-gradient(circle, rgba(255,181,155,0.15) 0%, transparent 70%)', zIndex: -1 }} />
+        <div style={{ position: 'relative', width: 128, height: 128, borderRadius: 24, padding: 4, border: '2px solid rgba(255,181,155,0.20)', boxShadow: 'var(--glow-primary)', background: 'var(--surface-container)', cursor: 'pointer' }} onClick={() => setShowAvatarPicker(true)}>
+          <div style={{ width: '100%', height: '100%', borderRadius: 18, overflow: 'hidden', position: 'relative', background: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {user.avatarUrl ? <img src={user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 40, fontWeight: 700, color: 'var(--on-surface-variant)' }}>{user.avatar}</div>}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity .2s' }} onMouseEnter={e => e.currentTarget.style.opacity=1} onMouseLeave={e => e.currentTarget.style.opacity=0}><Camera size={32} color="#fff" /></div>
+          </div>
+          <div style={{ position: 'absolute', bottom: -8, right: -8, background: 'var(--signature-gradient)', borderRadius: 8, padding: '4px 8px', fontSize: 12, fontWeight: 700, color: 'var(--on-primary)', boxShadow: 'var(--shadow-md)' }}>LVL {lvl}</div>
         </div>
-      </Sec>
-
-      <Sec n="02" label="Numbers">
-        <LedgerRow k="BMI" v={bmi} sub={` · ${getBMICat(bmi).label}`} />
-        <LedgerRow k="Body fat" v={latestBFPct ? `${latestBFPct.toFixed(1)}%` : '—'} />
-        <LedgerRow k="BMR" v={`${bmr} kcal`} />
-        <LedgerRow k="TDEE" v={`${tdee} kcal`} />
-      </Sec>
-
-      <Sec n="03" label="Muscle mastery">
-        {top4.map((m) => {
-          const xp = muscleXP[m.key] || 0;
-          const rank = getRank(xp);
-          return (
-            <Balance
-              key={m.key}
-              label={m.label}
-              current={rank.name}
-              pct={rank.progress * 100}
-              note={`${Math.floor(xp).toLocaleString()} XP`}
-            />
-          );
-        })}
-      </Sec>
-
-      <Sec n="04" label="Elite achievements">
-        {achievements.map(ach => (
-          <div key={ach.id}>
-            <LedgerRow k={ach.label} v={ach.locked ? 'Locked' : 'Earned'} />
-            <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-              <span className="meta">{ach.desc}</span>
-            </div>
-          </div>
-        ))}
-      </Sec>
-
-      <div id="personal-details">
-        <Sec n="05" label="Personal details">
-          <div className="rowf g12" style={{ marginBottom: 10 }}>
-            {ed ? (
-              <>
-                <TLink onClick={save}>Save</TLink>
-                <TLink onClick={() => setEd(false)}>Cancel</TLink>
-              </>
-            ) : (
-              <TLink onClick={() => setEd(true)}>Edit</TLink>
-            )}
-          </div>
-
-          {textFields.map(fld => fieldRow(fld, user[fld.k] || '—'))}
-          {bodyFields.map(fld => fieldRow(fld, bodyDisp(fld)))}
-
-          {ed ? (
-            <div className="field">
-              <span>Gender</span>
-              <select className="input" id="input-gender" value={f.gender} onChange={sf('gender')}>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          ) : (
-            <LedgerRow k="Gender" v={user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : '—'} />
-          )}
-
-          {goalFields.map(fld => fieldRow(fld, (!user[fld.k] && user[fld.k] !== 0) ? '—' : String(user[fld.k])))}
-
-          {ed ? (
-            <div className="field">
-              <span>Activity Level</span>
-              <select className="input" id="input-activityLevel" value={f.activityLevel} onChange={sf('activityLevel')}>
-                {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
-            </div>
-          ) : (
-            <LedgerRow k="Activity Level" v={ACTIVITY[user.activityLevel || 'moderate']?.label || '—'} />
-          )}
-
-          <Note>To update your goal weight, visit the Home page.</Note>
-        </Sec>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', textTransform: 'uppercase', color: 'var(--on-surface)', marginTop: 20 }}>{user.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--on-surface-variant)', marginTop: 6 }}><Shield size={14} /> {overall.name} · Olympus League</div>
+        <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+          <button style={{ background: 'var(--signature-gradient)', color: 'var(--on-primary)', borderRadius: 14, fontWeight: 700, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.12em', padding: '0 24px', height: 48, border: 'none', cursor: 'pointer' }} onClick={() => { document.getElementById('personal-details')?.scrollIntoView({ behavior: 'smooth' }); setEd(true); }}>Edit Profile</button>
+          <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 14, width: 48, height: 48, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => addToast('Profile shared!', 'success')}><Share2 size={20} /></button>
+        </div>
       </div>
 
-      <Sec n="06" label="Connected devices">
-        <LedgerRow k="Fitbit" v="Connect" sub=" · auto-sync steps daily" onClick={() => { window.location.href = `/fitbit/authorize?state=${user.id}`; }} />
-        <LedgerRow k="Strava" v="Connect" sub=" · auto-sync cardio runs & rides" onClick={() => { window.location.href = `/strava/authorize?state=${user.id}`; }} />
-      </Sec>
+      {/* Stats Strip (9.8) */}
+      <div className="profile-metrics-grid">
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMI</span><span style={{ fontSize: 8, background: 'var(--surface-container-highest)', borderRadius: 8, color: 'var(--on-surface-variant)', padding: '3px 8px' }}>{getBMICat(bmi).label}</span></div>
+          <div className="display-lg" style={{ color: 'var(--primary)' }}>{bmi}</div>
+        </div>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BF%</div>
+          <div className="display-lg" style={{ color: 'var(--primary)' }}>{latestBFPct ? `${latestBFPct.toFixed(1)}%` : '—'}</div>
+        </div>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
+          <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{bmr}</div>
+          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
+        </div>
+        <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>TDEE</div>
+          <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{tdee}</div>
+          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
+        </div>
+      </div>
 
-      <Sec n="07" label="Metabolism & targets">
-        <LedgerRow k="Adaptive TDEE">
-          <SegToggle options={[
-            { label: 'On', active: !!tdeePreferences?.useEstimatedTDEE, onClick: () => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: true })) },
-            { label: 'Off', active: !tdeePreferences?.useEstimatedTDEE, onClick: () => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: false })) },
-          ]} />
-        </LedgerRow>
-        <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-          <span className="meta">Auto-adjust targets based on weight & food logs</span>
+      {/* Muscle Mastery (9.4) */}
+      <div style={{ marginBottom: 40 }}>
+        <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 16 }}>Muscle Mastery</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {top4.map((m) => {
+            const xp = muscleXP[m.key] || 0;
+            const isAct = xp > 200;
+            const rank = getRank(xp);
+            const w = Math.max(2, rank.progress * 100);
+            return (
+              <div key={m.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface)' }}>{m.label}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                    <span style={{ fontSize: 9, color: 'var(--on-surface-variant)', fontWeight: 600 }}>{rank.name.toUpperCase()}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: isAct ? 'var(--primary)' : 'var(--on-surface-variant)' }}>{Math.floor(xp).toLocaleString()} XP</span>
+                  </div>
+                </div>
+                <div style={{ height: 12, borderRadius: 6, background: 'var(--surface-container-lowest)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${w}%`, background: isAct ? 'var(--signature-gradient)' : 'var(--surface-container-highest)', boxShadow: isAct ? '0 0 12px rgba(248,95,27,0.4)' : 'none', borderRadius: 6, transition: 'width 1s ease' }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Elite Achievements (9.5) */}
+      <div style={{ marginBottom: 40 }}>
+        <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 16 }}>Elite Achievements</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          {achievements.map(ach => (
+            <div key={ach.id} style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 20, opacity: ach.locked ? 0.4 : 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: ach.locked ? 'var(--surface-container-highest)' : 'rgba(255,181,155,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: ach.locked ? 'var(--on-surface-variant)' : 'var(--primary)' }}><ach.icon size={24} /></div>
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--on-surface)' }}>{ach.label}</div>
+              <div style={{ fontSize: 10, color: 'var(--on-surface-variant)', lineHeight: 1.5 }}>{ach.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Personal Details (9.6) */}
+      <div id="personal-details" style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: '18px 20px', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, alignItems: 'center' }}>
+          <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Personal Details</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {ed && <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: 'var(--on-surface-variant)', background: 'transparent' }} onClick={() => setEd(false)}>Cancel</button>}
+            <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : 'Edit'}</button>
+          </div>
         </div>
 
-        <LedgerRow k="Manual TDEE override" v={tdeePreferences?.manualTDEEOverride ? `${tdeePreferences.manualTDEEOverride} kcal` : 'Set manual'} onClick={() => setShowManualTDEEPicker(true)} />
-        <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-          <span className="meta">Force a specific baseline</span>
-          {tdeePreferences?.manualTDEEOverride && (
-            <TLink onClick={() => setTdeePreferences(p => ({ ...p, manualTDEEOverride: null }))} style={{ color: 'var(--bad)' }}>Clear manual override</TLink>
-          )}
-        </div>
-      </Sec>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Row 1: Full Name, Email */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+            {[{ l: 'Full Name', k: 'name', t: 'text' }, { l: 'Email', k: 'email', t: 'email' }].map(fld => {
+              const dispVal = user[fld.k] || '—';
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+          </div>
 
-      <Sec n="08" label="Notifications">
+          {/* Row 2: Age, Weight, Height, Gender */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 10 }}>
+            {[{ l: 'Age', k: 'age', t: 'number', min: 10, max: 100 }, { l: unitWeight === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)', k: 'weight', t: 'number' }, { l: unitHeight === 'ft' ? 'Height (ft/in)' : 'Height (cm)', k: 'height', t: 'number' }].map(fld => {
+              const v = user[fld.k];
+              let dispVal = (!v && v !== 0) ? '—' : String(v);
+              if (v && unitWeight === 'lbs' && fld.k === 'weight') dispVal = kgToLbs(v);
+              if (v && unitHeight === 'ft' && fld.k === 'height') dispVal = cmToFtIn(v);
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} min={fld.min} max={fld.max} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, fontFamily: 'monospace' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+            
+            <div style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="input-gender" style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>Gender</label>
+              {ed ? (
+                <select id="input-gender" value={f.gender} onChange={sf('gender')} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, textTransform: 'capitalize' }}>{user.gender || '—'}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3: Workout Days, Steps, Activity */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
+            {[{ l: 'Workout Days/Week', k: 'workoutDays', t: 'number', min: 1, max: 7 }, { l: 'Daily Steps Goal', k: 'stepGoal', t: 'number', placeholder: 'e.g. 10000' }, { l: 'Daily Water Goal (ml)', k: 'waterGoal', t: 'number', placeholder: 'e.g. 3000' }].map(fld => {
+              const dispVal = (!user[fld.k] && user[fld.k] !== 0) ? '—' : String(user[fld.k]);
+              return (
+                <div key={fld.k} style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label htmlFor={`input-${fld.k}`} style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>{fld.l}</label>
+                  {ed ? <input id={`input-${fld.k}`} type={fld.t} placeholder={fld.placeholder} min={fld.min} max={fld.max} value={f[fld.k] || ''} onChange={sf(fld.k)} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }} /> : <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500, fontFamily: 'monospace' }}>{dispVal}</div>}
+                </div>
+              );
+            })}
+            
+            <div style={{ background: 'var(--surface-container)', borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="input-activityLevel" style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontFamily: "'Space Grotesk', sans-serif" }}>Activity Level</label>
+              {ed ? (
+                <select id="input-activityLevel" value={f.activityLevel} onChange={sf('activityLevel')} style={{ padding: '6px 0', fontSize: 13, width: '100%', background: 'transparent', border: 'none', color: 'var(--on-surface)', outline: 'none' }}>
+                  {Object.entries(ACTIVITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--on-surface)', fontWeight: 500 }}>{ACTIVITY[user.activityLevel || 'moderate']?.label || '—'}</div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', marginTop: 12, textAlign: 'right' }}>To update your goal weight, visit the Home page.</div>
+      </div>
+
+      {/* Connected Devices (9.6b) */}
+      <div id="connected-devices" style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 16 }}>Connected Devices</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
+          <button
+            onClick={() => {
+              window.location.href = `/fitbit/authorize?state=${user.id}`;
+            }}
+            style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            <Link size={16} /> Connect Fitbit — Auto-sync steps daily
+          </button>
+          <button
+            onClick={() => {
+              window.location.href = `/strava/authorize?state=${user.id}`;
+            }}
+            style={{ width: '100%', padding: '14px', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            <Bike size={16} /> Connect Strava — Auto-sync cardio runs & rides
+          </button>
+        </div>
+      </div>
+
+      {/* Adaptive TDEE Settings */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Metabolism & Targets</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+           <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Adaptive TDEE</div>
+              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Auto-adjust targets based on weight & food logs</div>
+           </div>
+           <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+             <button onClick={() => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: true }))} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: tdeePreferences?.useEstimatedTDEE ? 'var(--primary)' : 'transparent', color: tdeePreferences?.useEstimatedTDEE ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ON</button>
+             <button onClick={() => setTdeePreferences(p => ({ ...p, useEstimatedTDEE: false }))} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: !tdeePreferences?.useEstimatedTDEE ? 'var(--primary)' : 'transparent', color: !tdeePreferences?.useEstimatedTDEE ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>OFF</button>
+           </div>
+        </div>
+        <div style={{ height: 1, background: 'var(--surface-container-highest)', margin: '16px 0' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+           <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Manual TDEE Override</div>
+              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Force a specific baseline</div>
+           </div>
+           <button style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }} onClick={() => setShowManualTDEEPicker(true)}>
+              {tdeePreferences?.manualTDEEOverride ? `${tdeePreferences.manualTDEEOverride} kcal` : 'Set manual'}
+           </button>
+        </div>
+        {tdeePreferences?.manualTDEEOverride && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+            <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setTdeePreferences(p => ({ ...p, manualTDEEOverride: null }))}>Clear manual override</button>
+          </div>
+        )}
+      </div>
+
+      {/* Notifications */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Notifications</div>
+        
         {!pushEnabled && (
-          <>
-            <Note>Enable push notifications — get alerts for streaks and Olympus League ranking.</Note>
-            <Action onClick={enablePush}>Enable push notifications</Action>
-          </>
+          <div style={{ background: 'var(--surface-container)', borderRadius: 16, padding: 16, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Bell size={20} color="var(--primary)" />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Enable Push Notifications</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Get alerts for streaks and Olympus League ranking.</div>
+              </div>
+            </div>
+            <button onClick={enablePush} style={{ background: 'var(--primary)', color: 'var(--on-primary)', padding: '10px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>Enable Push Notifications</button>
+          </div>
         )}
 
         {pushEnabled && (
-          <>
-            <LedgerRow k="Push notifications" v="Enabled on this device" />
-            <div className="rowf" style={{ justifyContent: 'flex-end', marginTop: -6, paddingBottom: 10 }}>
-              <TLink onClick={disablePush}>Disable</TLink>
-            </div>
-          </>
+          <div style={{ background: 'var(--surface-container)', borderRadius: 16, padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div>
+               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Push Notifications</div>
+               <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Enabled on this device</div>
+             </div>
+             <button onClick={disablePush} style={{ background: 'var(--surface-container-highest)', color: 'var(--on-surface)', padding: '8px 12px', borderRadius: 10, border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>Disable</button>
+          </div>
         )}
 
         {!prefsLoading && preferences && (
-          Object.entries({
-            email_weekly: { label: 'Weekly Summary Email', desc: 'Your progress delivered to your inbox every Sunday' },
-            ...(pushEnabled ? {
-              workout_reminders: { label: 'Workout Reminders', desc: 'Daily nudges to hit your goals' },
-              diet_reminders: { label: 'Diet Reminders', desc: 'Alerts to log your meals' },
-              streak_alerts: { label: 'Streak Alerts', desc: 'Warning before you lose a streak' },
-              olympus_weekly: { label: 'Olympus Weekly', desc: 'Weekly ranking summary via Push' },
-              olympus_overtaken: { label: 'Overtaken Alerts', desc: 'When someone passes your rank' }
-            } : {})
-          }).map(([key, info]) => (
-            <div key={key}>
-              <LedgerRow k={info.label}>
-                <SegToggle options={[
-                  { label: 'On', active: !!preferences[key], onClick: () => updatePreferences({ [key]: true }) },
-                  { label: 'Off', active: !preferences[key], onClick: () => updatePreferences({ [key]: false }) },
-                ]} />
-              </LedgerRow>
-              <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-                <span className="meta">{info.desc}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {Object.entries({
+              email_weekly: { label: 'Weekly Summary Email', desc: 'Your progress delivered to your inbox every Sunday' },
+              ...(pushEnabled ? {
+                workout_reminders: { label: 'Workout Reminders', desc: 'Daily nudges to hit your goals' },
+                diet_reminders: { label: 'Diet Reminders', desc: 'Alerts to log your meals' },
+                streak_alerts: { label: 'Streak Alerts', desc: 'Warning before you lose a streak' },
+                olympus_weekly: { label: 'Olympus Weekly', desc: 'Weekly ranking summary via Push' },
+                olympus_overtaken: { label: 'Overtaken Alerts', desc: 'When someone passes your rank' }
+              } : {})
+            }).map(([key, info]) => (
+              <div key={key}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>{info.label}</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>{info.desc}</div></div>
+                   <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+                     <button onClick={() => updatePreferences({ [key]: true })} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: preferences[key] ? 'var(--primary)' : 'transparent', color: preferences[key] ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ON</button>
+                     <button onClick={() => updatePreferences({ [key]: false })} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: !preferences[key] ? 'var(--primary)' : 'transparent', color: !preferences[key] ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>OFF</button>
+                   </div>
+                </div>
+                {key !== 'olympus_overtaken' && <div style={{ height: 1, background: 'var(--surface-container-highest)', marginTop: 16 }} />}
               </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Settings & Actions (9.7) */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Settings</div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+          {/* Weight */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Weight Unit</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Log and display weight</div></div>
+             <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+               <button onClick={toggleUnitWeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitWeight === 'kg' ? 'var(--primary)' : 'transparent', color: unitWeight === 'kg' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>KG</button>
+               <button onClick={toggleUnitWeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitWeight === 'lbs' ? 'var(--primary)' : 'transparent', color: unitWeight === 'lbs' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>LBS</button>
+             </div>
+          </div>
+          <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />
+          {/* Height */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Height Unit</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Profile height display</div></div>
+             <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
+               <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'cm' ? 'var(--primary)' : 'transparent', color: unitHeight === 'cm' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>CM</button>
+               <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'ft' ? 'var(--primary)' : 'transparent', color: unitHeight === 'ft' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>FT/IN</button>
+             </div>
+          </div>
+          <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />
+          {/* Theme */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Theme</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Switch display mode</div></div>
+             <ThemeTogglePill />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+           <button style={{ width: '100%', background: 'var(--surface-container-highest)', color: 'var(--on-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '12px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 13 }} onClick={handleExport}><Download size={16} /> Export Data</button>
+        </div>
+        
+        <button style={{ width: '100%', background: 'rgba(255,107,107,0.08)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14 }} onClick={() => setConfirm(true)}><LogOut size={16} /> Logout</button>
+      </div>
+
+      {/* Feedback Card */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, marginTop: 12, overflow: 'hidden' }}>
+        <button
+          onClick={() => setFeedbackOpen(v => !v)}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: 'var(--surface-container-high)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MessageSquare size={16} color="var(--primary)" />
             </div>
-          ))
-        )}
-      </Sec>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--on-surface)' }}>Feedback & Bugs</div>
+              <div style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 2 }}>Help us improve Kaaya Fit</div>
+            </div>
+          </div>
+          <ChevronDown size={18} color="var(--on-surface-dim)" style={{ transform: feedbackOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        </button>
 
-      <Sec n="09" label="Settings">
-        <LedgerRow k="Weight unit">
-          <SegToggle options={[
-            { label: 'KG', active: unitWeight === 'kg', onClick: toggleUnitWeight },
-            { label: 'LBS', active: unitWeight === 'lbs', onClick: toggleUnitWeight },
-          ]} />
-        </LedgerRow>
-        <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-          <span className="meta">Log and display weight</span>
-        </div>
-
-        <LedgerRow k="Height unit">
-          <SegToggle options={[
-            { label: 'CM', active: unitHeight === 'cm', onClick: toggleUnitHeight },
-            { label: 'FT/IN', active: unitHeight === 'ft', onClick: toggleUnitHeight },
-          ]} />
-        </LedgerRow>
-        <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-          <span className="meta">Profile height display</span>
-        </div>
-
-        <LedgerRow k="Theme">
-          <ThemeTogglePill />
-        </LedgerRow>
-        <div className="rowf between" style={{ marginTop: -6, paddingBottom: 10 }}>
-          <span className="meta">Switch display mode</span>
-        </div>
-
-        <div className="rowf g12" style={{ marginTop: 12 }}>
-          <TLink onClick={handleExport}>Export data</TLink>
-          <TLink onClick={() => setConfirm(true)} style={{ color: 'var(--bad)' }}>Logout</TLink>
-        </div>
-      </Sec>
-
-      <Sec n="10" label="Feedback & bugs">
-        <LedgerRow k="Help us improve Kaaya Fit" v={feedbackOpen ? 'Close' : 'Open'} onClick={() => setFeedbackOpen(v => !v)} />
-        {feedbackOpen && (
-          feedbackStatus === 'sent' ? (
-            <Note>Feedback sent — thank you! Your input helps shape the future of Kaaya Fit.</Note>
-          ) : feedbackStatus === 'error' ? (
-            <Note>Failed to send — something went wrong. Please try again later.</Note>
-          ) : (
-            <>
-              <div className="field">
-                <span>Subject</span>
-                <input className="input" type="text" placeholder="Subject (e.g. Bug, Feature Request)" value={feedbackSubject} onChange={e => setFeedbackSubject(e.target.value)} />
+        <div style={{ maxHeight: feedbackOpen ? 500 : 0, opacity: feedbackOpen ? 1 : 0, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', overflow: 'hidden' }}>
+          <div style={{ padding: '0 20px 20px 20px' }}>
+            <div style={{ height: 1, background: 'var(--surface-container-highest)', marginBottom: 16 }} />
+            
+            {feedbackStatus === 'sent' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>
+                <CheckCircle size={32} color="var(--primary)" />
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Feedback Sent</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Thank you! Your input helps shape the future of Kaaya Fit.</div>
               </div>
-              <div className="field">
-                <span>Message</span>
-                <textarea className="input" placeholder="Tell us what's on your mind..." value={feedbackMessage} onChange={e => setFeedbackMessage(e.target.value)} rows={4} style={{ resize: 'vertical', minHeight: 80 }} />
+            ) : feedbackStatus === 'error' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 12 }}>
+                <AlertCircle size={32} color="var(--danger)" />
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>Failed to send</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center' }}>Something went wrong. Please try again later.</div>
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '4px 0' }}>
-                <input type="checkbox" checked={includeProfile} onChange={e => setIncludeProfile(e.target.checked)} style={{ accentColor: 'var(--ember)' }} />
-                <span className="meta">Include basic profile data (helps with debugging)</span>
-              </label>
-              <Action ember onClick={handleFeedbackSubmit} disabled={!feedbackMessage.trim() || feedbackStatus === 'sending'}>
-                {feedbackStatus === 'sending' ? 'Sending…' : 'Send feedback'}
-              </Action>
-            </>
-          )
-        )}
-      </Sec>
-    </Screen>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input
+                  type="text"
+                  placeholder="Subject (e.g. Bug, Feature Request)"
+                  value={feedbackSubject}
+                  onChange={e => setFeedbackSubject(e.target.value)}
+                  style={{ width: '100%', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--on-surface)', outline: 'none' }}
+                />
+                <textarea
+                  placeholder="Tell us what's on your mind..."
+                  value={feedbackMessage}
+                  onChange={e => setFeedbackMessage(e.target.value)}
+                  rows={4}
+                  style={{ width: '100%', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--on-surface)', outline: 'none', resize: 'vertical', minHeight: 80 }}
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '4px 0' }}>
+                  <input type="checkbox" checked={includeProfile} onChange={e => setIncludeProfile(e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                  <span style={{ fontSize: 11, color: 'var(--on-surface-variant)' }}>Include basic profile data (helps with debugging)</span>
+                </label>
+                <button
+                  onClick={handleFeedbackSubmit}
+                  disabled={!feedbackMessage.trim() || feedbackStatus === 'sending'}
+                  style={{ width: '100%', background: 'var(--primary)', color: 'var(--on-primary)', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 700, cursor: feedbackMessage.trim() && feedbackStatus !== 'sending' ? 'pointer' : 'not-allowed', opacity: feedbackMessage.trim() && feedbackStatus !== 'sending' ? 1 : 0.5, marginTop: 4, transition: 'opacity 0.2s' }}
+                >
+                  {feedbackStatus === 'sending' ? 'Sending...' : 'Send Feedback'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+    </div>
 
     <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
     <AvatarPickerModal open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />

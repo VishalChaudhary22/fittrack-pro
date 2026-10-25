@@ -203,7 +203,7 @@ export default function EditWorkoutModal({ log, splits, onSave, onClose }) {
             ) : availableFromSplit.map(ex => (
               <div 
                 key={ex.name} 
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, cursor: 'pointer', background: 'var(--surface-container-low)', borderRadius: 20, border: '1px solid var(--outline-variant)' }} 
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, cursor: 'pointer', background: 'var(--surface-container-low)', borderRadius: 20, borderLeft: '3px solid var(--primary-container)' }} 
                 onClick={() => handleAddFromSplit(ex)}
               >
                 <div>

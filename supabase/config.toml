@@ -454,3 +454,8 @@ entrypoint = "./functions/unsubscribe/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/send-weekly-email/index.ts"
+
+[functions.send-feedback]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/send-feedback/index.ts"

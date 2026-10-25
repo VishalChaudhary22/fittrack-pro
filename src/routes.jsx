@@ -29,6 +29,7 @@ const V1_PAGES = {
 // Volt twins register here as they land (V-3+). Empty = every route is V1.
 const VOLT_PAGES = {
   '/': lazy(() => import('./ui/volt/pages/TodayPage')),
+  '/workout': lazy(() => import('./ui/volt/pages/WorkoutPage')),
 };
 
 function SkinFallback() {

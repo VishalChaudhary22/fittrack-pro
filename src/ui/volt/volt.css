@@ -278,6 +278,39 @@
   animation: v-rise 280ms var(--v-ease-out) both;
 }
 
+/* ─── Press feedback + sheet/pop entrances (Emil curves, plan §7) ──────────── */
+
+.v-press {
+  transition: transform 160ms var(--v-ease-out);
+}
+.v-press:active {
+  transform: scale(0.97);
+}
+
+@keyframes v-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.v-sheet-up {
+  animation: v-sheet-up 320ms var(--v-ease-drawer) both;
+}
+
+@keyframes v-pop {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.v-pop {
+  animation: v-pop 200ms var(--v-ease-out) both;
+}
+
+@keyframes v-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.v-dot {
+  animation: v-dot 1.6s ease-in-out infinite;
+}
+
 /* ─── Reduced motion: movement off, 150ms fades stay ───────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

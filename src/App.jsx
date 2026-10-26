@@ -10,6 +10,7 @@ import NotificationPrompt from './ui/v1/shared/NotificationPrompt';
 import { useChatbot } from './core/hooks/useChatbot';
 import ChatbotButton from './ui/v1/shared/ChatbotButton';
 import ChatbotModal from './ui/v1/shared/ChatbotModal';
+import { VoltChatbotButton, VoltChatbotModal } from './ui/volt/shared/VoltChatbot';
 
 function AppInner() {
   const { user, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
@@ -61,10 +62,10 @@ function AppInner() {
       {isVolt ? <VoltShellNav /> : <BottomNav />}
       {isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
       <NotificationPrompt />
-      <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />
-      {chatbot.isOpen && (
-        <ChatbotModal chatbot={chatbot} user={user} />
-      )}
+      {isVolt ? <VoltChatbotButton onClick={chatbot.openChat} userName={user?.name} /> : <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />}
+      {chatbot.isOpen && (isVolt
+        ? <VoltChatbotModal chatbot={chatbot} user={user} />
+        : <ChatbotModal chatbot={chatbot} user={user} />)}
     </div>
   );
 }

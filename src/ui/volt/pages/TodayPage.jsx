@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { X, ChevronRight, RefreshCw, Sun, Moon, TrendingUp, TrendingDown, Share } from 'lucide-react';
+import { X, ChevronRight, RefreshCw, TrendingUp, TrendingDown, Share } from 'lucide-react';
 import { ModalPortal } from '../../v1/shared/SharedComponents';
-import { VoltSheet, VoltScrollPicker } from '../shared/VoltShared';
+import { VoltSheet, VoltScrollPicker, VoltThemeToggle } from '../shared/VoltShared';
 import VoltReadinessCheckIn from '../shared/VoltReadinessCheckIn';
 import { VoltBodyFatCard } from '../shared/VoltBodyFat';
-import { useApp } from '../../../core/context/AppContext';
 import { useToday } from '../../../core/hooks/useToday';
 import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
 import { useSpringNumber, SPRING_DATA, EASE_OUT } from '../../../core/motion/springs';
@@ -206,7 +205,6 @@ function ReadinessLab({ user, activeScore, activeTier, hasCompletedReadiness, sp
 
 export default function TodayPage() {
   useScrollRestoration('/');
-  const { theme, toggleTheme } = useApp();
   const {
     navigate, user, updateProfile, addToast, logSteps, tdeeEstimate,
     showCheckIn, setShowCheckIn, showStepModal, setShowStepModal,
@@ -266,10 +264,7 @@ export default function TodayPage() {
         <header className="v-rise" style={riseStyle()}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
             <VoltLabel volt>{new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</VoltLabel>
-            <button type="button" className="v-chip" onClick={toggleTheme} style={{ cursor: 'pointer' }} aria-label="Toggle light or dark theme">
-              {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-              {theme === 'dark' ? 'LIGHT' : 'DARK'}
-            </button>
+            <VoltThemeToggle />
           </div>
           <h1 className="v-num" style={{ fontSize: 'clamp(2.3rem, 9vw, 3.6rem)', lineHeight: 0.98, margin: '12px 0 0', textTransform: 'uppercase' }}>
             {isNewUser ? 'Welcome,' : 'Welcome back,'}<br />{firstName}

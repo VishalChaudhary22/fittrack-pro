@@ -64,20 +64,20 @@ export const muscleIdFromDisplayName = (displayName) => {
 
 // ─── RANK TIERS ──────────────────────────────────────────────────────────────
 const TIER_STYLES = [
-  { name: 'Untrained',  color: '#8A8A96',  bg: 'rgba(100,100,110,.18)' },
-  { name: 'Bronze I',   color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
-  { name: 'Bronze II',  color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
-  { name: 'Bronze III', color: '#CD7F32',  bg: 'rgba(205,127,50,.15)' },
-  { name: 'Silver I',   color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
-  { name: 'Silver II',  color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
-  { name: 'Silver III', color: '#7A8FA6',  bg: 'rgba(100,130,160,.18)' },
-  { name: 'Gold I',     color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },
-  { name: 'Gold II',    color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },
-  { name: 'Gold III',   color: '#FFD700',  bg: 'rgba(255,215,0,.15)' },
-  { name: 'Platinum',   color: '#40E0D0',  bg: 'rgba(64,224,208,.15)' },
-  { name: 'Diamond',    color: '#B9F2FF',  bg: 'rgba(185,242,255,.15)' },
-  { name: 'Master',     color: '#FF69B4',  bg: 'rgba(255,105,180,.15)' },
-  { name: 'Legend',     color: '#FFB59B',  bg: 'linear-gradient(135deg,rgba(255,215,0,.2),rgba(232,84,13,.2))' },
+  { name: 'Untrained',  color: '#8A8A96',  bg: 'rgba(100,100,110,.22)' },
+  { name: 'Bronze I',   color: '#C2742A',  bg: 'rgba(194,116,42,.22)' },
+  { name: 'Bronze II',  color: '#C2742A',  bg: 'rgba(194,116,42,.22)' },
+  { name: 'Bronze III', color: '#C2742A',  bg: 'rgba(194,116,42,.22)' },
+  { name: 'Silver I',   color: '#5E7E9C',  bg: 'rgba(94,126,156,.22)' },
+  { name: 'Silver II',  color: '#5E7E9C',  bg: 'rgba(94,126,156,.22)' },
+  { name: 'Silver III', color: '#5E7E9C',  bg: 'rgba(94,126,156,.22)' },
+  { name: 'Gold I',     color: '#DFA106',  bg: 'rgba(223,161,6,.22)' },
+  { name: 'Gold II',    color: '#DFA106',  bg: 'rgba(223,161,6,.22)' },
+  { name: 'Gold III',   color: '#DFA106',  bg: 'rgba(223,161,6,.22)' },
+  { name: 'Platinum',   color: '#12B5A5',  bg: 'rgba(18,181,165,.22)' },
+  { name: 'Diamond',    color: '#4DB8E8',  bg: 'rgba(77,184,232,.22)' },
+  { name: 'Master',     color: '#FF69B4',  bg: 'rgba(255,105,180,.22)' },
+  { name: 'Legend',     color: '#FF8A5C',  bg: 'linear-gradient(135deg,rgba(223,161,6,.28),rgba(232,84,13,.28))' },
 ];
 
 export const getTierColor = (tierName) => {

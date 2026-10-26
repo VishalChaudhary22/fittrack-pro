@@ -14,9 +14,9 @@ function VoltRankBadge({ rank, size = 'md' }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: `${sz.py}px ${sz.px}px`, borderRadius: 7,
-      background: rank.bg, border: `1.5px solid ${rank.color}`,
+      background: rank.color, border: '2px solid var(--v-edge)',
       fontFamily: "'JetBrains Mono', monospace",
-      fontSize: sz.fs, fontWeight: 700, color: rank.color,
+      fontSize: sz.fs, fontWeight: 700, color: '#141416',
       textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap',
     }}>
       <Shield size={sz.icon} /> {rank.name}

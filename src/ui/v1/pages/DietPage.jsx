@@ -1,4 +1,4 @@
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot, Target, Drumstick, Wheat, UtensilsCrossed, ClipboardList, BarChart3, Soup, Droplets, CookingPot, Package, Leaf } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { PageHeader } from '../shared/SharedComponents';
 import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
@@ -233,7 +233,7 @@ export default function DietPage({ chatbot }) {
         <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, border: '1px solid var(--outline-variant)', boxShadow: 'var(--glow-primary)', marginBottom: 24, position: 'relative' }}>
           {isUnset ? (
             <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <span className="headline-md" style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🎯</span>
+              <span style={{ display: 'block', marginBottom: 16 }}><Target size={44} color="var(--primary)" /></span>
               <h2 className="headline-lg" style={{ fontSize: 24, marginBottom: 12, color: 'var(--on-surface)' }}>Targets Locked</h2>
               <p style={{ fontSize: 14, color: 'var(--on-surface-variant)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
                 Complete your profile with your age, height, current weight, and target weight to generate your personalized macros.
@@ -255,13 +255,13 @@ export default function DietPage({ chatbot }) {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap', background: 'var(--surface-container-highest)', padding: '8px 16px', borderRadius: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🔥 </span>{goalKcal} kcal{isCustomTarget ? ' ✦' : ''}</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><Flame size={11} color="var(--on-surface-dim)" /> {goalKcal} kcal{isCustomTarget ? ' · CUSTOM' : ''}</div>
             <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>💪 </span>{protTarget}g P</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><Drumstick size={11} color="var(--on-surface-dim)" /> {protTarget}g P</div>
             <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🌾 </span>{carbsTarget}g C</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><Wheat size={11} color="var(--on-surface-dim)" /> {carbsTarget}g C</div>
             <span style={{ color: 'var(--outline)' }}>·</span>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><span style={{ color: 'var(--on-surface-dim)' }}>🧈 </span>{fatTarget}g F</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)' }}><Droplet size={11} color="var(--on-surface-dim)" /> {fatTarget}g F</div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 24, justifyContent: 'center' }}>
@@ -300,7 +300,7 @@ export default function DietPage({ chatbot }) {
                 onClick={() => updateProfile({ customGoalKcal: null, customProteinG: null })}
                 style={{ fontSize: 11, fontWeight: 600, color: 'var(--on-surface-dim)', background: 'var(--surface-container-highest)', border: 'none', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
               >
-                ✦ Custom target active · <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Reset to calculated</span>
+                Custom target active · <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Reset to calculated</span>
               </button>
             </div>
           )}
@@ -311,13 +311,13 @@ export default function DietPage({ chatbot }) {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
           <div style={{ display: 'flex', background: 'var(--surface-container-highest)', borderRadius: 24, padding: 4 }}>
             <button onClick={() => setActiveTab('tracker')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'tracker' ? 'var(--primary)' : 'transparent', color: activeTab === 'tracker' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              🍽 Daily Tracker
+              <UtensilsCrossed size={15} /> Daily Tracker
             </button>
             <button onClick={() => setActiveTab('guide')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'guide' ? 'var(--primary)' : 'transparent', color: activeTab === 'guide' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              📋 Meal Guide
+              <ClipboardList size={15} /> Meal Guide
             </button>
             <button onClick={() => setActiveTab('analysis')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 20, border: 'none', fontSize: 14, fontWeight: 700, background: activeTab === 'analysis' ? 'var(--primary)' : 'transparent', color: activeTab === 'analysis' ? 'var(--on-primary)' : 'var(--on-surface-variant)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              📊 Analysis
+              <BarChart3 size={15} /> Analysis
             </button>
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function DietPage({ chatbot }) {
             {/* BLUEPRINT HEADER CARD */}
             <div style={{ background: 'var(--surface-container-lowest)', padding: 24, borderRadius: 16, borderLeft: '4px solid var(--primary)', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span className="headline-md" style={{ fontSize: 20, color: 'var(--on-surface)' }}>📋 Your Personalised Meal Blueprint</span>
+                <span className="headline-md" style={{ fontSize: 20, color: 'var(--on-surface)' }}><ClipboardList size={19} /> Your Personalised Meal Blueprint</span>
               </div>
               <p style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>These are AI-curated meal suggestions based on your {goal === 'loss' ? 'cut' : goal === 'gain' ? 'bulk' : 'maintenance'} goal and {DIET_TYPES[diet].label} diet. Use these as a daily reference — log your actual intake in the Daily Tracker.</p>
             </div>
@@ -348,7 +348,7 @@ export default function DietPage({ chatbot }) {
               <div style={{ display: 'flex', gap: 6, background: 'var(--surface-container-highest)', padding: 4, borderRadius: 12 }}>
                 {Object.values(DIET_TYPES).map(d => (
                   <button key={d.id} onClick={() => handleSetDiet(d.id)} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 700, background: diet === d.id ? 'var(--primary)' : 'transparent', color: diet === d.id ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {d.icon} {d.label}
+                    <d.icon size={14} style={{ verticalAlign: '-2px' }} /> {d.label}
                   </button>
                 ))}
               </div>
@@ -608,7 +608,7 @@ export default function DietPage({ chatbot }) {
                         </div>
                         <div>
                           <h4 className="headline-md" style={{ fontSize: 18, margin: 0 }}>{slot.id}</h4>
-                          <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 4 }}>🔥 ~ {slotCals} Kcal • {Math.round(slot.targetPct * 100)}%</p>
+                          <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--on-surface-variant)', fontWeight: 600, marginTop: 4 }}><Flame size={11} style={{ verticalAlign: '-1px' }} /> ~ {slotCals} Kcal • {Math.round(slot.targetPct * 100)}%</p>
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -700,7 +700,7 @@ export default function DietPage({ chatbot }) {
                       <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
                         {selectedFood.servings?.map(s => (
                           <button key={s.id} onClick={() => {setServingId(s.id); setCustomGrams('');}} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: servingId === s.id && !customGrams ? 'var(--primary)' : 'var(--surface-container-highest)', color: servingId === s.id && !customGrams ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                            {s.isDeliveryPortion && '📦 '} {s.label} ({s.grams}g)
+                            {s.isDeliveryPortion && <Package size={12} style={{ verticalAlign: '-2px' }} />} {s.label} ({s.grams}g)
                             {servingId === s.id && s.grams && qty !== 1 && (
                               <span style={{ opacity: 0.8, marginLeft: 4 }}>
                                 → {Math.round(s.grams * qty * 10) / 10}g
@@ -783,12 +783,12 @@ export default function DietPage({ chatbot }) {
                         <div style={{ marginBottom: 16 }}>
                           <label>Consistency / Thickness</label>
                           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }} className="hide-scrollbar">
-                            <button onClick={() => setConsistency('standard')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'standard' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'standard' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🥣 Normal</button>
+                            <button onClick={() => setConsistency('standard')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'standard' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'standard' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}><Soup size={13} style={{ verticalAlign: '-2px' }} /> Normal</button>
                             {selectedFood.supportedConsistencyTypes.includes('thin') && (
-                              <button onClick={() => setConsistency('thin')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thin' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thin' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>💧 Watery (Thin)</button>
+                              <button onClick={() => setConsistency('thin')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thin' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thin' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}><Droplets size={13} style={{ verticalAlign: '-2px' }} /> Watery (Thin)</button>
                             )}
                             {selectedFood.supportedConsistencyTypes.includes('thick') && (
-                              <button onClick={() => setConsistency('thick')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thick' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thick' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}>🍲 Restaurant (Thick)</button>
+                              <button onClick={() => setConsistency('thick')} style={{ padding: '8px 12px', fontSize: 12, fontWeight: 600, background: consistency === 'thick' ? 'var(--primary)' : 'var(--surface-container-highest)', color: consistency === 'thick' ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' }}><CookingPot size={13} style={{ verticalAlign: '-2px' }} /> Restaurant (Thick)</button>
                             )}
                           </div>
                         </div>
@@ -846,7 +846,7 @@ export default function DietPage({ chatbot }) {
                       {/* Cooked Oil Chip */}
                       {(selectedFood.itemType === 'dish' || selectedFood.itemType === 'sabzi-veg' || selectedFood.itemType === 'dal-legume') && (
                         <div style={{ marginTop: 24, padding: 16, background: 'var(--surface-container-high)', borderRadius: 12 }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>🫙 Cooked in Oil/Ghee?</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--on-surface)' }}>Cooked in Oil/Ghee?</span>
                           <p style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 4, lineHeight: 1.5 }}>Indian dishes absorb variable amounts of fat. If this is a homemade dish cooked in oil, add a secondary 15g entry.</p>
                           <button className="btn-g" style={{ marginTop: 12, width: '100%', background: 'var(--surface-container-highest)' }} onClick={addCookingOil}>
                             + Add Cooking Oil/Ghee (130 Kcal)
@@ -975,7 +975,7 @@ export default function DietPage({ chatbot }) {
                     {searchResults.map(f => (
                       <div key={f.id} onClick={(e) => { e.stopPropagation(); handleSelectFood(f); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'var(--surface-container-low)', borderRadius: 16, cursor: 'pointer' }} className="group hover:bg-surface-container-high transition-colors">
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && ' 🕉️'}</p>
+                          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)', marginBottom: 6 }}>{f.name} {f.isFastingFood && <Leaf size={14} color="var(--primary)" style={{ verticalAlign: '-2px', marginLeft: 6 }} />}</p>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                             <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', fontWeight: 500 }}>{f.servings?.[0]?.label || 'Serving'}</span>
                             {f.hasBeverageModifiers && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--tertiary-container)', background: 'rgba(231, 108, 55, 0.1)', padding: '2px 8px', borderRadius: 6 }}>Build Drink</span>}

@@ -195,7 +195,7 @@ export default function ProfilePage() {
           <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Personal Details</div>
           <div style={{ display: 'flex', gap: 8 }}>
             {ed && <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: 'var(--on-surface-variant)', background: 'transparent' }} onClick={() => setEd(false)}>Cancel</button>}
-            <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? '✓ Save' : 'Edit'}</button>
+            <button style={{ fontSize: 12, padding: '8px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 600, color: ed ? 'var(--on-primary)' : 'var(--on-surface)', background: ed ? 'var(--signature-gradient)' : 'var(--surface-container-highest)' }} onClick={() => ed ? save() : setEd(true)}>{ed ? 'Save' : 'Edit'}</button>
           </div>
         </div>
 

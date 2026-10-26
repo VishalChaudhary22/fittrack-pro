@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { ACTIVITY } from '../../../data/constants';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
@@ -159,7 +159,7 @@ export default function VoltAuthModal() {
   if (mode === 'verify') {
     return shell(
       <VoltBlock hero style={{ padding: '36px 26px', textAlign: 'center' }}>
-        <div style={{ fontSize: 46, marginBottom: 14 }}>📧</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><Mail size={42} color="var(--v-volt-text)" /></div>
         <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.01em', marginBottom: 10 }}>Check your inbox</div>
         <div style={{ fontSize: 13.5, color: 'var(--v-dim)', marginBottom: 24, lineHeight: 1.6 }}>
           We sent a verification link to <strong style={{ color: 'var(--v-volt-text)' }}>{f.email}</strong>.
@@ -181,7 +181,7 @@ export default function VoltAuthModal() {
   if (mode === 'forgot-sent') {
     return shell(
       <VoltBlock hero style={{ padding: '36px 26px', textAlign: 'center' }}>
-        <div style={{ fontSize: 46, marginBottom: 14 }}>🔑</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><KeyRound size={42} color="var(--v-volt-text)" /></div>
         <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.01em', marginBottom: 10 }}>Reset link sent</div>
         <div style={{ fontSize: 13.5, color: 'var(--v-dim)', marginBottom: 24, lineHeight: 1.6 }}>
           We sent password reset instructions to <strong style={{ color: 'var(--v-volt-text)' }}>{f.email}</strong>.
@@ -290,7 +290,7 @@ export default function VoltAuthModal() {
           {/* Try demo button */}
           {mode === 'login' && (
             <VoltPill ghost disabled={loading} style={{ width: '100%' }} onClick={handleDemo}>
-              ⚡ Try Demo Account
+              <Zap size={14} /> Try Demo Account
             </VoltPill>
           )}
 

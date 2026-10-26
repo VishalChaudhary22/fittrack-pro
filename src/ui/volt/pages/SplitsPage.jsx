@@ -156,7 +156,7 @@ export default function VoltSplitsPage() {
                                     </div>
                                     {isAdmin && (
                                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                                        <button type="button" className="v-press" aria-label="Edit exercise" onClick={() => setEditEx(editEx === ex.id ? null : ex.id)} style={{ minWidth: 36, height: 36, borderRadius: 10, border: '2px solid var(--v-edge-quiet)', background: 'var(--v-panel)', color: 'var(--v-ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{editEx === ex.id ? '✓' : <Edit2 size={13} />}</button>
+                                        <button type="button" className="v-press" aria-label="Edit exercise" onClick={() => setEditEx(editEx === ex.id ? null : ex.id)} style={{ minWidth: 36, height: 36, borderRadius: 10, border: '2px solid var(--v-edge-quiet)', background: 'var(--v-panel)', color: 'var(--v-ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{editEx === ex.id ? <Check size={13} /> : <Edit2 size={13} />}</button>
                                         <button type="button" className="v-press" aria-label="Delete exercise" onClick={() => delEx(split.id, day.id, ex.id)} style={{ minWidth: 36, height: 36, borderRadius: 10, border: '2px solid var(--v-edge-quiet)', background: 'var(--v-panel)', color: 'var(--v-coral-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={13} /></button>
                                       </div>
                                     )}

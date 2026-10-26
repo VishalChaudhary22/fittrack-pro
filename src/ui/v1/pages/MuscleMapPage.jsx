@@ -65,7 +65,7 @@ const MuscleCard = ({ muscle, xp }) => {
           <span>
             {rank.progress < 1
               ? `Next: ${Math.round(rank.nextXP).toLocaleString()} XP`
-              : <span style={{ color: rank.color }}>✓ MAX TIER</span>}
+              : <span style={{ color: rank.color }}>MAX TIER</span>}
           </span>
         </div>
       </div>
@@ -145,7 +145,7 @@ export default function MuscleMapPage({ chatbot }) {
                   : myRank === undefined
                     ? 'Syncing to leaderboard…'
                     : myRank === 1
-                      ? 'You are #1! 🏆'
+                      ? 'You are #1!'
                       : topPercent <= 50
                         ? `You are in the top ${topPercent}%`
                         : `You are rank #${myRank}`}
@@ -153,7 +153,7 @@ export default function MuscleMapPage({ chatbot }) {
               <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
                 {overall.progress < 1
                   ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to reach the next tier`
-                  : '✦ Max tier reached'}
+                  : 'Max tier reached'}
               </div>
             </div>
             <div style={{

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dumbbell, Eye, EyeOff } from 'lucide-react';
+import { Dumbbell, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { ACTIVITY } from '../../../data/constants';
 
@@ -140,7 +140,7 @@ export default function AuthModal() {
     return (
       <div className="mo" style={{ background: 'radial-gradient(ellipse at 50% 100%,rgba(232,84,13,.15) 0%,var(--surface-container-lowest) 70%)' }}>
         <div className="md" style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center', background: 'var(--surface-container-lowest)', borderRadius: 24, border: '1px solid var(--surface-container-highest)', boxShadow: 'var(--shadow-lg)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><Mail size={44} color="var(--primary)" /></div>
           <div className="headline-md" style={{ marginBottom: 12 }}>Check your inbox</div>
           <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 24, lineHeight: 1.6 }}>
             We sent a verification link to <strong style={{ color: 'var(--primary)' }}>{f.email}</strong>.
@@ -164,7 +164,7 @@ export default function AuthModal() {
     return (
       <div className="mo" style={{ background: 'radial-gradient(ellipse at 50% 100%,rgba(232,84,13,.15) 0%,var(--surface-container-lowest) 70%)' }}>
         <div className="md" style={{ maxWidth: 420, width: '100%', padding: '40px 28px', textAlign: 'center', background: 'var(--surface-container-lowest)', borderRadius: 24, border: '1px solid var(--surface-container-highest)', boxShadow: 'var(--shadow-lg)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🔑</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><KeyRound size={44} color="var(--primary)" /></div>
           <div className="headline-md" style={{ marginBottom: 12 }}>Reset link sent</div>
           <div style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 24, lineHeight: 1.6 }}>
             We sent password reset instructions to <strong style={{ color: 'var(--primary)' }}>{f.email}</strong>.
@@ -274,7 +274,7 @@ export default function AuthModal() {
             {/* Try demo button */}
             {mode === 'login' && (
               <button className="btn-g" disabled={loading} style={{ width: '100%', padding: '11px', borderRadius: 12, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700 }} onClick={handleDemo}>
-                ⚡ Try Demo Account
+                <Zap size={14} /> Try Demo Account
               </button>
             )}
 

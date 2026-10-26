@@ -143,7 +143,7 @@ export const classifyScenario = (rateData, params) => {
         scenario: 'S6',
         severity: 'info',
         adjustKcal: 0,
-        message: "You're on track! 🎯",
+        message: "You're on track!",
         reasoning: `Losing ${Math.abs(rateKgPerWeek).toFixed(1)} kg/week — right in the sweet spot. Keep it up!`,
       };
     }
@@ -177,7 +177,7 @@ export const classifyScenario = (rateData, params) => {
         scenario: 'S6',
         severity: 'info',
         adjustKcal: 0,
-        message: "You're on track! 💪",
+        message: "You're on track!",
         reasoning: `Gaining ${rateKgPerWeek.toFixed(2)} kg/week — ideal pace for lean muscle growth. Keep it up!`,
       };
     }
@@ -209,7 +209,7 @@ export const classifyScenario = (rateData, params) => {
       scenario: 'S6',
       severity: 'info',
       adjustKcal: 0,
-      message: 'Weight is stable ✓',
+      message: 'Weight is stable',
       reasoning: 'Your weight is holding steady — maintenance targets are working well.',
     };
   }

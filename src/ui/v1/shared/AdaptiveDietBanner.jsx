@@ -70,7 +70,7 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
             <span style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: severityColor }}>
-              ⚡ Adaptive Coach
+              Adaptive Coach
             </span>
           </div>
           <div className="headline-md" style={{ fontSize: 14, color: 'var(--on-surface)' }}>
@@ -150,7 +150,7 @@ export default function AdaptiveDietBanner({ suggestion, currentKcal, newKcal, n
             fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
             letterSpacing: '0.15em', color: severityColor,
           }}>
-            ⚡ Adaptive Coach
+            Adaptive Coach
           </span>
         </div>
       </div>

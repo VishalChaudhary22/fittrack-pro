@@ -47,7 +47,7 @@ export function useDiet() {
      
      await setTdeePreferences?.(prev => ({ ...prev, useEstimatedTDEE: true }));
      await updateProfile({ customGoalKcal: computedKcal });
-     addToast('Targets successfully updated to adaptive TDEE! 🚀', 'success');
+     addToast('Targets successfully updated to adaptive TDEE!', 'success');
   };
 
   // Search State

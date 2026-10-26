@@ -77,7 +77,7 @@ export default function ChatbotButton({ onClick, hasUnread = false, userName }) 
           </button>
 
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--on-surface)', lineHeight: 1.45, paddingRight: 12 }}>
-            Hey {firstName} 👋
+            Hey {firstName}
           </div>
           <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 4, lineHeight: 1.4 }}>
             Need help with your workout or diet? I'm here.

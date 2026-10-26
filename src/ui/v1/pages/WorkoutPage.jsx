@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw, Flower2, AlertTriangle } from 'lucide-react';
 import { beatsAllTimePR } from '../../../utils/exerciseHistory';
 import { PageHeader, EmptyState, Portal, PulseIndicator, ConfirmDialog } from '../shared/SharedComponents';
 import { gId, tod, fmt, formatTimeAgo } from '../../../utils/helpers';
@@ -186,7 +186,7 @@ const YogaSessionView = ({ day, onBack, onComplete }) => {
           {dayFlowPreset && (
             <div className="card" style={{ padding: 24, background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h3 className="headline-md" style={{ fontSize: 18, display: 'flex', alignItems: 'center', gap: 8 }}>🧘 Today's Yoga Flow</h3>
+                <h3 className="headline-md" style={{ fontSize: 18, display: 'flex', alignItems: 'center', gap: 8 }}><Flower2 size={19} /> Today's Yoga Flow</h3>
                 <span style={{ color: 'var(--on-surface-variant)', fontSize: 13 }}>{dayFlowPreset.poses.length} poses • {(totalFlowDuration / 60).toFixed(1)} min</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
@@ -1008,7 +1008,7 @@ export default function WorkoutPage() {
 
         {done._newPRs && done._newPRs.length > 0 && (
           <div className="card" style={{ padding: 20, marginBottom: 16, background: 'var(--surface-container-low)', borderRadius: 16, border: '1px solid var(--primary-container)' }}>
-            <div className="label-md" style={{ color: 'var(--primary)', marginBottom: 12, textAlign: 'center' }}>NEW PERSONAL RECORDS! 🏆</div>
+            <div className="label-md" style={{ color: 'var(--primary)', marginBottom: 12, textAlign: 'center' }}>NEW PERSONAL RECORDS! <Trophy size={13} style={{ verticalAlign: '-2px' }} /></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {done._newPRs.map((pr, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container)', padding: 12, borderRadius: 12 }}>
@@ -1066,7 +1066,7 @@ export default function WorkoutPage() {
           syncUserXPToCache({ workoutLogs: newLogs, splits, user }).catch(console.warn);
           return newLogs;
         });
-        addToast('Yoga session logged! 🧘', 'success');
+        addToast('Yoga session logged!', 'success');
       };
       return <YogaSessionView day={session.day} onBack={() => { 
         setSession(null); 
@@ -1258,7 +1258,7 @@ export default function WorkoutPage() {
                         <Check size={18} strokeWidth={s.done ? 3 : 2} />
                       </button>
                       {ex.sets.length > 1 && (
-                        <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
+                        <button onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--on-surface-dim)', cursor: 'pointer', padding: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set"><X size={13} /></button>
                       )}
                     </div>
 
@@ -1416,7 +1416,7 @@ export default function WorkoutPage() {
             return (
               <div style={{ background: 'var(--surface-container-low)', borderLeft: '3px solid var(--primary-container)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 14 }}>⚠️</span>
+                  <span style={{ display: 'inline-flex' }}><AlertTriangle size={15} /></span>
                   <span className="label-md" style={{ color: 'var(--on-surface-variant)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     {`SESSION FROM ${hoursAgo}H AGO`}
                   </span>

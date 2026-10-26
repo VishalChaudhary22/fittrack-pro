@@ -29,11 +29,11 @@ export const getDisplayStepLog = (stepLogs, date) => {
 
 export const getSourceLabel = (source) => {
   const labels = {
-    fitbit: '🔵 From Fitbit',
-    strava: '🟣 From Strava',
-    apple_health: '🍎 From Apple Health',
-    browser_sensor: '📱 Browser sensor',
-    manual: '✋ Manual entry',
+    fitbit: 'From Fitbit',
+    strava: 'From Strava',
+    apple_health: 'From Apple Health',
+    browser_sensor: 'Browser sensor',
+    manual: 'Manual entry',
   };
   return labels[source] || source;
 };

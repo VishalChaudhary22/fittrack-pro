@@ -281,7 +281,7 @@ export default function VoltProfilePage() {
           <VoltLabel volt>Personal Details</VoltLabel>
           <div style={{ display: 'flex', gap: 8 }}>
             {ed && <VoltPill ghost onClick={() => setEd(false)} style={{ minHeight: 40, padding: '0 16px', fontSize: 12.5 }}>Cancel</VoltPill>}
-            <VoltPill onClick={() => ed ? save() : setEd(true)} style={{ minHeight: 40, padding: '0 18px', fontSize: 12.5 }}>{ed ? '✓ Save' : 'Edit'}</VoltPill>
+            <VoltPill onClick={() => ed ? save() : setEd(true)} style={{ minHeight: 40, padding: '0 18px', fontSize: 12.5 }}>{ed ? 'Save' : 'Edit'}</VoltPill>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

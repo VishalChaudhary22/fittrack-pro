@@ -1,5 +1,6 @@
 import { useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { Check, X, Info } from 'lucide-react';
 import { useApp } from '../../../core/context/AppContext';
 import { clamp } from '../../../utils/helpers';
 import { VoltPill } from '../primitives';
@@ -141,10 +142,10 @@ export const VoltToastContainer = ({ toasts, removeToast }) => (
   <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, display: 'flex', flexDirection: 'column', gap: 10 }}>
     {toasts.map(t => {
       const tone = t.type === 'error'
-        ? { bg: 'var(--v-coral)', fg: '#fff', icon: '✕' }
+        ? { bg: 'var(--v-coral)', fg: '#fff', icon: X }
         : t.type === 'info'
-          ? { bg: 'var(--v-cobalt)', fg: '#fff', icon: 'ℹ' }
-          : { bg: 'var(--v-volt)', fg: '#141416', icon: '✓' };
+          ? { bg: 'var(--v-cobalt)', fg: '#fff', icon: Info }
+          : { bg: 'var(--v-volt)', fg: '#141416', icon: Check };
       return (
         <div key={t.id} className="v-toast" style={{
           background: 'var(--v-panel)', color: 'var(--v-ink)',
@@ -153,7 +154,7 @@ export const VoltToastContainer = ({ toasts, removeToast }) => (
           cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           minWidth: 240, maxWidth: 380, opacity: t.exiting ? 0 : 1, transition: 'opacity 200ms ease',
         }} onClick={() => removeToast(t.id)}>
-          <span style={{ width: 22, height: 22, borderRadius: '50%', background: tone.bg, color: tone.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{tone.icon}</span>
+          <span style={{ width: 22, height: 22, borderRadius: '50%', background: tone.bg, color: tone.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{<tone.icon size={11} />}</span>
           <span>{t.message}</span>
         </div>
       );

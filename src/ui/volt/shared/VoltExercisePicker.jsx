@@ -113,6 +113,9 @@ export default function VoltExercisePicker({
               <div
                 key={ex.exerciseId}
                 onClick={() => onSelect(ex)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(ex); } }}
                 className="v-press"
                 style={{
                   padding: '14px 16px', background: 'var(--v-canvas)',

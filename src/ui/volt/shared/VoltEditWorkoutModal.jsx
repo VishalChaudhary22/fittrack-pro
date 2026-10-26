@@ -231,6 +231,9 @@ export default function VoltEditWorkoutModal({ log, splits, onSave, onClose }) {
               <div
                 key={ex.name}
                 className="v-press"
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAddFromSplit(ex); } }}
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', cursor: 'pointer', background: 'var(--v-canvas)', border: '2px solid var(--v-edge-quiet)', borderLeft: '5px solid var(--v-volt)', borderRadius: 14 }}
                 onClick={() => handleAddFromSplit(ex)}
               >

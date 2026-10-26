@@ -337,6 +337,14 @@
   .v-rise {
     animation: v-fade 150ms ease both;
   }
+  .v-sheet-up,
+  .v-sheet-down,
+  .v-pop {
+    animation: v-fade 150ms ease both;
+  }
+  .v-dot {
+    animation: none;
+  }
   .v-pill,
   .v-nav-item {
     transition: opacity 150ms ease;

@@ -420,7 +420,7 @@ export default function DietPage({ chatbot }) {
         <div style={{ marginBottom: 24 }}>
           {/* VITAMIN ALERTS */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-            {(diet === 'veg' || diet === 'vegan' || diet === 'jain') && weeklyMicros.vitaminB12 < 1.5 && (
+            {(diet === 'vegetarian' || diet === 'vegan') && weeklyMicros.vitaminB12 < 1.5 && (
               <div style={{ padding: 16, borderRadius: 12, background: 'rgba(232,84,13,0.1)', border: '1px solid var(--primary-container)' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <AlertTriangle size={18} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />

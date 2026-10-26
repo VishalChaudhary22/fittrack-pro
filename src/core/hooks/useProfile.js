@@ -82,7 +82,7 @@ export function useProfile() {
         weightGoal: user.weightGoal ?? '',
         activity: user.activity || 'moderate',
         workoutDays: user.workoutDays ?? 4,
-        dietType: user.dietType || 'veg',
+        dietType: ({ veg: 'vegetarian', jain: 'vegetarian', eggetarian: 'egg' })[user.dietType] || user.dietType || 'vegetarian',
         stepGoal: user.stepGoal ?? 10000,
         waterGoal: user.waterGoal ?? 3000,
       });
@@ -112,7 +112,7 @@ export function useProfile() {
         workoutDays: safeParse(f.workoutDays, parseInt) ?? 4,
         stepGoal: safeParse(f.stepGoal, parseInt) ?? 10000,
         waterGoal: safeParse(f.waterGoal, parseInt) ?? 3000,
-        dietType: f.dietType || 'veg',
+        dietType: ({ veg: 'vegetarian', jain: 'vegetarian', eggetarian: 'egg' })[f.dietType] || f.dietType || 'vegetarian',
       };
 
       const result = await updateProfile(sanitized);

@@ -169,16 +169,6 @@ function ReadinessLab({ user, activeScore, activeTier, hasCompletedReadiness, sp
           </div>
         </div>
 
-        {/* Check-in */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 18 }}>
-          <VoltPill onClick={onCheckIn}>
-            {hasCompletedReadiness ? <><RefreshCw size={15} /> Update Check-In</> : 'Complete Check-In'}
-          </VoltPill>
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', color: CHAMBER_DIM }}>
-            {hasCompletedReadiness ? 'CHECK-IN LOGGED TODAY' : 'OBJECTIVE SCORE — CHECK IN TO PERSONALISE'}
-          </span>
-        </div>
-
         {/* Muscle chips */}
         <div style={{ marginTop: 'auto', paddingTop: 20 }}>
           {spotlightMuscles.length === 0 ? (
@@ -197,6 +187,17 @@ function ReadinessLab({ user, activeScore, activeTier, hasCompletedReadiness, sp
               ))}
             </div>
           )}
+        </div>
+
+        {/* Check-in — compact pill below the chips, over the chamber's dark
+            fade, so it never crosses the body figure */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+          <VoltPill onClick={onCheckIn} style={{ minHeight: 40, padding: '0 18px', fontSize: 13 }}>
+            {hasCompletedReadiness ? <><RefreshCw size={13} /> Update Check-In</> : 'Complete Check-In'}
+          </VoltPill>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', color: CHAMBER_DIM }}>
+            {hasCompletedReadiness ? 'CHECK-IN LOGGED TODAY' : 'OBJECTIVE SCORE — CHECK IN TO PERSONALISE'}
+          </span>
         </div>
       </div>
     </LabFrame>

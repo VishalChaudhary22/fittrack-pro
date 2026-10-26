@@ -3,6 +3,7 @@ import { LogOut, Download, Share2, Camera, Shield, Link, Bike, MessageSquare, Ch
 import { useApp } from '../../../core/context/AppContext';
 import { useProfile } from '../../../core/hooks/useProfile';
 import { VoltConfirmDialog, VoltThemeToggle, VoltScrollPicker } from '../shared/VoltShared';
+import { SkinPreviewVolt, SkinPreviewOriginal } from '../shared/SkinSwitch';
 import { ACTIVITY } from '../../../data/constants';
 import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
@@ -168,7 +169,7 @@ export default function VoltProfilePage() {
     pushEnabled, save, setConfirm, setDesignVersion, setEd, setFeedbackMessage,
     setFeedbackOpen, setFeedbackSubject, setIncludeProfile,
     setShowAvatarPicker, setShowManualTDEEPicker, setTdeePreferences, sf,
-    showAvatarPicker, showManualTDEEPicker, tdee, tdeePreferences,
+    showAvatarPicker, showManualTDEEPicker, streak, tdee, tdeePreferences,
     toggleUnitHeight, toggleUnitWeight, top4, unitHeight, unitWeight,
     updatePreferences, user,
   } = useProfile();
@@ -412,6 +413,23 @@ export default function VoltProfilePage() {
         )}
       </VoltBlock>
 
+      {/* Appearance — live mini-renders of your own Today in both looks (V-8) */}
+      <VoltBlock>
+        <VoltLabel volt>Appearance</VoltLabel>
+        <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em', margin: '5px 0 4px' }}>App Design</div>
+        <p style={{ fontSize: 12.5, color: 'var(--v-dim)', lineHeight: 1.5, margin: '0 0 14px' }}>
+          Two looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button onClick={() => setDesignVersion('volt')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'volt'}>
+            <SkinPreviewVolt firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'volt'} />
+          </button>
+          <button onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'v1'}>
+            <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
+          </button>
+        </div>
+      </VoltBlock>
+
       {/* Settings */}
       <VoltBlock>
         <VoltLabel volt>Settings</VoltLabel>
@@ -420,13 +438,6 @@ export default function VoltProfilePage() {
         </SettingRow>
         <SettingRow title="Height Unit" desc="Profile height display">
           <MiniSeg options={[{ k: 'cm', label: 'CM' }, { k: 'ft', label: 'FT/IN' }]} value={unitHeight} onPick={() => toggleUnitHeight()} />
-        </SettingRow>
-        <SettingRow title="App Design" desc="Original Kaaya or the new Volt look">
-          <MiniSeg
-            options={[{ k: 'v1', label: 'ORIGINAL' }, { k: 'volt', label: 'VOLT' }]}
-            value={designVersion}
-            onPick={(k) => setDesignVersion(k)}
-          />
         </SettingRow>
         <SettingRow title="Theme" desc="Switch display mode" last>
           <VoltThemeToggle />

@@ -1,7 +1,7 @@
 import { Edit2, Trash2, X } from 'lucide-react';
 import { useWeightLog } from '../../../core/hooks/useWeightLog';
 import { fmt, kgToLbs } from '../../../utils/helpers';
-import { ConfirmDialog } from '../../v1/shared/SharedComponents';
+import { VoltConfirmDialog } from '../shared/VoltShared';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 
 // ─── Kaaya Volt · Weight Log (V-6b) ─────────────────────────────────────────
@@ -83,7 +83,7 @@ export default function VoltWeightLogPage() {
         </VoltBlock>
       )}
 
-      <ConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
+      <VoltConfirmDialog open={!!confirm} title={confirm?.title} message={confirm?.message} onConfirm={confirm?.onConfirm} onCancel={() => setConfirm(null)} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} />
     </div>
   );
 }

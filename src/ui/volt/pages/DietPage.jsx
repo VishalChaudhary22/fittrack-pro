@@ -1,9 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, AlertTriangle, Star, Droplet, Pill, Bot } from 'lucide-react';
 import { Portal } from '../../v1/shared/SharedComponents';
-import AdaptiveDietBanner from '../../v1/shared/AdaptiveDietBanner';
-import { TDEEInsightCard } from '../../v1/shared/TDEEInsightCard';
-import { TDEEDetailSheet } from '../../v1/shared/TDEEDetailSheet';
+import { VoltAdaptiveDietBanner, VoltTDEEInsightCard, VoltTDEEDetailSheet } from '../shared/VoltDietInsights';
 import { computeNewTarget, recomputeMacros } from '../../../utils/adaptiveCalories';
 import { DIET_TYPES } from '../../../data/diets';
 import { tod, kgToLbs, cmToFtIn } from '../../../utils/helpers';
@@ -13,9 +11,8 @@ import { clamp } from '../../../utils/helpers';
 import { VoltBlock, VoltPill, VoltChip, Sticker, VoltLabel, VoltBar } from '../primitives';
 
 // ─── Kaaya Volt · Diet (V-4) ─────────────────────────────────────────────────
-// Same brain as V1's DietPage (useDiet), Volt presentation. AdaptiveDietBanner,
-// TDEEInsightCard and TDEEDetailSheet are V1's self-contained components,
-// reused as-is until the Volt popup pack (V-7) — same staging as V-3/V-4a.
+// Same brain as V1's DietPage (useDiet), Volt presentation. The adaptive
+// banner, TDEE insight card and TDEE detail sheet are Volt twins (V-7).
 // MEAL_SLOTS / FASTING_TYPES are data constants copied from the V1 page
 // (they live unexported in the frozen V1 file).
 
@@ -168,7 +165,7 @@ export default function DietPage({ chatbot }) {
           workoutDays: user.workoutDays,
         });
         return (
-          <AdaptiveDietBanner
+          <VoltAdaptiveDietBanner
             suggestion={adaptiveSuggestion}
             currentKcal={adaptiveSuggestion.goalKcal}
             newKcal={newKcal}
@@ -179,7 +176,7 @@ export default function DietPage({ chatbot }) {
         );
       })()}
       {adaptiveSuggestion && adaptiveSuggestion.scenario === 'S6' && (
-        <AdaptiveDietBanner
+        <VoltAdaptiveDietBanner
           suggestion={adaptiveSuggestion}
           currentKcal={goalKcal}
           newKcal={goalKcal}
@@ -188,7 +185,7 @@ export default function DietPage({ chatbot }) {
         />
       )}
 
-      <TDEEInsightCard
+      <VoltTDEEInsightCard
         tdeeEstimate={tdeeEstimate}
         onUpdateTargets={handleUpdateTDEETargets}
         onLearnMore={() => setShowTDEEDetails(true)}
@@ -909,7 +906,7 @@ export default function DietPage({ chatbot }) {
         </Portal>
       )}
 
-      <TDEEDetailSheet isOpen={showTDEEDetails} onClose={() => setShowTDEEDetails(false)} tdeeEstimate={tdeeEstimate} />
+      <VoltTDEEDetailSheet isOpen={showTDEEDetails} onClose={() => setShowTDEEDetails(false)} tdeeEstimate={tdeeEstimate} />
     </div>
   );
 }

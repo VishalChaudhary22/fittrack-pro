@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { X, ChevronRight, RefreshCw, Sun, Moon, TrendingUp, TrendingDown, Share } from 'lucide-react';
-import { ModalPortal, ScrollPicker } from '../../v1/shared/SharedComponents';
-import ReadinessCheckIn from '../../v1/shared/ReadinessCheckIn';
+import { ModalPortal } from '../../v1/shared/SharedComponents';
+import { VoltSheet, VoltScrollPicker } from '../shared/VoltShared';
+import VoltReadinessCheckIn from '../shared/VoltReadinessCheckIn';
+import { VoltBodyFatCard } from '../shared/VoltBodyFat';
 import { useApp } from '../../../core/context/AppContext';
 import { useToday } from '../../../core/hooks/useToday';
 import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
@@ -19,10 +21,9 @@ import VoltParticles from '../components/VoltParticles';
 // reproduces the V1 readiness composition exactly — particle field, the
 // body scan twice (reflective floor + main figure, screen blend, masked)
 // — re-lit in volt, with the score on a SPRING_DATA count-up.
-// Known staged gaps (flagged in the V-3 PR, closing before V-9 parity):
-// the four modals below are V1's components verbatim (Volt popup pack is
-// V-7); BodyFatRingCard and AdaptiveDietBanner get Volt treatments later
-// (the adaptive suggestion remains actionable from the Diet page).
+// V-7 closed the staged gaps: the modals below are Volt sheets, the
+// check-in is the Volt twin (drawer curve + drag-to-dismiss), and body
+// composition has its Volt card (VoltBodyFatCard).
 
 const CHAMBER_PAPER = '#F4F5E9';
 const CHAMBER_DIM = '#B9BFA8';
@@ -515,12 +516,15 @@ export default function TodayPage() {
             <p style={{ fontSize: 13, color: 'var(--v-dim)', margin: '9px 0 0' }}>Add weight &amp; height in your profile to unlock this.</p>
           )}
         </VoltBlock>
+
+        {/* ── Body composition (Volt twin of V1's BodyFatRingCard, V-7) ── */}
+        <VoltBodyFatCard />
       </div>
 
-      {/* ── Modals: V1 components verbatim until the Volt popup pack (V-7) ── */}
+      {/* ── Modals: Volt popup pack (V-7) ── */}
       {showCheckIn && (
         <ModalPortal>
-          <ReadinessCheckIn
+          <VoltReadinessCheckIn
             objectiveScore={objectiveScore}
             onClose={() => setShowCheckIn(false)}
           />
@@ -529,112 +533,111 @@ export default function TodayPage() {
 
       {showLog && (
         <ModalPortal>
-          <div className="mo">
-            <div className="md" style={{ maxWidth: 360 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Weight</div>
-                <button className="btn-g" aria-label="Close modal" style={{ padding: '5px 9px' }} onClick={() => setShowLog(false)}><X size={14} /></button>
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label>Select Weight ({isImpWeight ? 'lbs' : 'kg'})</label>
-                <ScrollPicker value={isImpWeight ? kgToLbs(logWeight) : logWeight} onChange={(v) => setLogWeight(isImpWeight ? lbsToKg(v) : v)} items={wtItems} unit={isImpWeight ? 'lbs' : 'kg'} fmtVal={(v) => v.toFixed(1)} />
-              </div>
-              <div style={{ marginBottom: 16 }}><label>Notes (optional)</label><input placeholder="Post-morning, post-workout..." value={logNote} onChange={(e) => setLogNote(e.target.value)} /></div>
-              <button className="btn-p" style={{ width: '100%', padding: '13px' }} onClick={saveLog}>Save Log</button>
+          <VoltSheet onClose={() => setShowLog(false)}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: '-0.01em' }}>Log Weight</div>
+              <button aria-label="Close modal" className="v-press" style={{ background: 'var(--v-canvas)', border: '2.5px solid var(--v-edge)', width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--v-ink)' }} onClick={() => setShowLog(false)}><X size={15} /></button>
             </div>
-          </div>
+            <div style={{ marginBottom: 16 }}>
+              <VoltLabel>Select Weight ({isImpWeight ? 'lbs' : 'kg'})</VoltLabel>
+              <div style={{ marginTop: 8 }}>
+                <VoltScrollPicker value={isImpWeight ? kgToLbs(logWeight) : logWeight} onChange={(v) => setLogWeight(isImpWeight ? lbsToKg(v) : v)} items={wtItems} unit={isImpWeight ? 'lbs' : 'kg'} fmtVal={(v) => v.toFixed(1)} />
+              </div>
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <VoltLabel>Notes (optional)</VoltLabel>
+              <input placeholder="Post-morning, post-workout..." value={logNote} onChange={(e) => setLogNote(e.target.value)} style={{ width: '100%', marginTop: 8, padding: '12px 14px', borderRadius: 12, background: 'var(--v-canvas)', border: '2.5px solid var(--v-edge)', color: 'var(--v-ink)', fontSize: 14, outline: 'none' }} />
+            </div>
+            <VoltPill style={{ width: '100%' }} onClick={saveLog}>Save Log</VoltPill>
+          </VoltSheet>
         </ModalPortal>
       )}
 
       {showStepModal && (
         <ModalPortal>
-          <div className="mo">
-            <div className="md" style={{ maxWidth: 360 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Log Steps</div>
-                <button className="btn-g" aria-label="Close step modal" style={{ padding: '5px 9px' }} onClick={() => setShowStepModal(false)}><X size={14} /></button>
-              </div>
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Manual Entry</label>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <input
-                    type="number"
-                    placeholder="e.g. 8500"
-                    value={stepInputVal}
-                    onChange={(e) => setStepInputVal(e.target.value)}
-                    style={{ flex: 1, padding: '12px', background: 'var(--surface-container-highest)', borderRadius: 8, border: 'none', color: '#fff', fontSize: 16 }}
-                  />
-                  <button className="btn-p" style={{ padding: '0 20px' }} onClick={() => {
-                    const val = parseInt(stepInputVal, 10);
-                    if (val > 0) {
-                      logSteps({ steps: val, date: todayStr, source: 'manual' });
-                      addToast('Steps logged for today!', 'success');
-                    }
-                    setShowStepModal(false);
-                  }}>Save</button>
-                </div>
-              </div>
-              <div style={{ height: 1, background: 'var(--surface-container-highest)', marginBottom: 24 }} />
-              <div>
-                <label style={{ fontSize: 13, color: 'var(--on-surface-variant)', marginBottom: 8, display: 'block' }}>Live Browser Sensor</label>
-                {supported ? (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-container-lowest)', padding: 16, borderRadius: 12, marginBottom: 16 }}>
-                      <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>Live Steps</div>
-                      <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>{isTracking ? liveSteps : (displayStepLog?.source === 'browser_sensor' ? todaySteps : 0)}</div>
-                    </div>
-                    {pedoError && <div style={{ fontSize: 12, color: 'var(--error)', marginBottom: 12 }}>{pedoError}</div>}
-                    {isTracking ? (
-                      <button className="btn-g" style={{ width: '100%', padding: '13px' }} onClick={() => {
-                        stopTracking();
-                        logSteps({ steps: liveSteps, date: todayStr, source: 'browser_sensor' });
-                        addToast('Tracking stopped & saved', 'success');
-                      }}>Stop Tracking &amp; Save</button>
-                    ) : (
-                      <button className="btn-p" style={{ width: '100%', padding: '13px', background: 'var(--signature-gradient)' }} onClick={startTracking}>
-                        Start Live Tracking
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <div style={{ fontSize: 12, color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', padding: 12, borderRadius: 8 }}>
-                    Device motion not supported on this browser/device.
-                  </div>
-                )}
+          <VoltSheet onClose={() => setShowStepModal(false)}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: '-0.01em' }}>Log Steps</div>
+              <button aria-label="Close step modal" className="v-press" style={{ background: 'var(--v-canvas)', border: '2.5px solid var(--v-edge)', width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--v-ink)' }} onClick={() => setShowStepModal(false)}><X size={15} /></button>
+            </div>
+            <div style={{ marginBottom: 22 }}>
+              <VoltLabel>Manual Entry</VoltLabel>
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <input
+                  type="number"
+                  placeholder="e.g. 8500"
+                  value={stepInputVal}
+                  onChange={(e) => setStepInputVal(e.target.value)}
+                  style={{ flex: 1, minWidth: 0, padding: '12px 14px', background: 'var(--v-canvas)', borderRadius: 12, border: '2.5px solid var(--v-edge)', color: 'var(--v-ink)', fontSize: 16, outline: 'none' }}
+                />
+                <VoltPill style={{ padding: '0 22px' }} onClick={() => {
+                  const val = parseInt(stepInputVal, 10);
+                  if (val > 0) {
+                    logSteps({ steps: val, date: todayStr, source: 'manual' });
+                    addToast('Steps logged for today!', 'success');
+                  }
+                  setShowStepModal(false);
+                }}>Save</VoltPill>
               </div>
             </div>
-          </div>
+            <div style={{ height: 2, background: 'var(--v-edge-quiet)', marginBottom: 22 }} />
+            <div>
+              <VoltLabel>Live Browser Sensor</VoltLabel>
+              {supported ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '2px solid var(--v-edge-quiet)', padding: 16, borderRadius: 12, margin: '10px 0 14px' }}>
+                    <div style={{ fontSize: 13, color: 'var(--v-dim)', fontWeight: 600 }}>Live Steps</div>
+                    <div className="v-num" style={{ fontSize: 24, color: 'var(--v-volt-text)' }}>{isTracking ? liveSteps : (displayStepLog?.source === 'browser_sensor' ? todaySteps : 0)}</div>
+                  </div>
+                  {pedoError && <div style={{ fontSize: 12, color: 'var(--v-coral-text)', marginBottom: 12 }}>{pedoError}</div>}
+                  {isTracking ? (
+                    <VoltPill ghost style={{ width: '100%' }} onClick={() => {
+                      stopTracking();
+                      logSteps({ steps: liveSteps, date: todayStr, source: 'browser_sensor' });
+                      addToast('Tracking stopped & saved', 'success');
+                    }}>Stop Tracking &amp; Save</VoltPill>
+                  ) : (
+                    <VoltPill style={{ width: '100%' }} onClick={startTracking}>
+                      Start Live Tracking
+                    </VoltPill>
+                  )}
+                </>
+              ) : (
+                <div style={{ fontSize: 12, color: 'var(--v-coral-text)', border: '2px solid var(--v-coral)', padding: 12, borderRadius: 10, marginTop: 10 }}>
+                  Device motion not supported on this browser/device.
+                </div>
+              )}
+            </div>
+          </VoltSheet>
         </ModalPortal>
       )}
 
       {showGoal && (
         <ModalPortal>
-          <div className="mo">
-            <div className="md" style={{ maxWidth: 400 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div className="headline-md" style={{ color: 'var(--on-surface)' }}>Set Weight Goal</div>
-                <button className="btn-g" aria-label="Close goal modal" style={{ padding: '5px 9px' }} onClick={() => setShowGoal(false)}><X size={14} /></button>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--primary)' }}>{isImpWeight ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-                <div><label>Target Weight ({isImpWeight ? 'lbs' : 'kg'})</label><ScrollPicker value={isImpWeight ? kgToLbs(goalTarget) : goalTarget} onChange={(v) => setGoalTarget(isImpWeight ? lbsToKg(v) : v)} items={wtItems} unit={isImpWeight ? 'lbs' : 'kg'} fmtVal={(v) => v.toFixed(1)} /></div>
-                <div><label>Timeline (weeks)</label><ScrollPicker value={goalWeeks} onChange={setGoalWeeks} items={wkItems} unit="wks" /></div>
-              </div>
-              {goalTarget && goalWeeks && (
-                <div style={{ padding: '12px 14px', background: 'var(--surface-container-highest)', borderRadius: 10, border: 'none', fontSize: 12, color: 'var(--primary)', marginBottom: 16 }}>
-                  {goalTarget < latestWeight
-                    ? `Lose ${(latestWeight - goalTarget).toFixed(1)} kg in ${goalWeeks} weeks → ~${Math.round((latestWeight - goalTarget) * 7700 / goalWeeks / 7)} kcal/day deficit`
-                    : goalTarget > latestWeight
-                      ? `Gain ${(goalTarget - latestWeight).toFixed(1)} kg in ${goalWeeks} weeks — diet page will show surplus plan`
-                      : 'Maintain current weight — diet page will show maintenance plan'}
-                </div>
-              )}
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn-p" style={{ flex: 1, padding: '13px' }} onClick={saveGoal}>Set Goal</button>
-                {user.weightGoal && <button className="btn-g" style={{ padding: '13px 16px' }} onClick={async () => { await updateProfile({ weightGoal: null, weightGoalStart: null, goalWeeks: null }); setShowGoal(false); addToast('Goal cleared', 'info'); }}>Clear</button>}
-              </div>
+          <VoltSheet onClose={() => setShowGoal(false)}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: '-0.01em' }}>Set Weight Goal</div>
+              <button aria-label="Close goal modal" className="v-press" style={{ background: 'var(--v-canvas)', border: '2.5px solid var(--v-edge)', width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--v-ink)' }} onClick={() => setShowGoal(false)}><X size={15} /></button>
             </div>
-          </div>
+            <div style={{ fontSize: 12.5, color: 'var(--v-dim)', marginBottom: 18 }}>Current: <strong style={{ color: 'var(--v-volt-text)' }}>{isImpWeight ? kgToLbs(latestWeight) + ' lbs' : latestWeight + ' kg'}</strong> · Your goal drives the calorie recommendations on the Diet page.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div><VoltLabel>Target Weight ({isImpWeight ? 'lbs' : 'kg'})</VoltLabel><div style={{ marginTop: 8 }}><VoltScrollPicker value={isImpWeight ? kgToLbs(goalTarget) : goalTarget} onChange={(v) => setGoalTarget(isImpWeight ? lbsToKg(v) : v)} items={wtItems} unit={isImpWeight ? 'lbs' : 'kg'} fmtVal={(v) => v.toFixed(1)} /></div></div>
+              <div><VoltLabel>Timeline (weeks)</VoltLabel><div style={{ marginTop: 8 }}><VoltScrollPicker value={goalWeeks} onChange={setGoalWeeks} items={wkItems} unit="wks" /></div></div>
+            </div>
+            {goalTarget && goalWeeks && (
+              <div style={{ padding: '12px 14px', border: '2px solid var(--v-edge-quiet)', borderRadius: 12, fontSize: 12.5, fontWeight: 600, color: 'var(--v-volt-text)', marginBottom: 16 }}>
+                {goalTarget < latestWeight
+                  ? `Lose ${(latestWeight - goalTarget).toFixed(1)} kg in ${goalWeeks} weeks → ~${Math.round((latestWeight - goalTarget) * 7700 / goalWeeks / 7)} kcal/day deficit`
+                  : goalTarget > latestWeight
+                    ? `Gain ${(goalTarget - latestWeight).toFixed(1)} kg in ${goalWeeks} weeks — diet page will show surplus plan`
+                    : 'Maintain current weight — diet page will show maintenance plan'}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <VoltPill style={{ flex: 1 }} onClick={saveGoal}>Set Goal</VoltPill>
+              {user.weightGoal && <VoltPill ghost style={{ padding: '0 18px' }} onClick={async () => { await updateProfile({ weightGoal: null, weightGoalStart: null, goalWeeks: null }); setShowGoal(false); addToast('Goal cleared', 'info'); }}>Clear</VoltPill>}
+            </div>
+          </VoltSheet>
         </ModalPortal>
       )}
     </>

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
 import { beatsAllTimePR } from '../../../utils/exerciseHistory';
-import { Portal, ConfirmDialog } from '../../v1/shared/SharedComponents';
+import { Portal } from '../../v1/shared/SharedComponents';
+import { VoltConfirmDialog } from '../shared/VoltShared';
 import BodyMapSVG from '../../v1/shared/BodyMapSVG';
 import { gId, tod, fmt, formatTimeAgo } from '../../../utils/helpers';
 import { calcAllMuscleXP } from '../../../data/muscleData';
@@ -1099,7 +1100,7 @@ export default function WorkoutPage() {
           </div>
         </Portal>
 
-        <ConfirmDialog
+        <VoltConfirmDialog
           open={confirmFinish}
           title="Unfinished Sets"
           message={`You have ${session?.exs?.reduce((acc, ex) => acc + ex.sets.filter(s => !s.done).length, 0) || 0} unchecked set(s). They will not be saved. Finish workout anyway?`}
@@ -1202,7 +1203,7 @@ export default function WorkoutPage() {
                     Discard
                   </button>
                 </div>
-                <ConfirmDialog
+                <VoltConfirmDialog
                   open={confirmDiscard}
                   title="Discard Session?"
                   message={`This will permanently delete all ${completedSets} sets logged in this session.`}

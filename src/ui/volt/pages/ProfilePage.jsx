@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { LogOut, Download, Share2, Camera, Shield, Link, Bike, MessageSquare, ChevronDown, CheckCircle, AlertCircle, Bell } from 'lucide-react';
 import { useApp } from '../../../core/context/AppContext';
 import { useProfile } from '../../../core/hooks/useProfile';
-import { ConfirmDialog, ThemeTogglePill, ScrollPicker } from '../../v1/shared/SharedComponents';
+import { VoltConfirmDialog, VoltThemeToggle, VoltScrollPicker } from '../shared/VoltShared';
 import { ACTIVITY } from '../../../data/constants';
 import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
@@ -429,7 +429,7 @@ export default function VoltProfilePage() {
           />
         </SettingRow>
         <SettingRow title="Theme" desc="Switch display mode" last>
-          <ThemeTogglePill />
+          <VoltThemeToggle />
         </SettingRow>
         <VoltPill ghost onClick={handleExport} style={{ width: '100%', marginTop: 16 }}>
           <Download size={16} /> Export Data
@@ -488,14 +488,14 @@ export default function VoltProfilePage() {
         </div>
       </VoltBlock>
 
-      <ConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
+      <VoltConfirmDialog open={confirm} title="Logout?" message="Are you sure you want to log out? Your data will persist." onConfirm={() => { setConfirm(false); logout(); }} onCancel={() => setConfirm(false)} confirmLabel="Logout" danger />
       <VoltAvatarPicker open={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
       {showManualTDEEPicker && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(6,8,6,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => setShowManualTDEEPicker(false)}>
           <div className="v-sheet-up" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 420, background: 'var(--v-panel)', border: '2.5px solid var(--v-edge)', borderBottom: 'none', borderRadius: '22px 22px 0 0', padding: '20px 20px 30px', textAlign: 'center' }}>
             <div className="v-num" style={{ fontSize: 19, textTransform: 'uppercase', marginBottom: 6 }}>Set Default TDEE</div>
             <p style={{ fontSize: 12.5, color: 'var(--v-dim)', marginBottom: 14 }}>Choose your daily calorie target baseline</p>
-            <ScrollPicker
+            <VoltScrollPicker
               value={tdeePreferences?.manualTDEEOverride || tdee}
               onChange={(v) => setTdeePreferences(p => ({ ...p, manualTDEEOverride: v }))}
               items={Array.from({ length: Math.floor((4500 - 1200) / 50) + 1 }, (_, i) => 1200 + i * 50)}

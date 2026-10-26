@@ -7,6 +7,7 @@ import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
 import { getRank } from '../../../data/muscleData';
 import { useProfile } from '../../../core/hooks/useProfile';
+import { VoltScope, SkinPreviewVolt, SkinPreviewOriginal } from '../../volt/shared/SkinSwitch';
 
 const PRESETS = [
   { id: 'iron-man', name: 'Iron Man', universe: 'Marvel' },
@@ -101,7 +102,7 @@ function AvatarPickerModal({ open, onClose }) {
 }
 
 export default function ProfilePage() {
-  const { achievements, addToast, bmi, bmr, confirm, designVersion, disablePush, ed, enablePush, f, feedbackMessage, feedbackOpen, feedbackStatus, feedbackSubject, handleExport, handleFeedbackSubmit, includeProfile, latestBFPct, logout, lvl, muscleXP, overall, preferences, prefsLoading, pushEnabled, save, setConfirm, setDesignVersion, setEd, setFeedbackMessage, setFeedbackOpen, setFeedbackSubject, setIncludeProfile, setShowAvatarPicker, setShowManualTDEEPicker, setTdeePreferences, sf, showAvatarPicker, showManualTDEEPicker, tdee, tdeePreferences, toggleUnitHeight, toggleUnitWeight, top4, unitHeight, unitWeight, updatePreferences, user } = useProfile();
+  const { achievements, addToast, bmi, bmr, confirm, designVersion, disablePush, ed, enablePush, f, feedbackMessage, feedbackOpen, feedbackStatus, feedbackSubject, handleExport, handleFeedbackSubmit, includeProfile, latestBFPct, logout, lvl, muscleXP, overall, preferences, prefsLoading, pushEnabled, save, setConfirm, setDesignVersion, setEd, setFeedbackMessage, setFeedbackOpen, setFeedbackSubject, setIncludeProfile, setShowAvatarPicker, setShowManualTDEEPicker, setTdeePreferences, sf, showAvatarPicker, showManualTDEEPicker, streak, tdee, tdeePreferences, toggleUnitHeight, toggleUnitWeight, top4, unitHeight, unitWeight, updatePreferences, user } = useProfile();
   return (
     <>
     <div className="pg-in" style={{ paddingBottom: 60 }}>
@@ -375,6 +376,25 @@ export default function ProfilePage() {
         )}
       </div>
 
+      {/* Appearance — App Design chooser with live previews (ported from the Volt Profile in the V-9 polish pass; styled for Original Kaaya) */}
+      <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
+        <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Appearance</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>App Design</div>
+        <p style={{ fontSize: 12.5, color: 'var(--on-surface-variant)', lineHeight: 1.5, margin: '6px 0 16px' }}>
+          Two looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
+        </p>
+        <VoltScope>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <button onClick={() => setDesignVersion('volt')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }} aria-pressed={designVersion === 'volt'}>
+              <SkinPreviewVolt firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'volt'} />
+            </button>
+            <button onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }} aria-pressed={designVersion === 'v1'}>
+              <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
+            </button>
+          </div>
+        </VoltScope>
+      </div>
+
       {/* Settings & Actions (9.7) */}
       <div style={{ background: 'var(--surface-container-low)', borderRadius: 20, padding: 24, marginBottom: 24 }}>
         <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 16 }}>Settings</div>
@@ -395,15 +415,6 @@ export default function ProfilePage() {
              <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
                <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'cm' ? 'var(--primary)' : 'transparent', color: unitHeight === 'cm' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>CM</button>
                <button onClick={toggleUnitHeight} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: unitHeight === 'ft' ? 'var(--primary)' : 'transparent', color: unitHeight === 'ft' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>FT/IN</button>
-             </div>
-          </div>
-          <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />
-          {/* App Design (Kaaya Volt toggle) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <div><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--on-surface)' }}>App Design</div><div style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginTop: 2 }}>Original Kaaya or the new Volt look</div></div>
-             <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--surface-container-highest)' }}>
-               <button onClick={() => setDesignVersion('v1')} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: designVersion === 'v1' ? 'var(--primary)' : 'transparent', color: designVersion === 'v1' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>ORIGINAL</button>
-               <button onClick={() => setDesignVersion('volt')} style={{ borderRadius: 8, padding: '6px 14px', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', background: designVersion === 'volt' ? 'var(--primary)' : 'transparent', color: designVersion === 'volt' ? 'var(--on-primary)' : 'var(--on-surface-variant)' }}>VOLT</button>
              </div>
           </div>
           <div style={{ height: 1, background: 'var(--surface-container-highest)' }} />

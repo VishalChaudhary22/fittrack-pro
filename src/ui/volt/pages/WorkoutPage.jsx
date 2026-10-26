@@ -1081,7 +1081,7 @@ export default function WorkoutPage() {
 
         {/* Floating live cluster */}
         <Portal>
-          <div style={{ position: 'fixed', bottom: 84, right: 16, zIndex: 9998, display: showAddEx ? 'none' : 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+          <div style={{ position: 'fixed', bottom: 88, left: 16, zIndex: 9998, display: showAddEx ? 'none' : 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
             {showFAB && (
               <button
                 type="button"

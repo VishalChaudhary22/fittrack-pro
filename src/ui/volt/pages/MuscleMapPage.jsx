@@ -23,9 +23,9 @@ function VoltRankBadge({ rank, size = 'md' }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: `${sz.py}px ${sz.px}px`, borderRadius: 7,
-      background: rank.bg, border: `1.5px solid ${rank.color}`,
+      background: rank.color, border: '2px solid var(--v-edge)',
       fontFamily: "'JetBrains Mono', monospace",
-      fontSize: sz.fs, fontWeight: 700, color: rank.color,
+      fontSize: sz.fs, fontWeight: 700, color: '#141416',
       textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap',
     }}>
       <Shield size={sz.icon} /> {rank.name}
@@ -365,7 +365,7 @@ export default function MuscleMapPage({ chatbot }) {
             <VoltLabel>Rank Tiers</VoltLabel>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 9 }}>
               {RANK_TIERS.filter((_, i) => i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12 || i === 13).map(tier => (
-                <span key={tier.name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9.5, color: tier.color, fontWeight: 700, padding: '4px 8px', borderRadius: 6, background: tier.bg, border: '1.5px solid var(--v-edge-quiet)' }}>
+                <span key={tier.name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9.5, color: '#141416', fontWeight: 700, padding: '4px 8px', borderRadius: 6, background: tier.color, border: '1.5px solid var(--v-edge)' }}>
                   <Shield size={10} /> {tier.name}
                 </span>
               ))}

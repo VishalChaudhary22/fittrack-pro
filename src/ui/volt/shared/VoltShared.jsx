@@ -166,9 +166,9 @@ export const VoltThemeToggle = () => {
   const { theme, toggleTheme } = useApp();
   const isDark = theme === 'dark';
 
-  const w = 96;
-  const h = 32;
-  const pad = 3;
+  const w = 118;
+  const h = 44;
+  const pad = 4;
   const knobSize = h - pad * 2;
   const travel = w - knobSize - pad * 2;
 
@@ -191,10 +191,10 @@ export const VoltThemeToggle = () => {
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
         justifyContent: isDark ? 'flex-end' : 'flex-start',
-        padding: `0 ${isDark ? 9 : 11}px`, pointerEvents: 'none',
+        padding: `0 ${isDark ? 12 : 14}px`, pointerEvents: 'none',
       }}>
-        <span style={{ fontSize: 7, fontWeight: 800, color: 'var(--v-ink)', letterSpacing: '0.5px' }}>
-          {isDark ? 'NIGHT MODE' : 'DAY MODE'}
+        <span style={{ fontSize: 10, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: 'var(--v-ink)', letterSpacing: '0.08em' }}>
+          {isDark ? 'NIGHT' : 'DAY'}
         </span>
       </div>
       <div style={{
@@ -205,9 +205,9 @@ export const VoltThemeToggle = () => {
         transition: 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <div style={{ position: 'relative', width: 16, height: 16 }}>
+        <div style={{ position: 'relative', width: 20, height: 20 }}>
           <div style={{ position: 'absolute', inset: 0, opacity: isDark ? 0 : 1, transition: 'opacity 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#141416' }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#141416' }}>
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
               <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -220,7 +220,7 @@ export const VoltThemeToggle = () => {
             </svg>
           </div>
           <div style={{ position: 'absolute', inset: 0, opacity: isDark ? 1 : 0, transition: 'opacity 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#141416' }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#141416' }}>
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </div>

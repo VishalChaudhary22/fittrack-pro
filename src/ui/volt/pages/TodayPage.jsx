@@ -61,6 +61,8 @@ function InkChart({ data, goal }) {
             <text x={W - PAD} y={y(goal) - 4} textAnchor="end" fontSize="8" fill="var(--v-coral-text)" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: '0.1em' }}>GOAL</text>
           </>
         )}
+        <text x={PAD} y={PAD + 1} fontSize="8" fill="var(--v-dim)" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{Math.round(max * 10) / 10}</text>
+        <text x={PAD} y={H - 1} fontSize="8" fill="var(--v-dim)" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{Math.round(min * 10) / 10}</text>
         <polyline
           points={line}
           fill="none"

@@ -169,8 +169,12 @@ export const VoltThemeToggle = () => {
 
   const w = 118;
   const h = 44;
-  const pad = 4;
-  const knobSize = h - pad * 2;
+  const knobSize = 36;
+  // The knob must be CONCENTRIC with the pill's rounded end caps: the pill
+  // is 44 tall (end-cap radius 22) and the knob is 36, so a uniform 4px gap
+  // all round puts the knob's centre exactly on the cap's centre and the
+  // curves match. Offsets are measured inside the 2.5px border (hence -5).
+  const pad = 1.5;
   const travel = w - knobSize - pad * 2 - 5;
 
   return (

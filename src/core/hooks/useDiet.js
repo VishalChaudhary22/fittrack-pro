@@ -20,7 +20,11 @@ export function useDiet() {
   const { allFoods, isLoading: foodsLoading } = useFoodCache();
   const [showTDEEDetails, setShowTDEEDetails] = useState(false);
   
-  const [diet, setDiet] = useState(() => user?.dietType || 'nonveg');
+  // Diet keys are canonical in DIET_TYPES (vegan/vegetarian/egg/nonveg), but
+  // older profile saves stored legacy values ('veg', 'jain', 'eggetarian').
+  // An unknown key makes dt undefined and crashes the Meal Guide — normalize.
+  const normalizeDiet = (raw) => (DIET_TYPES[raw] ? raw : { veg: 'vegetarian', jain: 'vegetarian', eggetarian: 'egg', non_veg: 'nonveg' }[raw] || 'nonveg');
+  const [diet, setDiet] = useState(() => normalizeDiet(user?.dietType));
   const [dateStr, setDateStr] = useState(tod());
 
   // The selected diet plan is a profile setting — persist it so it survives a
@@ -141,7 +145,7 @@ export function useDiet() {
   const wheyProt = wheyScoops * 25;
   const foodProt = protTarget - wheyProt;
   
-  const dt = DIET_TYPES[diet];
+  const dt = DIET_TYPES[diet] || DIET_TYPES.nonveg;
   const gKey = goal === 'loss' ? 'loss' : goal === 'gain' ? 'gain' : 'maintain';
 
   // Log calculation logic

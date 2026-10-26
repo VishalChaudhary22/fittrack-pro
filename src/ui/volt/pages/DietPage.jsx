@@ -400,7 +400,7 @@ export default function DietPage({ chatbot }) {
       {/* ── Analysis tab ── */}
       {activeTab === 'analysis' && (
         <>
-          {(diet === 'veg' || diet === 'vegan' || diet === 'jain') && weeklyMicros.vitaminB12 < 1.5 && (
+          {(diet === 'vegetarian' || diet === 'vegan') && weeklyMicros.vitaminB12 < 1.5 && (
             <VoltBlock quiet style={{ borderLeft: '4px solid var(--v-coral)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                 <AlertTriangle size={18} color="var(--v-coral-text)" style={{ flexShrink: 0, marginTop: 2 }} />

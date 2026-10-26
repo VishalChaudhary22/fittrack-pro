@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Activity, TrendingUp, Award, Share2, Bot } from 'lucide-react';
 import { useProgress } from '../../../core/hooks/useProgress';
 import { VoltBlock, VoltPill, VoltChip, VoltLabel } from '../primitives';
@@ -22,7 +23,8 @@ const fieldLabel = {
   fontWeight: 700, marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.1em',
 };
 
-// Hand-rolled SVG trend chart (draw-on line, optional volt area fill).
+// Hand-rolled SVG trend chart (draw-on line, optional volt area fill) with
+// y-axis tick labels and gridlines, so values can actually be read off it.
 function VoltTrendChart({ data, dataKey, height = 190, filled = true }) {
   const W = 560, H = 200, PAD = 10;
   const vals = data.map(d => d[dataKey]);
@@ -36,16 +38,32 @@ function VoltTrendChart({ data, dataKey, height = 190, filled = true }) {
   const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
   const area = `${line} L${pts[pts.length - 1][0].toFixed(1)},${H} L${pts[0][0].toFixed(1)},${H} Z`;
   const last = pts[pts.length - 1];
+  const fmt = (v) => Math.round(v * 10) / 10;
+  const ticks = [4, 3, 2, 1, 0].map(i => min + (range * i) / 4); // high → low
+  const gridY = [0, 1, 2, 3, 4].map(i => PAD + ((H - PAD * 2) * i) / 4); // top → bottom
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height, display: 'block' }} aria-hidden="true">
-        {filled && <path d={area} fill="var(--v-volt)" opacity="0.13" stroke="none" />}
-        <path className="v-draw" d={line} fill="none" stroke="var(--v-volt)" strokeWidth="2.5" pathLength={1} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        <circle cx={last[0]} cy={last[1]} r="4.5" fill="var(--v-volt)" stroke="var(--v-edge)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7, fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: 'var(--v-dim)' }}>
+      <div style={{ display: 'flex', gap: 7 }}>
+        <div style={{
+          width: 36, flexShrink: 0, height, display: 'flex', flexDirection: 'column',
+          justifyContent: 'space-between', textAlign: 'right',
+          paddingTop: Math.max(height * (PAD / H) - 5, 0), paddingBottom: Math.max(height * (PAD / H) - 5, 0),
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: 'var(--v-dim)',
+        }}>
+          {ticks.map((t, i) => <span key={i}>{fmt(t)}</span>)}
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ flex: 1, width: '100%', height, display: 'block' }} aria-hidden="true">
+          {gridY.map((y, i) => (
+            <line key={i} x1={0} x2={W} y1={y} y2={y} stroke="var(--v-edge-quiet)" strokeWidth="1" strokeDasharray="3 5" opacity="0.55" vectorEffect="non-scaling-stroke" />
+          ))}
+          {filled && <path d={area} fill="var(--v-volt)" opacity="0.13" stroke="none" />}
+          <path className="v-draw" d={line} fill="none" stroke="var(--v-volt)" strokeWidth="2.5" pathLength={1} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <circle cx={last[0]} cy={last[1]} r="4.5" fill="var(--v-volt)" stroke="var(--v-edge)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7, marginLeft: 43, fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: 'var(--v-dim)' }}>
         <span>{data[0]?.date}</span>
-        <span>MAX {Math.round(max * 10) / 10}</span>
+        <span>MAX {fmt(max)}</span>
         <span>{data[data.length - 1]?.date}</span>
       </div>
     </div>
@@ -70,6 +88,16 @@ export default function ProgressPage({ chatbot }) {
   } = useProgress();
 
   const prEntry = cd.find(d => d.maxWeight === pr);
+  // Volume range filter (the 1M/3M/6M chips were decorative — wire them).
+  const [volMonths, setVolMonths] = useState(1);
+  const volData = useMemo(() => {
+    if (!cd.length) return cd;
+    // Range is measured back from the most recent session, so a returning
+    // user still sees their last 1/3/6 months of training.
+    const latest = Math.max(...cd.map(d => (d.rawDate ? new Date(d.rawDate).getTime() : 0)));
+    const cutoff = latest - volMonths * 30 * 24 * 60 * 60 * 1000;
+    return cd.filter(d => !d.rawDate || new Date(d.rawDate).getTime() >= cutoff);
+  }, [cd, volMonths]);
   const firstDelta = cd.length > 0 ? cd[cd.length - 1].est1rm - cd[0].est1rm : 0;
 
   return (
@@ -216,15 +244,19 @@ export default function ProgressPage({ chatbot }) {
                 <p style={{ color: 'var(--v-dim)', fontSize: 12.5, margin: '4px 0 0' }}>Total load lifted per session</p>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <VoltChip>1M</VoltChip>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--v-dim)', padding: '5px 4px' }}>3M</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--v-dim)', padding: '5px 4px' }}>6M</span>
+                {[{ m: 1, l: '1M' }, { m: 3, l: '3M' }, { m: 6, l: '6M' }].map(r => (
+                  volMonths === r.m
+                    ? <VoltChip key={r.l}>{r.l}</VoltChip>
+                    : (
+                      <button key={r.l} type="button" onClick={() => setVolMonths(r.m)} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--v-dim)', padding: '5px 4px', background: 'none', border: 'none', cursor: 'pointer' }}>{r.l}</button>
+                    )
+                ))}
               </div>
             </div>
-            {cd.length >= 2 ? (
-              <VoltTrendChart data={cd} dataKey="volume" height={230} />
+            {volData.length >= 2 ? (
+              <VoltTrendChart data={volData} dataKey="volume" height={230} />
             ) : (
-              <InsufficientData height={230} message={`Log ${se} for at least two days to see your volume trend.`} />
+              <InsufficientData height={230} message={cd.length >= 2 ? `Not enough ${se} sessions in this range — try a wider one.` : `Log ${se} for at least two days to see your volume trend.`} />
             )}
           </VoltBlock>
 
@@ -232,10 +264,11 @@ export default function ProgressPage({ chatbot }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
             <div style={{ flex: '1 1 330px', display: 'flex', flexDirection: 'column', gap: 14 }}>
               <section ref={pbCardRef} className="v-block v-block--hero" style={{ position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 14, right: 14, width: 52, height: 58, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--v-canvas)', border: '2px solid var(--v-edge-quiet)', borderRadius: '11px 11px 0 0', borderBottom: '4px solid var(--v-volt)' }}>
-                  <Award size={30} color="var(--v-dim)" />
+                <div style={{ position: 'absolute', top: 14, right: 14, width: 52, height: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: 'var(--v-canvas)', border: '2px solid var(--v-edge-quiet)', borderRadius: '11px 11px 0 0', borderBottom: '4px solid var(--v-volt)' }}>
+                  <Award size={22} color="var(--v-dim)" />
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, fontWeight: 800, letterSpacing: '0.14em', color: 'var(--v-volt-text)' }}>PR</span>
                 </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, color: 'var(--v-volt-text)', letterSpacing: '0.18em', fontWeight: 700, marginBottom: 18 }}>PERSONAL BEST • {se.toUpperCase()}</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, color: 'var(--v-volt-text)', letterSpacing: '0.18em', fontWeight: 700, marginBottom: 18, paddingRight: 74 }}>PERSONAL BEST • {se.toUpperCase()}</div>
                 <div className="v-num" style={{ fontSize: 56, lineHeight: 1 }}>{pr}</div>
                 <div style={{ fontSize: 13.5, color: 'var(--v-dim)', marginTop: 7, marginBottom: 26 }}>
                   {prEntry ? `${prEntry.avgReps} avg reps · ${prEntry.sets} sets` : 'No sets data'}

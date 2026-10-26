@@ -268,6 +268,8 @@ export function VoltBodyFatCard() {
                 <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }} role="img" aria-label="Body fat trend">
                   <path d={areaPath} fill="var(--v-volt)" opacity="0.14" />
                   {goalY !== null && <line x1={PADX} x2={W - PADX} y1={goalY} y2={goalY} stroke="var(--v-cobalt)" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.65" />}
+                  <text x={PADX} y={11} fontSize="8.5" fill="var(--v-dim)" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{Math.max(...bfChartData.map(d => d.bf)).toFixed(1)}%</text>
+                  <text x={PADX} y={H - 14} fontSize="8.5" fill="var(--v-dim)" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{Math.min(...bfChartData.map(d => d.bf)).toFixed(1)}%</text>
                   <path className="v-draw" pathLength={1} d={linePath} fill="none" stroke="var(--v-volt-text)" strokeWidth="2.5" strokeLinecap="round" />
                   {pts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r="3" fill="var(--v-panel)" stroke="var(--v-volt-text)" strokeWidth="2" />)}
                   <text x={pts[0][0]} y={H - 3} fontSize="8.5" fill="var(--v-dim)" textAnchor="middle">{bfChartData[0].date}</text>

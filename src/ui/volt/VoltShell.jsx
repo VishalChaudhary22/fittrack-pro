@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Dumbbell, Target, Salad, Trophy, User } from 'lucide-react';
 import { VoltNav } from './primitives';
+import { useLongPressSwitch } from '../../core/hooks/useDiscovery';
 
 // ─── Volt shell navigation (V-3) ─────────────────────────────────────────────
 // Replaces the V1 Sidebar + BottomNav whenever the Volt skin is active.
@@ -22,9 +23,19 @@ export default function VoltShellNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const active = ITEMS.find((i) => (i.key === '/' ? pathname === '/' : pathname.startsWith(i.key)))?.key ?? '/';
+  // Long-press the nav bar → quick-switch sheet (V-8 discovery); the click
+  // that follows a long-press is swallowed so it doesn't also navigate.
+  const lp = useLongPressSwitch();
 
   return (
-    <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 100 }}>
+    <div
+      style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 100 }}
+      onPointerDown={lp.start}
+      onPointerUp={lp.clear}
+      onPointerLeave={lp.clear}
+      onPointerCancel={lp.clear}
+      onClickCapture={(e) => { if (lp.consume()) { e.preventDefault(); e.stopPropagation(); } }}
+    >
       <VoltNav items={ITEMS} active={active} onNavigate={(key) => navigate(key)} />
     </div>
   );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Dumbbell, Sun, Moon, MoreHorizontal, Zap } from 'lucide-react';
 import { useApp } from '../../../core/context/AppContext';
+import { useLongPressSwitch } from '../../../core/hooks/useDiscovery';
 import { NAV, NAV_MOBILE_MAIN, NAV_MOBILE_MORE } from '../../../data/constants';
 
 // ─── DESKTOP SIDEBAR ──────────────────────────────────────────────────────────
@@ -10,13 +11,16 @@ export const Sidebar = () => {
   const [sb, setSb] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  // Long-press the logo → quick-switch sheet (V-8 discovery); a long-press
+  // must not also toggle the sidebar collapse.
+  const lp = useLongPressSwitch();
 
   const currentPath = location.pathname;
   const isActive = (path) => path === '/' ? currentPath === '/' : currentPath.startsWith(path);
 
   return (
     <div className="ds" style={{ width: sb ? 230 : 54, background: 'var(--surface-container-low)', borderRight: 'none', display: 'flex', flexDirection: 'column', transition: 'width .22s var(--ease-spring)', flexShrink: 0, position: 'sticky', top: 0, height: '100dvh', overflow: 'hidden', zIndex: 'var(--z-nav)' }}>
-      <div role="button" aria-label={sb ? "Collapse sidebar" : "Expand sidebar"} tabIndex={0} onKeyDown={e => e.key === 'Enter' && setSb(!sb)} style={{ padding: '24px 16px 16px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => setSb(!sb)}>
+      <div role="button" aria-label={sb ? "Collapse sidebar" : "Expand sidebar"} tabIndex={0} onKeyDown={e => e.key === 'Enter' && setSb(!sb)} style={{ padding: '24px 16px 16px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onPointerDown={lp.start} onPointerUp={lp.clear} onPointerLeave={lp.clear} onPointerCancel={lp.clear} onClick={() => { if (lp.consume()) return; setSb(!sb); }}>
         <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--signature-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: 'var(--glow-primary)' }}><Dumbbell size={18} color="var(--on-primary)" /></div>
         {sb && <div className="headline-md" style={{ color: 'var(--on-surface)', whiteSpace: 'nowrap' }}>FITTRACK</div>}
       </div>
@@ -62,6 +66,8 @@ export const BottomNav = () => {
   const [showMore, setShowMore] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  // Long-press the nav bar → quick-switch sheet (V-8 discovery).
+  const lp = useLongPressSwitch();
   const currentPath = location.pathname;
   const isActive = (path) => path === '/' ? currentPath === '/' : currentPath.startsWith(path);
 
@@ -69,7 +75,7 @@ export const BottomNav = () => {
 
   return (
     <>
-      <nav className="bn">
+      <nav className="bn" onPointerDown={lp.start} onPointerUp={lp.clear} onPointerLeave={lp.clear} onPointerCancel={lp.clear} onClickCapture={(e) => { if (lp.consume()) { e.preventDefault(); e.stopPropagation(); } }}>
         {NAV_MOBILE_MAIN.map(({ id, label, Icon, path }) => (
           <button key={id} onClick={() => { navigate(path); setShowMore(false); }} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,

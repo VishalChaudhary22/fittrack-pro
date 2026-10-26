@@ -171,7 +171,7 @@ export const VoltThemeToggle = () => {
   const h = 44;
   const pad = 4;
   const knobSize = h - pad * 2;
-  const travel = w - knobSize - pad * 2;
+  const travel = w - knobSize - pad * 2 - 5;
 
   return (
     <div
@@ -199,10 +199,10 @@ export const VoltThemeToggle = () => {
         </span>
       </div>
       <div style={{
-        position: 'absolute', top: pad, left: pad, width: knobSize, height: knobSize,
+        position: 'absolute', top: '50%', left: pad, width: knobSize, height: knobSize,
         borderRadius: '50%', background: 'var(--v-volt)',
         border: '2px solid var(--v-edge)',
-        transform: `translateX(${isDark ? 0 : travel}px)`,
+        transform: `translate(${isDark ? 0 : travel}px, -50%)`,
         transition: 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>

@@ -1,13 +1,13 @@
 import { Trash2, ChevronDown, Search, Edit2, Bot } from 'lucide-react';
 import { useWorkoutHistory, fmtDuration, calcVolume } from '../../../core/hooks/useWorkoutHistory';
 import { fmt } from '../../../utils/helpers';
-import EditWorkoutModal from '../../v1/shared/EditWorkoutModal';
+import VoltEditWorkoutModal from '../shared/VoltEditWorkoutModal';
 import { VoltConfirmDialog } from '../shared/VoltShared';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 
 // ─── Kaaya Volt · Workout History (V-6a) ────────────────────────────────────
 // Same logic core as V1 (useWorkoutHistory), Volt presentation.
-// EditWorkoutModal + ConfirmDialog are V1 shared components (V-7 popup pack).
+// Edit modal + confirm dialog are Volt twins (V-7 popup pack).
 
 const inputStyle = {
   width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 14,
@@ -254,7 +254,7 @@ export default function VoltWorkoutHistoryPage({ chatbot }) {
       </>)}
 
       {editLog && (
-        <EditWorkoutModal
+        <VoltEditWorkoutModal
           log={editLog}
           splits={splits}
           onSave={async (updatedLog) => {

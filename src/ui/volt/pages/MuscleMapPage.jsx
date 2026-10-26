@@ -2,7 +2,7 @@ import { Shield, Trophy, Sparkles, TrendingUp, Minus, Award, Calendar, Users, Bo
 import BodyMapSVG from '../../v1/shared/BodyMapSVG';
 import AvatarInitials from '../../v1/shared/AvatarInitials';
 import ErrorBoundary from '../../v1/shared/ErrorBoundary';
-import PlayerDetailModal from '../../v1/shared/PlayerDetailModal';
+import VoltPlayerDetailModal from '../shared/VoltPlayerDetailModal';
 import { MUSCLE_GROUPS, RANK_TIERS, getRank, getOverallRank } from '../../../data/muscleData';
 import { MONTHLY_BENCHMARKS } from '../../../data/rankBenchmarks';
 import { getCurrentMonth } from '../../../utils/xpCacheSync';
@@ -15,7 +15,7 @@ import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 // presentation. Rank colors stay semantic (they ARE the game's language).
 // The body map reuses V1's BodyMapSVG canvas composite in its native
 // colors, exactly like the workout-complete screen.
-// PlayerDetailModal is V1's shared component (Volt skin = V-7 popup pack).
+// The player detail sheet is the Volt twin (V-7 popup pack).
 
 function VoltRankBadge({ rank, size = 'md' }) {
   const sz = size === 'sm' ? { fs: 8.5, px: 7, py: 3, icon: 10 } : size === 'lg' ? { fs: 12, px: 12, py: 5, icon: 14 } : { fs: 10, px: 10, py: 4, icon: 12 };
@@ -581,7 +581,7 @@ export default function MuscleMapPage({ chatbot }) {
       )}
 
       {selectedPlayer && (
-        <PlayerDetailModal
+        <VoltPlayerDetailModal
           player={selectedPlayer.isMe ? null : selectedPlayer}
           realMuscleXP={muscleXP}
           realUserName={user?.name || 'You'}

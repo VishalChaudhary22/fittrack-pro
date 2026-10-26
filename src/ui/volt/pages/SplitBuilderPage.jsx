@@ -1,12 +1,12 @@
 import { Plus, Trash2, X, GripVertical } from 'lucide-react';
 import { useSplitBuilder } from '../../../core/hooks/useSplitBuilder';
 import { ModalPortal } from '../../v1/shared/SharedComponents';
-import ExercisePicker from '../../v1/shared/ExercisePicker';
+import VoltExercisePicker from '../shared/VoltExercisePicker';
 import { VoltBlock, VoltPill, VoltLabel } from '../primitives';
 
 // ─── Kaaya Volt · Split Builder (V-6a) ──────────────────────────────────────
-// Same logic core as V1 (useSplitBuilder), Volt presentation. ExercisePicker
-// is V1's shared component (Volt skin = V-7 popup pack).
+// Same logic core as V1 (useSplitBuilder), Volt presentation. The exercise
+// picker is the Volt twin (V-7 popup pack).
 
 const inputStyle = {
   width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 14.5,
@@ -117,7 +117,7 @@ export default function VoltSplitBuilderPage() {
 
       {activeDayPicker && (
         <ModalPortal>
-          <ExercisePicker
+          <VoltExercisePicker
             onClose={() => setActiveDayPicker(null)}
             onSelect={handleAddExercise}
             excludeIds={days.find(d => d.id === activeDayPicker)?.exercises.map(e => e.exerciseId) || []}

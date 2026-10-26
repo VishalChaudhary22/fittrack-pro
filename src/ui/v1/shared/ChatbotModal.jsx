@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Zap, X, Trash2, Send } from 'lucide-react';
+import { Zap, X, Trash2, Send, Dumbbell, TrendingUp, UtensilsCrossed, Moon, Mountain, HeartPulse, Repeat, Pill } from 'lucide-react';
 
 const QUICK_PROMPTS = [
-  { icon: '🏋️', label: 'Last bench session', text: 'What weight did I do on Bench Press last time?' },
-  { icon: '📈', label: 'Weight trend', text: 'Am I losing weight? Show me my last 30-day trend.' },
-  { icon: '🍛', label: 'Protein meals', text: `Suggest high-protein Indian meals for today.` }, // Adjusted dynamic part for simplicity
-  { icon: '😴', label: 'Recovery advice', text: 'My readiness is low today. Should I train or rest?' },
-  { icon: '💪', label: 'Break plateau', text: 'My progress has stalled. How do I break through this plateau?' },
-  { icon: '🤕', label: 'Lower back pain', text: 'I have lower back pain. What exercises can I still do?' },
-  { icon: '🔄', label: 'Exercise swap', text: 'I don\'t have a cable machine. What are alternatives?' },
-  { icon: '🧪', label: 'Best supplement', text: 'What protein powder should I buy? Budget around ₹2000/kg.' },
+  { icon: Dumbbell, label: 'Last bench session', text: 'What weight did I do on Bench Press last time?' },
+  { icon: TrendingUp, label: 'Weight trend', text: 'Am I losing weight? Show me my last 30-day trend.' },
+  { icon: UtensilsCrossed, label: 'Protein meals', text: `Suggest high-protein Indian meals for today.` }, // Adjusted dynamic part for simplicity
+  { icon: Moon, label: 'Recovery advice', text: 'My readiness is low today. Should I train or rest?' },
+  { icon: Mountain, label: 'Break plateau', text: 'My progress has stalled. How do I break through this plateau?' },
+  { icon: HeartPulse, label: 'Lower back pain', text: 'I have lower back pain. What exercises can I still do?' },
+  { icon: Repeat, label: 'Exercise swap', text: 'I don\'t have a cable machine. What are alternatives?' },
+  { icon: Pill, label: 'Best supplement', text: 'What protein powder should I buy? Budget around ₹2000/kg.' },
 ];
 
 const renderMarkdown = (text) => {
@@ -91,8 +91,9 @@ export default function ChatbotModal({ chatbot, user }) {
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Zap size={17} color="var(--primary)" />
               <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 18, background: 'var(--signature-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                ⚡ FORGE
+                FORGE
               </span>
               <span style={{
                 fontSize: 11,
@@ -135,10 +136,10 @@ export default function ChatbotModal({ chatbot, user }) {
                 lineHeight: 1.5,
               }}>
                 <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>
-                  ⚡ Hey {user?.name || 'there'}! I'm FORGE, your AI coach.
+                  Hey {user?.name || 'there'}! I'm FORGE, your AI coach.
                 </div>
                 <div style={{ marginBottom: 12, color: 'var(--on-surface-dim)' }}>
-                  I have access to your full training history, weight logs, diet data, and Olympus League rank. Ask me anything — in English or Hinglish! 🇮🇳
+                  I have access to your full training history, weight logs, diet data, and Olympus League rank. Ask me anything — in English or Hinglish!
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 500 }}>
                   Current status: {latestWeight}kg · {streakDays} day streak
@@ -168,7 +169,7 @@ export default function ChatbotModal({ chatbot, user }) {
                       flexShrink: 0,
                     }}
                   >
-                    <span>{p.icon}</span>
+                    <p.icon size={14} />
                     <span style={{ fontWeight: 500 }}>{p.label}</span>
                   </button>
                 ))}

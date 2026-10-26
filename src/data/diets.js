@@ -1,9 +1,11 @@
+import { Leaf, Milk, Egg, Drumstick } from 'lucide-react';
+
 // ─── DIET DATA ───────────────────────────────────────────────────────────────
 const mk = (label, icon, items, macros, micros) => ({ label, icon, items, macros, micros });
 
 export const DIET_TYPES = {
   vegan: {
-    id: 'vegan', label: 'Vegan', icon: '🌱', color: '#E8540D', description: '100% plant-based',
+    id: 'vegan', label: 'Vegan', icon: Leaf, color: '#E8540D', description: '100% plant-based',
     proteinSources: ['Tofu', 'Tempeh', 'Soya Chunks', 'Rajma', 'Chana', 'Moong Dal', 'Hemp Seeds', 'Quinoa', 'Amaranth', 'Pea Protein', 'Peanut Butter'],
     meals: [
       mk('Breakfast', 'Sunrise', { loss: ['Overnight oats (40g) with soy milk, chia seeds & hemp seeds (all 9 EAAs)', 'OR Besan chilla (2) with tofu scramble — complete protein combo', '6 soaked almonds + 1 walnut', '1 scoop plant protein (pea+rice blend) in water'], maintain: ['Overnight oats (60g) with soy milk, banana, chia & hemp seeds', 'OR Quinoa porridge — quinoa contains all 9 EAAs', 'Soaked almonds (8) + 2 walnuts', '1 scoop plant protein in water or plant milk'], gain: ['Overnight oats (80g) with soy milk, banana, 2 tbsp peanut butter & hemp seeds', 'OR Quinoa upma (100g) with veggies + tofu — double complete protein', 'Almonds (10) + 2 walnuts + 2 dates', '1 scoop plant protein in 300ml soy milk'] }, { p: 38, c: 52, f: 14 }, ['Vitamin B12 (fortified soy milk)', 'Iron (hemp seeds)', 'Calcium (chia)', 'Omega-3 (walnuts)']),
@@ -15,7 +17,7 @@ export const DIET_TYPES = {
     ]
   },
   vegetarian: {
-    id: 'vegetarian', label: 'Vegetarian', icon: '🥛', color: '#E8540D', description: 'Dairy included — no meat or eggs',
+    id: 'vegetarian', label: 'Vegetarian', icon: Milk, color: '#E8540D', description: 'Dairy included — no meat or eggs',
     proteinSources: ['Paneer', 'Greek Yogurt', 'Full-Fat Milk', 'Soya Chunks', 'Rajma', 'Chana', 'Moong Dal', 'Quinoa', 'Hemp Seeds', 'Whey Protein'],
     meals: [
       mk('Breakfast', 'Sunrise', { loss: ['Moong dal cheela (2) with low-fat curd — complete amino acid combo', 'OR Paneer bhurji (60g) with 1 toast', '1 glass toned milk', '1 scoop whey in water'], maintain: ['Moong dal cheela (3) with full-fat curd', 'OR Paneer bhurji (80g) with 2 toasts', '1 glass full-fat milk', '1 scoop whey in milk'], gain: ['Quinoa upma (80g) with veggies + 80g paneer — double complete protein', 'OR Dal cheela (3-4) with full-fat curd', '1 glass full-fat milk + 1 banana', '1 scoop whey in full-fat milk'] }, { p: 42, c: 48, f: 16 }, ['B12 (dairy)', 'Calcium (paneer)', 'Vitamin D', 'Riboflavin']),
@@ -27,7 +29,7 @@ export const DIET_TYPES = {
     ]
   },
   egg: {
-    id: 'egg', label: 'Egg Diet', icon: '🥚', color: '#E8540D', description: 'Eggs at breakfast & dinner — dairy throughout',
+    id: 'egg', label: 'Egg Diet', icon: Egg, color: '#E8540D', description: 'Eggs at breakfast & dinner — dairy throughout',
     proteinSources: ['Whole Eggs', 'Egg Whites', 'Paneer', 'Greek Yogurt', 'Milk', 'Lentils', 'Chickpeas', 'Quinoa', 'Whey Protein'],
     meals: [
       mk('Breakfast', 'Sunrise', { loss: ['5 egg whites + 1 whole egg scramble with spinach, onion & tomato (PDCAAS 1.0 — all 9 EAAs)', '2 whole wheat toasts or 1 roti', '1 glass toned milk', '1 scoop whey in water'], maintain: ['5 egg whites + 1 whole egg masala bhurji with vegetables', '2 whole wheat toasts or 2 rotis', '1 glass full-fat milk', '1 scoop whey in milk'], gain: ['3 whole eggs + 5 egg whites scramble/bhurji with veggies + 30g paneer cubes', '3 whole wheat toasts or 2 rotis with ghee', '1 glass full-fat milk + 1 banana', '1 scoop whey in full-fat milk'] }, { p: 52, c: 42, f: 16 }, ['Vitamin B12 (eggs — highest bioavailability)', 'Choline (egg yolk)', 'Vitamin D', 'Selenium', 'Leucine']),
@@ -39,7 +41,7 @@ export const DIET_TYPES = {
     ]
   },
   nonveg: {
-    id: 'nonveg', label: 'Non-Veg', icon: '🍗', color: '#E8540D', description: 'Chicken, fish, eggs + dairy — all sources',
+    id: 'nonveg', label: 'Non-Veg', icon: Drumstick, color: '#E8540D', description: 'Chicken, fish, eggs + dairy — all sources',
     proteinSources: ['Chicken Breast', 'Fish (Rohu, Katla, Pomfret, Tuna)', 'Eggs', 'Paneer', 'Greek Yogurt', 'Mutton (limited)', 'Quinoa', 'Whey Protein'],
     meals: [
       mk('Breakfast', 'Sunrise', { loss: ['4 egg whites + 1 whole egg scramble with spinach & tomato', '1 whole wheat toast or 1 roti', '1 glass toned milk', '1 scoop whey in water'], maintain: ['4 egg whites + 1 whole egg masala bhurji with vegetables — all 9 EAAs', '2 toasts or 1 roti', '1 glass full-fat milk + soaked almonds (6)', '1 scoop whey in milk'], gain: ['2 whole eggs + 5 egg whites scramble + 30g paneer', '2-3 toasts or 2 rotis with ghee', '1 glass full-fat milk + banana', '1 scoop whey in full-fat milk'] }, { p: 52, c: 40, f: 16 }, ['Vitamin B12 (eggs)', 'Choline (egg yolk)', 'Vitamin D', 'Calcium (milk)', 'Leucine']),

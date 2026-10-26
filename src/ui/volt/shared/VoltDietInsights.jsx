@@ -61,7 +61,7 @@ export function VoltAdaptiveDietBanner({ suggestion, currentKcal, newKcal, newMa
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: accent, marginBottom: 3 }}>
-            ⚡ Adaptive Coach
+            Adaptive Coach
           </div>
           <div style={{ fontSize: 14.5, fontWeight: 700, lineHeight: 1.3 }}>{suggestion.message}</div>
           {!isPositive && suggestion.adjustKcal !== 0 && (
@@ -92,7 +92,7 @@ export function VoltAdaptiveDietBanner({ suggestion, currentKcal, newKcal, newMa
           <Icon size={16} color={accent} />
         </div>
         <span style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: accent }}>
-          ⚡ Adaptive Coach
+          Adaptive Coach
         </span>
       </div>
 

@@ -1,4 +1,4 @@
-import { Scale, Edit2, Trash2, X } from 'lucide-react';
+import { Scale, Edit2, Trash2, X, Check } from 'lucide-react';
 import { PageHeader, EmptyState, ConfirmDialog } from '../shared/SharedComponents';
 import { fmt, kgToLbs } from '../../../utils/helpers';
 import { useWeightLog } from '../../../core/hooks/useWeightLog';
@@ -31,7 +31,7 @@ export default function WeightLogPage() {
                     <input type="number" step=".1" value={editVal.weight} onChange={e => setEditVal(p => ({ ...p, weight: e.target.value }))} style={{ fontSize: 13, padding: '8px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
                     <input value={editVal.notes} onChange={e => setEditVal(p => ({ ...p, notes: e.target.value }))} placeholder="Notes..." style={{ fontSize: 13, padding: '8px 12px', borderRadius: 8, border: 'none', background: 'var(--surface-container-highest)', color: 'var(--on-surface)' }} />
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button className="btn-p" aria-label="Save weight edit" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 8 }} onClick={saveEdit}>✓</button>
+                      <button className="btn-p" aria-label="Save weight edit" style={{ padding: '6px 12px', fontSize: 12, borderRadius: 8 }} onClick={saveEdit}><Check size={13} /></button>
                       <button className="btn-g" aria-label="Cancel edit" style={{ padding: '6px 10px', fontSize: 12, borderRadius: 8 }} onClick={() => setEditId(null)}><X size={14} /></button>
                     </div>
                   </>

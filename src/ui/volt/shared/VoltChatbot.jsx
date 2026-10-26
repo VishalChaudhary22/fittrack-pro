@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, X, Zap, Trash2, Send } from 'lucide-react';
+import { Bot, X, Zap, Trash2, Send, Dumbbell, TrendingUp, UtensilsCrossed, Moon, Mountain, HeartPulse, Repeat, Pill } from 'lucide-react';
 
 // Volt twins of V1's ChatbotButton + ChatbotModal (FORGE) — greeting flow,
 // quick prompts, markdown rendering, send/clear/close behavior all identical
@@ -9,14 +9,14 @@ import { Bot, X, Zap, Trash2, Send } from 'lucide-react';
 const GREETING_KEY = 'forge_greeted';
 
 const QUICK_PROMPTS = [
-  { icon: '🏋️', label: 'Last bench session', text: 'What weight did I do on Bench Press last time?' },
-  { icon: '📈', label: 'Weight trend', text: 'Am I losing weight? Show me my last 30-day trend.' },
-  { icon: '🍛', label: 'Protein meals', text: `Suggest high-protein Indian meals for today.` },
-  { icon: '😴', label: 'Recovery advice', text: 'My readiness is low today. Should I train or rest?' },
-  { icon: '💪', label: 'Break plateau', text: 'My progress has stalled. How do I break through this plateau?' },
-  { icon: '🤕', label: 'Lower back pain', text: 'I have lower back pain. What exercises can I still do?' },
-  { icon: '🔄', label: 'Exercise swap', text: 'I don\'t have a cable machine. What are alternatives?' },
-  { icon: '🧪', label: 'Best supplement', text: 'What protein powder should I buy? Budget around ₹2000/kg.' },
+  { icon: Dumbbell, label: 'Last bench session', text: 'What weight did I do on Bench Press last time?' },
+  { icon: TrendingUp, label: 'Weight trend', text: 'Am I losing weight? Show me my last 30-day trend.' },
+  { icon: UtensilsCrossed, label: 'Protein meals', text: `Suggest high-protein Indian meals for today.` },
+  { icon: Moon, label: 'Recovery advice', text: 'My readiness is low today. Should I train or rest?' },
+  { icon: Mountain, label: 'Break plateau', text: 'My progress has stalled. How do I break through this plateau?' },
+  { icon: HeartPulse, label: 'Lower back pain', text: 'I have lower back pain. What exercises can I still do?' },
+  { icon: Repeat, label: 'Exercise swap', text: 'I don\'t have a cable machine. What are alternatives?' },
+  { icon: Pill, label: 'Best supplement', text: 'What protein powder should I buy? Budget around ₹2000/kg.' },
 ];
 
 const renderMarkdown = (text) => {
@@ -100,7 +100,7 @@ export function VoltChatbotButton({ onClick, hasUnread = false, userName }) {
           </button>
 
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--v-ink)', lineHeight: 1.45, paddingRight: 12 }}>
-            Hey {firstName} 👋
+            Hey {firstName}
           </div>
           <div style={{ fontSize: 12, color: 'var(--v-dim)', marginTop: 4, lineHeight: 1.4 }}>
             Need help with your workout or diet? I'm here.
@@ -224,8 +224,9 @@ export function VoltChatbotModal({ chatbot, user }) {
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Zap size={16} color="var(--v-volt-text)" />
                 <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em', color: 'var(--v-volt-text)' }}>
-                  ⚡ FORGE
+                  FORGE
                 </span>
                 <span style={{
                   fontSize: 10.5,
@@ -268,10 +269,10 @@ export function VoltChatbotModal({ chatbot, user }) {
                   lineHeight: 1.55,
                 }}>
                   <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 15 }}>
-                    ⚡ Hey {user?.name || 'there'}! I'm FORGE, your AI coach.
+                    Hey {user?.name || 'there'}! I'm FORGE, your AI coach.
                   </div>
                   <div style={{ marginBottom: 12, color: 'var(--v-dim)' }}>
-                    I have access to your full training history, weight logs, diet data, and Olympus League rank. Ask me anything — in English or Hinglish! 🇮🇳
+                    I have access to your full training history, weight logs, diet data, and Olympus League rank. Ask me anything — in English or Hinglish!
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600 }}>
                     Current status: {latestWeight}kg · {streakDays} day streak
@@ -301,7 +302,7 @@ export function VoltChatbotModal({ chatbot, user }) {
                         minHeight: 38,
                       }}
                     >
-                      <span>{p.icon}</span>
+                      <p.icon size={14} />
                       <span style={{ fontWeight: 600 }}>{p.label}</span>
                     </button>
                   ))}

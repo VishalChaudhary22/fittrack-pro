@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, RefreshCw, Share } from 'lucide-react';
+import { Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, RefreshCw, Share, Sparkles, Lightbulb } from 'lucide-react';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 import { calcBMR } from '../../../utils/calculations';
 import { ACTIVITY } from '../../../data/constants';
@@ -235,7 +235,7 @@ export default function DashboardPage() {
 
         {activeFestival && (
           <div style={{ background: 'linear-gradient(135deg, rgba(248,95,27,0.1) 0%, rgba(248,95,27,0.05) 100%)', border: '1px solid var(--primary-container)', borderRadius: 16, padding: 20, marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-            <div style={{ fontSize: 24 }}>✨</div>
+            <div><Sparkles size={24} color="var(--primary)" /></div>
             <div>
               <h3 className="headline-md" style={{ color: 'var(--primary)', fontSize: 16, marginBottom: 4 }}>{activeFestival.name}</h3>
               <p style={{ color: 'var(--on-surface-variant)', fontSize: 13, lineHeight: 1.5 }}>{activeFestival.message}</p>
@@ -381,7 +381,7 @@ export default function DashboardPage() {
           if (hasStarted && !hasSufficient) {
             return (
               <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', textAlign: 'center', padding: '8px 12px', background: 'var(--surface-container-lowest)', borderRadius: 12, marginBottom: 12 }}>
-                💡 Log your weight for 2+ more weeks to unlock personalised calorie adjustments
+                <Lightbulb size={13} style={{ verticalAlign: '-2px' }} /> Log your weight for 2+ more weeks to unlock personalised calorie adjustments
               </div>
             );
           }
@@ -777,7 +777,7 @@ export default function DashboardPage() {
                   alignSelf: 'flex-start', marginTop: 12,
                 }}
               >
-                ✦ Complete Check-In <ChevronRight size={12} />
+                Complete Check-In <ChevronRight size={12} />
               </button>
             ) : (
               <button
@@ -826,7 +826,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Check-in Modal ── */}
-      {/* ⚠️ GAP-G8 FIX: Wrap in Portal to guarantee z-index layering above all Dashboard modals */}
+      {/* GAP-G8 FIX: Wrap in Portal to guarantee z-index layering above all Dashboard modals */}
       {showCheckIn && (
         <ModalPortal>
           <ReadinessCheckIn

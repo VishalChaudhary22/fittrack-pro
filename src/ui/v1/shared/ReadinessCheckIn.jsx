@@ -68,11 +68,11 @@ export default function ReadinessCheckIn({ objectiveScore, onClose }) {
       field: 'energyLevel',
       label: "How's your energy right now?",
       options: [
-        { label: '😴 Drained', value: 1 },
-        { label: '😪 Low',     value: 2 },
-        { label: '😐 Okay',    value: 3 },
-        { label: '💪 Good',    value: 4 },
-        { label: '⚡ Peak',    value: 5 },
+        { label: 'Drained', value: 1 },
+        { label: 'Low',     value: 2 },
+        { label: 'Okay',    value: 3 },
+        { label: 'Good',    value: 4 },
+        { label: 'Peak',    value: 5 },
       ],
     },
     {
@@ -88,9 +88,9 @@ export default function ReadinessCheckIn({ objectiveScore, onClose }) {
       field: 'stressLevel',
       label: 'Mental stress level today?',
       options: [
-        { label: '😌 Chill',    value: 'low' },
-        { label: '😤 Some',     value: 'medium' },
-        { label: '🥵 Stressed', value: 'high' },
+        { label: 'Chill',    value: 'low' },
+        { label: 'Some',     value: 'medium' },
+        { label: 'Stressed', value: 'high' },
       ],
     },
   ];

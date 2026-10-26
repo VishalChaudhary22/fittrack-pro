@@ -57,7 +57,7 @@ export const syncUserXPToCache = async ({ workoutLogs, splits, user }) => {
     if (error) {
       console.warn('[XPCache] Upsert failed:', error.message);
     } else {
-      console.log('[XPCache] ✅ XP synced for', user.name, '→', overall.totalXP, 'total XP');
+      console.log('[XPCache] XP synced for', user.name, '→', overall.totalXP, 'total XP');
     }
   } catch (err) {
     // Non-fatal — leaderboard shows stale data, not a crash

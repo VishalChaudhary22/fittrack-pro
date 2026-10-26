@@ -1,4 +1,4 @@
-import { Edit2, Trash2, X } from 'lucide-react';
+import { Edit2, Trash2, X, Check } from 'lucide-react';
 import { useWeightLog } from '../../../core/hooks/useWeightLog';
 import { fmt, kgToLbs } from '../../../utils/helpers';
 import { VoltConfirmDialog } from '../shared/VoltShared';
@@ -50,7 +50,7 @@ export default function VoltWeightLogPage() {
                       <input value={editVal.notes} onChange={e => setEditVal(p => ({ ...p, notes: e.target.value }))} placeholder="Notes..." style={inputStyle} aria-label="Notes" />
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <VoltPill onClick={saveEdit} style={{ minHeight: 44, padding: '0 22px', fontSize: 13.5 }}>✓ Save</VoltPill>
+                      <VoltPill onClick={saveEdit} style={{ minHeight: 44, padding: '0 22px', fontSize: 13.5 }}><Check size={14} /> Save</VoltPill>
                       <VoltPill ghost onClick={() => setEditId(null)} style={{ minHeight: 44, padding: '0 18px', fontSize: 13.5 }}><X size={14} /> Cancel</VoltPill>
                     </div>
                   </div>

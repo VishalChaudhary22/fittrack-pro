@@ -55,7 +55,7 @@ function VoltMuscleCard({ muscle, xp }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginTop: 6 }}>
           <span style={{ color: rank.color }}>{Math.round(xp).toLocaleString()} XP</span>
           <span style={{ color: 'var(--v-dim)' }}>
-            {rank.progress < 1 ? `Next: ${Math.round(rank.nextXP).toLocaleString()} XP` : <span style={{ color: rank.color }}>✓ MAX TIER</span>}
+            {rank.progress < 1 ? `Next: ${Math.round(rank.nextXP).toLocaleString()} XP` : <span style={{ color: rank.color }}>MAX TIER</span>}
           </span>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function MuscleMapPage({ chatbot }) {
                   : myRank === undefined
                     ? 'Syncing to leaderboard…'
                     : myRank === 1
-                      ? 'You are #1! 🏆'
+                      ? 'You are #1!'
                       : topPercent <= 50
                         ? `You are in the top ${topPercent}%`
                         : `You are rank #${myRank}`}
@@ -125,7 +125,7 @@ export default function MuscleMapPage({ chatbot }) {
               <div style={{ fontSize: 13, color: 'var(--v-dim)' }}>
                 {overall.progress < 1
                   ? `${Math.round(overall.nextXP - overall.totalXP).toLocaleString()} XP to reach the next tier`
-                  : '✦ Max tier reached'}
+                  : 'Max tier reached'}
               </div>
             </div>
             <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, background: 'var(--v-volt)', border: '2.5px solid var(--v-edge)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

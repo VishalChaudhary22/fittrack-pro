@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronDown, Check, X, Info } from 'lucide-react';
 import { clamp, O } from '../../../utils/helpers';
 import { useApp } from '../../../core/context/AppContext';
 
@@ -273,7 +273,7 @@ export const ToastContainer = ({ toasts, removeToast }) => (
         border: `1px solid ${t.type === 'error' ? 'var(--error)' : t.type === 'info' ? 'var(--outline-variant)' : 'var(--primary-container)'}`,
         backdropFilter: 'var(--glass-blur)',
       }} onClick={() => removeToast(t.id)}>
-        <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0 }}>{t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'}</span>
+        <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, flexShrink: 0 }}>{t.type === 'success' ? <Check size={11} /> : t.type === 'error' ? <X size={11} /> : <Info size={11} />}</span>
         <span>{t.message}</span>
       </div>
     ))}

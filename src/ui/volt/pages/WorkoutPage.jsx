@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw } from 'lucide-react';
+import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw, Flower2, AlertTriangle } from 'lucide-react';
 import { beatsAllTimePR } from '../../../utils/exerciseHistory';
 import { Portal } from '../../v1/shared/SharedComponents';
 import { VoltConfirmDialog } from '../shared/VoltShared';
@@ -200,7 +200,7 @@ function VoltYogaView({ day, onBack, onComplete }) {
           {dayFlowPreset && (
             <VoltBlock hero>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 18, fontWeight: 900 }}>🧘 Today&apos;s Yoga Flow</span>
+                <span style={{ fontSize: 18, fontWeight: 900 }}><Flower2 size={18} style={{ verticalAlign: '-3px' }} /> Today&apos;s Yoga Flow</span>
                 <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11.5, color: 'var(--v-dim)' }}>{dayFlowPreset.poses.length} poses • {(totalFlowDuration / 60).toFixed(1)} min</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '16px 0' }}>
@@ -822,7 +822,7 @@ export default function WorkoutPage() {
           syncUserXPToCache({ workoutLogs: newLogs, splits, user }).catch(console.warn);
           return newLogs;
         });
-        addToast('Yoga session logged! 🧘', 'success');
+        addToast('Yoga session logged!', 'success');
       };
       return (
         <VoltYogaView
@@ -1004,7 +1004,7 @@ export default function WorkoutPage() {
                             <Check size={19} strokeWidth={s.done ? 3.2 : 2} />
                           </button>
                           {ex.sets.length > 1 && (
-                            <button type="button" onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ width: 44, height: 46, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--v-dim)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set">✕</button>
+                            <button type="button" onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ width: 44, height: 46, background: 'transparent', border: 'none', borderRadius: 8, color: 'var(--v-dim)', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove set"><X size={13} /></button>
                           )}
                         </div>
                       </div>
@@ -1176,7 +1176,7 @@ export default function WorkoutPage() {
             return (
               <VoltBlock hero className="v-rise">
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--v-coral-text)', textTransform: 'uppercase' }}>
-                  ⚠ Session from {hoursAgo}h ago
+                  <AlertTriangle size={12} style={{ verticalAlign: '-2px' }} /> Session from {hoursAgo}h ago
                 </div>
                 <div style={{ fontSize: 17.5, fontWeight: 900, marginTop: 8 }}>
                   {persistedSession.day?.name} • {activeSplit.name}

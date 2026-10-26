@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, ChevronRight, RefreshCw, TrendingUp, TrendingDown, Share } from 'lucide-react';
+import { X, ChevronRight, RefreshCw, TrendingUp, TrendingDown, Share, Sparkles } from 'lucide-react';
 import { ModalPortal } from '../../v1/shared/SharedComponents';
 import { VoltSheet, VoltScrollPicker, VoltThemeToggle } from '../shared/VoltShared';
 import VoltReadinessCheckIn from '../shared/VoltReadinessCheckIn';
@@ -303,7 +303,7 @@ export default function TodayPage() {
         {/* ── Festival ── */}
         {activeFestival && (
           <VoltBlock variant="volt" className="v-rise" style={riseStyle()}>
-            <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.01em' }}>✨ {activeFestival.name}</div>
+            <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.01em' }}><Sparkles size={16} style={{ verticalAlign: '-2px' }} /> {activeFestival.name}</div>
             <p style={{ fontSize: 13, lineHeight: 1.55, margin: '5px 0 0' }}>{activeFestival.message}</p>
           </VoltBlock>
         )}

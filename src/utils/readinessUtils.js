@@ -10,7 +10,7 @@ export const READINESS_TIERS = [
 export const getTier = (score) =>
   READINESS_TIERS.find(t => score >= t.min) ?? READINESS_TIERS[READINESS_TIERS.length - 1];
 
-// ⚠️ GAP-G5: Labels below must match the display names used in MUSCLE_GROUPS (muscleData.js).
+// GAP-G5: Labels below must match the display names used in MUSCLE_GROUPS (muscleData.js).
 // muscleData.js uses `back: 'Back'` and `abs: 'Abs'` — align these or users will see
 // different names for the same muscle group on different pages.
 // CORRECTED values below (matching muscleData.js MUSCLE_GROUPS):

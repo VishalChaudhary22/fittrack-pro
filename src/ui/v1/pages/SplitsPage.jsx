@@ -153,7 +153,7 @@ export default function SplitsPage() {
                                     <span style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginLeft: 8 }}>{ex.sets}×{ex.repsRange}</span>
                                     {(ex.primaryMuscle || ex.muscle) && <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', marginLeft: 8 }}>{ex.primaryMuscle || ex.muscle}</span>}
                                   </div>
-                                  {isAdmin && <div style={{ display: 'flex', gap: 6 }}><button className="btn-g" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => setEditEx(editEx === ex.id ? null : ex.id)}>{editEx === ex.id ? '✓' : <Edit2 size={11} />}</button><button className="btn-d" style={{ padding: '4px 8px' }} onClick={() => delEx(split.id, day.id, ex.id)}><Trash2 size={11} /></button></div>}
+                                  {isAdmin && <div style={{ display: 'flex', gap: 6 }}><button className="btn-g" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => setEditEx(editEx === ex.id ? null : ex.id)}>{editEx === ex.id ? <Check size={11} /> : <Edit2 size={11} />}</button><button className="btn-d" style={{ padding: '4px 8px' }} onClick={() => delEx(split.id, day.id, ex.id)}><Trash2 size={11} /></button></div>}
                                 </div>
                               )}
                             </div>

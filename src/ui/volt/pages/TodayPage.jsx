@@ -432,7 +432,7 @@ export default function TodayPage() {
               { l: 'Best Streak', v: streak.longest, u: 'd' },
             ].map((s) => (
               <div key={s.l}>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', color: 'var(--v-dim)', marginBottom: 4 }}>{s.l.toUpperCase()}</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', color: 'var(--v-dim)', marginBottom: 4, lineHeight: 1.25, minHeight: 25 }}>{s.l.toUpperCase()}</div>
                 <span className="v-num" style={{ fontSize: 31, lineHeight: 1, color: s.volt ? 'var(--v-volt-text)' : undefined }}>
                   {s.v}{s.u && <span style={{ fontSize: 14, color: 'var(--v-dim)' }}>{s.u}</span>}
                 </span>

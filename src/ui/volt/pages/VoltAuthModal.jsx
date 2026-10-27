@@ -198,7 +198,7 @@ export default function VoltAuthModal() {
       {/* Header */}
       <div className="v-rise" style={{ textAlign: 'center', marginBottom: 22 }}>
         <img
-          src="/kaaya-icon-192.png"
+          src="/kaaya-icon-volt.svg"
           alt="Kaaya Fit Logo"
           style={{ width: 66, height: 66, borderRadius: 18, margin: '0 auto 14px', display: 'block', border: '2.5px solid var(--v-edge)', boxShadow: '5px 5px 0 var(--v-shadow-hero)' }}
         />

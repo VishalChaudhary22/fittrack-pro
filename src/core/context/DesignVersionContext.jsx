@@ -30,10 +30,15 @@ export function DesignVersionProvider({ children }) {
   const [version, setVersionState] = useState(() => readLocal() ?? DEFAULT_DESIGN_VERSION);
   const userId = user?.id ?? null;
 
-  // Keep a data-design marker on <html> so skin stylesheets can key off it.
+  // Keep a data-design marker on <html> so skin stylesheets can key off it,
+  // and swap the favicon so the browser tab carries the active skin's mark.
+  // (The installed/launcher icon comes from the PWA manifest — the OS owns
+  // that one; in-app surfaces and the tab follow the chosen skin.)
   useEffect(() => {
     document.documentElement.dataset.design = version;
     try { localStorage.setItem(LS_KEY, version); } catch { /* private mode */ }
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) favicon.href = version === 'volt' ? '/kaaya-icon-volt.svg' : '/kaaya-icon-original.svg';
   }, [version]);
 
   // Adopt the account preference when a user signs in (profile wins over

@@ -184,7 +184,7 @@ export default function AuthModal() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img 
-            src="/kaaya-icon-192.png" 
+            src="/kaaya-icon-original.svg"
             alt="Kaaya Fit Logo" 
             style={{ width: 64, height: 64, borderRadius: 16, margin: '0 auto 16px', display: 'block', boxShadow: '0 8px 24px rgba(232,84,13,.2)' }} 
           />

@@ -549,18 +549,12 @@ const getSortIndex = (muscle) => {
   return index === -1 ? 999 : index;
 };
 
-const VOLT_MUSCLE_COLORS = {
-  'Chest': '#C9F158', 'Back': '#7FE0A8', 'Shoulders': '#FFD166', 'Rear Delts': '#FFD166',
-  'Legs': '#FF7A5C', 'Quads': '#FF7A5C', 'Hamstrings': '#FF7A5C', 'Glutes': '#FF9EC7',
-  'Calves': '#B388FF', 'Abductors': '#FF9EC7', 'Adductors': '#FF7A5C', 'Biceps': '#7D9BFF',
-  'Triceps': '#7D9BFF', 'Arms': '#7D9BFF', 'Core': '#FFB86B', 'Full Body': '#B9BFA8',
-};
-
 function VoltPoolRow({ ex, onAdd, session }) {
   const alreadyAdded = session?.exs?.some(e =>
     e.name === ex.name || e._originalName === ex.name || e.originalName === ex.name
   );
-  const accent = VOLT_MUSCLE_COLORS[ex.muscle] || 'var(--v-dim)';
+  // One accent for every row, per the Volt theme (was: a colour per muscle group).
+  const accent = 'var(--v-volt)';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '13px 14px', background: 'var(--v-panel)', border: '2px solid var(--v-edge-quiet)', borderLeft: `4px solid ${accent}`, borderRadius: 12, marginBottom: 8 }}>

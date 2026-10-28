@@ -75,8 +75,14 @@
 /* iOS WebKit paints bare <button> text in its own system blue when no
    colour is set (this is why the Volt History day names — UPPER A,
    LOWER A — rendered blue on iPhone but not on desktop). Volt buttons
-   always inherit the skin's ink instead. */
-[data-design='volt'] button {
+   always inherit the skin's ink instead.
+   The :where() wrapper keeps this rule at the lowest possible
+   specificity (0,0,1): it must beat the browser's default button
+   colour, but it must NEVER beat a component class — the unwrapped
+   version (0,1,1) outranked .v-pill (0,1,0) and silently erased the
+   pill's foreground, leaving e.g. the History "Edit Session" label
+   invisible ink-on-ink in light mode. */
+:where([data-design='volt']) button {
   color: inherit;
 }
 

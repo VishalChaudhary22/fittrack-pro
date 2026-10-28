@@ -37,8 +37,12 @@ export function DesignVersionProvider({ children }) {
   useEffect(() => {
     document.documentElement.dataset.design = version;
     try { localStorage.setItem(LS_KEY, version); } catch { /* private mode */ }
-    const favicon = document.querySelector('link[rel="icon"]');
-    if (favicon) favicon.href = version === 'volt' ? '/kaaya-icon-volt.svg' : '/kaaya-icon-original.svg';
+    // Swap both favicon links: the SVG (modern browsers) and the PNG
+    // (WebKit/iOS ignores SVG favicons and needs the PNG).
+    document.querySelectorAll('link[rel="icon"]').forEach((link) => {
+      if (link.type === 'image/svg+xml') link.href = version === 'volt' ? '/kaaya-icon-volt.svg' : '/kaaya-icon-original.svg';
+      else if (link.type === 'image/png') link.href = version === 'volt' ? '/kaaya-icon-192.png' : '/kaaya-icon-original-192.png';
+    });
   }, [version]);
 
   // Adopt the account preference when a user signs in (profile wins over

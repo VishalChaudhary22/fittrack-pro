@@ -108,9 +108,9 @@ export default function WorkoutHistoryPage({ chatbot }) {
                           e.stopPropagation();
                           if (chatbot) {
                             chatbot.openChat();
-                            setTimeout(() => chatbot.sendMessage(
+                            chatbot.sendMessage(
                               `How did I do on ${log.dayName} on ${fmt(log.date)}? Any improvements?`
-                            ), 300);
+                            );
                           }
                         }}
                         style={{ width: 36, height: 36, borderRadius: 10, background: 'transparent', border: '1px solid var(--outline-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--on-surface-dim)', transition: '0.2s' }}

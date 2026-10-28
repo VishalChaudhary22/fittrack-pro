@@ -50,6 +50,18 @@
   --v-pill-fg: #c9f158;
 }
 
+/* Focus ring in the Volt accent — the global :focus-visible rule paints it
+   with the Original skin's orange (--o); under Volt it must read volt.
+   --v-volt-text is the per-mode volt (bright in dark, deep olive in light). */
+[data-design='volt'] button:focus-visible,
+[data-design='volt'] a:focus-visible,
+[data-design='volt'] input:focus-visible,
+[data-design='volt'] select:focus-visible,
+[data-design='volt'] .ni:focus-visible {
+  outline: 2px solid var(--v-volt-text);
+  outline-offset: 2px;
+}
+
 /* ─── Screen + type ─────────────────────────────────────────────────────────── */
 
 .v-screen {

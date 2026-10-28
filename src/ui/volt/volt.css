@@ -62,6 +62,16 @@
   outline-offset: 2px;
 }
 
+/* Same leak, second door: the global input:focus rule paints an ember
+   bottom border + V1 surface wash on focused fields. Inputs with inline
+   borders override this anyway; bare inputs now stay volt. */
+[data-design='volt'] input:focus,
+[data-design='volt'] select:focus,
+[data-design='volt'] textarea:focus {
+  border-bottom-color: var(--v-volt-text);
+  background: transparent;
+}
+
 /* ─── Screen + type ─────────────────────────────────────────────────────────── */
 
 .v-screen {

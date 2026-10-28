@@ -96,7 +96,7 @@ export default function SplitBuilderPage() {
 
                   <button 
                     onClick={() => setActiveDayPicker(day.id)}
-                    style={{ width: '100%', padding: '12px', background: 'var(--primary-container)', color: 'var(--primary)', border: 'none', borderRadius: 12, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '12px', background: 'var(--primary-container)', color: 'var(--on-primary)', border: 'none', borderRadius: 12, fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer' }}
                   >
                     <Plus size={16} /> Add Exercise
                   </button>

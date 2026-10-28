@@ -50,6 +50,28 @@
   --v-pill-fg: #c9f158;
 }
 
+/* Focus ring in the Volt accent — the global :focus-visible rule paints it
+   with the Original skin's orange (--o); under Volt it must read volt.
+   --v-volt-text is the per-mode volt (bright in dark, deep olive in light). */
+[data-design='volt'] button:focus-visible,
+[data-design='volt'] a:focus-visible,
+[data-design='volt'] input:focus-visible,
+[data-design='volt'] select:focus-visible,
+[data-design='volt'] .ni:focus-visible {
+  outline: 2px solid var(--v-volt-text);
+  outline-offset: 2px;
+}
+
+/* Same leak, second door: the global input:focus rule paints an ember
+   bottom border + V1 surface wash on focused fields. Inputs with inline
+   borders override this anyway; bare inputs now stay volt. */
+[data-design='volt'] input:focus,
+[data-design='volt'] select:focus,
+[data-design='volt'] textarea:focus {
+  border-bottom-color: var(--v-volt-text);
+  background: transparent;
+}
+
 /* ─── Screen + type ─────────────────────────────────────────────────────────── */
 
 .v-screen {

@@ -717,30 +717,12 @@ const getSortIndex = (muscle) => {
   return index === -1 ? 999 : index;
 };
 
-const MUSCLE_COLOR_MAP = {
-  'Chest': 'var(--primary)',
-  'Back': 'var(--tertiary, #4CAF50)',
-  'Shoulders': 'var(--secondary, #FFC107)',
-  'Rear Delts': 'var(--secondary, #FFC107)',
-  'Legs': 'var(--error, #F44336)',
-  'Quads': 'var(--error, #F44336)',
-  'Hamstrings': 'var(--error, #F44336)',
-  'Glutes': '#E91E63',
-  'Calves': '#9C27B0',
-  'Abductors': '#E91E63',
-  'Adductors': 'var(--error, #F44336)',
-  'Biceps': '#00BCD4',
-  'Triceps': '#03A9F4',
-  'Arms': '#00BCD4',
-  'Core': '#FF9800',
-  'Full Body': 'var(--on-surface)'
-};
-
 function ExercisePoolRow({ ex, onAdd, session }) {
   const alreadyAdded = session?.exs?.some(e =>
     e.name === ex.name || e._originalName === ex.name || e.originalName === ex.name
   );
-  const accent = MUSCLE_COLOR_MAP[ex.muscle] || 'var(--on-surface-dim)';
+  // One accent for every row, per the Original theme (was: a colour per muscle group).
+  const accent = 'var(--primary)';
 
   return (
     <div style={{

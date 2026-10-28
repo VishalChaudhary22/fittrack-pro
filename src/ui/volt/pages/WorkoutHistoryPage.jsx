@@ -120,9 +120,9 @@ export default function VoltWorkoutHistoryPage({ chatbot }) {
                           onClick={() => {
                             if (chatbot) {
                               chatbot.openChat();
-                              setTimeout(() => chatbot.sendMessage(
+                              chatbot.sendMessage(
                                 `How did I do on ${log.dayName} on ${fmt(log.date)}? Any improvements?`
-                              ), 300);
+                              );
                             }
                           }}
                           style={{ width: 40, height: 40, borderRadius: 11, background: 'var(--v-panel)', border: '2px solid var(--v-edge-quiet)', color: 'var(--v-dim)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

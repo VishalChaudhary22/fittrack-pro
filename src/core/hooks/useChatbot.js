@@ -52,6 +52,18 @@ export function useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLo
       timestamp: new Date().toISOString(),
     };
 
+    // The system prompt is normally built when the panel opens, but a
+    // programmatic send (e.g. the per-session "Ask FORGE" buttons, which
+    // fire immediately on open) can beat that effect — and an empty
+    // system prompt makes BOTH AI providers reject the call (the client
+    // then shows "AI service unavailable"). Build it synchronously here
+    // if it isn't ready yet.
+    if (!systemPromptRef.current) {
+      systemPromptRef.current = buildForgeSystemPrompt({
+        user, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog,
+      });
+    }
+
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     saveMessages(newMessages);
@@ -110,7 +122,7 @@ export function useChatbot({ user, workoutLogs, healthLogs, foodLog, readinessLo
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, user, saveMessages]);
+  }, [messages, isLoading, user, saveMessages, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog]);
 
   const clearHistory = useCallback(() => {
     setMessages([]);

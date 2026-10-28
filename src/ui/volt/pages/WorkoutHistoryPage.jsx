@@ -112,7 +112,7 @@ export default function VoltWorkoutHistoryPage({ chatbot }) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                       <button type="button" onClick={() => setExpandId(isExpanded ? null : log.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
                         <VoltLabel volt>{fmt(log.date)}</VoltLabel>
-                        <span className="v-num" style={{ display: 'block', fontSize: 18, textTransform: 'uppercase', marginTop: 5 }}>{log.dayName}</span>
+                        <span className="v-num" style={{ display: 'block', fontSize: 18, textTransform: 'uppercase', marginTop: 5, color: 'var(--v-ink)' }}>{log.dayName}</span>
                       </button>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <button

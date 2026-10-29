@@ -103,6 +103,10 @@ function AvatarPickerModal({ open, onClose }) {
 
 export default function ProfilePage() {
   const { achievements, addToast, bmi, bmr, confirm, designVersion, disablePush, ed, enablePush, f, feedbackMessage, feedbackOpen, feedbackStatus, feedbackSubject, handleExport, handleFeedbackSubmit, includeProfile, latestBFPct, logout, lvl, muscleXP, overall, preferences, prefsLoading, pushEnabled, save, setConfirm, setDesignVersion, setEd, setFeedbackMessage, setFeedbackOpen, setFeedbackSubject, setIncludeProfile, setShowAvatarPicker, setShowManualTDEEPicker, setTdeePreferences, sf, showAvatarPicker, showManualTDEEPicker, streak, tdee, tdeePreferences, toggleUnitHeight, toggleUnitWeight, top4, unitHeight, unitWeight, updatePreferences, user } = useProfile();
+  // BMR is only meaningful with weight, height and age on file — without
+  // them calcBMR degenerates (e.g. 5 kcal for an empty profile). Show the
+  // same '—' the BF% tile uses instead of a misleading number.
+  const bmrValid = Boolean(user?.weight && user?.height && user?.age);
   return (
     <>
     <div className="pg-in" style={{ paddingBottom: 60 }}>
@@ -138,8 +142,8 @@ export default function ProfilePage() {
         </div>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>BMR</div>
-          <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{bmr}</div>
-          <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>
+          <div className="headline-lg" style={{ color: 'var(--on-surface)' }}>{bmrValid ? bmr : '—'}</div>
+          {bmrValid && <div style={{ fontSize: 10, color: 'var(--on-surface-dim)' }}>KCAL</div>}
         </div>
         <div style={{ background: 'var(--surface-container-low)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--on-surface-dim)', fontWeight: 700 }}>TDEE</div>

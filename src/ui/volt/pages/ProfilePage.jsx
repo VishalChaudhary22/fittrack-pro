@@ -174,6 +174,10 @@ export default function VoltProfilePage() {
     updatePreferences, user,
   } = useProfile();
 
+  // BMR is only meaningful with weight, height and age on file — without
+  // them calcBMR degenerates (e.g. 5 kcal for an empty profile). Show the
+  // same '—' the BF% tile uses instead of a misleading number.
+  const bmrValid = Boolean(user?.weight && user?.height && user?.age);
   const field = (fld, dispVal) => (
     <div key={fld.k} style={{ background: 'var(--v-canvas)', border: '2px solid var(--v-edge-quiet)', borderRadius: 11, padding: '10px 12px', minWidth: 0 }}>
       <label htmlFor={`v-input-${fld.k}`} style={fieldLabel}>{fld.l}</label>
@@ -221,7 +225,7 @@ export default function VoltProfilePage() {
         {[
           { label: 'BMI', value: bmi, chip: getBMICat(bmi).label },
           { label: 'BF%', value: latestBFPct ? `${latestBFPct.toFixed(1)}%` : '—' },
-          { label: 'BMR', value: bmr, unit: 'kcal' },
+          { label: 'BMR', value: bmrValid ? bmr : '—', unit: bmrValid ? 'kcal' : '' },
           { label: 'TDEE', value: tdee, unit: 'kcal' },
         ].map(s => (
           <VoltBlock key={s.label} style={{ padding: '14px 12px', minWidth: 0 }}>

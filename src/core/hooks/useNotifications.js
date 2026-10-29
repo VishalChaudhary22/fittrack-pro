@@ -36,7 +36,7 @@ export const useNotifications = () => {
     const fetchPrefs = async () => {
       setLoading(true);
       const [prefsRes, subsRes] = await Promise.all([
-        supabase.from('notification_preferences').select('*').eq('user_id', user.id).single(),
+        supabase.from('notification_preferences').select('*').eq('user_id', user.id).maybeSingle(),
         supabase.from('push_subscriptions').select('id').eq('user_id', user.id).limit(1)
       ]);
       

@@ -181,6 +181,11 @@ export default function MuscleMapPage({ chatbot }) {
             {[podium[1], podium[0], podium[2]].filter(Boolean).map((player, slotIndex) => {
               const isCenter = slotIndex === 1;
               const medalColor = player.rank === 1 ? 'var(--v-volt)' : player.rank === 2 ? '#8FA3B8' : '#CD7F32';
+              // Rank-1 TEXT (number + XP) must use the theme-adaptive volt:
+              // raw --v-volt (#C9F158) on the light panel is ~1.3:1 — nearly
+              // invisible in light mode. --v-volt-text is the same colour in
+              // dark and the deep olive in light. Borders keep raw volt.
+              const medalText = player.rank === 1 ? 'var(--v-volt-text)' : medalColor;
               const rankLabel = player.rank === 1 ? '1st' : player.rank === 2 ? '2nd' : '3rd';
               const podiumXP = muscleFilter === 'all' ? player.totalXP : (player.muscleXP?.[muscleFilter] || 0);
               return (
@@ -195,7 +200,7 @@ export default function MuscleMapPage({ chatbot }) {
                       width: isCenter ? 70 : 54, height: isCenter ? 70 : 54, borderRadius: '50%',
                       border: `${isCenter ? 3.5 : 2.5}px solid ${medalColor}`, background: 'var(--v-panel)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: isCenter ? 21 : 16, color: medalColor, position: 'relative', zIndex: 1,
+                      fontSize: isCenter ? 21 : 16, color: medalText, position: 'relative', zIndex: 1,
                     }}>
                       {player.rank}
                     </div>
@@ -210,7 +215,7 @@ export default function MuscleMapPage({ chatbot }) {
                     </div>
                   </div>
                   <div style={{ fontWeight: 700, fontSize: 12, marginTop: 5, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</div>
-                  <div className="v-num" style={{ fontSize: isCenter ? 13 : 11, color: medalColor, marginTop: 2 }}>
+                  <div className="v-num" style={{ fontSize: isCenter ? 13 : 11, color: medalText, marginTop: 2 }}>
                     {fmtK(podiumXP)} XP
                   </div>
                 </div>

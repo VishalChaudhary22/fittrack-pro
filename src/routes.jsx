@@ -56,6 +56,10 @@ const QUEST_PAGES = {
   '/split-builder': lazy(() => import('./ui/quest/pages/SplitBuilderPage')),
   '/history': lazy(() => import('./ui/quest/pages/HistoryPage')),
   '/weight-log': lazy(() => import('./ui/quest/pages/WeightLogPage')),
+  '/measurements': lazy(() => import('./ui/quest/pages/MeasurementsPage')),
+  '/cycle': lazy(() => import('./ui/quest/pages/CycleTrackerPage')),
+  '/profile': lazy(() => import('./ui/quest/pages/ProfilePage')),
+  '/contact': lazy(() => import('./ui/quest/pages/ContactPage')),
 };
 
 function SkinFallback() {

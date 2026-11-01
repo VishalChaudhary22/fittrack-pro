@@ -2,9 +2,11 @@ import { createContext, useContext, useCallback, useEffect, useState } from 'rea
 import { useApp } from './AppContext';
 import { supabase } from '../../lib/supabaseClient';
 
-// ─── Kaaya Volt · design version (skin) state ────────────────────────────────
-// One app, two presentation skins: 'v1' (Original Kaaya) and 'volt'
-// (Kaaya Volt). This context owns ONLY the preference — data, auth and
+// ─── Kaaya · design version (skin) state ─────────────────────────────────────
+// One app, three presentation skins: 'v1' (Original Kaaya), 'volt'
+// (Kaaya Volt) and 'quest' (Kaaya Quest — the 8-bit skin, Q-0 plumbing:
+// the value is accepted and persisted now; its pages land from Q-2).
+// This context owns ONLY the preference — data, auth and
 // features are untouched by it. Resolution order:
 //   user_profiles.design_version → localStorage → default 'volt'.
 // The profile write is best-effort: until the design_version migration has
@@ -13,7 +15,16 @@ import { supabase } from '../../lib/supabaseClient';
 
 const DesignVersionContext = createContext(null);
 const LS_KEY = 'kaaya-design-version';
-const DESIGN_VERSIONS = ['v1', 'volt'];
+const DESIGN_VERSIONS = ['v1', 'volt', 'quest'];
+
+// Per-skin favicons. Quest's PNG joins the icon upload pack (rendered with
+// Q-0); until it lands in public/, Quest tabs on WebKit/iOS — which ignore
+// SVG favicons — fall back to the Volt PNG rather than a missing file.
+const FAVICONS = {
+  volt: { svg: '/kaaya-icon-volt.svg', png: '/kaaya-icon-192.png' },
+  v1: { svg: '/kaaya-icon-original.svg', png: '/kaaya-icon-original-192.png' },
+  quest: { svg: '/kaaya-icon-quest.svg', png: '/kaaya-icon-192.png' },
+};
 const DEFAULT_DESIGN_VERSION = 'volt';
 
 function readLocal() {
@@ -39,9 +50,10 @@ export function DesignVersionProvider({ children }) {
     try { localStorage.setItem(LS_KEY, version); } catch { /* private mode */ }
     // Swap both favicon links: the SVG (modern browsers) and the PNG
     // (WebKit/iOS ignores SVG favicons and needs the PNG).
+    const fav = FAVICONS[version] ?? FAVICONS[DEFAULT_DESIGN_VERSION];
     document.querySelectorAll('link[rel="icon"]').forEach((link) => {
-      if (link.type === 'image/svg+xml') link.href = version === 'volt' ? '/kaaya-icon-volt.svg' : '/kaaya-icon-original.svg';
-      else if (link.type === 'image/png') link.href = version === 'volt' ? '/kaaya-icon-192.png' : '/kaaya-icon-original-192.png';
+      if (link.type === 'image/svg+xml') link.href = fav.svg;
+      else if (link.type === 'image/png') link.href = fav.png;
     });
   }, [version]);
 
@@ -81,7 +93,7 @@ export function DesignVersionProvider({ children }) {
   }, [userId]);
 
   return (
-    <DesignVersionContext.Provider value={{ version, setVersion, isVolt: version === 'volt' }}>
+    <DesignVersionContext.Provider value={{ version, setVersion, isVolt: version === 'volt', isQuest: version === 'quest' }}>
       {children}
     </DesignVersionContext.Provider>
   );

@@ -4,11 +4,11 @@ import { useDesignVersion } from './core/context/DesignVersionContext';
 import ErrorBoundary from './ui/v1/shared/ErrorBoundary';
 
 // ─── Skin routing ────────────────────────────────────────────────────────────
-// One route table, two skins. Each route names its V1 page (lazy) and,
-// when one exists, its Volt twin. SkinGate renders the Volt page when the
-// user's design version is 'volt' AND a Volt page has landed for that
-// route; otherwise it renders V1. Volt pages arrive per-route from V-3
-// onward — registering one is a single line in VOLT_PAGES below.
+// One route table, three skins. Each route names its V1 page (lazy) and,
+// when one exists, its Volt and Quest twins. SkinGate walks the fallback
+// chain for the active skin: Quest page → Volt page → V1 page; Volt page
+// → V1 page. Twins arrive per-route — registering one is a single line
+// in VOLT_PAGES / QUEST_PAGES below.
 
 const V1_PAGES = {
   '/': lazy(() => import('./ui/v1/pages/DashboardPage')),
@@ -43,6 +43,10 @@ const VOLT_PAGES = {
   '/contact': lazy(() => import('./ui/volt/pages/ContactPage')),
 };
 
+// Kaaya Quest twins register here as they land (Q-2 onward). Empty in Q-0:
+// a 'quest' design version renders the Volt twins until Quest pages exist.
+const QUEST_PAGES = {};
+
 function SkinFallback() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
@@ -59,9 +63,10 @@ function SkinFallback() {
 }
 
 export function SkinGate({ path, pageProps }) {
-  const { isVolt } = useDesignVersion();
-  const VoltPage = isVolt ? VOLT_PAGES[path] : null;
-  const Page = VoltPage ?? V1_PAGES[path];
+  const { version } = useDesignVersion();
+  const QuestPage = version === 'quest' ? QUEST_PAGES[path] : null;
+  const VoltPage = version !== 'v1' ? VOLT_PAGES[path] : null;
+  const Page = QuestPage ?? VoltPage ?? V1_PAGES[path];
   return (
     <ErrorBoundary>
       <Suspense fallback={<SkinFallback />}>

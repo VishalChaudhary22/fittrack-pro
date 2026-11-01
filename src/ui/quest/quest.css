@@ -410,9 +410,22 @@
   animation: q-float-up 0.9s steps(4) both;
 }
 
+/* Olympus + body map (§6.2/§7.3/§7.4): realtime row flash, today pulse. */
+@keyframes q-row-flash {
+  0%, 100% { border-color: var(--q-border); }
+  50% { border-color: var(--q-volt); }
+}
+.q-row-flash { animation: q-row-flash 0.45s steps(2) 3; }
+
+@keyframes q-zone-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+.q-zone-pulse { animation: q-zone-pulse 1.5s steps(2) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .q-blink, .q-bob, .q-heart, .q-rise-z { animation: none; }
-  .q-sheet, .q-boot, .q-sweep, .q-burst-star, .q-stamp, .q-floater { animation: none; }
+  .q-sheet, .q-boot, .q-sweep, .q-burst-star, .q-stamp, .q-floater, .q-row-flash, .q-zone-pulse { animation: none; }
   .q-sweep, .q-burst-star, .q-floater { display: none; }
   .q-btn:active { transform: none; }
 }

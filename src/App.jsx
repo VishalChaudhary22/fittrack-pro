@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './core/context/AppContext';
 import { DesignVersionProvider, useDesignVersion } from './core/context/DesignVersionContext';
@@ -17,9 +17,13 @@ import { VoltChatbotButton, VoltChatbotModal } from './ui/volt/shared/VoltChatbo
 import { SkinWelcomeSheet, SkinQuickSwitch, SkinComparePill } from './ui/volt/shared/SkinSwitch';
 import { recordSession, isWelcomeSeen } from './core/hooks/useDiscovery';
 
+// Quest shell loads lazily: a Volt/Original user never downloads the
+// Quest tree (its CSS carries the embedded pixel fonts).
+const QuestShellNav = lazy(() => import('./ui/quest/QuestShell'));
+
 function AppInner() {
   const { user, theme, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
-  const { isVolt } = useDesignVersion();
+  const { isVolt, isQuest } = useDesignVersion();
   const { pathname } = useLocation();
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
   const [welcomeDismissed, setWelcomeDismissed] = useState(false);
@@ -45,10 +49,12 @@ function AppInner() {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
-    meta.setAttribute('content', isVolt
-      ? (theme === 'light' ? '#F7F4ED' : '#0A0A09')
-      : (theme === 'light' ? '#EDE7E0' : '#131315'));
-  }, [isVolt, theme]);
+    meta.setAttribute('content', isQuest
+      ? (theme === 'light' ? '#EFE9DA' : '#14141F')
+      : isVolt
+        ? (theme === 'light' ? '#F7F4ED' : '#0A0A09')
+        : (theme === 'light' ? '#EDE7E0' : '#131315'));
+  }, [isVolt, isQuest, theme]);
 
   if (authLoading) {
     if (isVolt) {
@@ -70,6 +76,23 @@ function AppInner() {
               100% { opacity: 0.4; width: 48px; }
             }
           `}</style>
+        </div>
+      );
+    }
+    if (isQuest) {
+      // Inline-styled on purpose: quest.css is lazy and has not loaded yet.
+      const light = theme === 'light';
+      return (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: light ? '#EFE9DA' : '#14141F' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 22, letterSpacing: '0.14em', color: light ? '#1D1D26' : '#F4F5E9', textTransform: 'uppercase', marginBottom: 14 }}>
+              Kaaya Fit
+            </div>
+            <div style={{ fontFamily: 'monospace', fontSize: 13, letterSpacing: '0.3em', color: light ? '#4C6B00' : '#C9F158', textTransform: 'uppercase' }}>
+              Loading<span style={{ animation: 'q-load-blink 1.1s steps(1) infinite' }}>...</span>
+            </div>
+          </div>
+          <style>{`@keyframes q-load-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }`}</style>
         </div>
       );
     }
@@ -104,16 +127,22 @@ function AppInner() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {!isVolt && <Sidebar />}
+      {!isVolt && !isQuest && <Sidebar />}
       <main
         className="mc"
-        style={isVolt
-          ? { flex: 1, padding: '24px 24px 96px', overflowY: 'auto', background: 'var(--v-canvas)' }
-          : { flex: 1, padding: '22px 24px', overflowY: 'auto' }}
+        style={isQuest
+          ? { flex: 1, padding: '24px 24px 96px', overflowY: 'auto', background: 'var(--q-canvas)' }
+          : isVolt
+            ? { flex: 1, padding: '24px 24px 96px', overflowY: 'auto', background: 'var(--v-canvas)' }
+            : { flex: 1, padding: '22px 24px', overflowY: 'auto' }}
       >
         <AppRoutes chatbot={chatbot} />
       </main>
-      {isVolt ? <VoltShellNav /> : <BottomNav />}
+      {isVolt
+        ? <VoltShellNav />
+        : isQuest
+          ? (<Suspense fallback={null}><QuestShellNav /></Suspense>)
+          : <BottomNav />}
       {isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
       <NotificationPrompt />
       {isVolt ? <VoltChatbotButton onClick={chatbot.openChat} userName={user?.name} /> : <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />}

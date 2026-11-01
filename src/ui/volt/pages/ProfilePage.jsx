@@ -3,7 +3,7 @@ import { LogOut, Download, Share2, Camera, Shield, Link, Bike, MessageSquare, Ch
 import { useApp } from '../../../core/context/AppContext';
 import { useProfile } from '../../../core/hooks/useProfile';
 import { VoltConfirmDialog, VoltThemeToggle, VoltScrollPicker } from '../shared/VoltShared';
-import { SkinPreviewVolt, SkinPreviewOriginal } from '../shared/SkinSwitch';
+import { SkinPreviewVolt, SkinPreviewOriginal, SkinPreviewQuest } from '../shared/SkinSwitch';
 import { ACTIVITY } from '../../../data/constants';
 import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
@@ -422,7 +422,7 @@ export default function VoltProfilePage() {
         <VoltLabel volt>Appearance</VoltLabel>
         <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em', margin: '5px 0 4px' }}>App Design</div>
         <p style={{ fontSize: 12.5, color: 'var(--v-dim)', lineHeight: 1.5, margin: '0 0 14px' }}>
-          Two looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
+          Three looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <button onClick={() => setDesignVersion('volt')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'volt'}>
@@ -430,6 +430,9 @@ export default function VoltProfilePage() {
           </button>
           <button onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'v1'}>
             <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
+          </button>
+          <button onClick={() => setDesignVersion('quest')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', gridColumn: '1 / -1' }} aria-pressed={designVersion === 'quest'}>
+            <SkinPreviewQuest firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'quest'} />
           </button>
         </div>
       </VoltBlock>

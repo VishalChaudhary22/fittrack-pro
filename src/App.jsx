@@ -14,12 +14,18 @@ import { useChatbot } from './core/hooks/useChatbot';
 import ChatbotButton from './ui/v1/shared/ChatbotButton';
 import ChatbotModal from './ui/v1/shared/ChatbotModal';
 import { VoltChatbotButton, VoltChatbotModal } from './ui/volt/shared/VoltChatbot';
-import { SkinWelcomeSheet, SkinQuickSwitch, SkinComparePill } from './ui/volt/shared/SkinSwitch';
+import { SkinWelcomeSheet, SkinQuickSwitch, SkinComparePill, QuestDiscoveryPill } from './ui/volt/shared/SkinSwitch';
 import { recordSession, isWelcomeSeen } from './core/hooks/useDiscovery';
 
 // Quest shell loads lazily: a Volt/Original user never downloads the
 // Quest tree (its CSS carries the embedded pixel fonts).
 const QuestShellNav = lazy(() => import('./ui/quest/QuestShell'));
+// Q-8 Quest surfaces (auth title screen, FORGE dialogue, log-strip toasts)
+// ride the same lazy Quest chunk for the same reason.
+const QuestAuthModal = lazy(() => import('./ui/quest/pages/QuestAuthModal'));
+const QuestChatbotButton = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotButton })));
+const QuestChatbotModal = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotModal })));
+const QuestToastContainer = lazy(() => import('./ui/quest/shared/QuestToasts').then(m => ({ default: m.QuestToastContainer })));
 
 function AppInner() {
   const { user, theme, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
@@ -123,7 +129,9 @@ function AppInner() {
     );
   }
 
-  if (!user) return isVolt ? <VoltAuthModal /> : <AuthModal />;
+  if (!user) return isQuest
+    ? (<Suspense fallback={null}><QuestAuthModal /></Suspense>)
+    : isVolt ? <VoltAuthModal /> : <AuthModal />;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -143,13 +151,20 @@ function AppInner() {
         : isQuest
           ? (<Suspense fallback={null}><QuestShellNav /></Suspense>)
           : <BottomNav />}
-      {isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
+      {isQuest
+        ? (<Suspense fallback={null}><QuestToastContainer toasts={toasts} removeToast={removeToast} /></Suspense>)
+        : isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
       <NotificationPrompt />
-      {isVolt ? <VoltChatbotButton onClick={chatbot.openChat} userName={user?.name} /> : <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />}
-      {chatbot.isOpen && (isVolt
-        ? <VoltChatbotModal chatbot={chatbot} user={user} />
-        : <ChatbotModal chatbot={chatbot} user={user} />)}
+      {isQuest
+        ? (<Suspense fallback={null}><QuestChatbotButton onClick={chatbot.openChat} userName={user?.name} /></Suspense>)
+        : isVolt ? <VoltChatbotButton onClick={chatbot.openChat} userName={user?.name} /> : <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />}
+      {chatbot.isOpen && (isQuest
+        ? (<Suspense fallback={null}><QuestChatbotModal chatbot={chatbot} user={user} /></Suspense>)
+        : isVolt
+          ? <VoltChatbotModal chatbot={chatbot} user={user} />
+          : <ChatbotModal chatbot={chatbot} user={user} />)}
       {pathname === '/' && <SkinComparePill />}
+      {pathname === '/' && !isQuest && <QuestDiscoveryPill />}
       {welcomeOpen && <SkinWelcomeSheet onClose={() => setWelcomeDismissed(true)} />}
       {quickSwitchOpen && <SkinQuickSwitch onClose={() => setQuickSwitchOpen(false)} />}
     </div>

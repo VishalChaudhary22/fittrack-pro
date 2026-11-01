@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { QuestNav, QuestLabel } from './primitives';
 import PixelSprite from './PixelSprite';
 import { useLongPressSwitch } from '../../core/hooks/useDiscovery';
+import { questSound } from './sound';
 
 // ─── Quest shell navigation ──────────────────────────────────────────────────
 // Mirrors VoltShellNav's structure and destinations (route parity is the
@@ -55,7 +56,7 @@ export default function QuestShellNav() {
         <QuestNav
           items={navItems}
           active={active}
-          onNavigate={(key) => { if (key === MORE_KEY) setMoreOpen(true); else navigate(key); }}
+          onNavigate={(key) => { questSound('tap'); if (key === MORE_KEY) setMoreOpen(true); else navigate(key); }}
         />
       </div>
 
@@ -71,7 +72,7 @@ export default function QuestShellNav() {
                     key={key}
                     type="button"
                     className={isActive ? 'q-sheet-row q-sheet-row--active' : 'q-sheet-row'}
-                    onClick={() => { setMoreOpen(false); navigate(key); }}
+                    onClick={() => { questSound('tap'); setMoreOpen(false); navigate(key); }}
                   >
                     <PixelSprite name={sprite} size={24} />
                     <span style={{ flex: 1 }}>{label}</span>

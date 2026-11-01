@@ -125,8 +125,8 @@ export function SkinPreviewQuest({ firstName, streakDays, weightKg, selected }) 
       <div style={{ background: '#1E1E30', border: '2.5px solid #000', padding: '8px 10px' }}>
         <div style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontSize: 7, letterSpacing: '0.06em', color: '#8B8BA7' }}>READINESS</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
-          <span style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontWeight: 400, fontSize: 14, lineHeight: 1 }}>86</span>
-          <span style={{ flex: 1, display: 'flex', gap: 2 }}>
+          <span style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontWeight: 400, fontSize: 14, lineHeight: 1, flexShrink: 0 }}>86</span>
+          <span style={{ flex: 1, minWidth: 0, display: 'flex', gap: 2 }}>
             {Array.from({ length: 10 }, (_, i) => (
               <span key={i} style={{ flex: 1, height: 9, background: i < 9 ? '#C9F158' : '#10101C', border: '1.5px solid #000', display: 'block' }} />
             ))}

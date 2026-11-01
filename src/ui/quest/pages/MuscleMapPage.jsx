@@ -360,6 +360,7 @@ export default function MuscleMapPage({ chatbot }) {
                 states={zoneStates}
                 selectedKey={zoneKey}
                 onSelect={setZoneKey}
+                width={248}
               />
             </div>
 

@@ -50,6 +50,8 @@ const QUEST_PAGES = {
   '/': lazy(() => import('./ui/quest/pages/TodayPage')),
   '/workout': lazy(() => import('./ui/quest/pages/WorkoutPage')),
   '/muscle-map': lazy(() => import('./ui/quest/pages/MuscleMapPage')),
+  '/diet': lazy(() => import('./ui/quest/pages/DietPage')),
+  '/progress': lazy(() => import('./ui/quest/pages/ProgressPage')),
 };
 
 function SkinFallback() {

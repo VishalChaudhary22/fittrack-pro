@@ -1,14 +1,17 @@
-import { BODY_MAPS, BODY_W, BODY_H, CHAR_TO_MUSCLE, BASE_CHARS } from './bodyMapData';
+import { ZONE_PATHS, BASE_PATHS, BODY_W, BODY_H } from './bodyMapData';
 
 // ─── Kaaya Quest · pixel body map (plan §7.4) ────────────────────────────────
-// Renders the hand-drawn string maps from bodyMapData.js (34×69 cells,
-// run-length merged into rects). Zones are keyed to the canonical
-// MUSCLE_GROUPS ids. Zone states come from the page:
+// Renders the stepped-path figure from bodyMapData.js (48×82 grid, design
+// supplied by Vishal 2026-11-01): every muscle outlined in black, abs in
+// six segmented blocks. Zones are keyed to the canonical MUSCLE_GROUPS ids;
+// states come from the page:
 //   today      trained today       → volt fill + slow steps-pulse
 //   recovering trained < 48h ago   → ember dither (checker pattern fill)
 //   week       trained in last 7d  → volt-dk fill
 //   fresh      everything else     → panel2
-// Base body parts (head, obliques, pelvis, joints, hands/feet) use slot tone.
+// Base silhouette (head, neck, pelvis, knees) uses the slot tone. The
+// supplied design is a single silhouette, so `gender` is accepted for API
+// compatibility and no longer switches the figure.
 
 const STATE_FILLS = {
   today: 'var(--q-volt)',
@@ -16,43 +19,9 @@ const STATE_FILLS = {
   fresh: 'var(--q-panel2)',
 };
 
-// Parse a string map into per-key rect runs: { zones: Map(key → [rects]),
-// base: [rects] } where rect = [x, y, w].
-function parseMap(rows) {
-  const zones = new Map();
-  const base = [];
-  rows.forEach((row, y) => {
-    let x = 0;
-    while (x < row.length) {
-      const ch = row[x];
-      if (ch === '.') { x += 1; continue; }
-      let w = 1;
-      while (x + w < row.length && row[x + w] === ch) w += 1;
-      if (BASE_CHARS.has(ch)) {
-        base.push([x, y, w]);
-      } else {
-        const key = CHAR_TO_MUSCLE[ch];
-        if (key) {
-          if (!zones.has(key)) zones.set(key, []);
-          zones.get(key).push([x, y, w]);
-        }
-      }
-      x += w;
-    }
-  });
-  return { zones, base };
-}
-
-const PARSED = {};
-for (const side of Object.keys(BODY_MAPS)) {
-  PARSED[side] = {
-    male: parseMap(BODY_MAPS[side].male),
-    female: parseMap(BODY_MAPS[side].female),
-  };
-}
-
-export default function PixelBodyMap({ side = 'front', gender, states = {}, selectedKey, onSelect, width = 184 }) {
-  const { zones, base } = PARSED[side][gender === 'female' ? 'female' : 'male'];
+export default function PixelBodyMap({ side = 'front', states = {}, selectedKey, onSelect, width = 200 }) {
+  const zones = ZONE_PATHS[side];
+  const base = BASE_PATHS[side];
 
   return (
     <svg
@@ -72,11 +41,11 @@ export default function PixelBodyMap({ side = 'front', gender, states = {}, sele
         </pattern>
       </defs>
 
-      {base.map(([x, y, w], i) => (
-        <rect key={`b${i}`} x={x} y={y} width={w} height={1} fill="var(--q-slot)" />
-      ))}
+      <g fill="var(--q-slot)" stroke="var(--q-border)" strokeWidth="0.8">
+        {base.map((d, i) => <path key={i} d={d} />)}
+      </g>
 
-      {[...zones.entries()].map(([key, rects]) => {
+      {Object.entries(zones).map(([key, paths]) => {
         const state = states[key] || 'fresh';
         const fill = state === 'recovering' ? 'url(#q-dither-pat)' : STATE_FILLS[state];
         const selected = key === selectedKey;
@@ -88,19 +57,10 @@ export default function PixelBodyMap({ side = 'front', gender, states = {}, sele
             className={state === 'today' ? 'q-zone-pulse' : undefined}
             role={onSelect ? 'button' : undefined}
             aria-label={onSelect ? `${key} details` : undefined}
+            stroke={selected ? 'var(--q-ink)' : 'var(--q-border)'}
+            strokeWidth={selected ? 1.2 : 0.85}
           >
-            {rects.map(([x, y, w], i) => (
-              <rect
-                key={i}
-                x={x}
-                y={y}
-                width={w}
-                height={1}
-                fill={fill}
-                stroke={selected ? 'var(--q-ink)' : 'none'}
-                strokeWidth={selected ? 0.3 : 0}
-              />
-            ))}
+            {paths.map((d, i) => <path key={i} d={d} fill={fill} />)}
           </g>
         );
       })}

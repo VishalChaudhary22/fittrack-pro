@@ -49,6 +49,7 @@ const VOLT_PAGES = {
 const QUEST_PAGES = {
   '/': lazy(() => import('./ui/quest/pages/TodayPage')),
   '/workout': lazy(() => import('./ui/quest/pages/WorkoutPage')),
+  '/muscle-map': lazy(() => import('./ui/quest/pages/MuscleMapPage')),
 };
 
 function SkinFallback() {

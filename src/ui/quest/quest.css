@@ -129,6 +129,7 @@
 .q-label--volt { color: var(--q-volt-text); }
 .q-label--ember { color: var(--q-ember-text); }
 .q-label--gold { color: var(--q-gold-text); }
+.q-label--sky { color: var(--q-sky); }
 
 .q-meta {
   font-size: 17px;
@@ -369,9 +370,49 @@
 }
 .q-rise-z { animation: q-rise 2.2s steps(5) infinite; }
 
+/* Workout (§6.2/§7.2): slot-box inputs, set stamp, +XP floater. */
+.q-slot-input {
+  width: 100%;
+  min-height: 48px;
+  background: var(--q-slot);
+  border: 3px solid var(--q-border);
+  color: var(--q-ink);
+  font-family: 'VT323', monospace;
+  font-size: 23px;
+  text-align: center;
+  padding: 5px 2px;
+  box-sizing: border-box;
+  border-radius: 0;
+  appearance: none;
+  -moz-appearance: textfield;
+}
+.q-slot-input::-webkit-outer-spin-button,
+.q-slot-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.q-slot-input::placeholder { color: var(--q-dim); }
+
+@keyframes q-stamp {
+  from { transform: scale(1.07); }
+  to { transform: scale(1); }
+}
+.q-stamp { animation: q-stamp 0.12s steps(2) both; }
+
+@keyframes q-float-up {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-24px); opacity: 0; }
+}
+.q-floater {
+  position: absolute;
+  right: 6px;
+  top: -12px;
+  z-index: 3;
+  pointer-events: none;
+  animation: q-float-up 0.9s steps(4) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .q-blink, .q-bob, .q-heart, .q-rise-z { animation: none; }
-  .q-sheet, .q-boot, .q-sweep, .q-burst-star { animation: none; }
-  .q-sweep, .q-burst-star { display: none; }
+  .q-sheet, .q-boot, .q-sweep, .q-burst-star, .q-stamp, .q-floater { animation: none; }
+  .q-sweep, .q-burst-star, .q-floater { display: none; }
   .q-btn:active { transform: none; }
 }

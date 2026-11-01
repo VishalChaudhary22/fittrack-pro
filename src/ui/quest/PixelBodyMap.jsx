@@ -1,17 +1,18 @@
-import { ZONE_PATHS, BASE_PATHS, BODY_W, BODY_H } from './bodyMapData';
+import { FRONT_MAP, BACK_MAP, BODY_W, BODY_H } from './bodyMapData';
 
 // ─── Kaaya Quest · pixel body map (plan §7.4) ────────────────────────────────
-// Renders the stepped-path figure from bodyMapData.js (48×82 grid, design
-// supplied by Vishal 2026-11-01): every muscle outlined in black, abs in
-// six segmented blocks. Zones are keyed to the canonical MUSCLE_GROUPS ids;
-// states come from the page:
+// Renders the figure traced from the reference artwork Vishal supplied
+// (bodyMapData.js, 48×84 cell grid): zone fills with brightness-derived
+// shine/shade overlays, and the carved black outline/groove cells drawn as
+// a top layer so muscles stay separated in every state. Zones are keyed
+// to the canonical MUSCLE_GROUPS ids; states come from the page:
 //   today      trained today       → volt fill + slow steps-pulse
 //   recovering trained < 48h ago   → ember dither (checker pattern fill)
 //   week       trained in last 7d  → volt-dk fill
 //   fresh      everything else     → panel2
-// Base silhouette (head, neck, pelvis, knees) uses the slot tone. The
-// supplied design is a single silhouette, so `gender` is accepted for API
-// compatibility and no longer switches the figure.
+// Base silhouette (head, neck) uses the slot tone. The supplied design is
+// a single silhouette, so `gender` is accepted for API compatibility and
+// no longer switches the figure.
 
 const STATE_FILLS = {
   today: 'var(--q-volt)',
@@ -19,9 +20,16 @@ const STATE_FILLS = {
   fresh: 'var(--q-panel2)',
 };
 
+const Rects = ({ runs, fill, opacity }) => (
+  <>
+    {runs.map((r, i) => (
+      <rect key={i} x={r[0]} y={r[1]} width={r[2]} height={r[3]} fill={fill} opacity={opacity} stroke="none" />
+    ))}
+  </>
+);
+
 export default function PixelBodyMap({ side = 'front', states = {}, selectedKey, onSelect, width = 200 }) {
-  const zones = ZONE_PATHS[side];
-  const base = BASE_PATHS[side];
+  const map = side === 'back' ? BACK_MAP : FRONT_MAP;
 
   return (
     <svg
@@ -41,14 +49,11 @@ export default function PixelBodyMap({ side = 'front', states = {}, selectedKey,
         </pattern>
       </defs>
 
-      <g fill="var(--q-slot)" stroke="var(--q-border)" strokeWidth="0.8">
-        {base.map((d, i) => <path key={i} d={d} />)}
-      </g>
+      <Rects runs={map.base} fill="var(--q-slot)" />
 
-      {Object.entries(zones).map(([key, paths]) => {
+      {Object.entries(map.zones).map(([key, zone]) => {
         const state = states[key] || 'fresh';
         const fill = state === 'recovering' ? 'url(#q-dither-pat)' : STATE_FILLS[state];
-        const selected = key === selectedKey;
         return (
           <g
             key={key}
@@ -57,13 +62,19 @@ export default function PixelBodyMap({ side = 'front', states = {}, selectedKey,
             className={state === 'today' ? 'q-zone-pulse' : undefined}
             role={onSelect ? 'button' : undefined}
             aria-label={onSelect ? `${key} details` : undefined}
-            stroke={selected ? 'var(--q-ink)' : 'var(--q-border)'}
-            strokeWidth={selected ? 1.2 : 0.85}
           >
-            {paths.map((d, i) => <path key={i} d={d} fill={fill} />)}
+            <Rects runs={zone.fill} fill={fill} />
+            {zone.shade && <Rects runs={zone.shade} fill="#000" opacity={0.18} />}
+            {zone.shine && <Rects runs={zone.shine} fill="#FFF" opacity={0.18} />}
           </g>
         );
       })}
+
+      {/* carved outline + groove lines above every zone */}
+      <Rects runs={map.lines} fill="var(--q-border)" />
+      {selectedKey && map.zones[selectedKey] && (
+        <Rects runs={map.zones[selectedKey].fill} fill="var(--q-ink)" opacity={0.3} />
+      )}
     </svg>
   );
 }

@@ -81,37 +81,46 @@ function useHtmlTheme() {
   return theme;
 }
 
-const PX = 12; // canvas pixels per grid cell
-
 export default function PixelBodyMap({ side = 'front', states = {}, selectedKey, onSelect, width = 200 }) {
   const map = side === 'back' ? BACK_MAP : FRONT_MAP;
   const theme = useHtmlTheme();
   const art = ART[side][theme];
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
-  const [artReady, setArtReady] = useState(false);
+  // The loaded atlas is keyed by side+theme and the canvas only ever draws
+  // when the key matches the current view — a stale atlas must never pair
+  // with another view's layout (that mismatch smears foreign patches).
+  const artKey = `${side}:${theme}`;
+  const [loadedKey, setLoadedKey] = useState(null);
+  const artReady = loadedKey === artKey;
   const statesKey = JSON.stringify(states);
+  // Bitmap matched to the display size x device pixel ratio, so the art is
+  // resampled exactly once (drawImage) and never again by the browser —
+  // a second resample is what produced moire banding on the bright zones.
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  const bitmapW = Math.round(width * dpr);
+  const bitmapH = Math.round(bitmapW * BODY_H / BODY_W);
+  const pxf = bitmapW / BODY_W;
 
   useEffect(() => {
     let live = true;
-    setArtReady(false);
     const img = new Image();
-    img.onload = () => { if (live) { imgRef.current = img; setArtReady(true); } };
-    img.onerror = () => { if (live) { imgRef.current = null; setArtReady(false); } };
+    img.onload = () => { if (live) { imgRef.current = { img, key: artKey }; setLoadedKey(artKey); } };
+    img.onerror = () => { if (live) { imgRef.current = null; setLoadedKey(null); } };
     img.src = art.src;
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, theme]);
 
   useEffect(() => {
-    if (!artReady || !canvasRef.current || !imgRef.current) return;
+    if (!artReady || !canvasRef.current || !imgRef.current || imgRef.current.key !== artKey) return;
     const ctx = canvasRef.current.getContext('2d');
-    const img = imgRef.current;
+    const img = imgRef.current.img;
     const { geo, layout } = art;
     const parsedStates = JSON.parse(statesKey);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, BODY_W * PX, BODY_H * PX);
-    ctx.setTransform(PX, 0, 0, PX, 0, 0);
+    ctx.clearRect(0, 0, bitmapW, bitmapH);
+    ctx.setTransform(pxf, 0, 0, pxf, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     const drawPatch = (srcRect, dxArt, dyArt) => {
@@ -128,7 +137,7 @@ export default function PixelBodyMap({ side = 'front', states = {}, selectedKey,
     }
     if (layout.lines) drawPatch(layout.lines, 0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [artReady, side, theme, statesKey]);
+  }, [artReady, side, theme, statesKey, bitmapW]);
 
   const height = Math.round(width * BODY_H / BODY_W);
 
@@ -137,8 +146,8 @@ export default function PixelBodyMap({ side = 'front', states = {}, selectedKey,
       {artReady ? (
         <canvas
           ref={canvasRef}
-          width={BODY_W * PX}
-          height={BODY_H * PX}
+          width={bitmapW}
+          height={bitmapH}
           style={{ position: 'absolute', inset: 0, width, height, display: 'block' }}
         />
       ) : (

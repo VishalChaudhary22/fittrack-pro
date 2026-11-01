@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Portal } from '../../v1/shared/SharedComponents';
+import { questSound, soundEnabled, setSoundEnabled, onSoundChanged } from '../sound';
 import { useApp } from '../../../core/context/AppContext';
 import { useProfile } from '../../../core/hooks/useProfile';
-import { SkinPreviewVolt, SkinPreviewOriginal } from '../../volt/shared/SkinSwitch';
+import { VoltScope, SkinPreviewVolt, SkinPreviewOriginal, SkinPreviewQuest } from '../../volt/shared/SkinSwitch';
 import { ACTIVITY } from '../../../data/constants';
 import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
@@ -17,9 +19,8 @@ import PixelSprite from '../PixelSprite';
 // device-local fighter; preset/photo avatars remain untouched in the data
 // and still show in the other skins), LVL badge, vitals tiles with the
 // PR #47 BMR honesty rule, power stats as mastery segbars, settings as a
-// menu list. Appearance carries the two existing skin previews (the same
-// components V1/Volt use) plus the current Quest card — the 3-way switcher
-// itself is Q-8.
+// menu list (incl. the SOUND FX switch, §6.3). Appearance is the full
+// 3-way chooser since Q-8 — the same three preview cards in every skin.
 
 const ACH_SPRITES = { streak: 'flame', 'volume-king': 'dumbbell', 'heavy-hitter': 'trophy', 'early-bird': 'clock' };
 
@@ -118,6 +119,8 @@ export default function ProfilePage() {
   } = useProfile();
   const { theme, toggleTheme } = useApp();
   const { fighter } = useFighter();
+  const [soundOn, setSoundOn] = useState(soundEnabled());
+  useEffect(() => onSoundChanged(() => setSoundOn(soundEnabled())), []);
 
   // BMR is only meaningful with weight, height and age on file (PR #47 rule).
   const bmrValid = Boolean(user?.weight && user?.height && user?.age);
@@ -375,22 +378,19 @@ export default function ProfilePage() {
         <p style={{ fontSize: 17, color: 'var(--q-dim)', lineHeight: 1.5, margin: '0 0 13px' }}>
           Three looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <button type="button" onClick={() => setDesignVersion('volt')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'volt'}>
-            <SkinPreviewVolt firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'volt'} />
-          </button>
-          <button type="button" onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'v1'}>
-            <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
-          </button>
-        </div>
-        <div className="q-block q-block--panel2" style={{ marginTop: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, borderColor: 'var(--q-volt)' }}>
-          <FighterSprite fighter={fighter} state="idle" size={40} />
-          <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-            <div className="q-ps" style={{ fontSize: 11 }}>KAAYA QUEST</div>
-            <div style={{ fontSize: 16, color: 'var(--q-dim)', marginTop: 3 }}>The 8-bit arcade look</div>
+        <VoltScope>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <button type="button" onClick={() => setDesignVersion('volt')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'volt'}>
+              <SkinPreviewVolt firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'volt'} />
+            </button>
+            <button type="button" onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={designVersion === 'v1'}>
+              <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
+            </button>
+            <button type="button" onClick={() => setDesignVersion('quest')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', gridColumn: '1 / -1' }} aria-pressed={designVersion === 'quest'}>
+              <SkinPreviewQuest firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'quest'} />
+            </button>
           </div>
-          <QuestChip tone="volt">▶ INSERTED</QuestChip>
-        </div>
+        </VoltScope>
       </QuestBlock>
 
       {/* Settings */}
@@ -401,6 +401,13 @@ export default function ProfilePage() {
         </SettingRow>
         <SettingRow title="Height Unit" desc="Profile height display">
           <QuestSeg options={[{ k: 'cm', label: 'CM' }, { k: 'ft', label: 'FT/IN' }]} value={unitHeight} onPick={() => toggleUnitHeight()} />
+        </SettingRow>
+        <SettingRow title="Sound FX" desc="8-bit bleeps — battles, XP and menus (this device)">
+          <QuestSeg
+            options={[{ k: 'on', label: 'ON' }, { k: 'off', label: 'OFF' }]}
+            value={soundOn ? 'on' : 'off'}
+            onPick={(k) => { const on = k === 'on'; setSoundEnabled(on); setSoundOn(on); if (on) questSound('pr'); }}
+          />
         </SettingRow>
         <SettingRow title="Theme" desc="Switch display mode" last>
           <button type="button" onClick={toggleTheme} className="q-chip" aria-label="Toggle theme" style={{ cursor: 'pointer', padding: '8px 11px', display: 'inline-flex', alignItems: 'center', gap: 7 }}>

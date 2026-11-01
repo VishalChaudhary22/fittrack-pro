@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { QuestBlock, QuestChip, QuestLabel } from '../primitives';
 import PixelSprite from '../PixelSprite';
 import { FighterSprite, useFighter } from '../fighters';
+import { questSound } from '../sound';
 import { MUSCLE_LABELS } from '../../../utils/readinessUtils';
 
 // ─── The readiness card — Quest's signature scene (plan §6.1) ────────────────
@@ -78,6 +79,7 @@ export default function ReadinessCard({ score, tier, hasCompletedReadiness, spot
           clearInterval(iv);
           doneRef.current = true;
           setSettled(true);
+          questSound('xp');
           let c = 0;
           typeTimer = setInterval(() => {
             c += 1;

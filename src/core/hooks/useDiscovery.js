@@ -99,3 +99,38 @@ export function useLongPressSwitch(delay = 600) {
 
   return { start, clear, consume };
 }
+
+// ─── Quest discovery pill (Q-8, plan §3) ─────────────────────────────────────
+// "NEW SKIN UNLOCKED: KAAYA QUEST" on Today for non-Quest users, shown from
+// first sight until dismissed OR 14 days after first show, whichever comes
+// first (device-local timestamps). The announcement is limited-time; the
+// skin itself is permanent.
+const QUEST_DISCOVERY_KEY = 'kaaya_quest_discovery_v1';
+const QUEST_WINDOW_MS = 14 * 24 * 3600 * 1000;
+
+export function useQuestDiscovery() {
+  const [rec, setRec] = useState(() => {
+    try {
+      const raw = localStorage.getItem(QUEST_DISCOVERY_KEY);
+      if (raw) return JSON.parse(raw);
+      const fresh = { first: new Date().toISOString(), dismissed: false };
+      localStorage.setItem(QUEST_DISCOVERY_KEY, JSON.stringify(fresh));
+      return fresh;
+    } catch {
+      return { first: null, dismissed: true };
+    }
+  });
+
+  const visible = Boolean(
+    !rec.dismissed && rec.first &&
+    (Date.now() - new Date(rec.first).getTime() < QUEST_WINDOW_MS)
+  );
+
+  const dismiss = () => {
+    const next = { ...rec, dismissed: true };
+    setRec(next);
+    try { localStorage.setItem(QUEST_DISCOVERY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  };
+
+  return { visible, dismiss };
+}

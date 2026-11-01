@@ -7,7 +7,7 @@ import { getBMICat } from '../../../utils/calculations';
 import { kgToLbs, cmToFtIn } from '../../../utils/helpers';
 import { getRank } from '../../../data/muscleData';
 import { useProfile } from '../../../core/hooks/useProfile';
-import { VoltScope, SkinPreviewVolt, SkinPreviewOriginal } from '../../volt/shared/SkinSwitch';
+import { VoltScope, SkinPreviewVolt, SkinPreviewOriginal, SkinPreviewQuest } from '../../volt/shared/SkinSwitch';
 
 const PRESETS = [
   { id: 'iron-man', name: 'Iron Man', universe: 'Marvel' },
@@ -385,7 +385,7 @@ export default function ProfilePage() {
         <div className="label-md" style={{ textTransform: 'uppercase', color: 'var(--on-surface-dim)', marginBottom: 6 }}>Appearance</div>
         <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>App Design</div>
         <p style={{ fontSize: 12.5, color: 'var(--on-surface-variant)', lineHeight: 1.5, margin: '6px 0 16px' }}>
-          Two looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
+          Three looks, one app — same features, same data. Tap a look to switch instantly. Tip: long-press the bottom bar anywhere to switch fast.
         </p>
         <VoltScope>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -394,6 +394,9 @@ export default function ProfilePage() {
             </button>
             <button onClick={() => setDesignVersion('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }} aria-pressed={designVersion === 'v1'}>
               <SkinPreviewOriginal firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'v1'} />
+            </button>
+            <button onClick={() => setDesignVersion('quest')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', gridColumn: '1 / -1' }} aria-pressed={designVersion === 'quest'}>
+              <SkinPreviewQuest firstName={user?.name?.split(' ')[0] || ''} streakDays={streak?.current || 0} weightKg={f.weight || user?.weight || 0} selected={designVersion === 'quest'} />
             </button>
           </div>
         </VoltScope>

@@ -11,6 +11,7 @@ import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
 import { useWorkoutSession } from '../../../core/hooks/useWorkoutSession';
 import { clearPersistedSession, workoutPageCache } from '../../../core/services/workoutSession';
 import { QuestBlock, QuestBtn, QuestChip, QuestLabel, SegBar } from '../primitives';
+import { questSound } from '../sound';
 import PixelSprite from '../PixelSprite';
 import { FighterSprite, useFighter } from '../fighters';
 import { QuestConfirmDialog } from '../shared/QuestShared';
@@ -426,6 +427,7 @@ function useStepCount(target, ticks = 16, ms = 45) {
 }
 
 function QuestResults({ done, session, splits, user, onLogAnother, onDone, onViewMap }) {
+  useEffect(() => { questSound('levelup'); }, []);
   const sessionXP = calcAllMuscleXP([done], splits, user);
   const totalXP = Object.values(sessionXP).reduce((a, b) => a + b, 0);
   const totalSets = done.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
@@ -826,7 +828,7 @@ export default function WorkoutPage() {
                         <button
                           type="button"
                           className={s.done ? 'q-btn' : 'q-btn q-btn--ember'}
-                          onClick={() => upd(ei, si, 'done', !s.done)}
+                          onClick={() => { if (!s.done) questSound('set'); upd(ei, si, 'done', !s.done); }}
                           aria-label={s.done ? `Set ${si + 1} done` : `Log set ${si + 1}`}
                           style={{ minHeight: 48, padding: '8px 4px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >

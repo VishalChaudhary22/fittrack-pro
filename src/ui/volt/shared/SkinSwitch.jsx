@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { useApp } from '../../../core/context/AppContext';
 import { useDesignVersion } from '../../../core/context/DesignVersionContext';
-import { markWelcomeSeen, useComparePill } from '../../../core/hooks/useDiscovery';
+import { markWelcomeSeen, useComparePill, useQuestDiscovery } from '../../../core/hooks/useDiscovery';
 import { ModalPortal } from '../../v1/shared/SharedComponents';
 import { VoltPill, VoltLabel } from '../primitives';
 import { VoltSheet } from './VoltShared';
@@ -105,6 +105,44 @@ export function SkinPreviewOriginal({ firstName, streakDays, weightKg, selected 
   );
 }
 
+// Kaaya Quest preview (Q-8): colours are hardcoded (the Quest dark arcade
+// palette) like the Original preview, so the card renders truthfully under
+// any active skin; the pixel font applies when the Quest chunk has loaded.
+export function SkinPreviewQuest({ firstName, streakDays, weightKg, selected }) {
+  return (
+    <div style={{
+      background: '#14141F', border: `3px solid ${selected ? '#C9F158' : '#000'}`,
+      borderRadius: 4, padding: '12px 12px 13px', textAlign: 'left', color: '#F4F5E9',
+      boxShadow: selected ? '5px 5px 0 rgba(201,241,88,0.55)' : '5px 5px 0 rgba(0,0,0,0.45)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontSize: 8, letterSpacing: '0.08em', color: '#C9F158' }}>TODAY</span>
+        {selected && <span style={{ width: 17, height: 17, background: '#C9F158', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={11} color="#14141F" strokeWidth={3.5} /></span>}
+      </div>
+      <div style={{ fontFamily: "'VT323', 'JetBrains Mono', monospace", fontWeight: 700, fontSize: 19, margin: '6px 0 8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {firstName ? `Hey, ${firstName}` : 'Your Today'}
+      </div>
+      <div style={{ background: '#1E1E30', border: '2.5px solid #000', padding: '8px 10px' }}>
+        <div style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontSize: 7, letterSpacing: '0.06em', color: '#8B8BA7' }}>READINESS</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
+          <span style={{ fontFamily: "'Press Start 2P', 'JetBrains Mono', monospace", fontWeight: 400, fontSize: 14, lineHeight: 1 }}>86</span>
+          <span style={{ flex: 1, display: 'flex', gap: 2 }}>
+            {Array.from({ length: 10 }, (_, i) => (
+              <span key={i} style={{ flex: 1, height: 9, background: i < 9 ? '#C9F158' : '#10101C', border: '1.5px solid #000', display: 'block' }} />
+            ))}
+          </span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        {streakDays > 0 && <span style={{ fontFamily: "'VT323', monospace", fontSize: 13, fontWeight: 700, background: '#C9F158', color: '#14141F', padding: '2px 6px', border: '2px solid #000' }}>{streakDays} DAY STREAK</span>}
+        {weightKg > 0 && <span style={{ fontFamily: "'VT323', monospace", fontSize: 13, fontWeight: 700, border: '2px solid #000', background: '#262640', color: '#F4F5E9', padding: '2px 6px' }}>{weightKg} KG</span>}
+      </div>
+      <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 800 }}>Kaaya Quest</div>
+      <div style={{ fontSize: 11, color: '#8B8BA7' }}>The 8-bit look — press start</div>
+    </div>
+  );
+}
+
 // ─── One-time welcome sheet ───────────────────────────────────────────────────
 export function SkinWelcomeSheet({ onClose }) {
   const { user } = useApp();
@@ -122,10 +160,10 @@ export function SkinWelcomeSheet({ onClose }) {
     <ModalPortal>
       <VoltScope>
         <VoltSheet onClose={() => done(null)}>
-          <VoltLabel volt>New · Two Looks</VoltLabel>
+          <VoltLabel volt>New · Three Looks</VoltLabel>
           <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: '-0.02em', margin: '7px 0 6px' }}>Kaaya, your way</div>
           <p style={{ fontSize: 13.5, color: 'var(--v-dim)', lineHeight: 1.55, margin: '0 0 18px' }}>
-            Kaaya Fit now has two looks. Same features, same data — only the style changes. Pick one to start; switch anytime in <strong style={{ color: 'var(--v-ink)' }}>Profile → Appearance</strong>, or long-press the bottom bar.
+            Kaaya Fit now has three looks. Same features, same data — only the style changes. Pick one to start; switch anytime in <strong style={{ color: 'var(--v-ink)' }}>Profile → Appearance</strong>, or long-press the bottom bar.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -135,10 +173,13 @@ export function SkinWelcomeSheet({ onClose }) {
             <button onClick={() => setPick('v1')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }} aria-pressed={pick === 'v1'}>
               <SkinPreviewOriginal firstName={firstName} selected={pick === 'v1'} />
             </button>
+            <button onClick={() => setPick('quest')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', gridColumn: '1 / -1' }} aria-pressed={pick === 'quest'}>
+              <SkinPreviewQuest firstName={firstName} selected={pick === 'quest'} />
+            </button>
           </div>
 
           <VoltPill style={{ width: '100%', marginTop: 18 }} onClick={() => done(pick)}>
-            Start with {pick === 'volt' ? 'Volt' : 'Original'}
+            Start with {pick === 'volt' ? 'Volt' : pick === 'quest' ? 'Quest' : 'Original'}
           </VoltPill>
           {version !== pick && (
             <div style={{ textAlign: 'center', marginTop: 4 }}>
@@ -172,12 +213,12 @@ export function SkinQuickSwitch({ onClose }) {
         aria-pressed={active}
       >
         <span style={{
-          width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-          background: key === 'volt' ? 'var(--v-volt)' : 'linear-gradient(135deg, #F85F1B, #FFB59B)',
-          border: '2px solid var(--v-edge)',
+          width: 34, height: 34, borderRadius: key === 'quest' ? 4 : 10, flexShrink: 0,
+          background: key === 'volt' ? 'var(--v-volt)' : key === 'quest' ? '#14141F' : 'linear-gradient(135deg, #F85F1B, #FFB59B)',
+          border: key === 'quest' ? '2.5px solid #000' : '2px solid var(--v-edge)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 800, color: key === 'volt' ? '#141416' : '#fff',
-        }}>{key === 'volt' ? 'V' : 'O'}</span>
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 800, color: key === 'volt' ? '#141416' : key === 'quest' ? '#C9F158' : '#fff',
+        }}>{key === 'volt' ? 'V' : key === 'quest' ? 'Q' : 'O'}</span>
         <span style={{ flex: 1 }}>
           <span style={{ display: 'block', fontSize: 14.5, fontWeight: 800 }}>{title}</span>
           <span style={{ display: 'block', fontSize: 12, color: 'var(--v-dim)', marginTop: 1 }}>{desc}</span>
@@ -195,6 +236,7 @@ export function SkinQuickSwitch({ onClose }) {
           <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.01em', margin: '7px 0 16px' }}>Switch look</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {row('volt', 'Kaaya Volt', 'The new look — blackboard & volt')}
+            {row('quest', 'Kaaya Quest', 'The 8-bit look — press start')}
             {row('v1', 'Original Kaaya', 'The classic look — ember & glass')}
           </div>
           <p style={{ fontSize: 12, color: 'var(--v-dim)', lineHeight: 1.5, margin: '14px 0 0' }}>
@@ -245,6 +287,41 @@ export function SkinComparePill() {
           Try the {otherName} look
         </button>
         <button onClick={finish} aria-label="Dismiss" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(245,245,244,0.6)', padding: 7, display: 'flex' }}>
+          <X size={13} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Quest discovery pill (Q-8, plan §3) ─────────────────────────────────────
+// "NEW SKIN UNLOCKED: KAAYA QUEST →" on Today for non-Quest users, until
+// dismissed or 14 days after first show. Colours are hardcoded Quest
+// arcade values so the pill reads as a piece of the new skin wherever it
+// appears. Tap switches to Quest; either way it never returns.
+export function QuestDiscoveryPill() {
+  const { visible, dismiss } = useQuestDiscovery();
+  const { version, setVersion } = useDesignVersion();
+
+  if (!visible || version === 'quest') return null;
+
+  const go = () => {
+    dismiss();
+    setVersion('quest');
+  };
+
+  return (
+    <div style={{ position: 'fixed', left: 16, bottom: 'calc(142px + env(safe-area-inset-bottom, 0px))', zIndex: 150 }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        background: '#1E1E30', border: '3px solid #000', borderRadius: 4,
+        boxShadow: '5px 5px 0 rgba(0,0,0,0.5)', padding: '5px 5px 5px 13px',
+      }}>
+        <button onClick={go} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#F4F5E9', fontSize: 13, fontWeight: 700, fontFamily: "'VT323', monospace", letterSpacing: '0.03em', padding: '6px 2px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 8, height: 8, background: '#C9F158', display: 'inline-block' }} />
+          NEW SKIN UNLOCKED: <span style={{ color: '#C9F158' }}>KAAYA QUEST →</span>
+        </button>
+        <button onClick={dismiss} aria-label="Dismiss" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B8BA7', padding: 7, display: 'flex' }}>
           <X size={13} />
         </button>
       </div>

@@ -25,6 +25,33 @@ export const SPRITES = {
       '....R....',
     ],
   },
+  heartMono: {
+    pal: { R: C, W: 'var(--q-panel)' },
+    grid: [
+      '.WW.RRRR.',
+      'WRRWRRRRR',
+      'RRRRRRRRR',
+      'RRRRRRRRR',
+      '.RRRRRRR.',
+      '..RRRRR..',
+      '...RRR...',
+      '....R....',
+    ],
+  },
+  sun: {
+    pal: { G: V('--q-gold') },
+    grid: [
+      'G...G...G',
+      '.G.....G.',
+      '..GGGGG..',
+      '..GGGGG..',
+      'G.GGGGG.G',
+      '..GGGGG..',
+      '..GGGGG..',
+      '.G.....G.',
+      'G...G...G',
+    ],
+  },
   coin: {
     pal: { G: V('--q-gold'), E: V('--q-ember') },
     grid: [

@@ -46,7 +46,9 @@ const VOLT_PAGES = {
 // Kaaya Quest twins register here as they land (Q-2 onward). The Quest
 // shell + foundation landed in Q-1; pages arrive from Q-2, and until a
 // route registers here a 'quest' design version renders its Volt twin.
-const QUEST_PAGES = {};
+const QUEST_PAGES = {
+  '/': lazy(() => import('./ui/quest/pages/TodayPage')),
+};
 
 function SkinFallback() {
   return (

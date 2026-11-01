@@ -320,8 +320,58 @@
 }
 .q-bob { animation: q-bob 0.9s steps(2) infinite; }
 
+/* Readiness card (§6.1): boot snap, scanline sweep, heartbeat, star
+   burst, rising Z — all frame-stepped. */
+@keyframes q-boot-in {
+  from { transform: translateY(8px); }
+  to { transform: translateY(0); }
+}
+.q-boot { animation: q-boot-in 0.15s steps(2) both; }
+
+@keyframes q-sweep {
+  from { transform: translateY(-100%); opacity: 0.5; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+.q-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 45%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--q-volt) 55%, transparent);
+  opacity: 0;
+  animation: q-sweep 0.55s steps(6) 0.1s both;
+  mix-blend-mode: overlay;
+}
+
+@keyframes q-heartbeat {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(1.22); }
+  22% { transform: scale(1); }
+  34% { transform: scale(1.14); }
+  48% { transform: scale(1); }
+}
+.q-heart { animation: q-heartbeat 0.9s steps(1) infinite; transform-origin: center; }
+.q-heart--slow { animation-duration: 1.6s; }
+
+@keyframes q-burst {
+  0% { opacity: 0; transform: scale(0.4); }
+  30% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1) translateY(-5px); }
+}
+.q-burst-star { animation: q-burst 0.7s steps(3) both; }
+
+@keyframes q-rise {
+  0% { transform: translate(0, 4px); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(5px, -12px); opacity: 0; }
+}
+.q-rise-z { animation: q-rise 2.2s steps(5) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .q-blink, .q-bob { animation: none; }
-  .q-sheet { animation: none; }
+  .q-blink, .q-bob, .q-heart, .q-rise-z { animation: none; }
+  .q-sheet, .q-boot, .q-sweep, .q-burst-star { animation: none; }
+  .q-sweep, .q-burst-star { display: none; }
   .q-btn:active { transform: none; }
 }

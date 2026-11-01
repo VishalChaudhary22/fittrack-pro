@@ -52,6 +52,10 @@ const QUEST_PAGES = {
   '/muscle-map': lazy(() => import('./ui/quest/pages/MuscleMapPage')),
   '/diet': lazy(() => import('./ui/quest/pages/DietPage')),
   '/progress': lazy(() => import('./ui/quest/pages/ProgressPage')),
+  '/splits': lazy(() => import('./ui/quest/pages/SplitsPage')),
+  '/split-builder': lazy(() => import('./ui/quest/pages/SplitBuilderPage')),
+  '/history': lazy(() => import('./ui/quest/pages/HistoryPage')),
+  '/weight-log': lazy(() => import('./ui/quest/pages/WeightLogPage')),
 };
 
 function SkinFallback() {

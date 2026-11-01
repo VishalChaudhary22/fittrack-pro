@@ -48,6 +48,7 @@ const VOLT_PAGES = {
 // route registers here a 'quest' design version renders its Volt twin.
 const QUEST_PAGES = {
   '/': lazy(() => import('./ui/quest/pages/TodayPage')),
+  '/workout': lazy(() => import('./ui/quest/pages/WorkoutPage')),
 };
 
 function SkinFallback() {

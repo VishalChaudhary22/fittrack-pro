@@ -43,8 +43,9 @@ const VOLT_PAGES = {
   '/contact': lazy(() => import('./ui/volt/pages/ContactPage')),
 };
 
-// Kaaya Quest twins register here as they land (Q-2 onward). Empty in Q-0:
-// a 'quest' design version renders the Volt twins until Quest pages exist.
+// Kaaya Quest twins register here as they land (Q-2 onward). The Quest
+// shell + foundation landed in Q-1; pages arrive from Q-2, and until a
+// route registers here a 'quest' design version renders its Volt twin.
 const QUEST_PAGES = {};
 
 function SkinFallback() {

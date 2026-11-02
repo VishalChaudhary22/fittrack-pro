@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { beatsAllTimePR } from '../../../utils/exerciseHistory';
 import { Portal } from '../../v1/shared/SharedComponents';
-import BodyMapSVG from '../../v1/shared/BodyMapSVG';
+import PixelBodyMap from '../PixelBodyMap';
 import { gId, tod, fmt, formatTimeAgo } from '../../../utils/helpers';
 import { calcAllMuscleXP } from '../../../data/muscleData';
 import { syncUserXPToCache } from '../../../utils/xpCacheSync';
@@ -426,7 +426,7 @@ function useStepCount(target, ticks = 16, ms = 45) {
   return val;
 }
 
-function QuestResults({ done, session, splits, user, onLogAnother, onDone, onViewMap }) {
+function QuestResults({ done, splits, user, onLogAnother, onDone, onViewMap }) {
   useEffect(() => { questSound('levelup'); }, []);
   const sessionXP = calcAllMuscleXP([done], splits, user);
   const totalXP = Object.values(sessionXP).reduce((a, b) => a + b, 0);
@@ -434,18 +434,21 @@ function QuestResults({ done, session, splits, user, onLogAnother, onDone, onVie
   const totalVol = done.exercises.reduce((acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + s.reps * s.weight, 0), 0);
   const shownXP = useStepCount(Math.round(totalXP));
 
+  // The finished log carries each exercise's own muscle fields (doFinish
+  // copies them off the session), so the summary map reads the log itself —
+  // never the live session, whose exercises can belong to another day.
   const sessionPrimaryMuscles = [...new Set(
-    done.exercises.map(doneEx => {
-      const exItem = session?.exs?.find(e => (e.sv || e.name) === doneEx.name);
-      return exItem?.primaryMuscle || exItem?.muscle?.toLowerCase();
-    }).filter(Boolean)
+    done.exercises.map(ex => ex.primaryMuscle || ex.muscle?.toLowerCase()).filter(Boolean)
   )];
   const sessionSecondaryMuscles = [...new Set(
-    done.exercises.flatMap(doneEx => {
-      const exItem = session?.exs?.find(e => (e.sv || e.name) === doneEx.name);
-      return exItem?.secondaryMuscles || [];
-    })
+    done.exercises.flatMap(ex => ex.secondaryMuscles || [])
   )].filter(m => !sessionPrimaryMuscles.includes(m));
+  // PixelBodyMap states: primaries get the pulsing 'today' volt, secondaries
+  // the dimmer 'week' volt-dk — the 8-bit twin of the old primary/secondary
+  // highlight split.
+  const sessionStates = {};
+  sessionSecondaryMuscles.forEach(m => { sessionStates[m] = 'week'; });
+  sessionPrimaryMuscles.forEach(m => { sessionStates[m] = 'today'; });
 
   return (
     <div className="q-screen">
@@ -471,7 +474,14 @@ function QuestResults({ done, session, splits, user, onLogAnother, onDone, onVie
           </div>
         </div>
         <div style={{ maxWidth: 230, margin: '18px auto 0', border: '3px solid var(--q-border)', padding: 10 }}>
-          <BodyMapSVG muscleXP={sessionXP} primaryMuscles={sessionPrimaryMuscles} secondaryMuscles={sessionSecondaryMuscles} gender={user?.gender} />
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            {['front', 'back'].map(side => (
+              <div key={side} style={{ textAlign: 'center' }}>
+                <div className="q-meta" style={{ fontSize: 14, letterSpacing: 2, marginBottom: 6 }}>{side.toUpperCase()}</div>
+                <PixelBodyMap side={side} states={sessionStates} width={98} />
+              </div>
+            ))}
+          </div>
         </div>
       </QuestBlock>
 
@@ -603,7 +613,6 @@ export default function WorkoutPage() {
     return (
       <QuestResults
         done={done}
-        session={session}
         splits={splits}
         user={user}
         onDone={() => { setSession(null); setDone(null); nav('/'); }}

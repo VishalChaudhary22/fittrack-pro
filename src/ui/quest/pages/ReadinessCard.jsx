@@ -179,7 +179,7 @@ export default function ReadinessCard({ score, tier, hasCompletedReadiness, spot
             <FighterSprite
               fighter={fighter}
               state={settled || doneRef.current ? fighterState : 'idle'}
-              size={86}
+              size={96}
             />
             {fighterState === 'sleepy' && settled && (
               <span className="q-rise-z" style={{ position: 'absolute', right: -8, top: -6 }}>

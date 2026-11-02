@@ -42,6 +42,9 @@ export function unlockLabel(fighter) {
 // Renders one fighter. state: 'idle' | 'flex' | 'sleepy' — each state is a
 // real extracted pose (sleepy is its own artwork; the readiness card adds
 // the floating Z). Rects are run-merged per row to keep the node count low.
+// `size` is the rendered HEIGHT: every grid is 56 rows, so all fighters
+// stand exactly the same height everywhere; width follows the build
+// (GORO wide, VIPER slim) and the pose.
 export function FighterSprite({ fighter = 'kai', state = 'idle', size = 96, style }) {
   const f = FIGHTER_BY_ID[fighter] ?? FIGHTERS[0];
   const art = FIGHTER_ART[f.id] ?? FIGHTER_ART.kai;
@@ -64,8 +67,8 @@ export function FighterSprite({ fighter = 'kai', state = 'idle', size = 96, styl
   return (
     <svg
       viewBox={`0 0 ${cols} ${rows}`}
-      width={size}
-      height={Math.round((size * rows) / cols)}
+      width={Math.round((size * cols) / rows)}
+      height={size}
       style={{ display: 'block', flexShrink: 0, ...style }}
       shapeRendering="crispEdges"
       aria-label={`${f.name}, ${f.title.toLowerCase()}`}

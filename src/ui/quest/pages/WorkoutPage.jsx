@@ -720,7 +720,7 @@ export default function WorkoutPage() {
             <QuestBlock key={ex.id} variant={isBoss ? 'panel2' : undefined} style={cleared ? { opacity: 0.82 } : undefined}>
               {isBoss && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, border: '3px solid var(--q-volt-dk)', padding: '8px 10px', marginBottom: 14 }}>
-                  <FighterSprite fighter={fighter} state="flex" size={46} />
+                  <FighterSprite fighter={fighter} state="flex" size={64} />
                   <div>
                     <QuestChip tone="gold">Current Boss</QuestChip>
                     <div className="q-meta" style={{ marginTop: 5 }}>Clear every set to advance</div>

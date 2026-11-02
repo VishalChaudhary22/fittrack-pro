@@ -32,6 +32,9 @@ const MEAL_SLOTS = [
   { id: 'Pre-Workout', sprite: 'flame', targetPct: 0.05 },
   { id: 'Post-Workout Dinner', sprite: 'dumbbell', targetPct: 0.25 },
   { id: 'Before Bed', sprite: 'moon', targetPct: 0.05 },
+  // The FAB logs to 'Snack/General' — it needs a shelf or those entries are
+  // invisible (Q-10 fix, all three skins). Unbudgeted: targetPct 0.
+  { id: 'Snack/General', sprite: 'coin', targetPct: 0 },
 ];
 
 const qSelect = {

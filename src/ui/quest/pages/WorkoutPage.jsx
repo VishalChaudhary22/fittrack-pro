@@ -740,6 +740,7 @@ export default function WorkoutPage() {
                   <QuestBtn
                     sm
                     tone={confirmRemoveIdx === ei ? 'ember' : 'ghost'}
+                    aria-label="Remove exercise"
                     onClick={() => { if (confirmRemoveIdx === ei) removeExercise(ei); else setConfirmRemoveIdx(ei); }}
                   >
                     {confirmRemoveIdx === ei ? 'Sure?' : 'Del'}

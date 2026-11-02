@@ -10,14 +10,15 @@ import { calcAllMuscleXP, getOverallRank } from '../../../data/muscleData';
 import { QuestBlock, QuestBtn, QuestChip, QuestLabel, SegBar } from '../primitives';
 import PixelSprite from '../PixelSprite';
 import ReadinessCard from './ReadinessCard';
+import { QuestReadinessCheckIn, QuestLogWeightSheet, QuestStepsSheet, QuestGoalSheet } from '../shared/QuestTodaySheets';
+import { QuestBodyFatCard } from '../shared/QuestBodyFat';
 
-// ─── Kaaya Quest · Today (Q-2) ───────────────────────────────────────────────
+// ─── Kaaya Quest · Today (Q-2; sheets completed in the Q-10 parity pack) ────
 // Same brain as Volt's Today (useToday), Quest presentation (plan §7.1):
 // HUD strip → the animated readiness card (§6.1) → today's quest → stat
-// tiles → fuel / activity / metabolic blocks. The sheet-backed actions
-// (check-in, log weight/steps, set goal) arrive with the Q-8 popups pack —
-// the same staging Volt used (V-3 → V-7); data sections are all live here,
-// and weight logging routes to the Weight Log page meanwhile.
+// tiles → fuel / activity / metabolic blocks → body composition. The
+// sheet-backed actions (check-in, log weight/steps, set goal, body fat)
+// are Quest twins of Volt's V-7 popup pack, on the same useToday state.
 
 function QuestThemeToggle() {
   const { theme, toggleTheme } = useApp();
@@ -58,7 +59,7 @@ function Tile({ label, onClick, children }) {
 export default function TodayPage() {
   useScrollRestoration('/');
   const {
-    navigate, user, isImpWeight, isNewUser, tdeeEstimate,
+    navigate, user, updateProfile, addToast, logSteps, isImpWeight, isNewUser, tdeeEstimate,
     showIosInstall, setShowIosInstall, deferredPrompt, setDeferredPrompt,
     handleInstallClick, hasCompletedReadiness, activeScore, activeTier,
     spotlightMuscles, loaded, allUserLogs, latestWeight, bmi, bmiCat,
@@ -66,7 +67,18 @@ export default function TodayPage() {
     todayTotals, todayCaloriesBurned, displayStepLog, todaySteps, stepGoal,
     stepPct, cyclePhase, activeFestival, goalKcal, protTarget, carbTarget,
     fatTarget, calPct, hasNutritionTargets, userWo,
+    showCheckIn, setShowCheckIn, objectiveScore,
+    showLog, setShowLog, logWeight, setLogWeight, logNote, setLogNote, saveLog,
+    showStepModal, setShowStepModal, stepInputVal, setStepInputVal, todayStr,
+    isTracking, liveSteps, supported, pedoError, startTracking, stopTracking,
+    showGoal, setShowGoal, goalTarget, setGoalTarget, goalWeeks, setGoalWeeks, saveGoal,
   } = useToday();
+
+  const clearGoal = async () => {
+    await updateProfile({ weightGoal: null, weightGoalStart: null, goalWeeks: null });
+    setShowGoal(false);
+    addToast('Goal cleared', 'info');
+  };
   const { workoutLogs, splits } = useApp();
 
   const { totalXP, lvl, intoLevel, toNext } = useMemo(() => {
@@ -134,7 +146,7 @@ export default function TodayPage() {
             </button>
           )}
           <span style={{ flex: 1 }} />
-          <QuestBtn sm tone="ghost" onClick={() => navigate('/weight-log')}>+ Weight</QuestBtn>
+          <QuestBtn sm tone="ghost" onClick={() => setShowLog(true)}>+ Weight</QuestBtn>
         </div>
       </header>
 
@@ -173,6 +185,16 @@ export default function TodayPage() {
         spotlightMuscles={spotlightMuscles}
       />
 
+      {/* ── Check-in row (Volt parity: pill + status caption) ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: -4 }}>
+        <QuestBtn sm onClick={() => setShowCheckIn(true)}>
+          {hasCompletedReadiness ? 'Update Check-In' : 'Complete Check-In'}
+        </QuestBtn>
+        <span className="q-meta">
+          {hasCompletedReadiness ? 'CHECK-IN LOGGED TODAY' : 'OBJECTIVE SCORE — CHECK IN TO PERSONALISE'}
+        </span>
+      </div>
+
       {/* ── Today's quest ── */}
       <QuestBlock variant="panel2">
         <QuestLabel tone="volt">{activeSplit ? "Today's Quest" : 'New Game'}</QuestLabel>
@@ -210,11 +232,16 @@ export default function TodayPage() {
           <div className="q-meta" style={{ marginTop: 6 }}>
             {allUserLogs.length ? `${monthDelta > 0 ? '+' : ''}${monthDelta} ${unit} this month` : 'No logs yet'}
           </div>
-          {goalPct !== null && (
+          {goalPct !== null ? (
             <>
               <SegBar value={goalPct / 100} tone="gold" segments={10} style={{ marginTop: 10 }} />
-              <div className="q-meta" style={{ marginTop: 6 }}>{goalPct}% to goal</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                <div className="q-meta">{goalPct}% to goal</div>
+                <button type="button" className="q-chip" aria-label="Edit weight goal" onClick={(e) => { e.stopPropagation(); setShowGoal(true); }} style={{ cursor: 'pointer', padding: '5px 8px' }}>GOAL</button>
+              </div>
             </>
+          ) : (
+            <button type="button" className="q-chip" aria-label="Set weight goal" onClick={(e) => { e.stopPropagation(); setShowGoal(true); }} style={{ cursor: 'pointer', padding: '5px 8px', marginTop: 10 }}>SET GOAL</button>
           )}
         </Tile>
 
@@ -271,11 +298,14 @@ export default function TodayPage() {
         </QuestBlock>
       )}
 
-      {/* ── Activity ── */}
-      <QuestBlock>
+      {/* ── Activity (tap → log steps sheet, Volt parity) ── */}
+      <QuestBlock onClick={() => setShowStepModal(true)} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <QuestLabel tone="ember">Daily Activity</QuestLabel>
-          {displayStepLog?.source && <span className="q-meta" style={{ fontSize: 15 }}>{getSourceLabel(displayStepLog.source).toUpperCase()}</span>}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {displayStepLog?.source && <span className="q-meta" style={{ fontSize: 15 }}>{getSourceLabel(displayStepLog.source).toUpperCase()}</span>}
+            <PixelSprite name="chevR" size={11} />
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 7, marginTop: 9 }}>
           <span className="q-ps" style={{ fontSize: 19 }}>{todaySteps > 0 ? formatSteps(todaySteps) : '0'}</span>
@@ -311,6 +341,60 @@ export default function TodayPage() {
           <p className="q-meta" style={{ margin: '9px 0 0', fontSize: 18 }}>Add weight &amp; height in your profile to unlock this.</p>
         )}
       </QuestBlock>
+
+      {/* ── Body composition (Volt parity, Q-10) ── */}
+      <QuestBodyFatCard />
+
+      {/* ── Sheets: Quest popup pack (Q-10) ── */}
+      {showCheckIn && (
+        <QuestReadinessCheckIn
+          objectiveScore={objectiveScore}
+          onClose={() => setShowCheckIn(false)}
+        />
+      )}
+      {showLog && (
+        <QuestLogWeightSheet
+          isImpWeight={isImpWeight}
+          logWeight={logWeight}
+          setLogWeight={setLogWeight}
+          logNote={logNote}
+          setLogNote={setLogNote}
+          saveLog={saveLog}
+          onClose={() => setShowLog(false)}
+        />
+      )}
+      {showStepModal && (
+        <QuestStepsSheet
+          stepInputVal={stepInputVal}
+          setStepInputVal={setStepInputVal}
+          todayStr={todayStr}
+          todaySteps={todaySteps}
+          displayStepLog={displayStepLog}
+          supported={supported}
+          isTracking={isTracking}
+          liveSteps={liveSteps}
+          pedoError={pedoError}
+          startTracking={startTracking}
+          stopTracking={stopTracking}
+          logSteps={logSteps}
+          addToast={addToast}
+          onClose={() => setShowStepModal(false)}
+        />
+      )}
+      {showGoal && (
+        <QuestGoalSheet
+          user={user}
+          isImpWeight={isImpWeight}
+          latestWeight={latestWeight}
+          goalTarget={goalTarget}
+          setGoalTarget={setGoalTarget}
+          goalWeeks={goalWeeks}
+          setGoalWeeks={setGoalWeeks}
+          saveGoal={saveGoal}
+          onClear={clearGoal}
+          onClose={() => setShowGoal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot, Target, Drumstick, Wheat, UtensilsCrossed, ClipboardList, BarChart3, Soup, Droplets, CookingPot, Package, Leaf } from 'lucide-react';
+import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot, Target, Drumstick, Wheat, UtensilsCrossed, ClipboardList, BarChart3, Soup, Droplets, CookingPot, Package, Leaf, Cookie } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { PageHeader } from '../shared/SharedComponents';
 import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
@@ -48,6 +48,9 @@ const CONSTANTS = {
     { id: 'Pre-Workout', icon: Flame, targetPct: 0.05 },
     { id: 'Post-Workout Dinner', icon: Salad, targetPct: 0.25 },
     { id: 'Before Bed', icon: ActivityIcon, targetPct: 0.05 },
+    // The FAB logs to 'Snack/General' — it needs a shelf or those entries are
+    // invisible (Q-10 fix, all three skins). Unbudgeted: targetPct 0.
+    { id: 'Snack/General', icon: Cookie, targetPct: 0 },
   ]
 };
 

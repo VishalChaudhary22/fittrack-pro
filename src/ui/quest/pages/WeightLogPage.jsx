@@ -1,5 +1,7 @@
+import { useState } from 'react';
+import { useApp } from '../../../core/context/AppContext';
 import { useWeightLog } from '../../../core/hooks/useWeightLog';
-import { fmt, kgToLbs } from '../../../utils/helpers';
+import { fmt, gId, kgToLbs, lbsToKg, tod } from '../../../utils/helpers';
 import { QuestConfirmDialog } from '../shared/QuestShared';
 import { QuestBlock, QuestBtn, QuestLabel } from '../primitives';
 import PixelSprite from '../PixelSprite';
@@ -58,6 +60,23 @@ export default function WeightLogPage() {
     setEditId, setEditVal, startEdit, userLogs,
   } = useWeightLog();
 
+  // Add-entry form (Q-10 parity pack) — the page previously offered edit /
+  // delete only, so Quest had no way to log a weight at all. The payload and
+  // toast are identical to useToday.saveLog (the Today sheet's save).
+  const { user, setHealthLogs, addToast } = useApp();
+  const [newWeight, setNewWeight] = useState('');
+  const [newNote, setNewNote] = useState('');
+
+  const addEntry = () => {
+    const entered = parseFloat(newWeight);
+    if (!entered || isNaN(entered)) return;
+    const kg = isImpWeight ? lbsToKg(entered) : entered;
+    setHealthLogs(p => [...p, { id: gId(), userId: user.id, date: tod(), weight: kg, notes: newNote }]);
+    setNewWeight('');
+    setNewNote('');
+    addToast(`Weight logged: ${isImpWeight ? kgToLbs(kg) + ' lbs' : kg + ' kg'}`, 'success');
+  };
+
   const disp = (kg) => (isImpWeight ? kgToLbs(kg) : kg);
   const unit = isImpWeight ? 'lbs' : 'kg';
   const chrono = [...userLogs].reverse();
@@ -72,12 +91,22 @@ export default function WeightLogPage() {
         <h1 className="q-ps" style={{ fontSize: 'clamp(19px, 6vw, 30px)', lineHeight: 1.35, margin: '10px 0 0' }}>WEIGHT LOG</h1>
       </header>
 
+      {/* ── Add entry (Q-10) ── */}
+      <QuestBlock>
+        <QuestLabel tone="volt">Log Entry — Today</QuestLabel>
+        <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+          <input className="q-slot-input" type="number" step=".1" inputMode="decimal" value={newWeight} onChange={e => setNewWeight(e.target.value)} placeholder={unit} aria-label="New weight" style={{ maxWidth: 130 }} />
+          <input className="q-slot-input" value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="Notes..." aria-label="Notes" style={{ flex: 1, minWidth: 0 }} />
+        </div>
+        <QuestBtn onClick={addEntry} style={{ width: '100%', marginTop: 12 }}>+ Log Weight</QuestBtn>
+      </QuestBlock>
+
       {userLogs.length === 0 ? (
         <QuestBlock>
           <div style={{ textAlign: 'center', padding: '18px 0' }}>
             <PixelSprite name="scale" size={34} style={{ marginBottom: 12, opacity: 0.8 }} />
             <div className="q-ps" style={{ fontSize: 13 }}>NO WEIGHT ENTRIES</div>
-            <p style={{ color: 'var(--q-dim)', fontSize: 19, marginTop: 8, lineHeight: 1.5 }}>Log your weight from the Dashboard to start tracking</p>
+            <p style={{ color: 'var(--q-dim)', fontSize: 19, marginTop: 8, lineHeight: 1.5 }}>Use the form above to log your first entry</p>
           </div>
         </QuestBlock>
       ) : (<>

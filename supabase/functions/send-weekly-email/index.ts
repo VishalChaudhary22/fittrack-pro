@@ -167,18 +167,83 @@ async function tryFetchFeed(): Promise<Article[] | null> {
 }
 
 // ── Volt email palette (app dark tokens, src/ui/volt/volt.css) ──────────────
-// The weekly digest was the last surface still wearing the V1 "Kinetic"
-// ember identity. It now speaks Volt: blackboard canvas, panel blocks with
-// hard ink edges, volt as the single accent, Archivo for voice and
-// JetBrains Mono for data. Email is a dark-only design.
-const E = {
-  canvas: "#0a0a09", sheet: "#131311", panel: "#1a1a17", inset: "#0e0e0c",
-  ink: "#f4f5e9", dim: "#b9bfa8", faint: "rgba(244,245,233,0.45)",
-  volt: "#c9f158", voltSoft: "#e2fb8f", voltInk: "#141416",
-  hairline: "#2c2c26", gold: "#ffc627",
+// The weekly digest follows the skin each user selected in the app
+// (user_profiles.design_version): 'v1' gets the Original Kinetic ember
+// identity, 'volt' the Volt blackboard identity, 'quest' the Quest arcade
+// identity. Unknown/missing values fall back to Volt, the app default.
+// Email is a dark-only design in every skin. The consistency-protocol
+// helper in _shared keeps the V1 palette as its defaults; every skin
+// passes its own theme here.
+type SkinKey = "v1" | "volt" | "quest";
+type EmailTheme = {
+  skin: SkinKey;
+  colors: {
+    canvas: string; sheet: string; panel: string; inset: string;
+    ink: string; dim: string; faint: string;
+    volt: string; voltSoft: string; voltInk: string;
+    hairline: string; gold: string;
+    accentDim: string; onAccentDim: string; onAccentSoft: string; goldBorder: string;
+  };
+  fd: string; fm: string; fontsHref: string;
+  radius: string; radiusSm: string; slotRadius: string; pillRadius: string;
+  edgeCss: string; glow: string;
 };
-const FD = "'Archivo',Helvetica,Arial,sans-serif";
-const FM = "'JetBrains Mono',Menlo,Consolas,monospace";
+const SKIN_THEMES: Record<SkinKey, EmailTheme> = {
+  volt: {
+    skin: "volt",
+    colors: {
+      canvas: "#0a0a09", sheet: "#131311", panel: "#1a1a17", inset: "#0e0e0c",
+      ink: "#f4f5e9", dim: "#b9bfa8", faint: "rgba(244,245,233,0.45)",
+      volt: "#c9f158", voltSoft: "#e2fb8f", voltInk: "#141416",
+      hairline: "#2c2c26", gold: "#ffc627",
+      accentDim: "rgba(201,241,88,0.55)", onAccentDim: "rgba(20,20,22,0.65)",
+      onAccentSoft: "rgba(20,20,22,0.75)", goldBorder: "rgba(255,198,39,0.4)",
+    },
+    fd: "'Archivo',Helvetica,Arial,sans-serif",
+    fm: "'JetBrains Mono',Menlo,Consolas,monospace",
+    fontsHref: "family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700",
+    radius: "20px", radiusSm: "16px", slotRadius: "12px", pillRadius: "999px",
+    edgeCss: "2px solid #f4f5e9", glow: "rgba(201,241,88,0.35)",
+  },
+  v1: {
+    skin: "v1",
+    colors: {
+      canvas: "#0e0e10", sheet: "#131315", panel: "#1b1b1d", inset: "#0e0e10",
+      ink: "#e5e1e4", dim: "#e3bfb3", faint: "rgba(229,225,228,0.45)",
+      volt: "#f85f1b", voltSoft: "#ffb59b", voltInk: "#201f21",
+      hairline: "#353437", gold: "#ffb59b",
+      accentDim: "rgba(255,181,155,0.6)", onAccentDim: "rgba(32,31,33,0.62)",
+      onAccentSoft: "rgba(32,31,33,0.78)", goldBorder: "rgba(255,181,155,0.4)",
+    },
+    fd: "'Space Grotesk',Helvetica,Arial,sans-serif",
+    fm: "'Be Vietnam Pro',Helvetica,Arial,sans-serif",
+    fontsHref: "family=Space+Grotesk:wght@500;700&family=Be+Vietnam+Pro:wght@400;600;700",
+    radius: "24px", radiusSm: "16px", slotRadius: "12px", pillRadius: "999px",
+    edgeCss: "1px solid #353437", glow: "rgba(248,95,27,0.3)",
+  },
+  quest: {
+    skin: "quest",
+    colors: {
+      canvas: "#14141f", sheet: "#1e1e30", panel: "#262640", inset: "#10101c",
+      ink: "#f4f5e9", dim: "#8b8ba7", faint: "rgba(244,245,233,0.4)",
+      volt: "#c9f158", voltSoft: "#e2fb8f", voltInk: "#14141f",
+      hairline: "#000000", gold: "#ffc627",
+      accentDim: "rgba(201,241,88,0.55)", onAccentDim: "rgba(20,20,31,0.65)",
+      onAccentSoft: "rgba(20,20,31,0.78)", goldBorder: "rgba(255,198,39,0.55)",
+    },
+    fd: "'VT323','Courier New',monospace",
+    fm: "'Press Start 2P','VT323',monospace",
+    fontsHref: "family=Press+Start+2P&family=VT323",
+    radius: "0px", radiusSm: "0px", slotRadius: "0px", pillRadius: "0px",
+    edgeCss: "3px solid #000000", glow: "rgba(201,241,88,0.35)",
+  },
+};
+function skinOf(value: unknown): SkinKey {
+  return value === "v1" || value === "quest" ? value : "volt";
+}
+function themeForSkin(value: unknown): EmailTheme {
+  return SKIN_THEMES[skinOf(value)];
+}
 
 function buildEmailHtml(
   workoutCount: number,
@@ -191,20 +256,25 @@ function buildEmailHtml(
   bestLifts: LiftSummary[],
   weeklyStats: ReturnType<typeof getWeeklyStats>,
   leaderboardRank: number,
-  totalUsers: number
+  totalUsers: number,
+  designVersion?: string | null
 ) {
+  const T = themeForSkin(designVersion);
+  const E = T.colors;
+  const FD = T.fd;
+  const FM = T.fm;
   const hasWorkedOut = workoutCount > 0;
   const consistencyProtocol = getConsistencyProtocolHtml(
     allWorkoutDates,
     weekStartDate,
     weekEndDate,
     E.panel,
-    { accent: E.volt, accentSoft: E.voltSoft, onAccent: E.voltInk, idleBg: E.inset, glow: "rgba(201,241,88,0.35)", label: E.dim },
+    { accent: E.volt, accentSoft: E.voltSoft, onAccent: E.voltInk, idleBg: E.inset, glow: T.glow, label: E.dim, containerRadius: T.radius, displayFont: FD, bodyFont: FM },
   );
   const workoutLabel = workoutCount === 1 ? "1 workout logged." : `${workoutCount} workouts logged.`;
 
   const prItemsHtml = bestLifts.map(lift => `
-      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:${T.radiusSm};padding:16px 20px;margin-bottom:10px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
           <td><p style="font-family:${FD};font-size:16px;font-weight:700;color:${E.ink};margin:0;">${escapeHtml(lift.name)}</p><p style="font-family:${FM};font-size:11px;color:${E.dim};margin:3px 0 0;text-transform:uppercase;">${escapeHtml(lift.day)}</p></td>
           <td style="text-align:right;"><p style="font-family:${FM};font-size:17px;font-weight:700;color:${E.volt};margin:0;">${escapeHtml(lift.summary)}</p></td>
@@ -213,7 +283,7 @@ function buildEmailHtml(
   `).join('');
 
   const bestLiftHtml = bestLifts.length > 0 ? prItemsHtml : `
-      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:${T.radiusSm};padding:16px 20px;margin-bottom:10px;">
         <p style="font-family:${FD};font-size:13px;color:${E.dim};margin:0;">No lifting data available.</p>
       </div>
   `;
@@ -221,21 +291,21 @@ function buildEmailHtml(
   const statsCardsHtml = `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="width:33%;padding-right:6px;">
-        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:${T.slotRadius};padding:14px 12px;">
           <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${weeklyStats.volumeKg.toLocaleString("en-US")}</div>
-          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Volume (kg)</div>
+          <div style="font-family:${FM};font-size:9px;color:${E.accentDim};margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Volume (kg)</div>
         </div>
       </td>
       <td style="width:33%;padding:0 3px;">
-        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:${T.slotRadius};padding:14px 12px;">
           <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${weeklyStats.trainedMuscles}</div>
-          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Body Parts</div>
+          <div style="font-family:${FM};font-size:9px;color:${E.accentDim};margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Body Parts</div>
         </div>
       </td>
       <td style="width:33%;padding-left:6px;">
-        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:${T.slotRadius};padding:14px 12px;">
           <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${formatDuration(weeklyStats.durationMinutes)}</div>
-          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Training</div>
+          <div style="font-family:${FM};font-size:9px;color:${E.accentDim};margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Training</div>
         </div>
       </td>
     </tr></table>
@@ -243,9 +313,9 @@ function buildEmailHtml(
 
   const heroSection = hasWorkedOut ? `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.volt}" class="gm-volt" style="background-color:${E.volt} !important;padding:30px 28px 28px;">
-      <p style="font-family:${FM};font-size:10px;font-weight:700;color:rgba(20,20,22,0.65);letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">Last Week's Report</p>
+      <p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.onAccentDim};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">Last Week's Report</p>
       <h2 style="font-family:${FD};font-size:32px;font-weight:900;color:${E.voltInk};letter-spacing:-0.02em;line-height:1.12;margin:0 0 6px;">${escapeHtml(workoutLabel)}</h2>
-      <p style="font-family:${FD};font-size:15px;color:rgba(20,20,22,0.75);line-height:1.5;margin:0 0 22px;">
+      <p style="font-family:${FD};font-size:15px;color:${E.onAccentSoft};line-height:1.5;margin:0 0 22px;">
         ${workoutCount >= 4 ? "You are in the top 12% of Kaaya Fit users this month." : "Keep building. Consistency compounds."}
       </p>
       ${statsCardsHtml}
@@ -271,11 +341,11 @@ function buildEmailHtml(
     </td></tr></table>
   ` : `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:10px 28px 8px;background-color:${E.sheet} !important;">
-      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-left:3px solid ${E.volt};border-radius:16px;padding:18px 20px;">
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-left:3px solid ${E.volt};border-radius:${T.radiusSm};padding:18px 20px;">
         <p style="font-family:${FD};font-size:13px;color:${E.ink};line-height:1.6;margin:0 0 12px;"><strong>Your all-time best lifts:</strong></p>
         ${bestLiftHtml}
         <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:12px 0 16px;">Strength declines after ~10 days of inactivity.</p>
-        <a href="https://kaaya.fit/workout" style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FD};font-size:13px;font-weight:800;padding:13px 30px;border-radius:999px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
+        <a href="https://kaaya.fit/workout" style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FD};font-size:13px;font-weight:800;padding:13px 30px;border-radius:${T.pillRadius};text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
       </div>
     </td></tr></table>
   `;
@@ -284,12 +354,12 @@ function buildEmailHtml(
   articles.forEach(art => {
     articlesHtml += `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:0 28px 16px;background-color:${E.sheet} !important;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:20px;overflow:hidden;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:${T.radius};overflow:hidden;">
         <img src="${escapeHtml(art.image)}" alt="Article image" style="width:100%;height:200px;object-fit:cover;display:block;" />
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="padding:20px 24px 24px;background-color:${E.panel} !important;">
           <div style="margin-bottom:12px;">
-            <span style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">${escapeHtml(art.topic)}</span>
-            <span style="display:inline-block;color:${E.dim};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Science</span>
+            <span style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:${T.pillRadius};letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">${escapeHtml(art.topic)}</span>
+            <span style="display:inline-block;color:${E.dim};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:${T.pillRadius};letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Science</span>
           </div>
           <h4 style="font-family:${FD};font-size:20px;font-weight:700;color:${E.ink};line-height:1.3;margin:0 0 10px;">${escapeHtml(art.title)}</h4>
           <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:0 0 14px;">${escapeHtml(art.desc)}</p>
@@ -310,12 +380,12 @@ function buildEmailHtml(
     ${articlesHtml}
     <!-- Last Week's Analytics (archive teaser) -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:0 28px 24px;background-color:${E.sheet} !important;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:20px;overflow:hidden;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:${T.radius};overflow:hidden;">
         <img src="${IMG_ARCHIVE}" alt="Previous edition analytics" style="width:100%;height:160px;object-fit:cover;display:block;filter:grayscale(100%);opacity:0.7;" />
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="padding:20px 24px;background-color:${E.panel} !important;">
           <h4 style="font-family:${FD};font-size:20px;font-weight:700;color:${E.ink};text-transform:uppercase;margin:0 0 8px;">Last Week's Analytics</h4>
           <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:0 0 14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
-          <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.inset};color:${E.ink};font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:999px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Review Archive</a>
+          <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.inset};color:${E.ink};font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:${T.pillRadius};text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Review Archive</a>
         </td></tr></table>
       </td></tr></table>
     </td></tr></table>
@@ -339,14 +409,14 @@ u+.body .gm-volt{background-color:${E.volt} !important;}
   body,table,td,div{background-color:${E.canvas} !important;color:${E.ink} !important;}
 }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"></head>
+<link href="https://fonts.googleapis.com/css2?${T.fontsHref}&display=swap" rel="stylesheet"></head>
 <body class="body" bgcolor="${E.canvas}" style="margin:0 !important;padding:0 !important;background-color:${E.canvas} !important;background:${E.canvas} !important;color:${E.ink} !important;color-scheme:dark only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
 <!-- Preheader (hidden preview text) -->
 <div style="display:none;font-size:1px;color:${E.canvas};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya Fit digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
 <!-- Outer wrapper table (Gmail-proof) -->
 <table role="presentation" width="100%" bgcolor="${E.canvas}" cellpadding="0" cellspacing="0" border="0" class="gm-bg" style="background-color:${E.canvas} !important;background:${E.canvas} !important;width:100% !important;"><tr><td align="center" bgcolor="${E.canvas}" class="gm-bg" style="padding:20px 0;background-color:${E.canvas} !important;background:${E.canvas} !important;">
-<!-- Inner sheet: Volt block — panel with hard ink edge -->
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="gm-sheet" style="max-width:600px;width:100%;background-color:${E.sheet} !important;background:${E.sheet} !important;border:2px solid ${E.ink};border-radius:20px;overflow:hidden;"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="background-color:${E.sheet} !important;background:${E.sheet} !important;color:${E.ink} !important;">
+<!-- Inner sheet -->
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="gm-sheet" style="max-width:600px;width:100%;background-color:${E.sheet} !important;background:${E.sheet} !important;border:${T.edgeCss};border-radius:${T.radius};overflow:hidden;"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="background-color:${E.sheet} !important;background:${E.sheet} !important;color:${E.ink} !important;">
   <!-- Header -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.canvas}" class="gm-bg" style="background-color:${E.canvas} !important;padding:22px 28px 18px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
@@ -360,27 +430,27 @@ u+.body .gm-volt{background-color:${E.volt} !important;}
 
   <!-- Olympus League -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:14px 28px 26px;background-color:${E.sheet} !important;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:2px solid ${E.ink};border-radius:20px;padding:20px 24px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:${T.edgeCss};border-radius:${T.radius};padding:20px 24px;">
       <p style="font-family:${FM};font-size:10px;color:${E.dim} !important;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 5px;">Olympus League</p>
       <p style="font-family:${FD};font-size:18px;font-weight:800;color:${E.ink} !important;margin:0;">${xpData.tier} <span style="font-family:${FM};font-size:12px;font-weight:500;color:${E.dim} !important;">${xpData.xp.toLocaleString()} / ${xpData.nextXp.toLocaleString()} XP to ${xpData.nextTierName}</span></p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.inset}" class="gm-inset" style="margin-top:12px;background-color:${E.inset} !important;border-radius:6px;height:8px;overflow:hidden;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:${xpData.progressPct}%;height:8px;"><tr><td bgcolor="${E.volt}" style="height:8px;background-color:${E.volt} !important;border-radius:6px;"></td></tr></table>
       </td></tr></table>
-      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FM};font-size:11px;font-weight:700;padding:9px 22px;border-radius:999px;letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP to go</span></p>` : ''}
+      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FM};font-size:11px;font-weight:700;padding:9px 22px;border-radius:${T.pillRadius};letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP to go</span></p>` : ''}
     </td></tr></table>
     <!-- Top 5 Incentive -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border-radius:20px;padding:20px 24px;border:1px solid rgba(255,198,39,0.4);">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border-radius:${T.radius};padding:20px 24px;border:1px solid ${E.goldBorder};">
       <p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.gold} !important;letter-spacing:0.16em;text-transform:uppercase;margin:0 0 8px;">Monthly Prize Pool</p>
       <p style="font-family:${FD};font-size:16px;font-weight:700;color:${E.ink} !important;line-height:1.4;margin:0 0 10px;">Top 5 athletes this month win <span style="color:${E.gold} !important;">free supplements</span> — shipped to your door.</p>
       <p style="font-family:${FD};font-size:13px;color:${E.dim} !important;margin:0 0 14px;line-height:1.5;">Your rank: <strong style="color:${E.gold} !important;font-family:${FM};font-size:15px;">#${leaderboardRank}</strong> of ${totalUsers} athletes${leaderboardRank <= 5 ? ' — <span style="color:' + E.volt + ' !important;">In the prize zone!</span>' : leaderboardRank <= 10 ? ' — almost there, keep pushing!' : ''}</p>
-      <a href="https://kaaya.fit/" style="display:inline-block;background-color:transparent !important;color:${E.gold} !important;font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:999px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;border:1px solid ${E.gold};">See Full Leaderboard →</a>
+      <a href="https://kaaya.fit/" style="display:inline-block;background-color:transparent !important;color:${E.gold} !important;font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:${T.pillRadius};text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;border:1px solid ${E.gold};">See Full Leaderboard →</a>
     </td></tr></table>
   </td></tr></table>
 
   ${researchVault}
   <!-- CTA -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:6px 28px 30px;text-align:center;background-color:${E.sheet} !important;">
-    <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FD};font-size:13px;font-weight:800;padding:14px 40px;border-radius:999px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
+    <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FD};font-size:13px;font-weight:800;padding:14px 40px;border-radius:${T.pillRadius};text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
   </td></tr></table>
   <!-- Footer -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.canvas}" class="gm-bg" style="padding:20px 28px 26px;background-color:${E.canvas} !important;">
@@ -407,7 +477,7 @@ serve(async (req) => {
     let emailsSent = 0;
 
     // Fetch all profiles
-    const { data: dbUsers, error: usersError } = await supabase.from("user_profiles").select("id, email, name");
+    const { data: dbUsers, error: usersError } = await supabase.from("user_profiles").select("id, email, name, design_version");
     if (usersError) throw usersError;
 
     // Fetch emails from auth.users so each user gets their own data
@@ -448,7 +518,11 @@ serve(async (req) => {
       if (selectedUser) {
         users = [{ ...selectedUser, email: testEmail }];
       } else {
-        users = [{ id: "test-dummy-id", email: testEmail, name: "Test Athlete" }];
+        users = [{ id: "test-dummy-id", email: testEmail, name: "Test Athlete", design_version: "volt" }];
+      }
+      // Optional skin override for test sends: { testEmail, skin: "quest" }
+      if (reqBody.skin) {
+        users = users.map((u: any) => ({ ...u, design_version: String(reqBody.skin) }));
       }
     } else {
       // Normal flow: only send to users who have an email
@@ -468,6 +542,8 @@ serve(async (req) => {
     console.log(`Research intel source: ${intel.source} — ${articles.map((a) => a.title).join(" | ")}`);
     const errors = [];
     const diagnostics = [];
+    const skinCounts: Record<SkinKey, number> = { v1: 0, volt: 0, quest: 0 };
+    for (const u of users) skinCounts[skinOf((u as any).design_version)]++;
 
     // ── Compute global leaderboard for Top 5 incentive ──
     const { data: allXpRows } = await supabase
@@ -516,6 +592,7 @@ serve(async (req) => {
           totalXP,
           xpSource: cachedXP > totalLiveXP ? 'cache' : 'live',
           tier: xpData.tier,
+          designVersion: skinOf((user as any).design_version),
           selectedLifts: topLifts,
         });
         continue;
@@ -539,7 +616,8 @@ serve(async (req) => {
 
       const htmlContent = buildEmailHtml(
         workoutCount, weekRange, allWorkoutDates, reportWeek.startDate, reportWeek.endDate,
-        articles, xpData, topLifts, weeklyStats, userRank, totalLeaderboardUsers
+        articles, xpData, topLifts, weeklyStats, userRank, totalLeaderboardUsers,
+        (user as any).design_version
       );
 
       const res = await fetch("https://api.resend.com/emails", {
@@ -566,12 +644,12 @@ serve(async (req) => {
     }
 
     if (isDryRun) {
-      return new Response(JSON.stringify({ success: true, dryRun: true, articlesSource: intel.source, articleTitles: articles.map((a) => a.title), diagnostics }), {
+      return new Response(JSON.stringify({ success: true, dryRun: true, articlesSource: intel.source, articleTitles: articles.map((a) => a.title), skinCounts, diagnostics }), {
         headers: { "Content-Type": "application/json" }, status: 200,
       });
     }
 
-    return new Response(JSON.stringify({ success: true, emailsSent, errors, articlesSource: intel.source, articleTitles: articles.map((a) => a.title) }), {
+    return new Response(JSON.stringify({ success: true, emailsSent, errors, articlesSource: intel.source, articleTitles: articles.map((a) => a.title), skinCounts }), {
       headers: { "Content-Type": "application/json" }, status: 200,
     });
   } catch (error: any) {

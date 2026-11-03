@@ -7,6 +7,7 @@ import { calcAllMuscleXP } from '../../../data/muscleData';
 import { syncUserXPToCache } from '../../../utils/xpCacheSync';
 import { EXERCISE_LIBRARY } from '../../../data/exerciseLibrary';
 import { EXERCISE_ALTERNATIVES } from '../../../data/exerciseAlternatives';
+import { canonicalExerciseName } from '../../../data/exerciseAliases';
 import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
 import { useWorkoutSession } from '../../../core/hooks/useWorkoutSession';
 import { clearPersistedSession, workoutPageCache } from '../../../core/services/workoutSession';
@@ -261,7 +262,8 @@ function QuestRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
 // ─── Swap modal (alternatives logic identical to V1/Volt) ────────────────────
 function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   const targetName = originalName || exerciseName;
-  const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === targetName);
+  const lookupName = canonicalExerciseName(targetName);
+  const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === lookupName);
   let alternatives = [];
 
   if (libEntry && libEntry.muscle) {
@@ -272,11 +274,11 @@ function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
       const alts = EXERCISE_ALTERNATIVES[ex.name] || [];
       alts.forEach(alt => allOptions.add(alt));
     });
-    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    const baseAlternatives = EXERCISE_ALTERNATIVES[lookupName] || [];
     baseAlternatives.forEach(alt => allOptions.add(alt));
     alternatives = Array.from(allOptions);
   } else {
-    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    const baseAlternatives = EXERCISE_ALTERNATIVES[lookupName] || [];
     alternatives = [...baseAlternatives];
   }
 
@@ -284,7 +286,15 @@ function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   if (isSwapped && !alternatives.includes(originalName)) {
     alternatives.unshift(originalName);
   }
-  alternatives = alternatives.filter(a => a !== exerciseName);
+  const seenCanon = new Set();
+  alternatives = alternatives.filter(a => {
+    if (a === exerciseName) return false;
+    if (originalName && a === originalName) return true; // swap-back entry
+    const c = canonicalExerciseName(a);
+    if (c === canonicalExerciseName(exerciseName) || seenCanon.has(c)) return false;
+    seenCanon.add(c);
+    return true;
+  });
   alternatives.sort((a, b) => a.localeCompare(b));
 
   return (

@@ -23,58 +23,162 @@ const resendApiKey = Deno.env.get("RESEND_API_KEY") || "";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-// ── Research article images (from newsletter/code.html Google CDN) ──
+// ── Research intel: Stronger By Science RSS, hardened (2026-11) ───────────
+// The original version fetched with no User-Agent, no timeout and no
+// status check, and silently substituted two hardcoded articles on any
+// failure — in production the fetch never succeeded, so the same pair
+// shipped every week from launch. This version sends a browser UA,
+// times out at 10s, checks res.ok, takes the top 4 usable items and
+// rotates the displayed pair by ISO week (so the section changes even
+// when SBS has not published lately). On failure it falls back to a
+// pool of real SBS articles — also rotated — and the caller reports
+// which source was used, so a dead feed is never silent again.
+
 const IMG_ARCHIVE = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=800";
 
 type Article = { title: string; link: string; image: string; desc: string; topic: string; };
+type IntelResult = { articles: Article[]; source: "rss" | "pool" };
 
-async function fetchFitnessIntel(): Promise<Article[]> {
-  const articles: Article[] = [];
+// Real Stronger By Science articles (snapshot of their feed), used only
+// when the live fetch fails. Rotated by week like the live picks.
+const FALLBACK_POOL: Article[] = [
+  {
+    title: "Is the Correlation Between Hypertrophy and Strength Gains Stronger Than We Realized?",
+    link: "https://www.strongerbyscience.com/correlation-strength-hypertrophy/",
+    image: "https://www.strongerbyscience.com/wp-content/uploads/2026/05/image9.jpg",
+    desc: "Hypertrophy probably contributes more to strength gains in new lifters than prior studies suggested \u2026 but the relationship is nowhere near as strong a...",
+    topic: "Research",
+  },
+  {
+    title: "Hold Still: What Does the Evidence Actually Say About Isometric Training for Strength and Hypertrophy?",
+    link: "https://www.strongerbyscience.com/isometric-training/",
+    image: "https://www.strongerbyscience.com/wp-content/uploads/2026/04/image.png",
+    desc: "Resistance training is commonly performed dynamically using a full range of motion. Isometric training has long been thought to be inferior to dynamic...",
+    topic: "Research",
+  },
+  {
+    title: "High volume vs high intensity: which builds more muscle?",
+    link: "https://www.strongerbyscience.com/high-volume-vs-high-intensity/",
+    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=800",
+    desc: "Few topics in the fitness industry divide the community like this one. But what does the research actually say is best for hypertrophy?\nThe post High ...",
+    topic: "Research",
+  },
+  {
+    title: "Is lifting during pregnancy healthy?",
+    link: "https://www.strongerbyscience.com/lifting-during-pregnancy/",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
+    desc: "A recently published systematic review and meta analysis involving 50 studies and over 47,000 participants looked at the effect of resistance training...",
+    topic: "Research",
+  },
+  {
+    title: "How does sleep deprivation affect your workouts?",
+    link: "https://www.strongerbyscience.com/sleep-deprivation-affect-workouts/",
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800",
+    desc: "Can you still train effectively after a bad night, or is it better to rest and recover?\nThe post How does sleep deprivation affect your workouts? appe...",
+    topic: "Research",
+  },
+  {
+    title: "Can a little alcohol be healthy for lifters?",
+    link: "https://www.strongerbyscience.com/alcohol-lifters/",
+    image: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&q=80&w=800",
+    desc: "For decades, thanks to observational studies suggesting a J-shaped curve, light drinking was thought to have some protective benefits for the heart, w...",
+    topic: "Research",
+  },
+];
+
+function decodeEntities(s: string): string {
+  return s.replace(/&amp;/g, "&").replace(/&#0?39;/g, "'").replace(/&#8217;/g, "’")
+    .replace(/&#8220;/g, "“").replace(/&#8221;/g, "”").replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
+}
+
+function isoWeekNumber(d: Date): number {
+  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  const fDay = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - fDay + 3);
+  return 1 + Math.round((date.getTime() - firstThursday.getTime()) / (7 * 24 * 3600 * 1000));
+}
+
+// Consecutive pairs, rotating by ISO week: (0,1), (2,3), ... then repeat.
+function pickPair(items: Article[], when: Date): Article[] {
+  const pairs = Math.max(1, Math.floor(items.length / 2));
+  const idx = isoWeekNumber(when) % pairs;
+  return items.slice(idx * 2, idx * 2 + 2);
+}
+
+async function fetchFitnessIntel(when: Date): Promise<IntelResult> {
+  // SBS intermittently serves a bot-check page (HTTP 200, no <item> at all)
+  // instead of the feed — observed repeatedly on 2026-11-03 — so one retry
+  // is built in before falling back to the pool.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const got = await tryFetchFeed();
+    if (got) return { articles: pickPair(got, when), source: "rss" };
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 800));
+  }
+  return { articles: pickPair(FALLBACK_POOL, when), source: "pool" };
+}
+
+async function tryFetchFeed(): Promise<Article[] | null> {
   try {
-    const res = await fetch("https://www.strongerbyscience.com/feed/");
+    const res = await fetch("https://www.strongerbyscience.com/feed/", {
+      headers: {
+        // Browser UA only — do NOT send an RSS Accept header: SBS's server
+        // answers 415 to `Accept: application/rss+xml,...` from some
+        // clients (verified 2026-11-03). The runtime default (*/*) is fine.
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error(`SBS feed HTTP ${res.status}`);
     const text = await res.text();
-    const items = text.split("<item>").slice(1, 3);
-    for (const item of items) {
-      if (!item) continue;
+    const parsed: Article[] = [];
+    for (const item of text.split("<item>").slice(1)) {
+      if (parsed.length >= 4) break;
       const cleanItem = item.split("</item>")[0];
       const titleMatch = cleanItem.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || cleanItem.match(/<title>(.*?)<\/title>/);
       const linkMatch = cleanItem.match(/<link>(.*?)<\/link>/);
-      const imgMatch = cleanItem.match(/<media:content.*?url="([^"]+)"/i) 
-        || cleanItem.match(/<enclosure.*?url="([^"]+)"/i) 
+      if (!titleMatch || !linkMatch) continue;
+      const imgMatch = cleanItem.match(/<media:content.*?url="([^"]+)"/i)
+        || cleanItem.match(/<enclosure.*?url="([^"]+)"/i)
         || cleanItem.match(/<content:encoded>[\s\S]*?src="([^"]+)"/i)
         || cleanItem.match(/<description>[\s\S]*?src="([^"]+)"/i);
-      const descMatch = cleanItem.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i) 
-          || cleanItem.match(/<description>([\s\S]*?)<\/description>/i);
-      const cleanDesc = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim().substring(0, 150) + "..." : "New fitness research available.";
-      articles.push({
-        title: titleMatch ? titleMatch[1] : 'Fitness Research Update',
-        link: linkMatch ? linkMatch[1] : 'https://www.strongerbyscience.com/',
-        image: imgMatch ? imgMatch[1] : 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=800',
+      const descMatch = cleanItem.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i)
+        || cleanItem.match(/<description>([\s\S]*?)<\/description>/i);
+      const cleanDesc = descMatch ? decodeEntities(descMatch[1].replace(/<[^>]+>/g, "")).trim().substring(0, 150) + "..." : "New fitness research available.";
+      parsed.push({
+        title: decodeEntities(titleMatch[1]),
+        link: linkMatch[1],
+        image: imgMatch ? imgMatch[1] : FALLBACK_IMG,
         desc: cleanDesc,
-        topic: 'Research'
+        topic: "Research",
       });
     }
+    if (parsed.length >= 2) return parsed;
+    console.error(`SBS feed parsed only ${parsed.length} usable articles`);
+    return null;
   } catch (e) {
     console.error("RSS fetch failed", e);
+    return null;
   }
-  if (articles.length === 0) {
-    articles.push({
-      title: "The Anabolic Window: New Findings on Protein Timing",
-      link: "https://www.strongerbyscience.com/",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBJGY2ydexvDI9csFyDkG2Xn_3xs1IBwl1sqHSlZim5iKWsjtywGNfV-FYcBGSiNTjmjqIu9_TqCoGJc0TtA5xHUWT8XF-VH8oUC_wAtdxu5_4E21KeWTnngB8d6HowX9NYLtEGu6vEf_AuLIcCwqv63Sl_oOzifowidZr1VymDM9fK1n-eUkMDgeR5RewW1_u3XvRpbYRRUoka3vsiBsDi2Ivrt4kAClV2WRd3EOY-Zwz2vUNOKSgSQtuD7pTRYK2crnKH3jzrAaAL",
-      desc: "Recent clinical data suggests that the 'anabolic window' is significantly wider than previously assumed...",
-      topic: "Hypertrophy"
-    });
-    articles.push({
-      title: "Neural Drive & Force Production: Why Mind-Muscle Connection Matters",
-      link: "https://www.strongerbyscience.com/",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCPsFjojvlO3f0CM3Cm3mj33k123hteCivz0bdJK2pnt4XzG4_kR73MKGs3-dCFSQ6VZE70OF-OlgwAw8uJYP4YH3_u8VYgK3aDdkEfS6rBFRabCgko7roPjgemIWOAvf44xvOI8BZE7ShmwaGvFVawCFI7wfHXKLsX_hklCwNfNRA2Y7ICP5QVF6KqgSy1J7n1Nqc6o7fKUzPteuT-8CSpz9kY8PPM8YWu8wrT406VBaimjbwzty-9fiesmw33cFWBokhBYsVqcYaB",
-      desc: "Investigating the voluntary activation of motor units and how conscious focus can increase total force output by up to 12% in experienced lifters.",
-      topic: "Neurology"
-    });
-  }
-  return articles;
 }
+
+// ── Volt email palette (app dark tokens, src/ui/volt/volt.css) ──────────────
+// The weekly digest was the last surface still wearing the V1 "Kinetic"
+// ember identity. It now speaks Volt: blackboard canvas, panel blocks with
+// hard ink edges, volt as the single accent, Archivo for voice and
+// JetBrains Mono for data. Email is a dark-only design.
+const E = {
+  canvas: "#0a0a09", sheet: "#131311", panel: "#1a1a17", inset: "#0e0e0c",
+  ink: "#f4f5e9", dim: "#b9bfa8", faint: "rgba(244,245,233,0.45)",
+  volt: "#c9f158", voltSoft: "#e2fb8f", voltInk: "#141416",
+  hairline: "#2c2c26", gold: "#ffc627",
+};
+const FD = "'Archivo',Helvetica,Arial,sans-serif";
+const FM = "'JetBrains Mono',Menlo,Consolas,monospace";
 
 function buildEmailHtml(
   workoutCount: number,
@@ -94,92 +198,102 @@ function buildEmailHtml(
     allWorkoutDates,
     weekStartDate,
     weekEndDate,
-    hasWorkedOut ? C.surfaceLow : C.surfaceContainer,
+    E.panel,
+    { accent: E.volt, accentSoft: E.voltSoft, onAccent: E.voltInk, idleBg: E.inset, glow: "rgba(201,241,88,0.35)", label: E.dim },
   );
   const workoutLabel = workoutCount === 1 ? "1 workout logged." : `${workoutCount} workouts logged.`;
 
   const prItemsHtml = bestLifts.map(lift => `
-      <div style="background-color:${C.surfaceContainer};background:${C.surfaceContainer};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td><p style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:${C.onSurface};margin:0;">${escapeHtml(lift.name)}</p><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;color:${C.onSurfaceVariant};margin:2px 0 0;">${escapeHtml(lift.day)}</p></td>
-          <td style="text-align:right;"><p style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:${C.onSurface};margin:0;">${escapeHtml(lift.summary)}</p></td>
+          <td><p style="font-family:${FD};font-size:16px;font-weight:700;color:${E.ink};margin:0;">${escapeHtml(lift.name)}</p><p style="font-family:${FM};font-size:11px;color:${E.dim};margin:3px 0 0;text-transform:uppercase;">${escapeHtml(lift.day)}</p></td>
+          <td style="text-align:right;"><p style="font-family:${FM};font-size:17px;font-weight:700;color:${E.volt};margin:0;">${escapeHtml(lift.summary)}</p></td>
         </tr></table>
       </div>
   `).join('');
 
   const bestLiftHtml = bestLifts.length > 0 ? prItemsHtml : `
-      <div style="background-color:${C.surfaceContainer};background:${C.surfaceContainer};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
-        <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};margin:0;">No lifting data available.</p>
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-radius:16px;padding:16px 20px;margin-bottom:10px;">
+        <p style="font-family:${FD};font-size:13px;color:${E.dim};margin:0;">No lifting data available.</p>
       </div>
   `;
 
   const statsCardsHtml = `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="width:33%;padding-right:6px;">
-        <div style="background-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.1);border-radius:12px;padding:14px 12px;border:1px solid rgba(255,255,255,0.2);">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#FFFFFF;">${weeklyStats.volumeKg.toLocaleString("en-US")}</div>
-          <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:9px;color:rgba(255,255,255,0.6);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Volume (kg)</div>
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+          <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${weeklyStats.volumeKg.toLocaleString("en-US")}</div>
+          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Volume (kg)</div>
         </div>
       </td>
       <td style="width:33%;padding:0 3px;">
-        <div style="background-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.1);border-radius:12px;padding:14px 12px;border:1px solid rgba(255,255,255,0.2);">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#FFFFFF;">${weeklyStats.trainedMuscles}</div>
-          <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:9px;color:rgba(255,255,255,0.6);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Body Parts</div>
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+          <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${weeklyStats.trainedMuscles}</div>
+          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Body Parts</div>
         </div>
       </td>
       <td style="width:33%;padding-left:6px;">
-        <div style="background-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.1);border-radius:12px;padding:14px 12px;border:1px solid rgba(255,255,255,0.2);">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#FFFFFF;">${formatDuration(weeklyStats.durationMinutes)}</div>
-          <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:9px;color:rgba(255,255,255,0.6);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Training</div>
+        <div style="background-color:${E.voltInk};background:${E.voltInk};border-radius:12px;padding:14px 12px;">
+          <div style="font-family:${FM};font-size:22px;font-weight:700;color:${E.volt};">${formatDuration(weeklyStats.durationMinutes)}</div>
+          <div style="font-family:${FM};font-size:9px;color:rgba(201,241,88,0.55);margin-top:3px;letter-spacing:0.08em;text-transform:uppercase;">Training</div>
         </div>
       </td>
     </tr></table>
   `;
 
   const heroSection = hasWorkedOut ? `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.primaryContainer}" style="background-color:${C.primaryContainer} !important;padding:32px 28px 28px;">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onPrimary};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.15;margin:0 0 4px;">${escapeHtml(workoutLabel)}</h2>
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:15px;color:rgba(255,255,255,0.8);line-height:1.5;margin:0 0 24px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.volt}" class="gm-volt" style="background-color:${E.volt} !important;padding:30px 28px 28px;">
+      <p style="font-family:${FM};font-size:10px;font-weight:700;color:rgba(20,20,22,0.65);letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">Last Week's Report</p>
+      <h2 style="font-family:${FD};font-size:32px;font-weight:900;color:${E.voltInk};letter-spacing:-0.02em;line-height:1.12;margin:0 0 6px;">${escapeHtml(workoutLabel)}</h2>
+      <p style="font-family:${FD};font-size:15px;color:rgba(20,20,22,0.75);line-height:1.5;margin:0 0 22px;">
         ${workoutCount >= 4 ? "You are in the top 12% of Kaaya Fit users this month." : "Keep building. Consistency compounds."}
       </p>
-      ${consistencyProtocol}
       ${statsCardsHtml}
     </td></tr></table>
-    <!-- Personal Records -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="padding:24px 28px;background-color:${C.surfaceLow} !important;">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer};letter-spacing:0.16em;text-transform:uppercase;margin:0 0 16px;">Highlights</p>
+  ` : `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:30px 28px 26px;background-color:${E.sheet} !important;">
+      <p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.volt};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">Last Week's Report</p>
+      <h2 style="font-family:${FD};font-size:28px;font-weight:900;color:${E.ink};letter-spacing:-0.02em;line-height:1.15;margin:0 0 8px;">No workouts last week.</h2>
+      <p style="font-family:${FD};font-size:14px;color:${E.dim};line-height:1.6;margin:0;max-width:480px;">Consistency means showing up more often than not. One session this week resets the clock.</p>
+    </td></tr></table>
+  `;
+
+  const protocolSection = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:22px 28px 2px;background-color:${E.sheet} !important;">
+      ${consistencyProtocol}
+    </td></tr></table>
+  `;
+
+  const liftsSection = hasWorkedOut ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:10px 28px 8px;background-color:${E.sheet} !important;">
+      <p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.volt};letter-spacing:0.16em;text-transform:uppercase;margin:0 0 14px;">Highlights</p>
       ${bestLiftHtml}
     </td></tr></table>
   ` : `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="padding:32px 28px 28px;background-color:${C.surfaceLow} !important;">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.onSurfaceVariant};letter-spacing:0.2em;text-transform:uppercase;margin:0 0 8px;">LAST WEEK'S REPORT</p>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:900;color:${C.onSurface};letter-spacing:-0.03em;line-height:1.15;margin:0 0 8px;">No workouts last week.</h2>
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:14px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 24px;max-width:480px;">Consistency means showing up more often than not. One session this week resets the clock.</p>
-      ${consistencyProtocol}
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceContainer}" style="background-color:${C.surfaceContainer} !important;border-radius:16px;padding:16px 20px;border-left:3px solid ${C.primaryContainer};margin-bottom:24px;">
-        <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurface};line-height:1.6;margin:0 0 12px;"><strong>Your all-time best lifts:</strong></p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:10px 28px 8px;background-color:${E.sheet} !important;">
+      <div style="background-color:${E.panel};background:${E.panel};border:1px solid ${E.hairline};border-left:3px solid ${E.volt};border-radius:16px;padding:18px 20px;">
+        <p style="font-family:${FD};font-size:13px;color:${E.ink};line-height:1.6;margin:0 0 12px;"><strong>Your all-time best lifts:</strong></p>
         ${bestLiftHtml}
-        <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:12px 0 0;">Strength declines after ~10 days of inactivity.</p>
-      </td></tr></table>
-      <a href="https://kaaya.fit/workout" style="display:inline-block;background-color:${C.primaryContainer};color:${C.onPrimary};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:14px 32px;border-radius:16px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
+        <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:12px 0 16px;">Strength declines after ~10 days of inactivity.</p>
+        <a href="https://kaaya.fit/workout" style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FD};font-size:13px;font-weight:800;padding:13px 30px;border-radius:999px;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">Log a Workout</a>
+      </div>
     </td></tr></table>
   `;
 
   let articlesHtml = '';
   articles.forEach(art => {
     articlesHtml += `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surface}" style="padding:0 28px 16px;background-color:${C.surface} !important;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="background-color:${C.surfaceLow} !important;border-radius:20px;overflow:hidden;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:0 28px 16px;background-color:${E.sheet} !important;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:20px;overflow:hidden;">
         <img src="${escapeHtml(art.image)}" alt="Article image" style="width:100%;height:200px;object-fit:cover;display:block;" />
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="padding:20px 24px 24px;background-color:${C.surfaceLow} !important;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="padding:20px 24px 24px;background-color:${E.panel} !important;">
           <div style="margin-bottom:12px;">
-            <span style="display:inline-block;background-color:rgba(255,181,155,0.1);color:${C.primary};font-family:'Be Vietnam Pro',sans-serif;font-size:9px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid rgba(255,181,155,0.2);margin-right:6px;">${escapeHtml(art.topic)}</span>
-            <span style="display:inline-block;background-color:${C.surfaceHighest};color:${C.onSurfaceVariant};font-family:'Be Vietnam Pro',sans-serif;font-size:9px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.1em;text-transform:uppercase;">Science</span>
+            <span style="display:inline-block;background-color:${E.volt};color:${E.voltInk};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">${escapeHtml(art.topic)}</span>
+            <span style="display:inline-block;color:${E.dim};font-family:${FM};font-size:9px;font-weight:700;padding:5px 10px;border-radius:999px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Science</span>
           </div>
-          <h4 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:${C.onSurface};line-height:1.3;margin:0 0 10px;">${escapeHtml(art.title)}</h4>
-          <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 14px;">${escapeHtml(art.desc)}</p>
-          <a href="${escapeHtml(art.link)}" style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:${C.onSurfaceVariant};letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">READ FULL ARTICLE →</a>
+          <h4 style="font-family:${FD};font-size:20px;font-weight:700;color:${E.ink};line-height:1.3;margin:0 0 10px;">${escapeHtml(art.title)}</h4>
+          <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:0 0 14px;">${escapeHtml(art.desc)}</p>
+          <a href="${escapeHtml(art.link)}" style="font-family:${FM};font-size:10px;font-weight:700;color:${E.volt};letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">Read Full Article →</a>
         </td></tr></table>
       </td></tr></table>
     </td></tr></table>`;
@@ -187,21 +301,21 @@ function buildEmailHtml(
 
   const researchVault = `
     <!-- Research Vault Header -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surface}" style="padding:28px 28px 16px;background-color:${C.surface} !important;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:26px 28px 14px;background-color:${E.sheet} !important;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td><h3 style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:${C.onSurface};text-transform:uppercase;letter-spacing:-0.02em;margin:0;">Research Vault</h3></td>
-        <td style="text-align:right;"><span style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:${C.onSurfaceVariant};letter-spacing:0.15em;text-transform:uppercase;">0${articles.length} NEW PAPERS</span></td>
+        <td><h3 style="font-family:${FD};font-size:24px;font-weight:800;color:${E.ink};text-transform:uppercase;letter-spacing:-0.01em;margin:0;">Research Vault</h3></td>
+        <td style="text-align:right;"><span style="font-family:${FM};font-size:10px;color:${E.dim};letter-spacing:0.15em;text-transform:uppercase;">0${articles.length} New Papers</span></td>
       </tr></table>
     </td></tr></table>
     ${articlesHtml}
     <!-- Last Week's Analytics (archive teaser) -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surface}" style="padding:0 28px 24px;background-color:${C.surface} !important;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="background-color:${C.surfaceLow} !important;border-radius:20px;overflow:hidden;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:0 28px 24px;background-color:${E.sheet} !important;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:1px solid ${E.hairline};border-radius:20px;overflow:hidden;">
         <img src="${IMG_ARCHIVE}" alt="Previous edition analytics" style="width:100%;height:160px;object-fit:cover;display:block;filter:grayscale(100%);opacity:0.7;" />
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="padding:20px 24px;background-color:${C.surfaceLow} !important;">
-          <h4 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:${C.onSurface};text-transform:uppercase;margin:0 0 8px;">Last Week's Analytics</h4>
-          <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:${C.onSurfaceVariant};line-height:1.6;margin:0 0 14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
-          <a href="https://kaaya.fit/" style="display:inline-block;background-color:${C.surfaceHighest};color:${C.onSurface};font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;">Review Archive</a>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="padding:20px 24px;background-color:${E.panel} !important;">
+          <h4 style="font-family:${FD};font-size:20px;font-weight:700;color:${E.ink};text-transform:uppercase;margin:0 0 8px;">Last Week's Analytics</h4>
+          <p style="font-family:${FD};font-size:13px;color:${E.dim};line-height:1.6;margin:0 0 14px;">We analyzed performance of 5,000 elite athletes using the Kinetic methodology. Discover how neural drive impacts your RPE during high-volume hypertrophy blocks.</p>
+          <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.inset};color:${E.ink};font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:999px;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;border:1px solid ${E.hairline};">Review Archive</a>
         </td></tr></table>
       </td></tr></table>
     </td></tr></table>
@@ -212,66 +326,65 @@ function buildEmailHtml(
 <style>
 :root{color-scheme:dark only !important;}
 html,body,table,td,div,p,a,span,h1,h2,h3,h4{color-scheme:dark only !important;}
-body{margin:0 !important;padding:0 !important;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;color:${C.onSurface} !important;}
+body{margin:0 !important;padding:0 !important;background-color:${E.canvas} !important;background:${E.canvas} !important;color:${E.ink} !important;}
 /* Gmail dark mode override prevention */
-u+.body{background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;}
-u+.body .gm-bg{background-color:${C.surfaceLowest} !important;}
-u+.body .gm-surface{background-color:${C.surface} !important;}
-u+.body .gm-surface-low{background-color:${C.surfaceLow} !important;}
-u+.body .gm-surface-container{background-color:${C.surfaceContainer} !important;}
-u+.body .gm-surface-highest{background-color:${C.surfaceHighest} !important;}
-u+.body .gm-hero-active{background-color:${C.primaryContainer} !important;}
-u+.body .gm-hero-inactive{background-color:${C.surfaceLow} !important;}
-u+.body .gm-incentive{background-color:#1a1408 !important;}
+u+.body{background-color:${E.canvas} !important;background:${E.canvas} !important;}
+u+.body .gm-bg{background-color:${E.canvas} !important;}
+u+.body .gm-sheet{background-color:${E.sheet} !important;}
+u+.body .gm-panel{background-color:${E.panel} !important;}
+u+.body .gm-inset{background-color:${E.inset} !important;}
+u+.body .gm-volt{background-color:${E.volt} !important;}
 /* Prevent auto dark mode in supported clients */
 @media (prefers-color-scheme:dark){
-  body,table,td,div{background-color:${C.surfaceLowest} !important;color:${C.onSurface} !important;}
+  body,table,td,div{background-color:${E.canvas} !important;color:${E.ink} !important;}
 }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet"></head>
-<body class="body" bgcolor="${C.surfaceLowest}" style="margin:0 !important;padding:0 !important;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;color:${C.onSurface} !important;color-scheme:dark only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"></head>
+<body class="body" bgcolor="${E.canvas}" style="margin:0 !important;padding:0 !important;background-color:${E.canvas} !important;background:${E.canvas} !important;color:${E.ink} !important;color-scheme:dark only !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
 <!-- Preheader (hidden preview text) -->
-<div style="display:none;font-size:1px;color:${C.surfaceLowest};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya Fit digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+<div style="display:none;font-size:1px;color:${E.canvas};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${workoutCount > 0 ? `${workoutCount} workouts last week` : 'Your weekly Kaaya Fit digest is here'} &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
 <!-- Outer wrapper table (Gmail-proof) -->
-<table role="presentation" width="100%" bgcolor="${C.surfaceLowest}" cellpadding="0" cellspacing="0" border="0" class="gm-bg" style="background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;width:100% !important;"><tr><td align="center" bgcolor="${C.surfaceLowest}" class="gm-bg" style="padding:20px 0;background-color:${C.surfaceLowest} !important;background:${C.surfaceLowest} !important;">
-<!-- Inner wrapper table (second layer of protection) -->
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="gm-surface" style="max-width:600px;width:100%;background-color:${C.surface} !important;background:${C.surface} !important;border-radius:4px;overflow:hidden;"><tr><td bgcolor="${C.surface}" class="gm-surface" style="background-color:${C.surface} !important;background:${C.surface} !important;color:${C.onSurface} !important;">
+<table role="presentation" width="100%" bgcolor="${E.canvas}" cellpadding="0" cellspacing="0" border="0" class="gm-bg" style="background-color:${E.canvas} !important;background:${E.canvas} !important;width:100% !important;"><tr><td align="center" bgcolor="${E.canvas}" class="gm-bg" style="padding:20px 0;background-color:${E.canvas} !important;background:${E.canvas} !important;">
+<!-- Inner sheet: Volt block — panel with hard ink edge -->
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="gm-sheet" style="max-width:600px;width:100%;background-color:${E.sheet} !important;background:${E.sheet} !important;border:2px solid ${E.ink};border-radius:20px;overflow:hidden;"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="background-color:${E.sheet} !important;background:${E.sheet} !important;color:${E.ink} !important;">
   <!-- Header -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="background-color:${C.surfaceLowest} !important;padding:24px 28px 20px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.canvas}" class="gm-bg" style="background-color:${E.canvas} !important;padding:22px 28px 18px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${C.primaryContainer} !important;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Weekly Digest</p><h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;color:${C.onSurface} !important;letter-spacing:0.05em;font-style:italic;text-transform:uppercase;margin:0;">KAAYA FIT</h1></td>
-      <td style="text-align:right;vertical-align:top;"><p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.5) !important;letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
+      <td><p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.volt} !important;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 5px;">Weekly Digest</p><h1 style="font-family:${FD};font-size:22px;font-weight:900;color:${E.ink} !important;letter-spacing:0.04em;text-transform:uppercase;margin:0;">Kaaya <span style="color:${E.volt};">Fit</span></h1></td>
+      <td style="text-align:right;vertical-align:top;"><p style="font-family:${FM};font-size:10px;color:${E.dim} !important;letter-spacing:0.1em;text-transform:uppercase;line-height:1.6;margin:0;">${weekRange}</p></td>
     </tr></table>
   </td></tr></table>
   ${heroSection}
-  
+  ${protocolSection}
+  ${liftsSection}
+
   <!-- Olympus League -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceContainer}" style="padding:20px 28px;background-color:${C.surfaceContainer} !important;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLow}" style="background-color:${C.surfaceLow} !important;border-radius:24px;padding:20px 24px;">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:${C.onSurfaceVariant} !important;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 4px;">Olympus League</p>
-      <p style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:${C.onSurface} !important;margin:0;">${xpData.tier} <span style="font-size:13px;font-weight:400;color:${C.onSurfaceVariant} !important;">${xpData.xp.toLocaleString()} / ${xpData.nextXp.toLocaleString()} XP to ${xpData.nextTierName}</span></p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="margin-top:12px;background-color:${C.surfaceLowest} !important;border-radius:6px;height:8px;overflow:hidden;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:${xpData.progressPct}%;height:8px;"><tr><td bgcolor="${C.primaryContainer}" style="height:8px;background-color:${C.primaryContainer} !important;border-radius:6px;"></td></tr></table>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:14px 28px 26px;background-color:${E.sheet} !important;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border:2px solid ${E.ink};border-radius:20px;padding:20px 24px;">
+      <p style="font-family:${FM};font-size:10px;color:${E.dim} !important;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 5px;">Olympus League</p>
+      <p style="font-family:${FD};font-size:18px;font-weight:800;color:${E.ink} !important;margin:0;">${xpData.tier} <span style="font-family:${FM};font-size:12px;font-weight:500;color:${E.dim} !important;">${xpData.xp.toLocaleString()} / ${xpData.nextXp.toLocaleString()} XP to ${xpData.nextTierName}</span></p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.inset}" class="gm-inset" style="margin-top:12px;background-color:${E.inset} !important;border-radius:6px;height:8px;overflow:hidden;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:${xpData.progressPct}%;height:8px;"><tr><td bgcolor="${E.volt}" style="height:8px;background-color:${E.volt} !important;border-radius:6px;"></td></tr></table>
       </td></tr></table>
-      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:700;padding:10px 24px;border-radius:12px;letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP TO GO</span></p>` : ''}
+      ${xpData.xpToGo > 0 ? `<p style="text-align:center;margin:12px 0 0;"><span style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FM};font-size:11px;font-weight:700;padding:9px 22px;border-radius:999px;letter-spacing:0.06em;text-transform:uppercase;">${xpData.xpToGo.toLocaleString()} XP to go</span></p>` : ''}
     </td></tr></table>
     <!-- Top 5 Incentive -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;"><tr><td bgcolor="#1a1408" style="background-color:#1a1408 !important;border-radius:20px;padding:20px 24px;border:1px solid rgba(255,193,7,0.25);">
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:#FFD54F !important;letter-spacing:0.16em;text-transform:uppercase;margin:0 0 8px;">🏆 MONTHLY PRIZE POOL</p>
-      <p style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#FFFFFF !important;line-height:1.4;margin:0 0 10px;">Top 5 athletes this month win <span style="color:#FFD54F !important;">free supplements</span> — shipped to your door.</p>
-      <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:rgba(255,255,255,0.7) !important;margin:0 0 14px;line-height:1.5;">Your rank: <strong style="color:#FFD54F !important;font-family:'Space Grotesk',sans-serif;font-size:15px;">#${leaderboardRank}</strong> of ${totalUsers} athletes${leaderboardRank <= 5 ? ' — <span style="color:#4CAF50 !important;">In the prize zone! 🔥</span>' : leaderboardRank <= 10 ? ' — almost there, keep pushing!' : ''}</p>
-      <a href="https://kaaya.fit/" style="display:inline-block;background-color:#FFD54F !important;color:#1a1408 !important;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:10px 20px;border-radius:12px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">See Full Leaderboard →</a>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;"><tr><td bgcolor="${E.panel}" class="gm-panel" style="background-color:${E.panel} !important;border-radius:20px;padding:20px 24px;border:1px solid rgba(255,198,39,0.4);">
+      <p style="font-family:${FM};font-size:10px;font-weight:700;color:${E.gold} !important;letter-spacing:0.16em;text-transform:uppercase;margin:0 0 8px;">Monthly Prize Pool</p>
+      <p style="font-family:${FD};font-size:16px;font-weight:700;color:${E.ink} !important;line-height:1.4;margin:0 0 10px;">Top 5 athletes this month win <span style="color:${E.gold} !important;">free supplements</span> — shipped to your door.</p>
+      <p style="font-family:${FD};font-size:13px;color:${E.dim} !important;margin:0 0 14px;line-height:1.5;">Your rank: <strong style="color:${E.gold} !important;font-family:${FM};font-size:15px;">#${leaderboardRank}</strong> of ${totalUsers} athletes${leaderboardRank <= 5 ? ' — <span style="color:' + E.volt + ' !important;">In the prize zone!</span>' : leaderboardRank <= 10 ? ' — almost there, keep pushing!' : ''}</p>
+      <a href="https://kaaya.fit/" style="display:inline-block;background-color:transparent !important;color:${E.gold} !important;font-family:${FM};font-size:11px;font-weight:700;padding:10px 20px;border-radius:999px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;border:1px solid ${E.gold};">See Full Leaderboard →</a>
     </td></tr></table>
   </td></tr></table>
 
   ${researchVault}
   <!-- CTA -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surface}" style="padding:16px 28px 28px;text-align:center;background-color:${C.surface} !important;">
-    <a href="https://kaaya.fit/" style="display:inline-block;background-color:${C.surfaceHighest} !important;color:${C.onSurface} !important;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:14px 40px;border-radius:12px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.sheet}" class="gm-sheet" style="padding:6px 28px 30px;text-align:center;background-color:${E.sheet} !important;">
+    <a href="https://kaaya.fit/" style="display:inline-block;background-color:${E.volt} !important;color:${E.voltInk} !important;font-family:${FD};font-size:13px;font-weight:800;padding:14px 40px;border-radius:999px;text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;">Open Dashboard</a>
   </td></tr></table>
   <!-- Footer -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.surfaceLowest}" style="padding:20px 28px 28px;background-color:${C.surfaceLowest} !important;">
-    <p style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;color:rgba(227,191,179,0.4) !important;text-align:center;line-height:1.8;margin:0;">You receive this because you train with Kaaya Fit.<br><a href="https://kaaya.fit/profile" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${C.onSurfaceVariant} !important;text-decoration:underline;">Unsubscribe</a></p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${E.canvas}" class="gm-bg" style="padding:20px 28px 26px;background-color:${E.canvas} !important;">
+    <p style="font-family:${FM};font-size:10px;color:${E.faint} !important;text-align:center;line-height:1.8;margin:0;">You receive this because you train with Kaaya Fit.<br><a href="https://kaaya.fit/profile" style="color:${E.dim} !important;text-decoration:underline;">Manage preferences</a> · <a href="#" style="color:${E.dim} !important;text-decoration:underline;">Unsubscribe</a></p>
   </td></tr></table>
 </td></tr></table>
 </td></tr></table>
@@ -350,7 +463,9 @@ serve(async (req) => {
     const monthWindow = getCurrentMonthWindow(today);
     const weekRange = reportWeek.weekRange;
 
-    const articles = await fetchFitnessIntel();
+    const intel = await fetchFitnessIntel(today);
+    const articles = intel.articles;
+    console.log(`Research intel source: ${intel.source} — ${articles.map((a) => a.title).join(" | ")}`);
     const errors = [];
     const diagnostics = [];
 
@@ -451,12 +566,12 @@ serve(async (req) => {
     }
 
     if (isDryRun) {
-      return new Response(JSON.stringify({ success: true, dryRun: true, diagnostics }), {
+      return new Response(JSON.stringify({ success: true, dryRun: true, articlesSource: intel.source, articleTitles: articles.map((a) => a.title), diagnostics }), {
         headers: { "Content-Type": "application/json" }, status: 200,
       });
     }
 
-    return new Response(JSON.stringify({ success: true, emailsSent, errors }), {
+    return new Response(JSON.stringify({ success: true, emailsSent, errors, articlesSource: intel.source, articleTitles: articles.map((a) => a.title) }), {
       headers: { "Content-Type": "application/json" }, status: 200,
     });
   } catch (error: any) {

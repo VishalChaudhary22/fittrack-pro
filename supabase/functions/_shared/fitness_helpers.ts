@@ -333,7 +333,14 @@ export function getTopLiftsAllTime(allWorkouts: WorkoutRow[], cacheBodyPartsXp: 
   return bestLifts;
 }
 
-export function getConsistencyProtocolHtml(workoutDates: string[], weekStartDate: string, weekEndDate: string, containerBg = C.surfaceLow) {
+export type ConsistencyTheme = { accent?: string; accentSoft?: string; onAccent?: string; idleBg?: string; glow?: string; label?: string; };
+export function getConsistencyProtocolHtml(workoutDates: string[], weekStartDate: string, weekEndDate: string, containerBg = C.surfaceLow, theme: ConsistencyTheme = {}) {
+  const tAccent = theme.accent ?? C.primaryContainer;
+  const tAccentSoft = theme.accentSoft ?? C.primary;
+  const tOnAccent = theme.onAccent ?? C.onPrimary;
+  const tIdleBg = theme.idleBg ?? C.surfaceLowest;
+  const tGlow = theme.glow ?? "rgba(248,95,27,0.3)";
+  const tLabel = theme.label ?? C.onSurfaceVariant;
   const uniqueDates = new Set(workoutDates.map(normalizeDate).filter(Boolean));
   const daysTrained = Array.from(uniqueDates).filter((date) => date >= weekStartDate && date <= weekEndDate).length;
   const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -346,13 +353,13 @@ export function getConsistencyProtocolHtml(workoutDates: string[], weekStartDate
     const dayLabel = days[d.getUTCDay()];
     let bubble;
     if (isChecked) {
-      bubble = `<div style="width:36px;height:36px;border-radius:18px;background-color:${C.primaryContainer};background:linear-gradient(135deg,${C.primary},${C.primaryContainer});margin:0 auto;line-height:36px;color:${C.onPrimary};font-size:14px;box-shadow:0 0 10px rgba(248,95,27,0.3);">✓</div>`;
+      bubble = `<div style="width:36px;height:36px;border-radius:18px;background-color:${tAccent};background:linear-gradient(135deg,${tAccentSoft},${tAccent});margin:0 auto;line-height:36px;color:${tOnAccent};font-size:14px;box-shadow:0 0 10px ${tGlow};">✓</div>`;
     } else {
-      bubble = `<div style="width:36px;height:36px;border-radius:18px;background-color:${C.surfaceLowest};background:${C.surfaceLowest};margin:0 auto;"></div>`;
+      bubble = `<div style="width:36px;height:36px;border-radius:18px;background-color:${tIdleBg};background:${tIdleBg};margin:0 auto;"></div>`;
     }
     bubblesHtml.push(`
       <td style="width:14.28%;">
-        <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${isChecked ? C.primaryContainer : C.onSurfaceVariant};margin-bottom:8px;">${dayLabel}</div>
+        <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:700;color:${isChecked ? tAccent : tLabel};margin-bottom:8px;">${dayLabel}</div>
         ${bubble}
       </td>
     `);
@@ -362,10 +369,10 @@ export function getConsistencyProtocolHtml(workoutDates: string[], weekStartDate
     <div style="padding:24px;background-color:${containerBg};background:${containerBg};border-radius:24px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.03);">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr>
         <td>
-          <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:${C.onSurfaceVariant};letter-spacing:0.16em;text-transform:uppercase;">Consistency Protocol</div>
+          <div style="font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:${tLabel};letter-spacing:0.16em;text-transform:uppercase;">Consistency Protocol</div>
         </td>
         <td style="text-align:right;">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:${C.primary};letter-spacing:-0.02em;">${daysTrained} DAYS</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:${tAccentSoft};letter-spacing:-0.02em;">${daysTrained} DAYS</div>
         </td>
       </tr></table>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="text-align:center;"><tr>

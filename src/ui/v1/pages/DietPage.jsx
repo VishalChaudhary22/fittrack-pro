@@ -1,5 +1,5 @@
 import { TrendingUp, Salad, Flame, Activity as ActivityIcon, ChevronLeft, ChevronRight, Plus, Search, Info, X, Edit2, Copy, Filter, Check, Clock, Scale, Ruler, Calculator, Zap, PersonStanding, ArrowDown, AlertTriangle, Star, Droplet, Pill, Bot, Target, Drumstick, Wheat, UtensilsCrossed, ClipboardList, BarChart3, Soup, Droplets, CookingPot, Package, Leaf, Cookie } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { PageHeader } from '../shared/SharedComponents';
 import AdaptiveDietBanner from '../shared/AdaptiveDietBanner';
 import { TDEEInsightCard } from '../shared/TDEEInsightCard';
@@ -464,7 +464,6 @@ export default function DietPage({ chatbot }) {
             <div style={{ width: '100%', height: 350 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weeklyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" vertical={false} />
                   <XAxis dataKey="dayName" stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
                   <RechartsTooltip cursor={{ fill: 'var(--surface-container-highest)' }} contentStyle={{ background: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', borderRadius: 8, fontSize: 12, color: 'var(--on-surface)' }} itemStyle={{ fontSize: 13, fontWeight: 700 }} />

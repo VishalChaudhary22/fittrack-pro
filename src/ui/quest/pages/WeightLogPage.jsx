@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useApp } from '../../../core/context/AppContext';
 import { useWeightLog } from '../../../core/hooks/useWeightLog';
 import { fmt, gId, kgToLbs, lbsToKg, tod } from '../../../utils/helpers';
@@ -15,11 +15,16 @@ import PixelSprite from '../PixelSprite';
 // Stepped square-point line, chronological — same construction as the
 // Progress StepChart (H-then-V path, square markers, crispEdges).
 function WeightSpark({ entries }) {
+  const gid = useId().replace(/:/g, '');
   const W = 560, H = 150, PAD = 12;
   const vals = entries.map(d => d.weight);
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const range = (max - min) || 1;
+  const rawMin = Math.min(...vals);
+  const rawMax = Math.max(...vals);
+  const rawRange = (rawMax - rawMin) || 1;
+  // Padded domain + five-value axis rail, no gridlines (Progress chart rules).
+  const min = rawMin - rawRange * 0.12;
+  const max = rawMax + rawRange * 0.12;
+  const range = max - min;
   const pts = entries.map((d, i) => [
     PAD + (i / Math.max(entries.length - 1, 1)) * (W - PAD * 2),
     H - PAD - ((d.weight - min) / range) * (H - PAD * 2),
@@ -28,22 +33,31 @@ function WeightSpark({ entries }) {
   for (let i = 1; i < pts.length; i++) {
     path += ` H${pts[i][0].toFixed(1)} V${pts[i][1].toFixed(1)}`;
   }
-  const gridY = [0, 1, 2, 3, 4].map(i => PAD + ((H - PAD * 2) * i) / 4);
+  const area = `${path} L${pts[pts.length - 1][0].toFixed(1)},${H - PAD} L${pts[0][0].toFixed(1)},${H - PAD} Z`;
+  const fmt = (v) => Math.round(v * 10) / 10;
+  const ticks = [4, 3, 2, 1, 0].map(i => min + (range * i) / 4); // high → low
+  const lastPt = pts[pts.length - 1];
   return (
     <div>
       <div style={{ display: 'flex', gap: 7 }}>
         <div style={{ width: 38, flexShrink: 0, height: 132, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'right', paddingTop: 2, paddingBottom: 2 }}>
-          <span className="q-meta">{max}</span>
-          <span className="q-meta">{min}</span>
+          {ticks.map((t, i) => (
+            <span key={i} className="q-meta" style={{ fontSize: 16 }}>{fmt(t)}</span>
+          ))}
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ flex: 1, width: '100%', height: 132, display: 'block' }} aria-hidden="true">
-          {gridY.map((y, i) => (
-            <line key={i} x1={0} x2={W} y1={y} y2={y} stroke="var(--q-panel2)" strokeWidth="2" />
-          ))}
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--q-sky)" stopOpacity="0.32" />
+              <stop offset="100%" stopColor="var(--q-sky)" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill={`url(#${gid})`} stroke="none" />
           <path d={path} fill="none" stroke="var(--q-sky)" strokeWidth="3.5" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
           {pts.map((p, i) => (
             <rect key={i} x={p[0] - 4} y={p[1] - 4} width="8" height="8" fill="var(--q-sky)" stroke="var(--q-border)" strokeWidth="1.5" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
           ))}
+          <rect x={lastPt[0] - 6} y={lastPt[1] - 6} width="12" height="12" fill="var(--q-sky)" stroke="var(--q-ink)" strokeWidth="2" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7, marginLeft: 45 }}>

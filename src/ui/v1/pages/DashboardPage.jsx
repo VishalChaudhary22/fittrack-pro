@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Target, ChevronDown, ChevronRight, X, Zap, Dumbbell, Activity, TrendingDown, TrendingUp, RefreshCw, Share, Sparkles, Lightbulb } from 'lucide-react';
 import { ScrollPicker, ModalPortal, GlassTooltip, PulseIndicator, ProgressOrb, ThemeTogglePill } from '../shared/SharedComponents';
 import { calcBMR } from '../../../utils/calculations';
@@ -567,7 +567,6 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData}>
                 <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#F85F1B" stopOpacity={.18} /><stop offset="95%" stopColor="#F85F1B" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
                 <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
                 <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 9 }} width={38} axisLine={false} tickLine={false} />
                 <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />

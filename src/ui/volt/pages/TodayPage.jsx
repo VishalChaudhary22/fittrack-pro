@@ -54,7 +54,13 @@ function InkChart({ data, goal }) {
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 110, display: 'block' }} role="img" aria-label="Weight trend chart">
-        <polygon points={area} fill="var(--v-volt)" opacity={drawn ? 0.13 : 0} style={{ transition: `opacity 600ms ${EASE_OUT} 200ms` }} />
+        <defs>
+          <linearGradient id="ink-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--v-volt)" stopOpacity="0.30" />
+            <stop offset="100%" stopColor="var(--v-volt)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon points={area} fill="url(#ink-grad)" opacity={drawn ? 1 : 0} style={{ transition: `opacity 600ms ${EASE_OUT} 200ms` }} />
         {goal && (
           <>
             <line x1={PAD} x2={W - PAD} y1={y(goal)} y2={y(goal)} stroke="var(--v-coral)" strokeWidth="1.5" strokeDasharray="4 4" />

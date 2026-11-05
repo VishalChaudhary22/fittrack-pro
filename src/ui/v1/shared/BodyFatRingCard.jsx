@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../../core/context/AppContext';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TrendingDown, TrendingUp, Activity } from 'lucide-react';
 import BodyFatLogModal from './BodyFatLogModal';
 import { ProgressOrb, ModalPortal, GlassTooltip } from './SharedComponents';
@@ -287,7 +287,6 @@ export default function BodyFatRingCard() {
                           <stop offset="95%" stopColor="#F85F1B" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-highest)" />
                       <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 8 }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
                       <YAxis domain={['auto', 'auto']} tick={{ fill: 'var(--on-surface-dim)', fontSize: 8 }} width={30} axisLine={false} tickLine={false} />
                       <Tooltip content={<GlassTooltip />} cursor={{ fill: 'var(--surface-variant)' }} />

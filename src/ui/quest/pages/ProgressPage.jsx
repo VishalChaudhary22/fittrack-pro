@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useId } from 'react';
 import { useProgress } from '../../../core/hooks/useProgress';
 import { QuestBlock, QuestBtn, QuestChip, QuestLabel } from '../primitives';
 import PixelSprite from '../PixelSprite';
@@ -50,11 +50,18 @@ function BlockColumns({ data, dataKey }) {
 // Stepped square-point line: horizontal-then-vertical steps, square markers,
 // crispEdges throughout — the 8-bit way to draw a trend.
 function StepChart({ data, dataKey, color = 'var(--q-volt)', height = 150 }) {
+  const gid = useId().replace(/:/g, '');
   const W = 560, H = 170, PAD = 12;
   const vals = data.map(d => d[dataKey]);
-  const min = Math.min(...vals);
-  const max = Math.max(...vals);
-  const range = (max - min) || 1;
+  const rawMin = Math.min(...vals);
+  const rawMax = Math.max(...vals);
+  const rawRange = (rawMax - rawMin) || 1;
+  // Padded domain: the series never slams the floor or ceiling, so small
+  // drifts read as trends instead of mountain ranges. No gridlines — the
+  // five-value axis rail carries the scale.
+  const min = rawMin - rawRange * 0.12;
+  const max = rawMax + rawRange * 0.12;
+  const range = max - min;
   const pts = data.map((d, i) => [
     PAD + (i / Math.max(data.length - 1, 1)) * (W - PAD * 2),
     H - PAD - ((d[dataKey] - min) / range) * (H - PAD * 2),
@@ -63,28 +70,36 @@ function StepChart({ data, dataKey, color = 'var(--q-volt)', height = 150 }) {
   for (let i = 1; i < pts.length; i++) {
     path += ` H${pts[i][0].toFixed(1)} V${pts[i][1].toFixed(1)}`;
   }
+  const area = `${path} L${pts[pts.length - 1][0].toFixed(1)},${H - PAD} L${pts[0][0].toFixed(1)},${H - PAD} Z`;
   const fmt = (v) => Math.round(v * 10) / 10;
-  const gridY = [0, 1, 2, 3, 4].map(i => PAD + ((H - PAD * 2) * i) / 4);
+  const ticks = [4, 3, 2, 1, 0].map(i => min + (range * i) / 4); // high → low
+  const lastPt = pts[pts.length - 1];
   return (
     <div>
       <div style={{ display: 'flex', gap: 7 }}>
         <div style={{ width: 38, flexShrink: 0, height, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'right', paddingTop: 2, paddingBottom: 2 }}>
-          <span className="q-meta">{fmt(max)}</span>
-          <span className="q-meta">{fmt(min)}</span>
+          {ticks.map((t, i) => (
+            <span key={i} className="q-meta" style={{ fontSize: 16 }}>{fmt(t)}</span>
+          ))}
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ flex: 1, width: '100%', height, display: 'block' }} aria-hidden="true">
-          {gridY.map((y, i) => (
-            <line key={i} x1={0} x2={W} y1={y} y2={y} stroke="var(--q-panel2)" strokeWidth="2" />
-          ))}
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.32" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill={`url(#${gid})`} stroke="none" />
           <path d={path} fill="none" stroke={color} strokeWidth="3.5" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
           {pts.map((p, i) => (
             <rect key={i} x={p[0] - 4} y={p[1] - 4} width="8" height="8" fill={color} stroke="var(--q-border)" strokeWidth="1.5" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
           ))}
+          <rect x={lastPt[0] - 6} y={lastPt[1] - 6} width="12" height="12" fill={color} stroke="var(--q-ink)" strokeWidth="2" shapeRendering="crispEdges" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7, marginLeft: 45 }}>
         <span className="q-meta">{data[0]?.date}</span>
-        <span className="q-meta">MAX {fmt(max)}</span>
+        <span className="q-meta">MAX {fmt(rawMax)}</span>
         <span className="q-meta">{data[data.length - 1]?.date}</span>
       </div>
     </div>

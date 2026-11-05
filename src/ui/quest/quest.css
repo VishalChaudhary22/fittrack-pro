@@ -136,6 +136,21 @@
   color: var(--q-dim);
 }
 
+/* Cleared-exercise strike: a repeating background band, one per line box,
+   instead of text-decoration: line-through — Press Start 2P's strikeout
+   metric sits off the caps' visual centre. --q-strike-at is the band's
+   centre within each 1.5em line box, tuned against rendered output. */
+.q-struck {
+  --q-strike-at: 28%;
+  background-image: linear-gradient(to bottom,
+    transparent calc(var(--q-strike-at) - 1.5px),
+    currentColor calc(var(--q-strike-at) - 1.5px),
+    currentColor calc(var(--q-strike-at) + 1.5px),
+    transparent calc(var(--q-strike-at) + 1.5px));
+  background-size: 100% 1.5em;
+  background-repeat: repeat-y;
+}
+
 /* ─── Blocks ──────────────────────────────────────────────────────────────── */
 
 .q-block {
@@ -397,17 +412,26 @@
 .q-stamp { animation: q-stamp 0.12s steps(2) both; }
 
 @keyframes q-float-up {
-  0% { transform: translateY(0); opacity: 0; }
-  20% { opacity: 1; }
-  100% { transform: translateY(-24px); opacity: 0; }
+  0% { transform: translateY(0) scale(0.85); opacity: 0; }
+  18% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(-54px) scale(1.05); opacity: 0; }
 }
 .q-floater {
   position: absolute;
   right: 6px;
-  top: -12px;
+  top: -14px;
   z-index: 3;
   pointer-events: none;
-  animation: q-float-up 0.9s steps(4) both;
+  animation: q-float-up 1.15s steps(6) both;
+  /* Gold-on-ink chip so the reward reads instantly on any panel. */
+  background: #191914;
+  color: #ffc627;
+  border: 2px solid #ffc627;
+  padding: 5px 8px;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* Olympus + body map (§6.2/§7.3/§7.4): realtime row flash, today pulse. */

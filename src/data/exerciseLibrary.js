@@ -1,4 +1,5 @@
 import { INIT_SPLITS } from './splits';
+import { canonicalExerciseName } from './exerciseAliases';
 
 // Static list of additional exercises from EXERCISE_ALTERNATIVES that are not in default splits
 const ADDITIONAL_EXERCISES = [
@@ -89,13 +90,16 @@ export const EXERCISE_LIBRARY = (() => {
   // Helper to add an exercise and prevent duplicates (indexed by normalized lowercase name)
   const addExercise = (ex) => {
     if (!ex.name) return;
-    const key = ex.name.toLowerCase().trim();
+    // Canonicalise so duplicate names for one movement (see
+    // exerciseAliases.js) collapse into a single library entry.
+    const canonicalName = canonicalExerciseName(ex.name);
+    const key = canonicalName.toLowerCase();
     if (!map.has(key)) {
       // Store a clean copy of the exercise for the builder. Fields the builder
       // does not use (ids, swap bookkeeping, variants) are deliberately dropped.
       map.set(key, {
         exerciseId: ex.exerciseId || key.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        name: ex.name.trim(),
+        name: canonicalName,
         sets: ex.sets || 3,
         repsRange: ex.repsRange || '10-12',
         muscle: ex.muscle || 'Full Body',

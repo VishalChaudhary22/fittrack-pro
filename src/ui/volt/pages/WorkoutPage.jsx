@@ -14,6 +14,7 @@ import { clearPersistedSession, workoutPageCache } from '../../../core/services/
 import { useSpringNumber, SPRING_PLAY } from '../../../core/motion/springs';
 import { VoltBlock, VoltPill, VoltChip, Sticker, VoltLabel } from '../primitives';
 import { EXERCISE_ALTERNATIVES } from '../../../data/exerciseAlternatives';
+import { canonicalExerciseName } from '../../../data/exerciseAliases';
 
 // ─── Kaaya Volt · Workout (V-4) ──────────────────────────────────────────────
 // Same session machine as V1 (useWorkoutSession), Volt presentation.
@@ -310,7 +311,8 @@ function VoltRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
 // ─── Swap modal (alternatives logic identical to V1) ─────────────────────────
 function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   const targetName = originalName || exerciseName;
-  const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === targetName);
+  const lookupName = canonicalExerciseName(targetName);
+  const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === lookupName);
   let alternatives = [];
 
   if (libEntry && libEntry.muscle) {
@@ -321,11 +323,11 @@ function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
       const alts = EXERCISE_ALTERNATIVES[ex.name] || [];
       alts.forEach(alt => allOptions.add(alt));
     });
-    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    const baseAlternatives = EXERCISE_ALTERNATIVES[lookupName] || [];
     baseAlternatives.forEach(alt => allOptions.add(alt));
     alternatives = Array.from(allOptions);
   } else {
-    const baseAlternatives = EXERCISE_ALTERNATIVES[targetName] || [];
+    const baseAlternatives = EXERCISE_ALTERNATIVES[lookupName] || [];
     alternatives = [...baseAlternatives];
   }
 
@@ -333,7 +335,15 @@ function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   if (isSwapped && !alternatives.includes(originalName)) {
     alternatives.unshift(originalName);
   }
-  alternatives = alternatives.filter(a => a !== exerciseName);
+  const seenCanon = new Set();
+  alternatives = alternatives.filter(a => {
+    if (a === exerciseName) return false;
+    if (originalName && a === originalName) return true; // swap-back entry
+    const c = canonicalExerciseName(a);
+    if (c === canonicalExerciseName(exerciseName) || seenCanon.has(c)) return false;
+    seenCanon.add(c);
+    return true;
+  });
   alternatives.sort((a, b) => a.localeCompare(b));
 
   const rowBtn = (isOriginal) => ({

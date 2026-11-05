@@ -236,10 +236,15 @@ function QuestYogaView({ day, onBack, onComplete }) {
 
 // ─── Rest timer — the recharge bar ───────────────────────────────────────────
 function QuestRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
+  // The bar's total is the longest clock this rest has shown: the set
+  // duration, raised whenever +30s pushes the remaining time above it.
+  // Tracking totalDuration alone pinned the bar full after an extension
+  // until the clock fell back under the original duration.
   const [maxObserved, setMaxObserved] = useState(totalDuration || 90);
   useEffect(() => {
-    if (totalDuration > maxObserved) setMaxObserved(totalDuration);
-  }, [totalDuration, maxObserved]);
+    const peak = Math.max(totalDuration || 0, secondsLeft || 0);
+    if (peak > maxObserved) setMaxObserved(peak);
+  }, [totalDuration, secondsLeft, maxObserved]);
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
   return (
@@ -813,14 +818,23 @@ export default function WorkoutPage() {
                         {floater && floater.ei === ei && floater.si === si && (
                           <span key={floater.key} className="q-floater q-ps" style={{ fontSize: 12, color: 'var(--q-gold-text)' }}>+{floater.xp} XP</span>
                         )}
+                        {isPR && (
+                          <span
+                            title="Personal record"
+                            style={{
+                              position: 'absolute', top: -12, right: 12, zIndex: 2,
+                              background: 'var(--q-gold)', color: '#201803',
+                              border: '2.5px solid var(--q-border)',
+                              fontFamily: "'Press Start 2P', monospace", fontSize: 9,
+                              padding: '4px 7px', letterSpacing: '0.04em',
+                              transform: 'rotate(-2deg)', pointerEvents: 'none',
+                            }}
+                          >
+                            NEW PR
+                          </span>
+                        )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                          {isPR ? (
-                            <span style={{ background: 'var(--q-gold)', padding: 4, display: 'inline-flex' }} title="Personal Record">
-                              <PixelSprite name="trophy" size={15} />
-                            </span>
-                          ) : (
-                            <span className="q-ps" style={{ fontSize: 13 }}>{si + 1}</span>
-                          )}
+                          <span className="q-ps" style={{ fontSize: 13 }}>{si + 1}</span>
                           {ex.sets.length > 1 && (
                             <button type="button" onClick={() => rmS(ei, si)} aria-label="Remove set" style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}>
                               <PixelSprite name="x" size={9} />

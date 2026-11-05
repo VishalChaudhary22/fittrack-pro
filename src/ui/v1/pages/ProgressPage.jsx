@@ -1,4 +1,4 @@
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Trophy, Activity, TrendingUp, Flame, Target, Award, Share2, Download, Bot } from 'lucide-react';
 import { StatCard, PageHeader, EmptyState } from '../shared/SharedComponents';
 
@@ -196,7 +196,6 @@ export default function ProgressPage({ chatbot }) {
                     <stop offset="95%" stopColor="var(--primary-container)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
                 <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 11, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
                 <Tooltip cursor={false} contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
@@ -347,20 +346,24 @@ export default function ProgressPage({ chatbot }) {
                           <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
                       <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
                       <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
                       <Tooltip contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
                       <Area type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={2} fill={`url(#cg2-${ch.key})`} dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} />
                     </AreaChart>
                   ) : (
-                    <LineChart data={cd}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+                    <AreaChart data={cd}>
+                      <defs>
+                        <linearGradient id={`cg3-${ch.key}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--primary)" stopOpacity={.18} />
+                          <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
                       <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
                       <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dx={-10} />
                       <Tooltip contentStyle={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur-sm)', border: 'none', borderRadius: 12, fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
-                      <Line type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} />
-                    </LineChart>
+                      <Area type="monotone" dataKey={ch.key} stroke="var(--primary)" strokeWidth={2.5} fill={`url(#cg3-${ch.key})`} dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                    </AreaChart>
                   )}
                 </ResponsiveContainer>
               ) : (

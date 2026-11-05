@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Ruler, X, Plus, Activity } from 'lucide-react';
 import { PageHeader, EmptyState, ModalPortal } from '../shared/SharedComponents';
 import { MEASUREMENT_FIELDS } from '../../../data/constants';
@@ -30,13 +30,18 @@ export default function MeasurementsPage() {
         <div className="card" style={{ padding: 20, marginBottom: 24, border: 'none' }}>
           <div style={{ fontSize: 11, color: 'var(--on-surface-dim)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 16, letterSpacing: '.5px' }}>{MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label} Over Time</div>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-lowest)" vertical={false} />
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="meas-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={.18} />
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <XAxis dataKey="date" tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
               <YAxis tick={{ fill: 'var(--on-surface-dim)', fontSize: 10, fontWeight: 600 }} domain={['auto', 'auto']} tickLine={false} axisLine={false} dx={-10} />
               <Tooltip contentStyle={{ background: 'var(--surface-container-highest)', border: 'none', borderRadius: 12, boxShadow: 'var(--shadow-md)', fontSize: 12, color: 'var(--on-surface)', fontWeight: 600 }} itemStyle={{ color: 'var(--primary)' }} />
-              <Line type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 3, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 6, strokeWidth: 0 }} name={MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label} />
-            </LineChart>
+              <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={2.5} fill="url(#meas-grad)" dot={{ fill: 'var(--primary)', r: 3, strokeWidth: 0, stroke: 'var(--surface-container-low)' }} activeDot={{ r: 5, strokeWidth: 0 }} name={MEASUREMENT_FIELDS.find(f => f.key === chartField)?.label} />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       ) : userMeasurements.length === 0 ? (

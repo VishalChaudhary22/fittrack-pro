@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { X, Plus } from 'lucide-react';
 import { useMeasurements } from '../../../core/hooks/useMeasurements';
 import { MEASUREMENT_FIELDS } from '../../../data/constants';
@@ -19,6 +20,7 @@ const labelStyle = {
 };
 
 function TrendChart({ data }) {
+  const gid = useId().replace(/:/g, '');
   const W = 640, H = 190, PADX = 14, PADT = 16, PADB = 26;
   const vals = data.map(d => d.value);
   const min = Math.min(...vals), max = Math.max(...vals);
@@ -26,12 +28,17 @@ function TrendChart({ data }) {
   const x = (i) => PADX + (i * (W - PADX * 2)) / Math.max(1, data.length - 1);
   const y = (v) => PADT + (1 - (v - min) / span) * (H - PADT - PADB);
   const pts = data.map((d, i) => `${x(i)},${y(d.value)}`).join(' ');
+  const areaPath = `M${pts.replaceAll(' ', ' L')} L${x(data.length - 1).toFixed(1)},${H - PADB} L${x(0).toFixed(1)},${H - PADB} Z`;
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }} role="img" aria-label="Measurement trend">
-        {[0.25, 0.55, 0.85].map(f => (
-          <line key={f} x1={PADX} x2={W - PADX} y1={H * f} y2={H * f} stroke="var(--v-edge-quiet)" strokeWidth="1" strokeDasharray="3 5" opacity="0.5" />
-        ))}
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--v-cobalt)" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="var(--v-cobalt)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill={`url(#${gid})`} stroke="none" />
         <polyline points={pts} fill="none" stroke="var(--v-cobalt)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="v-draw" />
         {data.map((d, i) => (
           <g key={i}>

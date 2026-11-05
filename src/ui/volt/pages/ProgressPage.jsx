@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useId } from 'react';
 import { Activity, TrendingUp, Award, Share2, Bot } from 'lucide-react';
 import { useProgress } from '../../../core/hooks/useProgress';
 import { VoltBlock, VoltPill, VoltChip, VoltLabel } from '../primitives';
@@ -26,6 +26,7 @@ const fieldLabel = {
 // Hand-rolled SVG trend chart (draw-on line, optional volt area fill) with
 // y-axis tick labels and gridlines, so values can actually be read off it.
 function VoltTrendChart({ data, dataKey, height = 190, filled = true }) {
+  const gid = useId().replace(/:/g, '');
   const W = 560, H = 200, PAD = 10;
   const vals = data.map(d => d[dataKey]);
   const min = Math.min(...vals);
@@ -40,7 +41,6 @@ function VoltTrendChart({ data, dataKey, height = 190, filled = true }) {
   const last = pts[pts.length - 1];
   const fmt = (v) => Math.round(v * 10) / 10;
   const ticks = [4, 3, 2, 1, 0].map(i => min + (range * i) / 4); // high → low
-  const gridY = [0, 1, 2, 3, 4].map(i => PAD + ((H - PAD * 2) * i) / 4); // top → bottom
   return (
     <div>
       <div style={{ display: 'flex', gap: 7 }}>
@@ -53,10 +53,13 @@ function VoltTrendChart({ data, dataKey, height = 190, filled = true }) {
           {ticks.map((t, i) => <span key={i}>{fmt(t)}</span>)}
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ flex: 1, width: '100%', height, display: 'block' }} aria-hidden="true">
-          {gridY.map((y, i) => (
-            <line key={i} x1={0} x2={W} y1={y} y2={y} stroke="var(--v-edge-quiet)" strokeWidth="1" strokeDasharray="3 5" opacity="0.55" vectorEffect="non-scaling-stroke" />
-          ))}
-          {filled && <path d={area} fill="var(--v-volt)" opacity="0.13" stroke="none" />}
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--v-volt)" stopOpacity="0.30" />
+              <stop offset="100%" stopColor="var(--v-volt)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {filled && <path d={area} fill={`url(#${gid})`} stroke="none" />}
           <path className="v-draw" d={line} fill="none" stroke="var(--v-volt)" strokeWidth="2.5" pathLength={1} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           <circle cx={last[0]} cy={last[1]} r="4.5" fill="var(--v-volt)" stroke="var(--v-edge)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
         </svg>

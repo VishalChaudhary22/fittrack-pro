@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Trophy, Timer, X, Check, Play, Pause, Square, ArrowRightLeft, Clock, Trash2, Search, Plus, RefreshCcw, Flower2, AlertTriangle } from 'lucide-react';
-import { beatsAllTimePR } from '../../../utils/exerciseHistory';
+import { beatsAllTimePR, getLastSessionSets, exerciseNamePool } from '../../../utils/exerciseHistory';
 import { Portal } from '../../v1/shared/SharedComponents';
 import { VoltConfirmDialog } from '../shared/VoltShared';
 import BodyMapSVG from '../../v1/shared/BodyMapSVG';
@@ -771,32 +771,16 @@ export default function WorkoutPage() {
 
               {/* Previous session reference (cross-split lookup, same as V1) */}
               {(() => {
-                const exName = ex.sv || ex.name;
-                const allNames = [exName, ...(ex.variants || [])];
-                const sorted = [...workoutLogs]
-                  .filter(l => l.userId === user.id)
-                  .sort((a, b) => new Date(b.date) - new Date(a.date));
-                let prevLog = null;
-                let pe = null;
-                for (const log of sorted) {
-                  for (const logEx of (log.exercises || [])) {
-                    if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
-                      prevLog = log;
-                      pe = logEx;
-                      break;
-                    }
-                  }
-                  if (pe) break;
-                }
-                if (!pe?.sets?.length) return null;
-                const displaySets = pe.sets.slice(0, 3);
+                const prev = getLastSessionSets(workoutLogs.filter(l => l.userId === user.id), exerciseNamePool(ex));
+                if (!prev?.sets?.length) return null;
+                const displaySets = prev.sets.slice(0, 3);
                 return (
                   <div style={{ padding: '7px 12px', marginBottom: 12, borderLeft: '3px solid var(--v-volt)', background: 'var(--v-canvas)', borderRadius: '0 10px 10px 0', fontSize: 11.5, display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center', fontFamily: "'JetBrains Mono', monospace" }}>
-                    <span style={{ color: 'var(--v-dim)', fontWeight: 700 }}>PREV ({fmt(prevLog.date)}):</span>
+                    <span style={{ color: 'var(--v-dim)', fontWeight: 700 }}>PREV ({fmt(prev.date)}):</span>
                     {displaySets.map((s, i) => (
                       <span key={i}>{s.reps}r × {s.weight}kg{i < displaySets.length - 1 ? ',' : ''}</span>
                     ))}
-                    {pe.sets.length > 3 && <span style={{ color: 'var(--v-dim)' }}>+{pe.sets.length - 3} more</span>}
+                    {prev.sets.length > 3 && <span style={{ color: 'var(--v-dim)' }}>+{prev.sets.length - 3} more</span>}
                   </div>
                 );
               })()}

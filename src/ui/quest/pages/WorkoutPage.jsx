@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { beatsAllTimePR } from '../../../utils/exerciseHistory';
+import { beatsAllTimePR, getLastSessionSets, exerciseNamePool } from '../../../utils/exerciseHistory';
 import { Portal } from '../../v1/shared/SharedComponents';
 import PixelBodyMap from '../PixelBodyMap';
 import { gId, tod, fmt, formatTimeAgo } from '../../../utils/helpers';
@@ -769,32 +769,16 @@ export default function WorkoutPage() {
 
               {/* Previous session reference (cross-split lookup, same as V1/Volt) */}
               {(() => {
-                const exName = ex.sv || ex.name;
-                const allNames = [exName, ...(ex.variants || [])];
-                const sorted = [...workoutLogs]
-                  .filter(l => l.userId === user.id)
-                  .sort((a, b) => new Date(b.date) - new Date(a.date));
-                let prevLog = null;
-                let pe = null;
-                for (const log of sorted) {
-                  for (const logEx of (log.exercises || [])) {
-                    if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
-                      prevLog = log;
-                      pe = logEx;
-                      break;
-                    }
-                  }
-                  if (pe) break;
-                }
-                if (!pe?.sets?.length) return null;
-                const displaySets = pe.sets.slice(0, 3);
+                const prev = getLastSessionSets(workoutLogs.filter(l => l.userId === user.id), exerciseNamePool(ex));
+                if (!prev?.sets?.length) return null;
+                const displaySets = prev.sets.slice(0, 3);
                 return (
                   <div style={{ background: 'var(--q-slot)', border: '3px solid var(--q-border)', padding: '7px 10px', margin: '13px 0 4px', fontSize: 17, display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-                    <span className="q-meta">PREV ({fmt(prevLog.date).toUpperCase()}):</span>
+                    <span className="q-meta">PREV ({fmt(prev.date).toUpperCase()}):</span>
                     {displaySets.map((s, i) => (
                       <span key={i}>{s.reps}r × {s.weight}kg{i < displaySets.length - 1 ? ',' : ''}</span>
                     ))}
-                    {pe.sets.length > 3 && <span className="q-meta">+{pe.sets.length - 3} more</span>}
+                    {prev.sets.length > 3 && <span className="q-meta">+{prev.sets.length - 3} more</span>}
                   </div>
                 );
               })()}

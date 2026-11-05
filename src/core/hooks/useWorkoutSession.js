@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Check } from 'lucide-react';
-import { getLastSessionSets, getAllTimePR, beatsAllTimePR } from '../../utils/exerciseHistory';
+import { getLastSessionSets, getAllTimePR, beatsAllTimePR, exerciseNamePool } from '../../utils/exerciseHistory';
 import { useApp } from '../context/AppContext';
 import { gId, tod } from '../../utils/helpers';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
@@ -53,7 +53,7 @@ export function useWorkoutSession() {
     const map = {};
     for (const ex of session?.exs ?? []) {
       const name = ex.sv || ex.name;
-      map[name] = getAllTimePR(workoutLogs, name);
+      map[name] = getAllTimePR(workoutLogs, exerciseNamePool(ex));
     }
     return map;
   }, [session?.exs, workoutLogs]);
@@ -359,7 +359,15 @@ export function useWorkoutSession() {
   }, []);
 
   const swapExercise = (exerciseIndex, newName) => {
-    const lastSession = getLastSessionSets(workoutLogs, newName);
+    // Pre-fill pools the replacement's history with the original
+    // exercise's: a swap and its original share one performance history.
+    const targetEx0 = session?.exs?.[exerciseIndex];
+    const prefillPool = [
+      newName,
+      targetEx0?._originalName, targetEx0?.originalName, targetEx0?.name,
+      ...(targetEx0?.variants || []), ...(targetEx0?._originalVariants || []),
+    ].filter(Boolean);
+    const lastSession = getLastSessionSets(workoutLogs, prefillPool);
     const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 
     setSession(prev => {
@@ -434,7 +442,7 @@ export function useWorkoutSession() {
     // Calculate new PRs before adding the log
     const newPRs = session.exs.map(ex => {
       const name = ex.sv || ex.name;
-      const oldPR = getAllTimePR(workoutLogs, name);
+      const oldPR = getAllTimePR(workoutLogs, exerciseNamePool(ex));
       const sessionBest = Math.max(0, ...ex.sets.filter(s => s.done).map(s => parseFloat(s.weight) || 0));
       const sessionBestReps = ex.sets.filter(s => s.done && parseFloat(s.weight) === sessionBest).reduce((max, s) => Math.max(max, parseFloat(s.reps) || 0), 0);
       if (sessionBest > 0 || sessionBestReps > 0) { // Ensure there are actually completed sets

@@ -136,6 +136,21 @@
   color: var(--q-dim);
 }
 
+/* Cleared-exercise strike: a repeating background band, one per line box,
+   instead of text-decoration: line-through — Press Start 2P's strikeout
+   metric sits off the caps' visual centre. --q-strike-at is the band's
+   centre within each 1.5em line box, tuned against rendered output. */
+.q-struck {
+  --q-strike-at: 28%;
+  background-image: linear-gradient(to bottom,
+    transparent calc(var(--q-strike-at) - 1.5px),
+    currentColor calc(var(--q-strike-at) - 1.5px),
+    currentColor calc(var(--q-strike-at) + 1.5px),
+    transparent calc(var(--q-strike-at) + 1.5px));
+  background-size: 100% 1.5em;
+  background-repeat: repeat-y;
+}
+
 /* ─── Blocks ──────────────────────────────────────────────────────────────── */
 
 .q-block {

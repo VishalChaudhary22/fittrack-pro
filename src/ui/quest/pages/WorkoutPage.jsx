@@ -745,8 +745,8 @@ export default function WorkoutPage() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 className="q-ps" style={{ fontSize: 15, lineHeight: 1.5, margin: 0, textTransform: 'uppercase', textDecoration: cleared ? 'line-through' : 'none' }}>
-                    {ex.sv || ex.name}
+                  <h3 className="q-ps" style={{ fontSize: 15, lineHeight: 1.5, margin: 0, textTransform: 'uppercase' }}>
+                    <span className={cleared ? 'q-struck' : undefined}>{ex.sv || ex.name}</span>
                   </h3>
                   {ex.variants && (
                     <select value={ex.sv || ex.variants[0]} onChange={e => setV(ei, e.target.value)} aria-label={`Variant for ${ex.name}`} className="q-slot-input" style={{ width: 'auto', minHeight: 38, fontSize: 19, padding: '2px 8px', marginTop: 9 }}>

@@ -612,7 +612,7 @@ export default function WorkoutPage() {
           if (delta > 0) {
             setFloater({ ei, si, xp: delta, key: Date.now() });
             clearTimeout(floaterTimer.current);
-            floaterTimer.current = setTimeout(() => setFloater(null), 950);
+            floaterTimer.current = setTimeout(() => setFloater(null), 1250);
           }
         }
       });
@@ -816,7 +816,7 @@ export default function WorkoutPage() {
                         }}
                       >
                         {floater && floater.ei === ei && floater.si === si && (
-                          <span key={floater.key} className="q-floater q-ps" style={{ fontSize: 12, color: 'var(--q-gold-text)' }}>+{floater.xp} XP</span>
+                          <span key={floater.key} className="q-floater q-ps">+{floater.xp} XP</span>
                         )}
                         {isPR && (
                           <span

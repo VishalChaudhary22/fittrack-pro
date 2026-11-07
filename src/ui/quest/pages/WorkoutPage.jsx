@@ -12,6 +12,7 @@ import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
 import { useWorkoutSession } from '../../../core/hooks/useWorkoutSession';
 import { clearPersistedSession, workoutPageCache } from '../../../core/services/workoutSession';
 import { QuestBlock, QuestBtn, QuestChip, QuestLabel, SegBar } from '../primitives';
+import { CUSTOM_MUSCLE_OPTIONS } from '../../../utils/customExercises';
 import { questSound } from '../sound';
 import PixelSprite from '../PixelSprite';
 import { FighterSprite, useFighter } from '../fighters';
@@ -265,7 +266,10 @@ function QuestRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
 }
 
 // ─── Swap modal (alternatives logic identical to V1/Volt) ────────────────────
-function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
+function QuestSwapModal({ exerciseName, originalName, onSwap, onClose, customs = [], onAddCustom }) {
+  const [showForm, setShowForm] = useState(false);
+  const [nameVal, setNameVal] = useState('');
+  const [muscleVal, setMuscleVal] = useState(null);
   const targetName = originalName || exerciseName;
   const lookupName = canonicalExerciseName(targetName);
   const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === lookupName);
@@ -302,6 +306,19 @@ function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   });
   alternatives.sort((a, b) => a.localeCompare(b));
 
+  const yourOptions = customs.filter(c => canonicalExerciseName(c.name) !== canonicalExerciseName(exerciseName));
+  const pickCustom = (c) => {
+    onSwap(c.name, { muscle: c.muscle, primaryMuscle: c.primaryMuscle, exerciseId: c.exerciseId });
+    onClose();
+  };
+  const submitManual = () => {
+    if (!onAddCustom || nameVal.trim().length < 2) return;
+    const res = onAddCustom(nameVal, muscleVal || libEntry?.muscle || 'Chest');
+    if (!res) return;
+    if (res.library) { onSwap(res.library.name); onClose(); return; }
+    if (res.entry) pickCustom(res.entry);
+  };
+
   return (
     <div className="q-sheet-wrap" onClick={onClose}>
       <div className="q-sheet" role="dialog" aria-label={`Swap ${exerciseName}`} onClick={e => e.stopPropagation()}>
@@ -312,10 +329,23 @@ function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
             <span style={{ flex: 1 }}>Keep current</span>
             <span className="q-meta">CURRENT</span>
           </button>
+          {yourOptions.length > 0 && (
+            <>
+              <QuestLabel style={{ marginTop: 8 }}>Your Moves</QuestLabel>
+              {yourOptions.map(c => (
+                <button key={c.exerciseId} type="button" className="q-sheet-row" onClick={() => pickCustom(c)}>
+                  <span style={{ flex: 1 }}>{c.name}</span>
+                  <span className="q-meta">{c.muscle.toUpperCase()} · YOURS</span>
+                </button>
+              ))}
+            </>
+          )}
           {alternatives.length === 0 ? (
-            <div className="q-meta" style={{ textAlign: 'center', padding: '14px 0', fontSize: 18 }}>
-              No swap options available for this exercise
-            </div>
+            yourOptions.length === 0 && (
+              <div className="q-meta" style={{ textAlign: 'center', padding: '14px 0', fontSize: 18 }}>
+                No swap options available for this exercise
+              </div>
+            )
           ) : alternatives.map(alt => {
             const isOriginal = isSwapped && alt === originalName;
             return (
@@ -325,6 +355,55 @@ function QuestSwapModal({ exerciseName, originalName, onSwap, onClose }) {
               </button>
             );
           })}
+          {!showForm ? (
+            <button type="button" className="q-sheet-row" onClick={() => setShowForm(true)} style={{ marginTop: 8 }}>
+              <span style={{ flex: 1 }}>+ Add exercise manually</span>
+              <span className="q-meta">NEW</span>
+            </button>
+          ) : (
+            <div style={{ marginTop: 10, borderTop: '3px solid var(--q-border)', paddingTop: 14 }}>
+              <QuestLabel tone="gold">Add exercise manually</QuestLabel>
+              <input
+                type="text"
+                className="q-slot-input"
+                placeholder="Exercise name — e.g. Landmine Press"
+                value={nameVal}
+                onChange={e => setNameVal(e.target.value)}
+                maxLength={48}
+                autoFocus
+                style={{ textAlign: 'left', paddingLeft: 12, width: '100%', marginTop: 12 }}
+              />
+              <div style={{ display: 'flex', overflowX: 'auto', gap: 7, padding: '12px 0 4px', scrollbarWidth: 'none' }}>
+                {CUSTOM_MUSCLE_OPTIONS.map(m => {
+                  const active = (muscleVal || libEntry?.muscle || 'Chest') === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMuscleVal(m)}
+                      style={{
+                        flexShrink: 0, cursor: 'pointer', padding: '7px 11px',
+                        border: '2.5px solid #000', fontSize: 17, lineHeight: 1,
+                        background: active ? 'var(--q-volt)' : 'var(--q-panel2)',
+                        color: active ? '#191914' : 'var(--q-ink)',
+                      }}
+                    >
+                      {m}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 9, marginTop: 12 }}>
+                <QuestBtn tone="ember" style={{ flex: 1 }} disabled={nameVal.trim().length < 2} onClick={submitManual}>
+                  Add &amp; swap in
+                </QuestBtn>
+                <QuestBtn tone="ghost" onClick={() => setShowForm(false)}>Cancel</QuestBtn>
+              </div>
+              <div className="q-meta" style={{ marginTop: 10, fontSize: 16 }}>
+                Saved to Your Moves — it will show here every time, with your last sets &amp; reps.
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -543,7 +622,7 @@ export default function WorkoutPage() {
     user, splits, workoutLogs, setWorkoutLogs, addToast, nav, activeSplit,
     pastDate, setPastDate, session, setSession, done, setDone,
     persistedSession, setPersistedSession, confirmDiscard, setConfirmDiscard,
-    swapTarget, setSwapTarget, showAddEx, setShowAddEx, addExSearch, setAddExSearch,
+    swapTarget, setSwapTarget, customExercises, addCustomExercise, showAddEx, setShowAddEx, addExSearch, setAddExSearch,
     addExCat, setAddExCat, confirmRemoveIdx, setConfirmRemoveIdx, prMap,
     restDuration, restActive, restSecondsLeft, restTimerPosition,
     confirmFinish, setConfirmFinish, wDays, finishBtnRef, showFAB,
@@ -947,8 +1026,10 @@ export default function WorkoutPage() {
             <QuestSwapModal
               exerciseName={swapTarget.name}
               originalName={swapTarget.originalName}
-              onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
+              onSwap={(newName, opts) => swapExercise(swapTarget.exerciseIndex, newName, opts)}
               onClose={() => setSwapTarget(null)}
+              customs={customExercises}
+              onAddCustom={addCustomExercise}
             />
           </Portal>
         )}

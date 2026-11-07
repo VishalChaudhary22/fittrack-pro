@@ -13,6 +13,7 @@ import { computeWeeklyRate, classifyScenario, hasSufficientData, checkSuggestion
 import { getBestTDEE, detectMetabolicAdaptation } from '../../utils/adaptiveTDEE';
 import { calcDeficit, calcTDEESource } from '../../utils/calculations';
 import { loadSwapRegistryFromCloud } from '../../utils/swapRegistry';
+import { loadCustomExercisesFromCloud } from '../../utils/customExercises';
 import { buildMonthlyRankHistory } from '../../utils/rankHistory';
 
 const AppContext = createContext(null);
@@ -702,6 +703,9 @@ export function AppProvider({ children }) {
 
     // Load Swap Registry
     await loadSwapRegistryFromCloud(userId);
+
+    // Load the user's custom exercises (Workout → Swap → Add manually)
+    await loadCustomExercisesFromCloud(userId);
 
     // Sync XP to leaderboard cache now that logs are loaded.
     // Always sync — even with 0 workout logs — so the user appears on the leaderboard.

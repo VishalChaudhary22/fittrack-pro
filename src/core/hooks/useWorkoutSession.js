@@ -11,6 +11,7 @@ import { useApp } from '../context/AppContext';
 import { gId, tod } from '../../utils/helpers';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
 import { getSwappedExercise, registerSwap, removeSwap } from '../../utils/swapRegistry';
+import { getCustomExercises, addCustomExercise as storeAddCustomExercise } from '../../utils/customExercises';
 import { clearScrollPosition } from './useScrollRestoration';
 import { EXERCISE_LIBRARY } from '../../data/exerciseLibrary';
 import { getAudioCtx, playRestCompleteChime, vibrateRestComplete, REST_TIMER_KEY, REST_TIMER_POS_KEY, SESSION_STALE_MS, persistActiveSession, clearPersistedSession, loadPersistedSession, workoutPageCache } from '../services/workoutSession';
@@ -44,6 +45,19 @@ export function useWorkoutSession() {
   });
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [swapTarget, setSwapTarget] = useState(null);
+  // User-created exercises (Swap → Add manually): reusable across sessions,
+  // local-first with cloud sync handled inside the store.
+  const [customState, setCustomState] = useState(() => ({ uid: user?.id, list: getCustomExercises(user?.id) }));
+  if (customState.uid !== user?.id) {
+    setCustomState({ uid: user?.id, list: getCustomExercises(user?.id) });
+  }
+  const customExercises = customState.list;
+
+  const addCustomExercise = useCallback((name, muscle) => {
+    const res = storeAddCustomExercise(user?.id, name, muscle);
+    if (res?.entry) setCustomState({ uid: user?.id, list: getCustomExercises(user?.id) });
+    return res;
+  }, [user?.id]);
   const [showAddEx, setShowAddEx] = useState(false);
   const [addExSearch, setAddExSearch] = useState('');
   const [addExCat, setAddExCat] = useState('all');
@@ -358,7 +372,7 @@ export function useWorkoutSession() {
     });
   }, []);
 
-  const swapExercise = (exerciseIndex, newName) => {
+  const swapExercise = (exerciseIndex, newName, opts = {}) => {
     // Pre-fill pools the replacement's history with the original
     // exercise's: a swap and its original share one performance history.
     const targetEx0 = session?.exs?.[exerciseIndex];
@@ -383,8 +397,9 @@ export function useWorkoutSession() {
         removeSwap(originalId, activeSplit?.id, user.id);
       } else {
         const libEntry = EXERCISE_LIBRARY.find(e => e.name === newName);
-        const replacementId = libEntry ? libEntry.exerciseId : newName.toLowerCase().replace(/\s+/g, '-');
-        registerSwap(originalId, trueOriginal, replacementId, newName, activeSplit?.id, user.id);
+        const replacementId = opts.exerciseId || (libEntry ? libEntry.exerciseId : newName.toLowerCase().replace(/\s+/g, '-'));
+        registerSwap(originalId, trueOriginal, replacementId, newName, activeSplit?.id, user.id,
+          opts.muscle ? { muscle: opts.muscle, primaryMuscle: opts.primaryMuscle } : {});
       }
 
       return {
@@ -400,6 +415,9 @@ export function useWorkoutSession() {
             ...ex,
             sv: newName,
             name: newName, // Update the displayed name
+            ...(opts.muscle
+              ? { muscle: opts.muscle, primaryMuscle: opts.primaryMuscle ?? null }
+              : {}),
             _originalName: trueOriginal, // Always keep the real original
             _originalVariants: origVariants,
             variants: isRestoringOriginal ? origVariants : null,
@@ -537,6 +555,8 @@ export function useWorkoutSession() {
     removeExercise,
     exercisePool,
     swapExercise,
+    customExercises,
+    addCustomExercise,
     finish,
     doFinish,
   };

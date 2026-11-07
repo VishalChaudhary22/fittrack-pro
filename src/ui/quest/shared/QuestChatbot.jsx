@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelSprite from '../PixelSprite';
 import { QuestBtn } from '../primitives';
+import { QuestLoaderMini } from './QuestLoader';
 
 // ─── Kaaya Quest · FORGE — the RPG dialogue box (plan §7.6) ─────────────────
 // Quest twin of V1/Volt's chatbot surfaces, same useChatbot brain (the
@@ -281,6 +282,9 @@ export function QuestChatbotModal({ chatbot, user }) {
                       <span key={i} className="q-blink" style={{ display: 'inline-block', width: 8, height: 8, background: 'var(--q-volt)', animationDelay: `${i * 0.22}s` }} />
                     ))}
                   </span>
+                  <div style={{ marginTop: 9 }}>
+                    <QuestLoaderMini />
+                  </div>
                 </ForgeBox>
               </div>
             )}

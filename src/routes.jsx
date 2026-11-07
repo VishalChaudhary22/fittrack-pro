@@ -62,7 +62,16 @@ const QUEST_PAGES = {
   '/contact': lazy(() => import('./ui/quest/pages/ContactPage')),
 };
 
-function SkinFallback() {
+const QuestRouteLoader = lazy(() => import('./ui/quest/shared/QuestLoader').then(m => ({ default: m.QuestRouteLoader })));
+
+function SkinFallback({ version }) {
+  if (version === 'quest') {
+    return (
+      <Suspense fallback={null}>
+        <QuestRouteLoader />
+      </Suspense>
+    );
+  }
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
       <div style={{
@@ -84,7 +93,7 @@ export function SkinGate({ path, pageProps }) {
   const Page = QuestPage ?? VoltPage ?? V1_PAGES[path];
   return (
     <ErrorBoundary>
-      <Suspense fallback={<SkinFallback />}>
+      <Suspense fallback={<SkinFallback version={version} />}>
         <Page {...pageProps} />
       </Suspense>
     </ErrorBoundary>

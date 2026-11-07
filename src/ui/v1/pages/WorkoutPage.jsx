@@ -9,6 +9,7 @@ import { syncUserXPToCache } from '../../../utils/xpCacheSync';
 import { useScrollRestoration } from '../../../core/hooks/useScrollRestoration';
 import { EXERCISE_LIBRARY } from '../../../data/exerciseLibrary';
 import { canonicalExerciseName } from '../../../data/exerciseAliases';
+import { CUSTOM_MUSCLE_OPTIONS } from '../../../utils/customExercises';
 import { clearPersistedSession, workoutPageCache } from '../../../core/services/workoutSession';
 import { useWorkoutSession } from '../../../core/hooks/useWorkoutSession';
 
@@ -542,7 +543,10 @@ const EXERCISE_ALTERNATIVES = {
   'Australian Pull-ups':                    ['Inverted Rows', 'Seated Cable Row', 'Resistance Band Rows'],
 };
 
-function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
+function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose, customs = [], onAddCustom }) {
+  const [showForm, setShowForm] = useState(false);
+  const [nameVal, setNameVal] = useState('');
+  const [muscleVal, setMuscleVal] = useState(null);
   // Always use the ORIGINAL exercise's swap list as the source of truth.
   // This ensures we always have the full list even when the swapped-to exercise
   // (e.g. "Machine Chest Press") has no entry in EXERCISE_ALTERNATIVES.
@@ -594,6 +598,32 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   
   // Sort alphabetically for a cleaner UI
   alternatives.sort((a, b) => a.localeCompare(b));
+
+  const yourOptions = customs.filter(c => canonicalExerciseName(c.name) !== canonicalExerciseName(exerciseName));
+  const pickCustom = (c) => {
+    onSwap(c.name, { muscle: c.muscle, primaryMuscle: c.primaryMuscle, exerciseId: c.exerciseId });
+    onClose();
+  };
+  const submitManual = () => {
+    if (!onAddCustom || nameVal.trim().length < 2) return;
+    const res = onAddCustom(nameVal, muscleVal || libEntry?.muscle || 'Chest');
+    if (!res) return;
+    if (res.library) { onSwap(res.library.name); onClose(); return; }
+    if (res.entry) pickCustom(res.entry);
+  };
+  const rowStyle = {
+    width: '100%', padding: '14px 16px', minHeight: 44,
+    borderRadius: 12, border: 'none', cursor: 'pointer',
+    background: 'var(--surface-container)',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    fontFamily: "'Be Vietnam Pro', sans-serif",
+    fontSize: 14, fontWeight: 600,
+    color: 'var(--on-surface)',
+  };
+  const tagStyle = {
+    fontSize: 9, color: 'var(--primary)',
+    fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em',
+  };
 
   return (
     <div
@@ -661,14 +691,37 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
           }}>Current</span>
         </button>
 
+        {yourOptions.length > 0 && (
+          <>
+            <div style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 10, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.15em',
+              color: 'var(--on-surface-dim)', marginBottom: 8,
+            }}>
+              Your Exercises
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+              {yourOptions.map(c => (
+                <button key={c.exerciseId} onClick={() => pickCustom(c)} style={rowStyle}>
+                  <span>{c.name}</span>
+                  <span style={tagStyle}>{c.muscle} · Yours</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
         {alternatives.length === 0 ? (
-          <div style={{
-            textAlign: 'center', padding: '20px 16px',
-            fontSize: 13, color: 'var(--on-surface-dim)',
-            fontFamily: "'Be Vietnam Pro', sans-serif",
-          }}>
-            No swap options available for this exercise
-          </div>
+          yourOptions.length === 0 && (
+            <div style={{
+              textAlign: 'center', padding: '20px 16px',
+              fontSize: 13, color: 'var(--on-surface-dim)',
+              fontFamily: "'Be Vietnam Pro', sans-serif",
+            }}>
+              No swap options available for this exercise
+            </div>
+          )
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {alternatives.map(alt => {
@@ -702,6 +755,86 @@ function ExerciseSwapModal({ exerciseName, originalName, onSwap, onClose }) {
               </button>
               );
             })}
+          </div>
+        )}
+
+        {!showForm ? (
+          <button onClick={() => setShowForm(true)} style={{ ...rowStyle, marginTop: 16, background: 'var(--surface-container-highest)' }}>
+            <span>+ Add exercise manually</span>
+            <span style={tagStyle}>New</span>
+          </button>
+        ) : (
+          <div style={{ marginTop: 20, borderTop: '1px solid var(--surface-container-highest)', paddingTop: 16 }}>
+            <div style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 10, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.15em',
+              color: 'var(--on-surface-dim)', marginBottom: 6,
+            }}>
+              Add exercise manually
+            </div>
+            <input
+              type="text"
+              placeholder="Exercise name — e.g. Landmine Press"
+              value={nameVal}
+              onChange={e => setNameVal(e.target.value)}
+              maxLength={48}
+              autoFocus
+              style={{
+                width: '100%', padding: '13px 14px', marginTop: 8, boxSizing: 'border-box',
+                background: 'var(--surface-container)', border: 'none', borderRadius: 12,
+                color: 'var(--on-surface)', fontSize: 15, fontFamily: "'Be Vietnam Pro', sans-serif",
+              }}
+            />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 12 }}>
+              {CUSTOM_MUSCLE_OPTIONS.map(m => {
+                const active = (muscleVal || libEntry?.muscle || 'Chest') === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMuscleVal(m)}
+                    style={{
+                      cursor: 'pointer', padding: '8px 12px', borderRadius: 999, border: 'none',
+                      fontSize: 12.5, fontWeight: 600, fontFamily: "'Be Vietnam Pro', sans-serif",
+                      background: active ? 'var(--primary)' : 'var(--surface-container-high)',
+                      color: active ? '#fff' : 'var(--on-surface)',
+                    }}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: 9, marginTop: 14 }}>
+              <button
+                type="button"
+                onClick={submitManual}
+                disabled={nameVal.trim().length < 2}
+                style={{
+                  flex: 1, cursor: 'pointer', padding: '13px 16px', minHeight: 48, borderRadius: 12, border: 'none',
+                  background: 'var(--primary)', color: '#fff',
+                  fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 14, fontWeight: 700,
+                  opacity: nameVal.trim().length < 2 ? 0.5 : 1,
+                }}
+              >
+                Add &amp; swap in
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                style={{
+                  cursor: 'pointer', padding: '13px 16px', minHeight: 48, borderRadius: 12, border: 'none',
+                  background: 'var(--surface-container-high)', color: 'var(--on-surface)',
+                  fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: 14, fontWeight: 600,
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+            <div style={{ marginTop: 10, fontSize: 12, color: 'var(--on-surface-dim)', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+              Saved to Your Exercises — it will show here every time, with your last sets &amp; reps.
+            </div>
           </div>
         )}
       </div>
@@ -911,6 +1044,8 @@ export default function WorkoutPage() {
     setConfirmDiscard,
     swapTarget,
     setSwapTarget,
+    customExercises,
+    addCustomExercise,
     showAddEx,
     setShowAddEx,
     addExSearch,
@@ -1334,8 +1469,10 @@ export default function WorkoutPage() {
           <ExerciseSwapModal
             exerciseName={swapTarget.name}
             originalName={swapTarget.originalName}
-            onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
+            onSwap={(newName, opts) => swapExercise(swapTarget.exerciseIndex, newName, opts)}
             onClose={() => setSwapTarget(null)}
+            customs={customExercises}
+            onAddCustom={addCustomExercise}
           />
         </Portal>
       )}

@@ -15,6 +15,7 @@ import { useSpringNumber, SPRING_PLAY } from '../../../core/motion/springs';
 import { VoltBlock, VoltPill, VoltChip, Sticker, VoltLabel } from '../primitives';
 import { EXERCISE_ALTERNATIVES } from '../../../data/exerciseAlternatives';
 import { canonicalExerciseName } from '../../../data/exerciseAliases';
+import { CUSTOM_MUSCLE_OPTIONS } from '../../../utils/customExercises';
 
 // ─── Kaaya Volt · Workout (V-4) ──────────────────────────────────────────────
 // Same session machine as V1 (useWorkoutSession), Volt presentation.
@@ -309,7 +310,10 @@ function VoltRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
 }
 
 // ─── Swap modal (alternatives logic identical to V1) ─────────────────────────
-function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
+function VoltSwapModal({ exerciseName, originalName, onSwap, onClose, customs = [], onAddCustom }) {
+  const [showForm, setShowForm] = useState(false);
+  const [nameVal, setNameVal] = useState('');
+  const [muscleVal, setMuscleVal] = useState(null);
   const targetName = originalName || exerciseName;
   const lookupName = canonicalExerciseName(targetName);
   const libEntry = EXERCISE_LIBRARY.find(ex => ex.name === lookupName);
@@ -346,6 +350,19 @@ function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
   });
   alternatives.sort((a, b) => a.localeCompare(b));
 
+  const yourOptions = customs.filter(c => canonicalExerciseName(c.name) !== canonicalExerciseName(exerciseName));
+  const pickCustom = (c) => {
+    onSwap(c.name, { muscle: c.muscle, primaryMuscle: c.primaryMuscle, exerciseId: c.exerciseId });
+    onClose();
+  };
+  const submitManual = () => {
+    if (!onAddCustom || nameVal.trim().length < 2) return;
+    const res = onAddCustom(nameVal, muscleVal || libEntry?.muscle || 'Chest');
+    if (!res) return;
+    if (res.library) { onSwap(res.library.name); onClose(); return; }
+    if (res.entry) pickCustom(res.entry);
+  };
+
   const rowBtn = (isOriginal) => ({
     width: '100%', padding: '13px 16px', minHeight: 48, borderRadius: 12, cursor: 'pointer',
     border: isOriginal ? '2.5px solid var(--v-volt)' : '2px solid var(--v-edge-quiet)',
@@ -376,10 +393,25 @@ function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
           <span>Keep current</span>
           <span style={tag('var(--v-dim)')}>Current</span>
         </button>
+        {yourOptions.length > 0 && (
+          <>
+            <VoltLabel style={{ marginBottom: 8 }}>Your Exercises</VoltLabel>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {yourOptions.map(c => (
+                <button key={c.exerciseId} type="button" className="v-press" onClick={() => pickCustom(c)} style={rowBtn(false)}>
+                  <span>{c.name}</span>
+                  <span style={tag('var(--v-cobalt, #7D9BFF)')}>{c.muscle} · Yours</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
         {alternatives.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '18px 12px', fontSize: 13, color: 'var(--v-dim)' }}>
-            No swap options available for this exercise
-          </div>
+          yourOptions.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '18px 12px', fontSize: 13, color: 'var(--v-dim)' }}>
+              No swap options available for this exercise
+            </div>
+          )
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {alternatives.map(alt => {
@@ -391,6 +423,75 @@ function VoltSwapModal({ exerciseName, originalName, onSwap, onClose }) {
                 </button>
               );
             })}
+          </div>
+        )}
+        {!showForm ? (
+          <button type="button" className="v-press" onClick={() => setShowForm(true)} style={{ ...rowBtn(false), marginTop: 16 }}>
+            <span>+ Add exercise manually</span>
+            <span style={tag('var(--v-volt-text)')}>New</span>
+          </button>
+        ) : (
+          <div style={{ marginTop: 18, borderTop: '2px solid var(--v-edge-quiet)', paddingTop: 16 }}>
+            <VoltLabel volt>Add exercise manually</VoltLabel>
+            <input
+              type="text"
+              placeholder="Exercise name — e.g. Landmine Press"
+              value={nameVal}
+              onChange={e => setNameVal(e.target.value)}
+              maxLength={48}
+              autoFocus
+              style={{ width: '100%', padding: '13px 14px', marginTop: 12, background: 'var(--v-panel)', border: '2.5px solid var(--v-edge)', borderRadius: 14, color: 'var(--v-ink)', fontSize: 15, fontFamily: "'Archivo', sans-serif", boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 12 }}>
+              {CUSTOM_MUSCLE_OPTIONS.map(m => {
+                const active = (muscleVal || libEntry?.muscle || 'Chest') === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMuscleVal(m)}
+                    style={{
+                      cursor: 'pointer', padding: '8px 12px', borderRadius: 999,
+                      border: '2px solid var(--v-edge)', fontSize: 12.5, fontWeight: 700,
+                      fontFamily: "'Archivo', sans-serif",
+                      background: active ? 'var(--v-volt)' : 'transparent',
+                      color: active ? '#141416' : 'var(--v-ink)',
+                    }}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: 9, marginTop: 14 }}>
+              <button
+                type="button"
+                onClick={submitManual}
+                disabled={nameVal.trim().length < 2}
+                style={{
+                  flex: 1, cursor: 'pointer', padding: '13px 16px', minHeight: 48, borderRadius: 12,
+                  border: '2.5px solid var(--v-edge)', background: 'var(--v-volt)', color: '#141416',
+                  fontFamily: "'Archivo', sans-serif", fontSize: 14.5, fontWeight: 800,
+                  opacity: nameVal.trim().length < 2 ? 0.5 : 1,
+                }}
+              >
+                Add &amp; swap in
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                style={{
+                  cursor: 'pointer', padding: '13px 16px', minHeight: 48, borderRadius: 12,
+                  border: '2px solid var(--v-edge-quiet)', background: 'transparent', color: 'var(--v-ink)',
+                  fontFamily: "'Archivo', sans-serif", fontSize: 14.5, fontWeight: 700,
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+            <div style={{ marginTop: 10, fontSize: 12, color: 'var(--v-dim)' }}>
+              Saved to Your Exercises — it will show here every time, with your last sets &amp; reps.
+            </div>
           </div>
         )}
       </div>
@@ -624,7 +725,7 @@ export default function WorkoutPage() {
     user, splits, workoutLogs, setWorkoutLogs, addToast, nav, activeSplit,
     pastDate, setPastDate, session, setSession, done, setDone,
     persistedSession, setPersistedSession, confirmDiscard, setConfirmDiscard,
-    swapTarget, setSwapTarget, showAddEx, setShowAddEx, addExSearch, setAddExSearch,
+    swapTarget, setSwapTarget, customExercises, addCustomExercise, showAddEx, setShowAddEx, addExSearch, setAddExSearch,
     addExCat, setAddExCat, confirmRemoveIdx, setConfirmRemoveIdx, prMap,
     restDuration, restActive, restSecondsLeft, restTimerPosition,
     confirmFinish, setConfirmFinish, wDays, finishBtnRef, showFAB,
@@ -953,8 +1054,10 @@ export default function WorkoutPage() {
             <VoltSwapModal
               exerciseName={swapTarget.name}
               originalName={swapTarget.originalName}
-              onSwap={(newName) => swapExercise(swapTarget.exerciseIndex, newName)}
+              onSwap={(newName, opts) => swapExercise(swapTarget.exerciseIndex, newName, opts)}
               onClose={() => setSwapTarget(null)}
+              customs={customExercises}
+              onAddCustom={addCustomExercise}
             />
           </Portal>
         )}

@@ -54,6 +54,9 @@ export function getSwappedExercise(exercise, splitId, userId) {
       ...exercise,
       name: swapInfo.replacementName,
       exerciseId: swapInfo.replacementId,
+      ...(swapInfo.replacementMuscle
+        ? { muscle: swapInfo.replacementMuscle, primaryMuscle: swapInfo.replacementPrimaryMuscle ?? null }
+        : {}),
       isSwapped: true,
       originalId: exercise.exerciseId,
       originalName: exercise.name,
@@ -64,12 +67,15 @@ export function getSwappedExercise(exercise, splitId, userId) {
   return exercise;
 }
 
-export function registerSwap(originalId, originalName, replacementId, replacementName, splitId, userId) {
+export function registerSwap(originalId, originalName, replacementId, replacementName, splitId, userId, extra = {}) {
   const registry = getSwapRegistry(splitId, userId);
   registry[originalId] = {
     replacementId,
     replacementName,
-    swappedAt: new Date().toISOString()
+    swappedAt: new Date().toISOString(),
+    ...(extra.muscle
+      ? { replacementMuscle: extra.muscle, replacementPrimaryMuscle: extra.primaryMuscle ?? null }
+      : {})
   };
   setSwapRegistry(splitId, userId, registry);
   return registry;

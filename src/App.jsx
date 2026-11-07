@@ -26,6 +26,7 @@ const QuestAuthModal = lazy(() => import('./ui/quest/pages/QuestAuthModal'));
 const QuestChatbotButton = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotButton })));
 const QuestChatbotModal = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotModal })));
 const QuestToastContainer = lazy(() => import('./ui/quest/shared/QuestToasts').then(m => ({ default: m.QuestToastContainer })));
+const QuestBootLoader = lazy(() => import('./ui/quest/shared/QuestLoader').then(m => ({ default: m.QuestBootLoader })));
 
 function AppInner() {
   const { user, theme, authLoading, toasts, removeToast, workoutLogs, healthLogs, foodLog, readinessLog, splits, bodyFatLog } = useApp();
@@ -88,7 +89,7 @@ function AppInner() {
     if (isQuest) {
       // Inline-styled on purpose: quest.css is lazy and has not loaded yet.
       const light = theme === 'light';
-      return (
+      const plainBoot = (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: light ? '#EFE9DA' : '#14141F' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 22, letterSpacing: '0.14em', color: light ? '#1D1D26' : '#F4F5E9', textTransform: 'uppercase', marginBottom: 14 }}>
@@ -100,6 +101,11 @@ function AppInner() {
           </div>
           <style>{`@keyframes q-load-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }`}</style>
         </div>
+      );
+      return (
+        <Suspense fallback={plainBoot}>
+          <QuestBootLoader />
+        </Suspense>
       );
     }
     return (

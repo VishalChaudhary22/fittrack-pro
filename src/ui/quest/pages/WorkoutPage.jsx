@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { beatsAllTimePR, getLastSessionSets, exerciseNamePool } from '../../../utils/exerciseHistory';
 import { Portal } from '../../v1/shared/SharedComponents';
 import PixelBodyMap from '../PixelBodyMap';
@@ -262,6 +262,53 @@ function QuestRestTimer({ secondsLeft, totalDuration, onSkip, onExtend }) {
         <QuestBtn sm onClick={onSkip}>Skip</QuestBtn>
       </div>
     </QuestBlock>
+  );
+}
+
+// ─── Sticky mini rest timer ──────────────────────────────────────────────────
+// The full RECHARGING block lives inside the exercise where the set was
+// cleared; when it scrolls off-screen this slim bar pins to the top of the
+// screen instead (clock + segments) with +30s / Skip at full tap-target
+// size, and tucks away again when the block is back in view.
+function QuestRestMini({ secondsLeft, totalDuration, onSkip, onExtend, show }) {
+  // Same peak rule as QuestRestTimer: the bar's total is the longest clock
+  // this rest has shown, so +30s extensions drain from the true top.
+  // (Peak is adjusted during render rather than in an effect.)
+  const [maxObserved, setMaxObserved] = useState(totalDuration || 90);
+  const peakNow = Math.max(totalDuration || 0, secondsLeft || 0);
+  if (peakNow > maxObserved) setMaxObserved(peakNow);
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
+  const btn = {
+    minHeight: 44, minWidth: 62, padding: '0 12px', cursor: 'pointer', flexShrink: 0,
+    fontFamily: "'Press Start 2P', monospace", fontSize: 10,
+    border: '3px solid var(--q-border)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  };
+  return (
+    <div
+      aria-hidden={!show}
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 80,
+        transform: show ? 'translateY(0)' : 'translateY(-112%)',
+        transition: 'transform 0.28s steps(4)',
+        background: 'var(--q-panel)', borderBottom: '3px solid var(--q-border)',
+        boxShadow: '0 5px 0 rgba(0,0,0,0.30)',
+        padding: '9px 12px',
+        display: 'flex', alignItems: 'center', gap: 10,
+        pointerEvents: show ? 'auto' : 'none',
+      }}
+    >
+      <QuestLabel tone="sky">Rest</QuestLabel>
+      <span className="q-ps" style={{ fontSize: 15, flexShrink: 0 }}>
+        {mins.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
+      </span>
+      <div style={{ flex: 1, minWidth: 24 }}>
+        <SegBar value={maxObserved > 0 ? secondsLeft / maxObserved : 0} tone="sky" segments={8} />
+      </div>
+      <button type="button" style={{ ...btn, background: 'var(--q-panel2)', color: 'var(--q-ink)' }} onClick={() => onExtend(30)}>+30s</button>
+      <button type="button" style={{ ...btn, background: 'var(--q-volt)', color: '#191914' }} onClick={onSkip}>Skip</button>
+    </div>
   );
 }
 
@@ -636,6 +683,21 @@ export default function WorkoutPage() {
   // ── Battle log + XP floaters, derived from the session's own events ──
   const [logEntries, setLogEntries] = useState([]);
   const [floater, setFloater] = useState(null);
+  // Boss follow: the boss is normally the first exercise with an uncleared
+  // set, but it follows the player — entering details on (or striking) a
+  // later exercise moves the boss there until that exercise is cleared.
+  const [bossFocus, setBossFocus] = useState(null); // { ei, exId }
+  // Sticky rest mini: observe the inline RECHARGING block; the mini pins to
+  // the top of the screen only while the block itself is scrolled away.
+  const [restAnchorEl, setRestAnchorEl] = useState(null);
+  const restAnchorRef = useCallback(node => setRestAnchorEl(node), []);
+  const [restOnScreen, setRestOnScreen] = useState(true);
+  useEffect(() => {
+    if (!restAnchorEl) return undefined;
+    const io = new IntersectionObserver(([entry]) => setRestOnScreen(entry.isIntersecting), { threshold: 0.15 });
+    io.observe(restAnchorEl);
+    return () => io.disconnect();
+  }, [restAnchorEl]);
   const prevRef = useRef(null);
   const floaterTimer = useRef(null);
 
@@ -762,10 +824,15 @@ export default function WorkoutPage() {
 
     const allSets = session.exs.flatMap(e => e.sets);
     const pct = Math.round((allSets.filter(s => s.done).length / allSets.length) * 100) || 0;
-    const bossEi = session.exs.findIndex(ex => ex.sets.some(s => !s.done));
+    const firstUnclearedEi = session.exs.findIndex(ex => ex.sets.some(s => !s.done));
+    const focusedEx = bossFocus && session.exs[bossFocus.ei]?.id === bossFocus.exId ? session.exs[bossFocus.ei] : null;
+    const bossEi = focusedEx && focusedEx.sets.some(s => !s.done) ? bossFocus.ei : firstUnclearedEi;
 
     return (
       <div className="q-screen">
+        {restActive && (
+          <QuestRestMini secondsLeft={restSecondsLeft} totalDuration={restDuration} onSkip={skipRestTimer} onExtend={extendRestTimer} show={!restOnScreen} />
+        )}
         {/* Battle header */}
         <QuestBlock flat style={{ padding: '14px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -881,7 +948,9 @@ export default function WorkoutPage() {
                   return (
                     <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                       {restActive && restTimerPosition?.ei === ei && restTimerPosition?.si === si && (
-                        <QuestRestTimer secondsLeft={restSecondsLeft} totalDuration={restDuration} onSkip={skipRestTimer} onExtend={extendRestTimer} />
+                        <div ref={restAnchorRef}>
+                          <QuestRestTimer secondsLeft={restSecondsLeft} totalDuration={restDuration} onSkip={skipRestTimer} onExtend={extendRestTimer} />
+                        </div>
                       )}
                       <div
                         className={s.done ? 'q-stamp' : undefined}
@@ -920,12 +989,12 @@ export default function WorkoutPage() {
                             </button>
                           )}
                         </div>
-                        <input type="number" className="q-slot-input" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} aria-label={`Set ${si + 1} reps`} />
-                        <input type="number" step=".5" className="q-slot-input" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} aria-label={`Set ${si + 1} weight in kg`} />
+                        <input type="number" className="q-slot-input" placeholder={s.targetRep} value={s.reps} onChange={e => upd(ei, si, 'reps', e.target.value)} onFocus={() => setBossFocus({ ei, exId: ex.id })} aria-label={`Set ${si + 1} reps`} />
+                        <input type="number" step=".5" className="q-slot-input" placeholder="--" value={s.weight} onChange={e => upd(ei, si, 'weight', e.target.value)} onFocus={() => setBossFocus({ ei, exId: ex.id })} aria-label={`Set ${si + 1} weight in kg`} />
                         <button
                           type="button"
                           className={s.done ? 'q-btn' : 'q-btn q-btn--ember'}
-                          onClick={() => { if (!s.done) questSound('set'); upd(ei, si, 'done', !s.done); }}
+                          onClick={() => { setBossFocus({ ei, exId: ex.id }); if (!s.done) questSound('set'); upd(ei, si, 'done', !s.done); }}
                           aria-label={s.done ? `Set ${si + 1} done` : `Log set ${si + 1}`}
                           style={{ minHeight: 48, padding: '8px 4px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >

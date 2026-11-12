@@ -10,6 +10,7 @@ import { VoltToastContainer } from './ui/volt/shared/VoltShared';
 import AuthModal from './ui/v1/pages/AuthModal';
 import VoltAuthModal from './ui/volt/pages/VoltAuthModal';
 import NotificationPrompt from './ui/v1/shared/NotificationPrompt';
+import VoltNotificationPrompt from './ui/volt/shared/VoltNotificationPrompt';
 import { useChatbot } from './core/hooks/useChatbot';
 import ChatbotButton from './ui/v1/shared/ChatbotButton';
 import ChatbotModal from './ui/v1/shared/ChatbotModal';
@@ -26,6 +27,7 @@ const QuestAuthModal = lazy(() => import('./ui/quest/pages/QuestAuthModal'));
 const QuestChatbotButton = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotButton })));
 const QuestChatbotModal = lazy(() => import('./ui/quest/shared/QuestChatbot').then(m => ({ default: m.QuestChatbotModal })));
 const QuestToastContainer = lazy(() => import('./ui/quest/shared/QuestToasts').then(m => ({ default: m.QuestToastContainer })));
+const QuestNotificationPrompt = lazy(() => import('./ui/quest/shared/QuestNotificationPrompt'));
 const QuestBootLoader = lazy(() => import('./ui/quest/shared/QuestLoader').then(m => ({ default: m.QuestBootLoader })));
 
 function AppInner() {
@@ -160,7 +162,9 @@ function AppInner() {
       {isQuest
         ? (<Suspense fallback={null}><QuestToastContainer toasts={toasts} removeToast={removeToast} /></Suspense>)
         : isVolt ? <VoltToastContainer toasts={toasts} removeToast={removeToast} /> : <ToastContainer toasts={toasts} removeToast={removeToast} />}
-      <NotificationPrompt />
+      {isQuest
+        ? (<Suspense fallback={null}><QuestNotificationPrompt /></Suspense>)
+        : isVolt ? <VoltNotificationPrompt /> : <NotificationPrompt />}
       {isQuest
         ? (<Suspense fallback={null}><QuestChatbotButton onClick={chatbot.openChat} userName={user?.name} /></Suspense>)
         : isVolt ? <VoltChatbotButton onClick={chatbot.openChat} userName={user?.name} /> : <ChatbotButton onClick={chatbot.openChat} userName={user?.name} />}

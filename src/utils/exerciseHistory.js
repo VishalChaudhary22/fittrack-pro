@@ -3,16 +3,22 @@
  * Shared utilities for historical exercise data lookup.
  * Imported by WorkoutPage for swap pre-fill (F2) and PR badge (F3).
  *
- * History identity is the MOVEMENT, not the exact name a day template
- * happened to use. Saved logs store only the performed name string, and
- * the same movement appears in logs under twin names (see
- * data/exerciseAliases.js), under different variant selections on
- * different days, and under a replacement name when it was swapped in.
- * Every lookup here therefore matches by CANONICAL name and accepts a
- * POOL of equivalent names (single string or array): a log entry matches
- * when its canonical name is in the pool's canonical set. Day and split
- * are never part of the match — the most recent performance anywhere
- * wins.
+ * History identity is the MOVEMENT actually performed, not the exact
+ * name a day template happened to use. Saved logs store only the
+ * performed name string, and the same movement appears in logs under
+ * twin names (see data/exerciseAliases.js) and under different variant
+ * selections on different days. Every lookup here therefore matches by
+ * CANONICAL name and accepts a POOL of equivalent names (single string
+ * or array): a log entry matches when its canonical name is in the
+ * pool's canonical set. Day and split are never part of the match — the
+ * most recent performance anywhere wins.
+ *
+ * A swap to a DIFFERENT exercise does NOT inherit the original
+ * exercise's history (Vishal's rule, 2026-11-17): a cable stack's 85 kg
+ * is not a dumbbell's 85 kg. The pool therefore contains only the
+ * current exercise's own names — never the name of the exercise it
+ * replaced. Sets performed under a swap are saved under the performed
+ * name, so they build that exercise's own history from then on.
  */
 
 import { canonicalExerciseName } from '../data/exerciseAliases';
@@ -33,18 +39,16 @@ const matchesPool = (pool, loggedName) => pool.has(canonKey(loggedName));
 
 /**
  * The full set of names that share one history for a session exercise:
- * the selected variant/current name, every variant the slot offers
- * (today's list and, for a swapped exercise, the original's list), and
- * the original exercise's name when this exercise was swapped in.
+ * the selected variant/current name plus every variant the slot offers
+ * for THIS exercise. The original exercise's name is deliberately NOT
+ * included when this exercise was swapped in — different exercise,
+ * different history (see header note).
  */
 export function exerciseNamePool(ex) {
   if (!ex) return [];
   const names = [
     ex.sv || ex.name,
     ...(ex.variants || []),
-    ...(ex._originalVariants || []),
-    ex._originalName,
-    ex.originalName,
   ];
   return [...new Set(names.filter(Boolean))];
 }

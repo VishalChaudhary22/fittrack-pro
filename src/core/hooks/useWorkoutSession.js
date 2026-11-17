@@ -7,6 +7,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Timer, Check } from 'lucide-react';
 import { getLastSessionSets, getAllTimePR, beatsAllTimePR, exerciseNamePool } from '../../utils/exerciseHistory';
+import { canonicalExerciseName } from '../../data/exerciseAliases';
 import { useApp } from '../context/AppContext';
 import { gId, tod } from '../../utils/helpers';
 import { syncUserXPToCache } from '../../utils/xpCacheSync';
@@ -253,8 +254,19 @@ export function useWorkoutSession() {
       return;
     }
     const exs = day.exercises.map(ex => {
-      // Cross-split: find the most recent log containing this exercise (any split, any day)
-      const allNames = [ex.name, ...(ex.variants || [])];
+      // Feature 2: Apply cross-day swap if registered — resolved FIRST,
+      // because pre-fill history belongs to the exercise that will
+      // actually be performed (Vishal's rule, 2026-11-17). Previously the
+      // history search ran on the scheduled exercise's names and its
+      // weights were pre-filled into the swapped-in exercise.
+      const swappedEx = getSwappedExercise(ex, activeSplit?.id, user.id);
+
+      // Cross-split: find the most recent log containing the effective
+      // exercise (any split, any day), matched by canonical name so
+      // same-movement alias twins share one history.
+      const poolKeys = new Set(
+        exerciseNamePool(swappedEx).map(n => canonicalExerciseName(n).trim().toLowerCase())
+      );
       let prevEx = null;
 
       const sorted = [...workoutLogs]
@@ -263,16 +275,13 @@ export function useWorkoutSession() {
 
       for (const log of sorted) {
         for (const logEx of (log.exercises || [])) {
-          if (allNames.some(n => n.toLowerCase() === logEx.name.toLowerCase())) {
+          if (poolKeys.has(canonicalExerciseName(logEx.name).trim().toLowerCase())) {
             prevEx = logEx;
             break;
           }
         }
         if (prevEx) break;
       }
-
-      // Feature 2: Apply cross-day swap if registered
-      const swappedEx = getSwappedExercise(ex, activeSplit?.id, user.id);
 
       return {
         ...swappedEx,
@@ -373,14 +382,11 @@ export function useWorkoutSession() {
   }, []);
 
   const swapExercise = (exerciseIndex, newName, opts = {}) => {
-    // Pre-fill pools the replacement's history with the original
-    // exercise's: a swap and its original share one performance history.
-    const targetEx0 = session?.exs?.[exerciseIndex];
-    const prefillPool = [
-      newName,
-      targetEx0?._originalName, targetEx0?.originalName, targetEx0?.name,
-      ...(targetEx0?.variants || []), ...(targetEx0?._originalVariants || []),
-    ].filter(Boolean);
+    // Pre-fill uses ONLY the replacement exercise's own history: a swap
+    // to a different exercise never inherits the original's numbers
+    // (Vishal's rule, 2026-11-17). Canonical matching in
+    // getLastSessionSets still pools same-movement alias twins.
+    const prefillPool = [newName];
     const lastSession = getLastSessionSets(workoutLogs, prefillPool);
     const history = lastSession ? { weight: lastSession.sets[lastSession.sets.length - 1].weight, reps: lastSession.sets[lastSession.sets.length - 1].reps, date: lastSession.date } : null;
 

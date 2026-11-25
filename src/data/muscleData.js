@@ -301,6 +301,12 @@ export const calcAllMuscleXP = (workoutLogs, splits, user, targetMonth) => {
     }
   });
 
+  // XP is a whole-points currency: the volume formula (1.15 quality
+  // bonus, 0.3 secondary share) produces fractions, so round every
+  // muscle's total here at the source — every display, level calc,
+  // leaderboard sync and rank check downstream then sees integers.
+  MUSCLE_GROUPS.forEach(m => { xp[m.key] = Math.round(xp[m.key]); });
+
   return xp;
 };
 

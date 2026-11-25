@@ -137,7 +137,7 @@ export default function TodayPage() {
           {isNewUser ? 'Welcome,' : 'Hey,'}<br />{firstName}
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-          <QuestChip tone="gold">{totalXP} XP</QuestChip>
+          <QuestChip tone="gold">{Math.round(totalXP).toLocaleString()} XP</QuestChip>
           {streak.current > 0 && <QuestChip tone="ember"><PixelSprite name="flame" size={13} /> {streak.current} DAY STREAK</QuestChip>}
           <QuestChip><PixelSprite name="star" size={13} /> LVL {lvl}</QuestChip>
           {cyclePhase && (
@@ -249,7 +249,7 @@ export default function TodayPage() {
           <div className="q-ps" style={{ fontSize: 24, color: 'var(--q-violet)' }}>LVL {lvl}</div>
           <SegBar value={intoLevel / 5000} tone="violet" segments={10} style={{ marginTop: 10 }} />
           <div className="q-meta" style={{ marginTop: 6 }}>
-            {lvl >= 99 ? 'MAX LEVEL' : `${toNext} XP to LVL ${lvl + 1}`}
+            {lvl >= 99 ? 'MAX LEVEL' : `${Math.round(toNext).toLocaleString()} XP to LVL ${lvl + 1}`}
           </div>
         </Tile>
 

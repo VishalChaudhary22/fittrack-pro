@@ -249,6 +249,9 @@ export function calculateWorkoutXP(workouts: WorkoutRow[]) {
       });
     });
   });
+  // XP is whole points — round the fractional volume shares here so the
+  // weekly email never prints decimal XP (mirrors the app's muscleData).
+  Object.keys(xp).forEach((k) => { xp[k] = Math.round(xp[k]); });
   return xp;
 }
 
